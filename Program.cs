@@ -28,7 +28,6 @@ namespace Opc2Aml
            try
             {
                 e.ModelFilePath = Models[e.ModelUri];
-
             }
             catch (Exception )
             {
