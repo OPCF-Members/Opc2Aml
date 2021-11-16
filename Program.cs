@@ -108,7 +108,8 @@ namespace Opc2Aml
                     ShowSyntax();
                     break;
             }
-            Console.WriteLine("... done.");
+            Console.WriteLine("... done.   Press Enter to exit.");
+            Console.ReadLine();
         }
     }
 }
