@@ -8,9 +8,7 @@ namespace Opc2Aml
 
     internal class Program
     {
-        
-        
-        public static Dictionary<string, string> Models;
+        private static Dictionary<string, string> Models;  // dictionary of model URIs (key) with Nodeset filenames (value) for nodeset files in the CWD
         private Program()
         {
             Models = new Dictionary<string, string>();
@@ -22,12 +20,7 @@ namespace Opc2Aml
                 string uri = manager.LoadModel(fileEntry, null, null);
                 if( uri != null)
                     Models.Add(uri, fileEntry.Substring(2));
-
             }
-
-
-            
-
         }
 
         static void ModelImporter_ModelRequired(object sender, ModelRequiredEventArgs e)
@@ -39,8 +32,7 @@ namespace Opc2Aml
             }
             catch (Exception )
             {
-                Console.WriteLine("Cannot locate Nodeset file for Model URI: " + e.ModelUri);
-                ShowSyntax();
+                 throw new ArgumentException("Cannot locate Nodeset file for Model URI: " + e.ModelUri + " in the CWD: " + Directory.GetCurrentDirectory());
             }
          }
 
@@ -49,66 +41,75 @@ namespace Opc2Aml
             if( File.Exists( filename ))
                  return true;
 
-            Console.WriteLine(filename + " Does not exist \n");
-            ShowSyntax();
-            return false;
+            throw new ArgumentException("Nodeset file '" + filename + "' does not exist in the CWD: " + Directory.GetCurrentDirectory());
         }
 
         static void ConvertModel( string NodesetFile, string outputFile = null)
         {
             if (FileIsGood(NodesetFile))
             {
-                Console.WriteLine("Processing " + NodesetFile);
+                Console.WriteLine("Processing " + NodesetFile + " ...");
                 ModelManager manager = new ModelManager();
                 manager.ModelRequired += ModelImporter_ModelRequired;
-
                 NodeSetToAML convertor = new NodeSetToAML(manager);
-
                 convertor.CreateAML(NodesetFile, outputFile);
             }
         }
         
         static void ShowSyntax()
         {
+            Console.WriteLine("\n++++++++++  Opc2Aml Help  +++++++++++");
             Console.WriteLine("Converts one or more OPC UA Nodeset files in the current working directory (CWD) into their equivalent\nAutomationML Libraries.\n");
-            Console.WriteLine("\nOpc2Aml.exe [NodesetFile] [AmlBaseFilename]\n");
+            Console.WriteLine("Opc2Aml.exe [NodesetFile] [AmlBaseFilename]\n");
             Console.WriteLine("NodesetFile       Name of nodeset file in the CWD to be processed");
             Console.WriteLine("AmlBaseFilename   File name of the AutomationML file to be written (without the .amlx extension).");
             Console.WriteLine("                  The default name is the NodesetFile if this argument is missing.");
             Console.WriteLine("\nWith no optional arguments, all nodeset files in CWD are processed.");
             Console.WriteLine("All dependent nodeset files need to be present in the CWD, even if they are not processed. ");
-            Console.WriteLine("Copyright(c) 2021 OPC Foundation.  All rights reserved.\n\n");
+            Console.WriteLine("Copyright(c) 2021 OPC Foundation.  All rights reserved.");
+            Console.WriteLine("+++++++++++++++++++++++++++++++++++++\n\n");
         }
 
         static void Main(string[] args)
         {
             Console.WriteLine("Opc2Aml ...");
-            Program program = new Program();
-
-            switch( args.Length)
+            try
             {
-                case 0:  // if no args build everything 
-                    if( Models.Count == 0)
-                    {
-                        Console.WriteLine("Nothing to do -- No Nodeset files found in CWD: " + Directory.GetCurrentDirectory());
-                        ShowSyntax();
-                    }
-                    foreach (var model in Models)
-                    {
-                        ConvertModel(model.Value);
-                    }
-                    break;
-                case 1:
-                    ConvertModel(args[0]);
-                    break;
-                case 2:
-                    ConvertModel(args[0], args[1]);
-                    break;
-                default:
-                    ShowSyntax();
-                    break;
+                Program program = new Program();
+
+                switch (args.Length)
+                {
+                    case 0:  // if no args build everything 
+                        if (Models.Count == 0)
+                        {
+                            throw new ArgumentException("Nothing to do -- No Nodeset files found in CWD: " + Directory.GetCurrentDirectory());
+                        }
+                        foreach (var model in Models)
+                        {
+                            ConvertModel(model.Value);
+                        }
+                        break;
+                    case 1:
+                        ConvertModel(args[0]);
+                        break;
+                    case 2:
+                        ConvertModel(args[0], args[1]);
+                        break;
+                    default:
+                        throw new ArgumentException("wrong number of arguments.");
+                        
+                } 
+                Console.WriteLine("... completed successfully.");
             }
-            Console.WriteLine("... done.   Press Enter to exit.");
+           
+            catch (Exception ex)
+            {
+                Console.WriteLine("** FATAL EXCEPTION **");
+                Console.WriteLine(ex.Message);
+                ShowSyntax();
+            }
+    
+            Console.WriteLine("Press Enter to exit.");
             Console.ReadLine();
         }
     }
