@@ -5,17 +5,21 @@ This C# console application targets .NET Core Runtime 3.1 can be built using Vis
 
 ## Command Line Help
 
-`Converts one or more OPC UA Nodeset files in the current working directory (CWD) into their equivalent`
-`AutomationML Libraries.`
+```
+Converts one or more OPC UA Nodeset files in the current working directory (CWD) into their equivalent
+AutomationML Libraries.
 
-`Opc2Aml.exe [NodesetFile] [AmlBaseFilename]`
+Opc2Aml.exe [NodesetFile] [AmlBaseFilename]
 
-`NodesetFile       Name of nodeset file in the CWD to be processed`
-`AmlBaseFilename   File name of the AutomationML file to be written (without the .amlx extension).`
-                                      `The default name is the NodesetFile if this argument is missing.`
+NodesetFile         Name of nodeset file in the CWD to be processed
+AmlBaseFilename     File name of the AutomationML file to be written (without the .amlx extension).`
+                    The default name is the NodesetFile if this argument is missing.
 
-`With no optional arguments, all nodeset files in CWD are processed.`
-`All dependent nodeset files need to be present in the CWD, even if they are not processed.`
+With no optional arguments, all nodeset files in CWD are processed.
+All dependent nodeset files need to be present in the CWD, even if they are not processed.
+```
+
+
 
 ## Binary Releases
 
