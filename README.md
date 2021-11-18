@@ -12,7 +12,7 @@ AutomationML Libraries.
 Opc2Aml.exe [NodesetFile] [AmlBaseFilename]
 
 NodesetFile         Name of nodeset file in the CWD to be processed
-AmlBaseFilename     File name of the AutomationML file to be written (without the .amlx extension).`
+AmlBaseFilename     File name of the AutomationML file to be written (without the .amlx extension).
                     The default name is the NodesetFile if this argument is missing.
 
 With no optional arguments, all nodeset files in CWD are processed.
