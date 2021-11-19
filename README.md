@@ -28,7 +28,9 @@ The binary releases are provided as a ZIP file. To install the binaries do the f
 
 1. Install the [.NET Core Runtime 3.1](https://dotnet.microsoft.com/download/dotnet/3.1) for your platform.
 2. Extract the files from the ZIP into a directory of your choice.
-3. On Windows run "Opc2Aml.exe" from the command line.  On Linux run "dotnet Opc2Aml.dll" from the terminal.
+3. Run the app:
+   a. Windows command line> ` Opc2Aml.exe`
+   b. Linux terminal> `dotnet Opc2Aml.dll`
 
 ## Licenses
 
