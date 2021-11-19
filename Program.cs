@@ -134,11 +134,14 @@ namespace Opc2Aml
             {
                 Console.WriteLine("** FATAL EXCEPTION **");
                 Console.WriteLine(ex.Message);
-                ShowSyntax();
+                ShowSyntax();           
+                Console.WriteLine("Press Enter to exit.");
+                Console.ReadLine();
+                Environment.Exit(1);
+                
             }
     
-            Console.WriteLine("Press Enter to exit.");
-            Console.ReadLine();
+ 
         }
     }
 }
