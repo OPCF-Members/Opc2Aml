@@ -27,3 +27,11 @@ The binary releases are provided as a ZIP file. To install the binaries do the f
 1. Install the [.NET Core Runtime 3.1](https://dotnet.microsoft.com/download/dotnet/3.1) for your platform.
 2. Extract the files from the ZIP into a directory of your choice.
 3. On Windows run "Opc2Aml.exe" from the command line.  On Linux run "dotnet Opc2Aml.dll" from the terminal.
+
+## Licenses
+
+The source code in this repository is MIT License but the code depends on two NuGet packages with the following licenses:
+
+- AML.Engine -  [Nuget MIT License](https://licenses.nuget.org/MIT).
+- OPCFoundation.NetStandard.Opc.UA - [Custom License](https://www.nuget.org/packages/OPCFoundation.NetStandard.Opc.Ua/1.4.367.42/license)
+
