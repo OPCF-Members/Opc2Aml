@@ -444,7 +444,7 @@ namespace MarkdownProcessor
             string ListOfPrefix = "";
             if (bListOf == true)
                 ListOfPrefix = ListOf;
-            string path = BuildLibraryReference(ATLPrefix, sURI, ListOfPrefix+sUADataType);
+            string path = BuildLibraryReference(ATLPrefix, sURI, ListOfPrefix + sUADataType);
             var ob = m_cAEXDocument.FindByPath(path);
             var at = ob as AttributeFamilyType;
             AttributeType a;
@@ -452,9 +452,11 @@ namespace MarkdownProcessor
                 a = seq.Append(name);
             else
                 a = seq[name];
+            
             a.RecreateAttributeInstance(at);
             if (val != null)
                 a.Value = val;
+      
             return a;
         }
 
@@ -844,11 +846,13 @@ namespace MarkdownProcessor
             m_atl_temp.AttributeType.Insert(rtn);
             rtn.RefAttributeType = "AutomationMLBaseAttributeTypeLib/OrderedListType";
 
+            /* Mantis #7383 - remove placeholder elements of ListOf types
             AttributeType a = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
             
             a.RecreateAttributeInstance(aft);
             a.Name = aft.Name;
            rtn.Insert(a);
+            end Mantis #7383 */
    
             return rtn;
         }
