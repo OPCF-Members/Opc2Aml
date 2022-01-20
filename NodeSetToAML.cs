@@ -76,6 +76,8 @@ namespace MarkdownProcessor
         private const string MetaModelName = "OpcAmlMetaModel";
         private const string UaBaseRole = "UaBaseRole";
         private const string MethodNodeClass = "UaMethodNodeClass";
+        private const string RefClassConnectsToPath = "RefClassConnectsToPath";
+        private const string IsSource = "IsSource";
         private ModelManager m_modelManager;
         private CAEXDocument m_cAEXDocument;
         private AttributeTypeLibType m_atl_temp;
@@ -798,8 +800,29 @@ namespace MarkdownProcessor
 
         #endregion
 
-     
+
         #region ICL
+
+        private void OverrideAttribute(IClassWithBaseClassReference owner, string Name, string AttType, object val)
+        {
+            var atts = owner.GetInheritedAttributes();
+            foreach(var aa in atts)
+            {
+                if (aa.Name == Name)
+                {
+                    if (aa.AttributeDataType == AttType && aa.AttributeValue.Equals(val))
+                    {
+                        return;  // no need to override
+                    }
+                }
+            }
+
+            AttributeType a = owner.Attribute.Append();
+            a.Name = Name;
+            a.AttributeDataType = AttType;
+            a.AttributeValue = val;
+       
+        }
 
         private void ProcesReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
         {
@@ -834,7 +857,7 @@ namespace MarkdownProcessor
                 }
             }
             
-
+            
             // ovveride any attribute values
             if (BaseNodeId != null)
             {
@@ -847,6 +870,12 @@ namespace MarkdownProcessor
 
                 if (refnode.InverseName != null)
                     AddModifyAttribute( true, added.Attribute, "InverseName", "LocalizedText",  refnode.InverseName[0].Value);
+                
+                OverrideAttribute(added, IsSource, "xs:boolean", true);
+                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
+
+                
+
 
                 if (inverseAdded != null)
                 {
@@ -856,6 +885,9 @@ namespace MarkdownProcessor
                     if (basenode.Symmetric != refnode.Symmetric)
                         OverrideBooleanAttribute(inverseAdded.Attribute, "Symmetric", refnode.Symmetric);
                     AddModifyAttribute( true, inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
+                    // OverrideBooleanAttribute(inverseAdded.Attribute, "IsSource", false);
+                    OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
+                    OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string",  added.CAEXPath());
 
                 }
 

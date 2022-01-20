@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aml.Engine" Version="1.7.0" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.367.42" />
+    <PackageReference Include="Aml.Engine" Version="1.7.2" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.367.75" />
   </ItemGroup>
 
   <ItemGroup>
