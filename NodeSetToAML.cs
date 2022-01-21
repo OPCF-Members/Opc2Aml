@@ -152,6 +152,7 @@ namespace MarkdownProcessor
             AutomationMLBaseRoleClassLibType.RoleClassLib(m_cAEXDocument);
             AutomationMLBaseAttributeTypeLibType.AttributeTypeLib(m_cAEXDocument);
             AutomationMLBaseAttributeTypeLibType.AttributeTypeLib(cAEXDocumentTemp);
+            AutomationMLInterfaceClassLibType.InterfaceClassLib(cAEXDocumentTemp);
 
             // process each model in  order (with the base UA Model first )
 
@@ -179,8 +180,10 @@ namespace MarkdownProcessor
                
                 AddLibaryHeaderInfo(m_atl_temp as CAEXBasicObject, modelInfo);
 
+                // create the InterfaceClassLibrary
+                var icl_temp = cAEXDocumentTemp.CAEXFile.InterfaceClassLib.Append(ICLPrefix + modelInfo.NamespaceUri);
+                AddLibaryHeaderInfo(icl_temp as CAEXBasicObject, modelInfo);
 
-                
                 // Create the RoleClassLibrary
                 var rcl_temp = cAEXDocumentTemp.CAEXFile.RoleClassLib.Append(RCLPrefix + modelInfo.NamespaceUri);
                 // var rcl_temp = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + modelInfo.NamespaceUri);
@@ -238,17 +241,34 @@ namespace MarkdownProcessor
                     atl.AttributeType.Insert(CreateListOf(dicEntry.Value), false);  // insert into the AML document in alpha order
                 }
 
+                foreach( var refType in SortedReferenceTypes)
+                {
+                    ProcessReferenceType(ref icl_temp, refType.Value);
+                }
+
+                 // reorder icl_temp an put in the real icl in alpha order
+
                 foreach (var refType in SortedReferenceTypes)
                 {
-                    if (icl == null)
+                    string iclpath = BuildLibraryReference(ICLPrefix, modelInfo.NamespaceUri, refType.Key);
+                    InterfaceClassType ict = icl_temp.CAEXDocument.FindByPath(iclpath) as InterfaceClassType;
+
+                    if (ict != null)
                     {
-                        // Create the InterfaceClassLibrary
-                        icl = m_cAEXDocument.CAEXFile.InterfaceClassLib.Append(ICLPrefix + modelInfo.NamespaceUri);
-                        AddLibaryHeaderInfo(icl as CAEXBasicObject, modelInfo);
+
+                        if (icl == null)
+                        {
+                            // Create the InterfaceClassLibrary
+                            icl = m_cAEXDocument.CAEXFile.InterfaceClassLib.Append(ICLPrefix + modelInfo.NamespaceUri);
+                            AddLibaryHeaderInfo(icl as CAEXBasicObject, modelInfo);
+                        }
+                        icl.Insert(ict, false);
                     }
-                    ProcesReferenceType(ref icl, refType.Value);
+                    
                 }
  
+       
+                
                 foreach (var obType in SortedObjectTypes)
                 {
                     FindOrAddSUC(ref scl_temp, ref rcl_temp,  obType.Value);
@@ -417,22 +437,22 @@ namespace MarkdownProcessor
 
         
 
-        private void AddBaseNodeClassAttributes(AttributeSequence seq, bool isAbstract)
+        private void AddBaseNodeClassAttributes(IClassWithBaseClassReference owner, bool isAbstract)
         {
-            AddModifyAttribute( true, seq, "BrowseName", "QualifiedName", Variant.Null);
-            AddModifyAttribute( true, seq, "DisplayName", "LocalizedText", Variant.Null);
+            AddModifyAttribute( owner.Attribute, "BrowseName", "QualifiedName", Variant.Null);
+            AddModifyAttribute( owner.Attribute, "DisplayName", "LocalizedText", Variant.Null);
 
-            var abs = AddModifyAttribute( true, seq, "IsAbstract", "Boolean", Variant.Null);
-            abs.Value = isAbstract ? "true" : "false";
+            var abs = AddModifyAttribute( owner.Attribute, "IsAbstract", "Boolean", isAbstract);
+         //   abs.Value = isAbstract ? "true" : "false";
 
-            AddModifyAttribute( true, seq, "Description", "LocalizedText", Variant.Null);
-            AddModifyAttribute( true, seq, "WriteMask", "AttributeWriteMask", Variant.Null);
-            AddModifyAttribute( true, seq, "RolePermissions", "ListOfRolePermissionType", Variant.Null);
-            AddModifyAttribute( true, seq, "AccessRestrictions", "AccessRestrictionType", Variant.Null);
+            AddModifyAttribute( owner.Attribute, "Description", "LocalizedText", Variant.Null);
+            AddModifyAttribute( owner.Attribute, "WriteMask", "AttributeWriteMask", Variant.Null);
+            AddModifyAttribute( owner.Attribute, "RolePermissions", "ListOfRolePermissionType", Variant.Null);
+            AddModifyAttribute( owner.Attribute, "AccessRestrictions", "AccessRestrictionType", Variant.Null);
         }
 
 
-        private AttributeType AddModifyAttribute(bool bAdd, AttributeSequence seq, string name, string refDataType, Variant val,  bool bListOf = false,  string sURI = uaNamespaceURI)
+        private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
         {
             string sUADataType = refDataType;
 
@@ -450,15 +470,13 @@ namespace MarkdownProcessor
             var ob = m_cAEXDocument.FindByPath(path);
             var at = ob as AttributeFamilyType;
             AttributeType a;
-            if (bAdd == true)
-                a = seq.Append(name);
-            else
-                a = seq[name];
-            
+           
+            a = seq.Append(name);
+
             a.RecreateAttributeInstance(at);
-            if ( bListOf == false && val.TypeInfo != null)
+            if (bListOf == false && val.TypeInfo != null)
             {
-                switch( val.TypeInfo.BuiltInType )  // TODO -- consider supporting setting values for more complicated types (enums, structures, Qualified Names ...) and arrays
+                switch (val.TypeInfo.BuiltInType)  // TODO -- consider supporting setting values for more complicated types (enums, structures, Qualified Names ...) and arrays
                 {
                     case BuiltInType.Boolean:
                     case BuiltInType.Byte:
@@ -477,33 +495,34 @@ namespace MarkdownProcessor
                     case BuiltInType.UInt32:
                     case BuiltInType.UInt64:
                     case BuiltInType.UInteger:
-                        a.Value = val.ToString();
-                        a.DefaultValue = a.Value;
+                        a.DefaultAttributeValue = a.AttributeValue = val;
                         break;
-                 }
+                }
             }
- 
+
             return a;
         }
 
-        private AttributeType AddModifyAttribute(bool bAdd, AttributeSequence seq, string name, NodeId refDataType, Variant val, bool bListOf = false  )
+       
+
+        private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType, Variant val, bool bListOf = false)
         {
             var DataTypeNode = m_modelManager.FindNode<UANode>(refDataType);
             var sUADataType = DataTypeNode.DecodedBrowseName.Name;
             var sURI = m_modelManager.FindModelUri(DataTypeNode.DecodedNodeId);
-            return AddModifyAttribute( bAdd, seq, name, sUADataType, val, bListOf,  sURI);
+            return AddModifyAttribute(seq, name, sUADataType, val, bListOf, sURI);
         }
 
-        private AttributeType AddModifyAttribute(bool bAdd, AttributeSequence seq, string name, NodeId refDataType)
+        
+        private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType)
         {
-            return AddModifyAttribute(bAdd, seq, name, refDataType, Variant.Null);
+            return AddModifyAttribute(seq, name, refDataType, Variant.Null);
         }
 
 
         private void OverrideBooleanAttribute(AttributeSequence seq, string AttributeName, Boolean value)
         {
-            var at = AddModifyAttribute(true, seq, AttributeName, "Boolean", Variant.Null);
-            at.DefaultValue = at.Value = value ? "true" : "false";
+            var at = AddModifyAttribute(seq, AttributeName, "Boolean", value);
         }
 
 
@@ -686,11 +705,11 @@ namespace MarkdownProcessor
                             var basevar = basenode as NodeSet.UAVariableType;
 
                             if (varnode.ValueRank != basevar.ValueRank)
-                                AddModifyAttribute(true, rtn.Attribute, "ValueRank", "Int32", varnode.ValueRank);
+                                AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", varnode.ValueRank);
                             if (basevar.IsAbstract != varnode.IsAbstract)
                                 OverrideBooleanAttribute(rtn.Attribute, "IsAbstract", varnode.IsAbstract);
                             if (basevar.DataType != varnode.DataType)
-                                AddModifyAttribute(true, rtn.Attribute, "Value",  varnode.DecodedDataType);
+                                AddModifyAttribute(rtn.Attribute, "Value",  varnode.DecodedDataType);
                             break;
 
                     }
@@ -701,21 +720,21 @@ namespace MarkdownProcessor
                     switch (refnode.NodeClass)
                     {
                         case NodeClass.ObjectType:
-                            AddBaseNodeClassAttributes(rtn.Attribute, false);
-                            AddModifyAttribute(true, rtn.Attribute, "EventNotifier", "EventNotifierType", Variant.Null);
+                            AddBaseNodeClassAttributes(rtn, false);
+                            AddModifyAttribute(rtn.Attribute, "EventNotifier", "EventNotifierType", Variant.Null);
                             break;
                         case NodeClass.VariableType:
-                            AddBaseNodeClassAttributes(rtn.Attribute, true);
-                            AddModifyAttribute(true, rtn.Attribute, "ArrayDimensions", "ListOfUInt32", Variant.Null);
-                            AddModifyAttribute(true, rtn.Attribute, "ValueRank", "Int32",-2);
-                            AddModifyAttribute(true, rtn.Attribute, "Value", "BaseDataType", Variant.Null );
-                            AddModifyAttribute(true, rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null);
-                            AddModifyAttribute(true, rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null);
+                            AddBaseNodeClassAttributes(rtn, true);
+                            AddModifyAttribute(rtn.Attribute, "ArrayDimensions", "ListOfUInt32", Variant.Null);
+                            AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32",-2);
+                            AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null );
+                            AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null);
+                            AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null);
                             break;
                         case NodeClass.Method:
-                            AddBaseNodeClassAttributes(rtn.Attribute, false);
-                            AddModifyAttribute(true, rtn.Attribute, "Executable", "Boolean", true);
-                            AddModifyAttribute(true, rtn.Attribute, "UserExecutable", "Boolean", true);
+                            AddBaseNodeClassAttributes(rtn, false);
+                            AddModifyAttribute(rtn.Attribute, "Executable", "Boolean", true);
+                            AddModifyAttribute(rtn.Attribute, "UserExecutable", "Boolean", true);
                             
                             break;
                     }
@@ -750,7 +769,7 @@ namespace MarkdownProcessor
                                     var varnode = targetNode as NodeSet.UAVariable;
                                     bool bListOf = (varnode.ValueRank == 1);  // use ListOf when its a UA array
                      
-                                    AddModifyAttribute(false, ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
+                                    AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
                                     ie.SetAttributeValue("ValueRank", varnode.ValueRank);
                                     ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
                                     
@@ -824,7 +843,7 @@ namespace MarkdownProcessor
        
         }
 
-        private void ProcesReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
+        private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
         {
             var refnode = m_modelManager.FindNode<NodeSet.UAReferenceType>(nodeId);
             var added = icl.InterfaceClass.Append(refnode.DecodedBrowseName.Name);
@@ -832,6 +851,9 @@ namespace MarkdownProcessor
             if (BaseNodeId != null)
             {
                 added.RefBaseClassPath = BaseRefFromNodeId(BaseNodeId, ICLPrefix);
+                InterfaceClassType ict = icl.CAEXDocument.FindByPath(added.RefBaseClassPath) as InterfaceClassType;
+                if (ict == null)
+                    ProcessReferenceType( ref icl, BaseNodeId);
             }
             else
             {
@@ -840,10 +862,11 @@ namespace MarkdownProcessor
             //    AddBaseNodeClassAttributes(added.Attribute, true);
                 
 
-                AddModifyAttribute( true, added.Attribute, "InverseName", "LocalizedText", Variant.Null);
-                AddModifyAttribute( true, added.Attribute, "ModellingRule", "ModellingRuleType", Variant.Null, false,   MetaModelName );
-                var sym = AddModifyAttribute( true, added.Attribute, "Symmetric", "Boolean", Variant.Null);
-                sym.Value = "true";
+                AddModifyAttribute( added.Attribute, "InverseName", "LocalizedText", Variant.Null);
+                AddModifyAttribute( added.Attribute, "ModellingRule", "ModellingRuleType", Variant.Null, false,   MetaModelName );
+                OverrideBooleanAttribute( added.Attribute, "Symmetric",  true);
+                OverrideBooleanAttribute( added.Attribute, "IsAbstract", true);
+
             }
             // look for inverse name
             InterfaceFamilyType inverseAdded = null;
@@ -869,7 +892,7 @@ namespace MarkdownProcessor
                     OverrideBooleanAttribute(added.Attribute, "Symmetric", refnode.Symmetric);
 
                 if (refnode.InverseName != null)
-                    AddModifyAttribute( true, added.Attribute, "InverseName", "LocalizedText",  refnode.InverseName[0].Value);
+                    AddModifyAttribute( added.Attribute, "InverseName", "LocalizedText",  refnode.InverseName[0].Value);
                 
                 OverrideAttribute(added, IsSource, "xs:boolean", true);
                 OverrideAttribute(added, RefClassConnectsToPath, "xs:string", (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
@@ -884,8 +907,8 @@ namespace MarkdownProcessor
                         OverrideBooleanAttribute(inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract);
                     if (basenode.Symmetric != refnode.Symmetric)
                         OverrideBooleanAttribute(inverseAdded.Attribute, "Symmetric", refnode.Symmetric);
-                    AddModifyAttribute( true, inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
-                    // OverrideBooleanAttribute(inverseAdded.Attribute, "IsSource", false);
+                    AddModifyAttribute(  inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
+             
                     OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
                     OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string",  added.CAEXPath());
 
