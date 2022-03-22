@@ -866,6 +866,8 @@ namespace MarkdownProcessor
                 AddModifyAttribute( added.Attribute, "ModellingRule", "ModellingRuleType", Variant.Null, false,   MetaModelName );
                 OverrideBooleanAttribute( added.Attribute, "Symmetric",  true);
                 OverrideBooleanAttribute( added.Attribute, "IsAbstract", true);
+                OverrideAttribute(added, IsSource, "xs:boolean", true);
+                OverrideAttribute(added, RefClassConnectsToPath, "xs:string",  added.CAEXPath());
 
             }
             // look for inverse name
