@@ -55,9 +55,9 @@ using System.ComponentModel;
 using System.CodeDom;
 // using System.Windows.Forms;
 using System.Linq;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing.Text;
-using System.Diagnostics;
 using Aml.Engine.AmlObjects.Extensions;
 
 
@@ -95,6 +95,9 @@ namespace MarkdownProcessor
         private readonly NodeId HasTypeDefinitionNodeId = new NodeId(40, 0);
         private readonly NodeId HasModellingRuleNodeId = new NodeId(37, 0);
         private readonly NodeId BaseInterfaceNodeId = new NodeId(17602, 0);
+        private readonly NodeId RootNodeId = new NodeId(84, 0);
+        private readonly NodeId OrganizesNodeId = new NodeId(35, 0);
+        private readonly NodeId TypesFolderNodeId = new NodeId(86, 0);
         private readonly System.Xml.Linq.XNamespace defaultNS = "http://www.dke.de/CAEX";
         private const string uaNamespaceURI = "http://opcfoundation.org/UA/";
         private const string OpcLibInfoNamespace = "http://opcfoundation.org/UA/FX/2021/08/OpcUaLibInfo.xsd";
@@ -133,11 +136,11 @@ namespace MarkdownProcessor
         public NodeSetToAML(ModelManager modelManager)
         {
             m_modelManager = modelManager;
-            
+
         }
 
 
-        public void CreateAML(string modelPath, string modelName = null )
+        public void CreateAML(string modelPath, string modelName = null)
         {
             string modelUri = m_modelManager.LoadModel(modelPath, null, null);
             structureNode = m_modelManager.FindNodeByName("Structure");
@@ -156,8 +159,8 @@ namespace MarkdownProcessor
 
             // process each model in  order (with the base UA Model first )
 
-            AddMetaModelLibraries( m_cAEXDocument);
-            
+            AddMetaModelLibraries(m_cAEXDocument);
+
 
             List<ModelInfo> MyModelInfoList = new List<ModelInfo>();
             // Get the models in the correct order for processing the base models first
@@ -175,9 +178,9 @@ namespace MarkdownProcessor
                 RoleClassLibType rcl = null;
                 SystemUnitClassLibType scl = null;
 
-               
+
                 m_atl_temp = cAEXDocumentTemp.CAEXFile.AttributeTypeLib.Append(ATLPrefix + modelInfo.NamespaceUri);
-               
+
                 AddLibaryHeaderInfo(m_atl_temp as CAEXBasicObject, modelInfo);
 
                 // create the InterfaceClassLibrary
@@ -198,10 +201,10 @@ namespace MarkdownProcessor
                 SortedDictionary<string, NodeId> SortedReferenceTypes = new SortedDictionary<string, NodeId>();
                 SortedDictionary<string, NodeId> SortedObjectTypes = new SortedDictionary<string, NodeId>();  // also contains VariableTypes
 
-                                
+
                 foreach (var node in modelInfo.Types)
                 {
-                    
+
 
                     switch (node.Value.NodeClass)
                     {
@@ -224,11 +227,11 @@ namespace MarkdownProcessor
                     }
                 }
 
-                
+
 
                 foreach (var dicEntry in SortedDataTypes)
                 {
-                    if( atl == null)
+                    if (atl == null)
                     {
                         atl = m_cAEXDocument.CAEXFile.AttributeTypeLib.Append(ATLPrefix + modelInfo.NamespaceUri);
                         AddLibaryHeaderInfo(atl as CAEXBasicObject, modelInfo);
@@ -241,12 +244,12 @@ namespace MarkdownProcessor
                     atl.AttributeType.Insert(CreateListOf(dicEntry.Value), false);  // insert into the AML document in alpha order
                 }
 
-                foreach( var refType in SortedReferenceTypes)
+                foreach (var refType in SortedReferenceTypes)
                 {
                     ProcessReferenceType(ref icl_temp, refType.Value);
                 }
 
-                 // reorder icl_temp an put in the real icl in alpha order
+                // reorder icl_temp an put in the real icl in alpha order
 
                 foreach (var refType in SortedReferenceTypes)
                 {
@@ -264,16 +267,16 @@ namespace MarkdownProcessor
                         }
                         icl.Insert(ict, false);
                     }
-                    
+
                 }
- 
-       
-                
+
+
+
                 foreach (var obType in SortedObjectTypes)
                 {
-                    FindOrAddSUC(ref scl_temp, ref rcl_temp,  obType.Value);
+                    FindOrAddSUC(ref scl_temp, ref rcl_temp, obType.Value);
                 }
-                
+
                 // re-order the rcl_temp and scl_temp in alpha order into the real rcl and scl
 
 
@@ -283,19 +286,19 @@ namespace MarkdownProcessor
                     SystemUnitFamilyType sft = scl_temp.CAEXDocument.FindByPath(sucpath) as SystemUnitFamilyType;
                     if (sft != null)
                     {
-                        if( scl == null )
+                        if (scl == null)
                         {
                             scl = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + modelInfo.NamespaceUri);
                             AddLibaryHeaderInfo(scl as CAEXBasicObject, modelInfo);
                         }
                         scl.Insert(sft, false);
                     }
-                       
+
                     string rclpath = BuildLibraryReference(RCLPrefix, modelInfo.NamespaceUri, obType.Key);
                     var rft = rcl_temp.CAEXDocument.FindByPath(rclpath) as RoleFamilyType;
                     if (rft != null)
                     {
-                        if( rcl == null)
+                        if (rcl == null)
                         {
                             rcl = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + modelInfo.NamespaceUri);
                             AddLibaryHeaderInfo(rcl as CAEXBasicObject, modelInfo);
@@ -304,8 +307,11 @@ namespace MarkdownProcessor
                     }
                 }
 
-
             }
+
+            CreateInstances(); //  add the instances for each model
+
+
             // write out the AML file
             // var OutFilename = modelName + ".aml";
             // m_cAEXDocument.SaveToFile(OutFilename, true);
@@ -313,6 +319,8 @@ namespace MarkdownProcessor
             container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + modelName + ".aml", UriKind.Relative));
             container.Close();
         }
+
+
 
         private void AddLibaryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
         {
@@ -353,7 +361,7 @@ namespace MarkdownProcessor
         private AttributeValueRequirementType BuiltInTypeConstraint()
         {
             AttributeValueRequirementType avrt = new AttributeValueRequirementType(new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-            avrt.Name =  "BuiltInType Constraint";
+            avrt.Name = "BuiltInType Constraint";
             var res = avrt.New_NominalType();
 
             foreach (string name in Enum.GetNames(typeof(BuiltInType)))
@@ -378,14 +386,14 @@ namespace MarkdownProcessor
             return avrt;
         }
 
-        private void AddMetaModelLibraries(  CAEXDocument doc)
-        { 
+        private void AddMetaModelLibraries(CAEXDocument doc)
+        {
             // add ModelingRuleType (that does not exist in UA) to ATL
 
-           
+
             AttributeTypeLibType atl_meta = doc.CAEXFile.AttributeTypeLib.Append(ATLPrefix + MetaModelName);
             AddLibaryHeaderInfo(atl_meta as CAEXBasicObject);
-            
+
             var added = new AttributeFamilyType(new System.Xml.Linq.XElement(defaultNS + "AttributeType"));
             var att = added as AttributeTypeType;
             added.Name = "ModellingRuleType";
@@ -432,24 +440,49 @@ namespace MarkdownProcessor
             mb.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);
             AddLibaryHeaderInfo(suc_meta as CAEXBasicObject);
 
-            
+
         }
 
-        
+
 
         private void AddBaseNodeClassAttributes(IClassWithBaseClassReference owner, bool isAbstract)
         {
-            AddModifyAttribute( owner.Attribute, "BrowseName", "QualifiedName", Variant.Null);
-            AddModifyAttribute( owner.Attribute, "DisplayName", "LocalizedText", Variant.Null);
+            AttributeType a = owner.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
+            a.AttributeDataType = "xs:anyURI";
 
-            var abs = AddModifyAttribute( owner.Attribute, "IsAbstract", "Boolean", isAbstract);
-         //   abs.Value = isAbstract ? "true" : "false";
+            AddModifyAttribute(owner.Attribute, "BrowseName", "QualifiedName", Variant.Null);
+            AddModifyAttribute(owner.Attribute, "DisplayName", "LocalizedText", Variant.Null);
 
-            AddModifyAttribute( owner.Attribute, "Description", "LocalizedText", Variant.Null);
-            AddModifyAttribute( owner.Attribute, "WriteMask", "AttributeWriteMask", Variant.Null);
-            AddModifyAttribute( owner.Attribute, "RolePermissions", "ListOfRolePermissionType", Variant.Null);
-            AddModifyAttribute( owner.Attribute, "AccessRestrictions", "AccessRestrictionType", Variant.Null);
+            var abs = AddModifyAttribute(owner.Attribute, "IsAbstract", "Boolean", isAbstract);
+            //   abs.Value = isAbstract ? "true" : "false";
+
+            AddModifyAttribute(owner.Attribute, "Description", "LocalizedText", Variant.Null);
+            AddModifyAttribute(owner.Attribute, "WriteMask", "AttributeWriteMask", Variant.Null);
+            AddModifyAttribute(owner.Attribute, "RolePermissions", "ListOfRolePermissionType", Variant.Null);
+            AddModifyAttribute(owner.Attribute, "AccessRestrictions", "AccessRestrictionType", Variant.Null);
         }
+
+        private void SetBrowseNameUri( AttributeSequence seq, UANode uanode, UANode basenode = null)
+        {
+            // only set the value if different from the base node
+            string baseuri = "";
+            if (basenode != null )
+              baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
+            string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
+            if (myuri != baseuri)
+            {
+                var browse = seq["BrowseName"];
+                if (browse == null)
+                {
+                    browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
+                }
+                var uriatt = browse.Attribute["NamespaceURI"];
+ 
+                uriatt.Value = myuri;
+
+            }
+         }
+
 
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
@@ -469,9 +502,9 @@ namespace MarkdownProcessor
             string path = BuildLibraryReference(ATLPrefix, sURI, ListOfPrefix + sUADataType);
             var ob = m_cAEXDocument.FindByPath(path);
             var at = ob as AttributeFamilyType;
-            AttributeType a;
-           
-            a = seq.Append(name);
+            AttributeType a = seq[name];  //find the existing attribute with the name
+            if (a == null)
+                 a = seq.Append(name);  // not found so create a new one
 
             a.RecreateAttributeInstance(at);
             if (bListOf == false && val.TypeInfo != null)
@@ -503,7 +536,7 @@ namespace MarkdownProcessor
             return a;
         }
 
-       
+
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType, Variant val, bool bListOf = false)
         {
@@ -513,7 +546,7 @@ namespace MarkdownProcessor
             return AddModifyAttribute(seq, name, sUADataType, val, bListOf, sURI);
         }
 
-        
+
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType)
         {
             return AddModifyAttribute(seq, name, refDataType, Variant.Null);
@@ -540,12 +573,12 @@ namespace MarkdownProcessor
         }
         static private string BuildLibraryReference(string prefix, string namespaceURI, string elementName, string inverseName = null)
         {
-            
-            if( inverseName == null)
+
+            if (inverseName == null)
                 return "[" + prefix + namespaceURI + "]/[" + elementName + "]";
             else
-                return "[" + prefix + namespaceURI + "]/[" + elementName + "]/[" + inverseName + "]" ;
-            
+                return "[" + prefix + namespaceURI + "]/[" + elementName + "]/[" + inverseName + "]";
+
         }
 
 
@@ -561,7 +594,7 @@ namespace MarkdownProcessor
                     if (refnode.InverseName != null)
                     {
                         if (BaseNode.DecodedBrowseName.Name != refnode.InverseName[0].Value)
-                            return BuildLibraryReference(LibPrefix, NamespaceURI, BaseNode.DecodedBrowseName.Name , refnode.InverseName[0].Value);
+                            return BuildLibraryReference(LibPrefix, NamespaceURI, BaseNode.DecodedBrowseName.Name, refnode.InverseName[0].Value);
                     }
                 }
                 if (IsArray == true)
@@ -575,14 +608,14 @@ namespace MarkdownProcessor
             }
             return "";
         }
-        
+
 
         #region SUC
         void CopyAttributes(ref ExternalInterfaceType eit)
         {
             // var ob = eit.CAEXDocument.FindByPath(eit.RefBaseClassPath);
             var ob = m_cAEXDocument.FindByPath(eit.RefBaseClassPath);
-            
+
             var iface = ob as InterfaceFamilyType;
 
             foreach (var e in iface.GetInheritedAttributes())
@@ -592,7 +625,7 @@ namespace MarkdownProcessor
 
         }
 
-        
+
 
         ExternalInterfaceType FindOrAddSourceInterface(ref SystemUnitFamilyType suc, string uri, string name)
         {
@@ -602,17 +635,17 @@ namespace MarkdownProcessor
             SystemUnitFamilyType test = suc;
             bool bFoundInParent = false;
             bool bFirst = true;
-            while (test != null && bFoundInParent == false )
+            while (test != null && bFoundInParent == false)
             {
                 foreach (var iface in test.ExternalInterface)
                 {
-                    if (iface.RefBaseClassPath == RefBaseClassPath )
+                    if (iface.RefBaseClassPath == RefBaseClassPath)
                     {
                         if (bFirst)
                             return iface;
                         bFoundInParent = true;
                         break;
-                    }         
+                    }
                 }
                 bFirst = false;
                 test = test.BaseClass;
@@ -627,55 +660,57 @@ namespace MarkdownProcessor
 
 
 
-        ExternalInterfaceType FindOrAddInterface(ref SystemUnitClassType suc, string uri, string name )
+        ExternalInterfaceType FindOrAddInterface(ref InternalElementType suc, string uri, string name)
         {
             var splitname = name.Split('/');
             var leafname = splitname[splitname.Length - 1];
-            SystemUnitClassType test = suc;
-            
-                foreach (var iface in test.ExternalInterface)
-                {
-                    if (iface.Name == leafname)
-                        return iface;
-                }
-          
+            if( leafname[0] == '[')
+                leafname = leafname.Substring(1);  //remove the leading [
+            InternalElementType test = suc;
+
+            foreach (var iface in test.ExternalInterface)
+            {
+                if (iface.Name == leafname)
+                    return iface;
+            }
+
             var rtn = suc.ExternalInterface.Append(leafname);
             rtn.RefBaseClassPath = BuildLibraryReference(ICLPrefix, uri, name);
             CopyAttributes(ref rtn);
             return rtn;
         }
-        
-     
 
-        
+
+
+
 
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
         {
             var refnode = m_modelManager.FindNode<NodeSet.UANode>(nodeId);
             string path = "";
-            if( refnode.NodeClass != NodeClass.Method)
+            if (refnode.NodeClass != NodeClass.Method)
                 path = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refnode.DecodedNodeId), refnode.DecodedBrowseName.Name);
             SystemUnitFamilyType rtn = scl.CAEXDocument.FindByPath(path) as SystemUnitFamilyType;
             if (rtn == null)
             {
-                if (m_modelManager.IsTypeOf(nodeId, BaseInterfaceNodeId ) == true)
+                if (m_modelManager.IsTypeOf(nodeId, BaseInterfaceNodeId) == true)
                 {
                     var rc = rcl.New_RoleClass(refnode.DecodedBrowseName.Name);  // create a RoleClass for UA interfaces
-                    if( nodeId == BaseInterfaceNodeId)
+                    if (nodeId == BaseInterfaceNodeId)
                         rc.RefBaseClassPath = RCLPrefix + MetaModelName + "/" + UaBaseRole;
                     else
                         rc.RefBaseClassPath = BuildLibraryReference(RCLPrefix, m_modelManager.FindModelUri(BaseInterfaceNodeId), "BaseInterfaceType");
                 }
-                    // make sure the base type is already created
-                    NodeId BaseNodeId = m_modelManager.FindFirstTarget(refnode.DecodedNodeId, HasSubTypeNodeId, false);
+                // make sure the base type is already created
+                NodeId BaseNodeId = m_modelManager.FindFirstTarget(refnode.DecodedNodeId, HasSubTypeNodeId, false);
                 if (BaseNodeId != null)
                 {
                     var refBaseNode = m_modelManager.FindNode<NodeSet.UANode>(BaseNodeId);
                     string basepath = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refBaseNode.DecodedNodeId), refBaseNode.DecodedBrowseName.Name);
                     SystemUnitFamilyType baseSUC = scl.CAEXDocument.FindByPath(basepath) as SystemUnitFamilyType;
                     if (baseSUC == null)
-                        FindOrAddSUC(ref scl, ref rcl,  BaseNodeId);
+                        FindOrAddSUC(ref scl, ref rcl, BaseNodeId);
 
                 }
                 // now add the SUC with the immediate elements
@@ -683,13 +718,14 @@ namespace MarkdownProcessor
                 rtn = scl.SystemUnitClass.Append(refnode.DecodedBrowseName.Name);
                 if (BaseNodeId != null)
                 {
-                    
+
 
                     rtn.RefBaseClassPath = BaseRefFromNodeId(BaseNodeId, SUCPrefix);
 
                     // override any attribute values
 
                     var basenode = m_modelManager.FindNode<NodeSet.UANode>(BaseNodeId);
+                    SetBrowseNameUri(rtn.Attribute, refnode, basenode);
                     switch (refnode.NodeClass)
                     {
                         case NodeClass.ObjectType:
@@ -709,7 +745,7 @@ namespace MarkdownProcessor
                             if (basevar.IsAbstract != varnode.IsAbstract)
                                 OverrideBooleanAttribute(rtn.Attribute, "IsAbstract", varnode.IsAbstract);
                             if (basevar.DataType != varnode.DataType)
-                                AddModifyAttribute(rtn.Attribute, "Value",  varnode.DecodedDataType);
+                                AddModifyAttribute(rtn.Attribute, "Value", varnode.DecodedDataType);
                             break;
 
                     }
@@ -722,23 +758,29 @@ namespace MarkdownProcessor
                         case NodeClass.ObjectType:
                             AddBaseNodeClassAttributes(rtn, false);
                             AddModifyAttribute(rtn.Attribute, "EventNotifier", "EventNotifierType", Variant.Null);
+                            SetBrowseNameUri(rtn.Attribute, refnode);
                             break;
                         case NodeClass.VariableType:
                             AddBaseNodeClassAttributes(rtn, true);
                             AddModifyAttribute(rtn.Attribute, "ArrayDimensions", "ListOfUInt32", Variant.Null);
-                            AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32",-2);
-                            AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null );
+                            AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2);
+                            AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null);
                             AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null);
                             AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null);
+                            SetBrowseNameUri(rtn.Attribute, refnode);
                             break;
                         case NodeClass.Method:
                             AddBaseNodeClassAttributes(rtn, false);
                             AddModifyAttribute(rtn.Attribute, "Executable", "Boolean", true);
                             AddModifyAttribute(rtn.Attribute, "UserExecutable", "Boolean", true);
-                            
+                            SetBrowseNameUri(rtn.Attribute, refnode);
+
                             break;
                     }
+                                     
                 }
+                
+
                 // now add the references and contained objects
                 var refList = m_modelManager.FindReferences(nodeId);
                 foreach (var reference in refList)
@@ -751,14 +793,14 @@ namespace MarkdownProcessor
                             var ReferenceTypeNode = m_modelManager.FindNode<UANode>(reference.ReferenceTypeId);
                             var sourceInterface = FindOrAddSourceInterface(ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name);
                             var targetNode = m_modelManager.FindNode<UANode>(reference.TargetId);
- //                           if (targetNode.NodeClass != NodeClass.Method) //  methods are now processed
+                            //                           if (targetNode.NodeClass != NodeClass.Method) //  methods are now processed
                             {
                                 var TypeDefNodeId = reference.TargetId;
                                 if (targetNode.NodeClass == NodeClass.Variable || targetNode.NodeClass == NodeClass.Object)
                                     TypeDefNodeId = m_modelManager.FindFirstTarget(reference.TargetId, HasTypeDefinitionNodeId, true);
                                 if (TypeDefNodeId == null)
                                     TypeDefNodeId = reference.TargetId;
-                                var child = FindOrAddSUC(ref scl, ref rcl,  TypeDefNodeId);
+                                var child = FindOrAddSUC(ref scl, ref rcl, TypeDefNodeId);
 
                                 // var ie = suc.New_InternalElement(targetNode.DecodedBrowseName.Name);
                                 var ie = child.CreateClassInstance();
@@ -768,23 +810,23 @@ namespace MarkdownProcessor
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
                                     bool bListOf = (varnode.ValueRank == 1);  // use ListOf when its a UA array
-                     
+
                                     AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
                                     ie.SetAttributeValue("ValueRank", varnode.ValueRank);
                                     ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
-                                    
+
                                 }
                                 else if (targetNode.NodeClass == NodeClass.Method)
-                                    ie.RefBaseSystemUnitPath = BuildLibraryReference(SUCPrefix, MetaModelName, MethodNodeClass );
+                                    ie.RefBaseSystemUnitPath = BuildLibraryReference(SUCPrefix, MetaModelName, MethodNodeClass);
                                 var ie_suc = ie as SystemUnitClassType;
-                                
 
-                                var destInterface = FindOrAddInterface(ref ie_suc, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.GetAttribute("InverseName").Value);
-                                
+
+                                var destInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value);
+
                                 var internalLink = rtn.New_InternalLink(targetNode.DecodedBrowseName.Name);
                                 internalLink.RefPartnerSideA = sourceInterface.ID;
                                 internalLink.RefPartnerSideB = destInterface.ID;
-                            
+
                                 //   set the modeling rule
                                 var modellingId = m_modelManager.FindFirstTarget(reference.TargetId, HasModellingRuleNodeId, true);
                                 var modellingRule = m_modelManager.FindNode<UANode>(modellingId);
@@ -800,18 +842,18 @@ namespace MarkdownProcessor
                             var roleSUC = FindOrAddSUC(ref scl, ref rcl, reference.TargetId);  // make sure the AMLobjects are already created.
                             var srt = rtn.New_SupportedRoleClass(rolepath, false);
                             var inst = roleSUC.CreateClassInstance();
-                            foreach( var element in inst.InternalElement)
+                            foreach (var element in inst.InternalElement)
                             {
                                 rtn.InternalElement.Append(element);
                             }
 
 
-                           
+
                         }
                     }
                 }
                 rtn.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);  // all UA SUCs support the UaBaseRole
-             }
+            }
 
             return rtn;
 
@@ -825,7 +867,7 @@ namespace MarkdownProcessor
         private void OverrideAttribute(IClassWithBaseClassReference owner, string Name, string AttType, object val)
         {
             var atts = owner.GetInheritedAttributes();
-            foreach(var aa in atts)
+            foreach (var aa in atts)
             {
                 if (aa.Name == Name)
                 {
@@ -840,7 +882,7 @@ namespace MarkdownProcessor
             a.Name = Name;
             a.AttributeDataType = AttType;
             a.AttributeValue = val;
-       
+
         }
 
         private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
@@ -853,21 +895,21 @@ namespace MarkdownProcessor
                 added.RefBaseClassPath = BaseRefFromNodeId(BaseNodeId, ICLPrefix);
                 InterfaceClassType ict = icl.CAEXDocument.FindByPath(added.RefBaseClassPath) as InterfaceClassType;
                 if (ict == null)
-                    ProcessReferenceType( ref icl, BaseNodeId);
+                    ProcessReferenceType(ref icl, BaseNodeId);
             }
             else
             {
                 added.RefBaseClassPath = "AutomationMLInterfaceClassLib/AutomationMLBaseInterface";
                 // add the attributes to the base ReferenceType
-            //    AddBaseNodeClassAttributes(added.Attribute, true);
-                
+                //    AddBaseNodeClassAttributes(added.Attribute, true);
 
-                AddModifyAttribute( added.Attribute, "InverseName", "LocalizedText", Variant.Null);
-                AddModifyAttribute( added.Attribute, "ModellingRule", "ModellingRuleType", Variant.Null, false,   MetaModelName );
-                OverrideBooleanAttribute( added.Attribute, "Symmetric",  true);
-                OverrideBooleanAttribute( added.Attribute, "IsAbstract", true);
+
+                AddModifyAttribute(added.Attribute, "InverseName", "LocalizedText", Variant.Null);
+                AddModifyAttribute(added.Attribute, "ModellingRule", "ModellingRuleType", Variant.Null, false, MetaModelName);
+                OverrideBooleanAttribute(added.Attribute, "Symmetric", true);
+                OverrideBooleanAttribute(added.Attribute, "IsAbstract", true);
                 OverrideAttribute(added, IsSource, "xs:boolean", true);
-                OverrideAttribute(added, RefClassConnectsToPath, "xs:string",  added.CAEXPath());
+                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", added.CAEXPath());
 
             }
             // look for inverse name
@@ -881,48 +923,48 @@ namespace MarkdownProcessor
                         inverseAdded.RefBaseClassPath = BaseRefFromNodeId(BaseNodeId, ICLPrefix, true);
                 }
             }
-            
-            
+
+
             // ovveride any attribute values
             if (BaseNodeId != null)
             {
                 var basenode = m_modelManager.FindNode<NodeSet.UAReferenceType>(BaseNodeId);
- 
+
                 if (basenode.IsAbstract != refnode.IsAbstract)
                     OverrideBooleanAttribute(added.Attribute, "IsAbstract", refnode.IsAbstract);
                 if (basenode.Symmetric != refnode.Symmetric)
                     OverrideBooleanAttribute(added.Attribute, "Symmetric", refnode.Symmetric);
 
                 if (refnode.InverseName != null)
-                    AddModifyAttribute( added.Attribute, "InverseName", "LocalizedText",  refnode.InverseName[0].Value);
-                
+                    AddModifyAttribute(added.Attribute, "InverseName", "LocalizedText", refnode.InverseName[0].Value);
+
                 OverrideAttribute(added, IsSource, "xs:boolean", true);
                 OverrideAttribute(added, RefClassConnectsToPath, "xs:string", (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
 
-                
+
 
 
                 if (inverseAdded != null)
                 {
-                   
+
                     if (basenode.IsAbstract != refnode.IsAbstract)
                         OverrideBooleanAttribute(inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract);
                     if (basenode.Symmetric != refnode.Symmetric)
                         OverrideBooleanAttribute(inverseAdded.Attribute, "Symmetric", refnode.Symmetric);
-                    AddModifyAttribute(  inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
-             
+                    AddModifyAttribute(inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
+
                     OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
-                    OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string",  added.CAEXPath());
+                    OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string", added.CAEXPath());
 
                 }
 
-        
+
             }
         }
 
         #endregion
 
-      
+
         #region ATL
         private AttributeFamilyType CreateListOf(AttributeFamilyType aft)
         {
@@ -938,7 +980,7 @@ namespace MarkdownProcessor
             a.Name = aft.Name;
            rtn.Insert(a);
             end Mantis #7383 */
-   
+
             return rtn;
         }
 
@@ -985,7 +1027,7 @@ namespace MarkdownProcessor
         private void ProcessOptionSets(ref AttributeTypeType att, NodeId nodeId)
         {
             NodeId OptionSetsPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "OptionSetValues");
-            
+
             if (OptionSetsPropertyId != null && m_modelManager.IsTypeOf(nodeId, NumberNodeId))
             {
                 att.AttributeDataType = "";
@@ -1000,7 +1042,7 @@ namespace MarkdownProcessor
                     att.Attribute.Insert(a, false);
                 }
             }
-            if ( nodeId == NodeIdNodeId)
+            if (nodeId == NodeIdNodeId)
             {
                 att.AttributeDataType = "";
                 AttributeType ns = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
@@ -1012,7 +1054,7 @@ namespace MarkdownProcessor
                 n.AttributeDataType = "xs:string";
                 att.Attribute.Insert(n, false);
             }
-            else if (nodeId == QualifiedNameNodeId )
+            else if (nodeId == QualifiedNameNodeId)
             {
                 att.AttributeDataType = "";
                 AttributeType ns = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
@@ -1024,7 +1066,7 @@ namespace MarkdownProcessor
                 n.AttributeDataType = "xs:string";
                 att.Attribute.Insert(n, false);
             }
-            else if( nodeId == GuidNodeId)
+            else if (nodeId == GuidNodeId)
             {
                 att.AttributeDataType = "xs:string";
             }
@@ -1056,7 +1098,7 @@ namespace MarkdownProcessor
 
         private void RecurseStructures(ref AttributeTypeType att, NodeId nodeId)
         {
-            
+
             if (m_modelManager.IsTypeOf(nodeId, structureNode.DecodedNodeId))
             {
                 att.AttributeDataType = "";
@@ -1111,7 +1153,7 @@ namespace MarkdownProcessor
                                 a.Attribute.Insert(aa, false);
                             }
                             else
-                            { 
+                            {
                                 var b = a as AttributeTypeType;
                                 FillSubAttributes(ref b, MyNode.Definition.Field[i].DecodedDataType);
                             }
@@ -1137,10 +1179,10 @@ namespace MarkdownProcessor
             m_atl_temp.AttributeType.Insert(added);
 
             added.AttributeDataType = GetAttributeDataType(node.DecodedNodeId);
-            
+
             NodeId BaseNodeId = m_modelManager.FindFirstTarget(node.DecodedNodeId, HasSubTypeNodeId, false);
             if (BaseNodeId != null)
-            { 
+            {
                 string s = BaseRefFromNodeId(BaseNodeId, ATLPrefix);
                 added.RefAttributeType = s;
             }
@@ -1155,5 +1197,100 @@ namespace MarkdownProcessor
             return added;
         }
         #endregion
+
+        #region INSTANCE
+
+        private void CreateInstances()
+        {
+            // add an InstanceHierarchy to the ROOT CAEXFile element
+            var myIH = m_cAEXDocument.CAEXFile.New_InstanceHierarchy("myIH");
+
+            var RootNode = m_modelManager.FindNode<UANode>(RootNodeId);
+            RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode);
+
+        }
+
+        InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd) where T : IInternalElementContainer
+        {
+            //first see if node already exists
+            var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
+            if (ie == null)
+            {
+                var TypeDefNodeId = m_modelManager.FindFirstTarget(toAdd.DecodedNodeId, HasTypeDefinitionNodeId, true);
+                var path = BaseRefFromNodeId(TypeDefNodeId, SUCPrefix);
+                SystemUnitFamilyType suc = m_cAEXDocument.FindByPath(path) as SystemUnitFamilyType;
+                Debug.Assert(suc != null);
+
+                ie = suc.CreateClassInstance();
+                ie.Name = toAdd.DecodedBrowseName.Name;
+                SetBrowseNameUri(ie.Attribute, toAdd);
+                ie.Attribute["UaNodeNamespaceUri"].Value = m_modelManager.FindModelUri(toAdd.DecodedNodeId);
+
+                parent.Insert(ie);
+
+            }
+            Debug.Assert(ie != null);
+
+            // set the values to match the values in the nodeset
+            if (toAdd.NodeClass == NodeClass.Variable)
+            {  //  Set the datatype for Value
+                var varnode = toAdd as NodeSet.UAVariable;
+                bool bListOf = (varnode.ValueRank == 1);  // use ListOf when its a UA array
+
+                AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
+                ie.SetAttributeValue("ValueRank", varnode.ValueRank);
+                ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
+
+            }
+            // TODO set the values of the other attributes to match the instance ??
+
+            // follow forward hierarchical references to add the children
+
+            // now add the references and contained objects
+            var nodeId = toAdd.NodeId;
+            var refList = m_modelManager.FindReferences(nodeId);
+            if (refList != null)
+            {
+                foreach (var reference in refList)
+                {
+                    if (reference.IsForward == true)
+                    {
+                        if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, OrganizesNodeId) == true
+                            || m_modelManager.IsTypeOf(reference.ReferenceTypeId, AggregatesNodeId) == true)
+                        {
+                            string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
+                            var ReferenceTypeNode = m_modelManager.FindNode<UANode>(reference.ReferenceTypeId);
+                            var sourceInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name);
+                            var targetNode = m_modelManager.FindNode<UANode>(reference.TargetId);
+                            if (reference.TargetId != TypesFolderNodeId)
+                            {
+                                var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode);                             
+                                var destInterface = FindOrAddInterface(ref childIE, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value);
+                                FindOrAddInternalLink(ref ie, sourceInterface.ID, destInterface.ID, targetNode.DecodedBrowseName.Name);
+                            }
+                        }
+                    }
+                }
+            }
+            return ie;
+        }
+
+        // add an internal link if it does not already exist
+        InternalLinkType FindOrAddInternalLink(ref InternalElementType ie, string sourceID, string destinationID, string linkName)        
+        {
+            foreach( var link in ie.InternalLink)
+            {
+                if (link.RefPartnerSideA == sourceID && link.RefPartnerSideB == destinationID)
+                    return link;  // link already exists
+            }
+            // add a new link
+            var internalLink = ie.New_InternalLink(linkName);
+            internalLink.RefPartnerSideA = sourceID;
+            internalLink.RefPartnerSideB = destinationID;
+            return internalLink;
+        }
+
+        #endregion
+
     }
 }
