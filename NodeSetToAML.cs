@@ -806,6 +806,8 @@ namespace MarkdownProcessor
                                 var ie = child.CreateClassInstance();
                                 rtn.AddInstance(ie);
                                 ie.Name = targetNode.DecodedBrowseName.Name;
+                                var basenode = m_modelManager.FindNode<NodeSet.UANode>(TypeDefNodeId);
+                                SetBrowseNameUri(ie.Attribute, targetNode, basenode);
                                 if (targetNode.NodeClass == NodeClass.Variable)
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
@@ -1203,7 +1205,8 @@ namespace MarkdownProcessor
         private void CreateInstances()
         {
             // add an InstanceHierarchy to the ROOT CAEXFile element
-            var myIH = m_cAEXDocument.CAEXFile.New_InstanceHierarchy("myIH");
+            var myIH = m_cAEXDocument.CAEXFile.New_InstanceHierarchy("OPC UA Instance Hierarchy");
+            AddLibaryHeaderInfo(myIH);
 
             var RootNode = m_modelManager.FindNode<UANode>(RootNodeId);
             RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode);
