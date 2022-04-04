@@ -26,7 +26,7 @@ This C# console application that targets .NET Runtime can be built using Visual 
 
 The binary releases are provided as a ZIP file. To install the binaries do the following:
 
-1. Install the [.NET Runtime 6.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)) for your platform.
+1. Install the [.NET Runtime 6.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) for your platform.
 
 2. Extract the files from the ZIP into a directory of your choice.
 
@@ -41,4 +41,4 @@ The binary releases are provided as a ZIP file. To install the binaries do the f
 The source code in this repository is MIT License but the code depends on two NuGet packages with the following licenses:
 
 - AML.Engine -  [Nuget MIT License](https://licenses.nuget.org/MIT).
-- OPCFoundation.NetStandard.Opc.UA - [Custom License]([UA-.NETStandard/LICENSE.txt at master · OPCFoundation/UA-.NETStandard (github.com)](https://github.com/OPCFoundation/UA-.NETStandard/blob/master/LICENSE.txt))
+- OPCFoundation.NetStandard.Opc.UA - [Custom License](https://github.com/OPCFoundation/UA-.NETStandard/blob/master/LICENSE.txt)
