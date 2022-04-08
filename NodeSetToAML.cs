@@ -96,6 +96,7 @@ namespace MarkdownProcessor
         private readonly NodeId HasModellingRuleNodeId = new NodeId(37, 0);
         private readonly NodeId BaseInterfaceNodeId = new NodeId(17602, 0);
         private readonly NodeId RootNodeId = new NodeId(84, 0);
+        private readonly NodeId HierarchicalNodeId = new NodeId(33, 0);
         private readonly NodeId OrganizesNodeId = new NodeId(35, 0);
         private readonly NodeId TypesFolderNodeId = new NodeId(86, 0);
         private readonly System.Xml.Linq.XNamespace defaultNS = "http://www.dke.de/CAEX";
@@ -710,6 +711,7 @@ namespace MarkdownProcessor
                     string basepath = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refBaseNode.DecodedNodeId), refBaseNode.DecodedBrowseName.Name);
                     SystemUnitFamilyType baseSUC = scl.CAEXDocument.FindByPath(basepath) as SystemUnitFamilyType;
                     if (baseSUC == null)
+                        
                         FindOrAddSUC(ref scl, ref rcl, BaseNodeId);
 
                 }
@@ -1219,9 +1221,20 @@ namespace MarkdownProcessor
             var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
             if (ie == null)
             {
+                SystemUnitFamilyType suc;
+                
                 var TypeDefNodeId = m_modelManager.FindFirstTarget(toAdd.DecodedNodeId, HasTypeDefinitionNodeId, true);
                 var path = BaseRefFromNodeId(TypeDefNodeId, SUCPrefix);
-                SystemUnitFamilyType suc = m_cAEXDocument.FindByPath(path) as SystemUnitFamilyType;
+                suc = m_cAEXDocument.FindByPath(path) as SystemUnitFamilyType;
+              
+                if (suc == null && toAdd.NodeClass == NodeClass.Method)
+                {
+                    suc = m_cAEXDocument.FindByPath( BuildLibraryReference( SUCPrefix, MetaModelName, MethodNodeClass)) as SystemUnitFamilyType;
+                    Debug.Assert(suc != null);
+                    AddBaseNodeClassAttributes(suc, false);
+                    AddModifyAttribute(suc.Attribute, "Executable", "Boolean", true);
+                    AddModifyAttribute(suc.Attribute, "UserExecutable", "Boolean", true);
+                }
                 Debug.Assert(suc != null);
 
                 ie = suc.CreateClassInstance();
@@ -1250,7 +1263,7 @@ namespace MarkdownProcessor
             // follow forward hierarchical references to add the children
 
             // now add the references and contained objects
-            var nodeId = toAdd.NodeId;
+            var nodeId = toAdd.DecodedNodeId;
             var refList = m_modelManager.FindReferences(nodeId);
             if (refList != null)
             {
@@ -1258,8 +1271,7 @@ namespace MarkdownProcessor
                 {
                     if (reference.IsForward == true)
                     {
-                        if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, OrganizesNodeId) == true
-                            || m_modelManager.IsTypeOf(reference.ReferenceTypeId, AggregatesNodeId) == true)
+                        if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, HierarchicalNodeId) == true )
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
                             var ReferenceTypeNode = m_modelManager.FindNode<UANode>(reference.ReferenceTypeId);

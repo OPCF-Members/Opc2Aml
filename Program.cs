@@ -92,9 +92,9 @@ namespace Opc2Aml
             Console.WriteLine("NodesetFile       Name of nodeset file in the CWD to be processed");
             Console.WriteLine("AmlBaseFilename   File name of the AutomationML file to be written (without the .amlx extension).");
             Console.WriteLine("                  The default name is the NodesetFile if this argument is missing.");
-            Console.WriteLine("\nWith no optional arguments, all nodeset files in CWD are processed.");
-            Console.WriteLine("All dependent nodeset files need to be present in the CWD, even if they are not processed. ");
-            Console.WriteLine("Copyright(c) 2021 OPC Foundation.  All rights reserved.");
+            Console.WriteLine("\nWith no arguments, all nodeset files in CWD are processed.");
+            Console.WriteLine("NOTE: All dependent nodeset files need to be present in the CWD, even if they are not processed. ");
+            Console.WriteLine("Copyright(c) 2021-2022 OPC Foundation.  All rights reserved.");
             Console.WriteLine("+++++++++++++++++++++++++++++++++++++\n\n");
         }
 
