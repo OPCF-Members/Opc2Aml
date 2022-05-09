@@ -141,6 +141,18 @@ namespace MarkdownProcessor
         }
 
 
+        public T FindNode<T>(NodeId sourceId) where T : UANode 
+        {
+            UANode node = null;
+            node = m_modelManager.FindNode<T>(sourceId);
+            // display error message and throw
+            if( node == null )
+                throw new Exception( "Can't find node: " + sourceId.ToString() + "   Is your nodeset file missing a <RequiredModel> element?");
+            return node as T;
+        }
+
+
+
         public void CreateAML(string modelPath, string modelName = null)
         {
             string modelUri = m_modelManager.LoadModel(modelPath, null, null);
@@ -541,7 +553,7 @@ namespace MarkdownProcessor
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType, Variant val, bool bListOf = false)
         {
-            var DataTypeNode = m_modelManager.FindNode<UANode>(refDataType);
+            var DataTypeNode = FindNode<UANode>(refDataType);
             var sUADataType = DataTypeNode.DecodedBrowseName.Name;
             var sURI = m_modelManager.FindModelUri(DataTypeNode.DecodedNodeId);
             return AddModifyAttribute(seq, name, sUADataType, val, bListOf, sURI);
@@ -688,7 +700,7 @@ namespace MarkdownProcessor
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
         {
-            var refnode = m_modelManager.FindNode<NodeSet.UANode>(nodeId);
+            var refnode = FindNode<NodeSet.UANode>(nodeId);
             string path = "";
             if (refnode.NodeClass != NodeClass.Method)
                 path = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refnode.DecodedNodeId), refnode.DecodedBrowseName.Name);
@@ -707,7 +719,7 @@ namespace MarkdownProcessor
                 NodeId BaseNodeId = m_modelManager.FindFirstTarget(refnode.DecodedNodeId, HasSubTypeNodeId, false);
                 if (BaseNodeId != null)
                 {
-                    var refBaseNode = m_modelManager.FindNode<NodeSet.UANode>(BaseNodeId);
+                    var refBaseNode = FindNode<NodeSet.UANode>(BaseNodeId);
                     string basepath = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refBaseNode.DecodedNodeId), refBaseNode.DecodedBrowseName.Name);
                     SystemUnitFamilyType baseSUC = scl.CAEXDocument.FindByPath(basepath) as SystemUnitFamilyType;
                     if (baseSUC == null)
@@ -726,7 +738,7 @@ namespace MarkdownProcessor
 
                     // override any attribute values
 
-                    var basenode = m_modelManager.FindNode<NodeSet.UANode>(BaseNodeId);
+                    var basenode = FindNode<NodeSet.UANode>(BaseNodeId);
                     SetBrowseNameUri(rtn.Attribute, refnode, basenode);
                     switch (refnode.NodeClass)
                     {
@@ -792,9 +804,9 @@ namespace MarkdownProcessor
                         if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, AggregatesNodeId) == true)
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
-                            var ReferenceTypeNode = m_modelManager.FindNode<UANode>(reference.ReferenceTypeId);
+                            var ReferenceTypeNode = FindNode<UANode>(reference.ReferenceTypeId);
                             var sourceInterface = FindOrAddSourceInterface(ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name);
-                            var targetNode = m_modelManager.FindNode<UANode>(reference.TargetId);
+                            var targetNode = FindNode<UANode>(reference.TargetId);
                             //                           if (targetNode.NodeClass != NodeClass.Method) //  methods are now processed
                             {
                                 var TypeDefNodeId = reference.TargetId;
@@ -808,7 +820,7 @@ namespace MarkdownProcessor
                                 var ie = child.CreateClassInstance();
                                 rtn.AddInstance(ie);
                                 ie.Name = targetNode.DecodedBrowseName.Name;
-                                var basenode = m_modelManager.FindNode<NodeSet.UANode>(TypeDefNodeId);
+                                var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
                                 SetBrowseNameUri(ie.Attribute, targetNode, basenode);
                                 if (targetNode.NodeClass == NodeClass.Variable)
                                 {  //  Set the datatype for Value
@@ -841,7 +853,7 @@ namespace MarkdownProcessor
                         else if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, HasInterfaceNodeId) == true)
                         {
                             // add the elements of the UA Interface
-                            var targetNode = m_modelManager.FindNode<UANode>(reference.TargetId);
+                            var targetNode = FindNode<UANode>(reference.TargetId);
                             string rolepath = BuildLibraryReference(RCLPrefix, m_modelManager.FindModelUri(targetNode.DecodedNodeId), targetNode.DecodedBrowseName.Name);
                             var roleSUC = FindOrAddSUC(ref scl, ref rcl, reference.TargetId);  // make sure the AMLobjects are already created.
                             var srt = rtn.New_SupportedRoleClass(rolepath, false);
@@ -891,7 +903,7 @@ namespace MarkdownProcessor
 
         private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
         {
-            var refnode = m_modelManager.FindNode<NodeSet.UAReferenceType>(nodeId);
+            var refnode = FindNode<NodeSet.UAReferenceType>(nodeId);
             var added = icl.InterfaceClass.Append(refnode.DecodedBrowseName.Name);
             NodeId BaseNodeId = m_modelManager.FindFirstTarget(refnode.DecodedNodeId, HasSubTypeNodeId, false);
             if (BaseNodeId != null)
@@ -932,8 +944,8 @@ namespace MarkdownProcessor
             // ovveride any attribute values
             if (BaseNodeId != null)
             {
-                var basenode = m_modelManager.FindNode<NodeSet.UAReferenceType>(BaseNodeId);
-
+                var basenode = FindNode<NodeSet.UAReferenceType>(BaseNodeId);
+ 
                 if (basenode.IsAbstract != refnode.IsAbstract)
                     OverrideBooleanAttribute(added.Attribute, "IsAbstract", refnode.IsAbstract);
                 if (basenode.Symmetric != refnode.Symmetric)
@@ -995,10 +1007,10 @@ namespace MarkdownProcessor
             if (EnumStringsPropertyId != null)
             {
                 att.AttributeDataType = "xs:string";
-                var EnumStringsPropertyNode = m_modelManager.FindNode<UANode>(EnumStringsPropertyId);
+                var EnumStringsPropertyNode = FindNode<UANode>(EnumStringsPropertyId);
                 var EnumStrings = EnumStringsPropertyNode as UAVariable;
                 AttributeValueRequirementType avrt = new AttributeValueRequirementType(new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                var MyNode = m_modelManager.FindNode<UANode>(nodeId) as NodeSet.UADataType;
+                var MyNode = FindNode<UANode>(nodeId) as NodeSet.UADataType;
                 avrt.Name = MyNode.DecodedBrowseName.Name + " Constraint";
                 var res = avrt.New_NominalType();
                 Opc.Ua.LocalizedText[] EnumValues = EnumStrings.DecodedValue.Value as Opc.Ua.LocalizedText[];
@@ -1011,10 +1023,10 @@ namespace MarkdownProcessor
             else if (EnumValuesPropertyId != null)
             {
                 att.AttributeDataType = "xs:string";
-                var EnumValuesPropertyNode = m_modelManager.FindNode<UANode>(EnumValuesPropertyId);
+                var EnumValuesPropertyNode = FindNode<UANode>(EnumValuesPropertyId);
                 var EnumValues = EnumValuesPropertyNode as UAVariable;
                 AttributeValueRequirementType avrt = new AttributeValueRequirementType(new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                var MyNode = m_modelManager.FindNode<UANode>(nodeId) as NodeSet.UADataType;
+                var MyNode = FindNode<UANode>(nodeId) as NodeSet.UADataType;
                 avrt.Name = MyNode.DecodedBrowseName.Name + " Constraint";
                 var res = avrt.New_NominalType();
 
@@ -1035,7 +1047,7 @@ namespace MarkdownProcessor
             if (OptionSetsPropertyId != null && m_modelManager.IsTypeOf(nodeId, NumberNodeId))
             {
                 att.AttributeDataType = "";
-                var OptionSetsPropertyNode = m_modelManager.FindNode<UANode>(OptionSetsPropertyId);
+                var OptionSetsPropertyNode = FindNode<UANode>(OptionSetsPropertyId);
                 var OptionSets = OptionSetsPropertyNode as UAVariable;
                 Opc.Ua.LocalizedText[] OptionSetValues = OptionSets.DecodedValue.Value as Opc.Ua.LocalizedText[];
                 foreach (var OptionSetValue in OptionSetValues)
@@ -1106,7 +1118,7 @@ namespace MarkdownProcessor
             if (m_modelManager.IsTypeOf(nodeId, structureNode.DecodedNodeId))
             {
                 att.AttributeDataType = "";
-                var MyNode = m_modelManager.FindNode<UANode>(nodeId) as NodeSet.UADataType;
+                var MyNode = FindNode<UANode>(nodeId) as NodeSet.UADataType;
                 if (MyNode.Definition != null && MyNode.Definition.Field != null)
                 {
                     if (MyNode.Definition.IsOptionSet == true && m_modelManager.IsTypeOf(nodeId, OptionSetStructureNodeId) == true)
@@ -1210,7 +1222,7 @@ namespace MarkdownProcessor
             var myIH = m_cAEXDocument.CAEXFile.New_InstanceHierarchy("OPC UA Instance Hierarchy");
             AddLibaryHeaderInfo(myIH);
 
-            var RootNode = m_modelManager.FindNode<UANode>(RootNodeId);
+            var RootNode = FindNode<UANode>(RootNodeId);
             RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode);
 
         }
@@ -1274,9 +1286,10 @@ namespace MarkdownProcessor
                         if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, HierarchicalNodeId) == true )
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
-                            var ReferenceTypeNode = m_modelManager.FindNode<UANode>(reference.ReferenceTypeId);
+                            var ReferenceTypeNode = FindNode<UANode>(reference.ReferenceTypeId);
                             var sourceInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name);
-                            var targetNode = m_modelManager.FindNode<UANode>(reference.TargetId);
+                            var targetNode = FindNode<UANode>(reference.TargetId);
+                           
                             if (reference.TargetId != TypesFolderNodeId)
                             {
                                 var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode);                             

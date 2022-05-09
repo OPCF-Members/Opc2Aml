@@ -46,7 +46,17 @@ namespace Opc2Aml
             foreach (string fileEntry in fileEntries)
             {
                 ModelManager manager = new ModelManager();
-                string uri = manager.LoadModel(fileEntry, null, null);
+                string uri;
+                Console.WriteLine("Loading nodeset: " + fileEntry + "  ...");
+                try
+                {
+                    uri = manager.LoadModel(fileEntry, null, null);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Unable to load nodeset: " + fileEntry + "  Are you missing a <Uri> element or is the file not a proper nodeset?");
+                    throw;
+                }
                 if( uri != null)
                     Models.Add(uri, fileEntry.Substring(2));
             }
