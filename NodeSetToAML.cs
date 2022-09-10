@@ -640,7 +640,7 @@ namespace MarkdownProcessor
 
 
 
-        ExternalInterfaceType FindOrAddSourceInterface(ref SystemUnitFamilyType suc, string uri, string name)
+        ExternalInterfaceType FindOrAddSourceInterface(ref SystemUnitFamilyType suc, string uri, string name, NodeId nodeId )
         {
             string RefBaseClassPath = BuildLibraryReference(ICLPrefix, uri, name);
             var splitname = name.Split('/');
@@ -666,6 +666,7 @@ namespace MarkdownProcessor
             if (bFoundInParent == true)  // make a unique name by appending the SUC name
                 leafname += ":" + suc.Name;
             var rtn = suc.ExternalInterface.Append(leafname);
+            rtn.ID = AmlIDFromNodeId(nodeId, leafname);
             rtn.RefBaseClassPath = RefBaseClassPath;
             CopyAttributes(ref rtn);
             return rtn;
@@ -673,7 +674,7 @@ namespace MarkdownProcessor
 
 
 
-        ExternalInterfaceType FindOrAddInterface(ref InternalElementType suc, string uri, string name)
+        ExternalInterfaceType FindOrAddInterface(ref InternalElementType suc, string uri, string name, NodeId nodeId = null)
         {
             var splitname = name.Split('/');
             var leafname = splitname[splitname.Length - 1];
@@ -689,13 +690,31 @@ namespace MarkdownProcessor
 
             var rtn = suc.ExternalInterface.Append(leafname);
             rtn.RefBaseClassPath = BuildLibraryReference(ICLPrefix, uri, name);
+            if( nodeId != null)
+                rtn.ID = AmlIDFromNodeId(nodeId, leafname);
             CopyAttributes(ref rtn);
             return rtn;
         }
 
 
 
-
+        private string AmlIDFromNodeId(NodeId nodeId, string name = null)
+        {
+            string sNodeId = nodeId.ToString();
+            var n = sNodeId.IndexOf(';');
+            if( n >= 0 )
+                sNodeId = sNodeId.Substring(n+1 ); //skip the "ns=nnn;" part
+            string rtn =  "ns=" + m_modelManager.FindModelUri(nodeId) + ";" + sNodeId;
+            if( name != null)
+            {
+                rtn += ";" + name;
+            }
+            // substitute for illlegal chars in AML IDs 
+            rtn = rtn.Replace('/', '\\'); 
+            rtn = rtn.Replace(':', '#');
+            
+            return rtn;
+        }
 
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
@@ -732,7 +751,7 @@ namespace MarkdownProcessor
                 rtn = scl.SystemUnitClass.Append(refnode.DecodedBrowseName.Name);
                 if (BaseNodeId != null)
                 {
-
+                    rtn.ID = AmlIDFromNodeId(nodeId);
 
                     rtn.RefBaseClassPath = BaseRefFromNodeId(BaseNodeId, SUCPrefix);
 
@@ -805,7 +824,7 @@ namespace MarkdownProcessor
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
                             var ReferenceTypeNode = FindNode<UANode>(reference.ReferenceTypeId);
-                            var sourceInterface = FindOrAddSourceInterface(ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name);
+                            var sourceInterface = FindOrAddSourceInterface(ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId);
                             var targetNode = FindNode<UANode>(reference.TargetId);
                             //                           if (targetNode.NodeClass != NodeClass.Method) //  methods are now processed
                             {
@@ -816,10 +835,11 @@ namespace MarkdownProcessor
                                     TypeDefNodeId = reference.TargetId;
                                 var child = FindOrAddSUC(ref scl, ref rcl, TypeDefNodeId);
 
-                                // var ie = suc.New_InternalElement(targetNode.DecodedBrowseName.Name);
-                                var ie = child.CreateClassInstance();
+                                // var ie = suc.New_InternalElement(targetotNode.DecodedBrowseName.Name);
+                                var ie = child.CreateClassInstance();  //need to rewite to eliminate calls to CreateClassInstance in order to set the ID.
                                 rtn.AddInstance(ie);
                                 ie.Name = targetNode.DecodedBrowseName.Name;
+                                ie.ID = AmlIDFromNodeId(reference.TargetId);
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
                                 SetBrowseNameUri(ie.Attribute, targetNode, basenode);
                                 if (targetNode.NodeClass == NodeClass.Variable)
@@ -837,7 +857,7 @@ namespace MarkdownProcessor
                                 var ie_suc = ie as SystemUnitClassType;
 
 
-                                var destInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value);
+                                var destInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, reference.TargetId);
 
                                 var internalLink = rtn.New_InternalLink(targetNode.DecodedBrowseName.Name);
                                 internalLink.RefPartnerSideA = sourceInterface.ID;
@@ -1249,8 +1269,9 @@ namespace MarkdownProcessor
                 }
                 Debug.Assert(suc != null);
 
-                ie = suc.CreateClassInstance();
+                ie = suc.CreateClassInstance();  // this crates GUI IDs for all the sub-elements
                 ie.Name = toAdd.DecodedBrowseName.Name;
+                ie.ID = AmlIDFromNodeId(toAdd.DecodedNodeId);  // decided not to replace the GUID IDs in the top level instances
                 SetBrowseNameUri(ie.Attribute, toAdd);
                 ie.Attribute["UaNodeNamespaceUri"].Value = m_modelManager.FindModelUri(toAdd.DecodedNodeId);
 
@@ -1287,13 +1308,13 @@ namespace MarkdownProcessor
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
                             var ReferenceTypeNode = FindNode<UANode>(reference.ReferenceTypeId);
-                            var sourceInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name);
+                            var sourceInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId);
                             var targetNode = FindNode<UANode>(reference.TargetId);
                            
                             if (reference.TargetId != TypesFolderNodeId)
                             {
-                                var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode);                             
-                                var destInterface = FindOrAddInterface(ref childIE, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value);
+                                var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode);
+                                var destInterface = FindOrAddInterface(ref childIE, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, targetNode.DecodedNodeId);
                                 FindOrAddInternalLink(ref ie, sourceInterface.ID, destInterface.ID, targetNode.DecodedBrowseName.Name);
                             }
                         }

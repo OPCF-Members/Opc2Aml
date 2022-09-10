@@ -52,7 +52,7 @@ namespace Opc2Aml
                 {
                     uri = manager.LoadModel(fileEntry, null, null);
                 }
-                catch (Exception ex)
+                catch (Exception )
                 {
                     Console.WriteLine("Unable to load nodeset: " + fileEntry + "  Are you missing a <Uri> element or is the file not a proper nodeset?");
                     throw;
