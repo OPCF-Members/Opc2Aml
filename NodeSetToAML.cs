@@ -460,19 +460,22 @@ namespace MarkdownProcessor
 
         private void AddBaseNodeClassAttributes(IClassWithBaseClassReference owner, bool isAbstract)
         {
-            AttributeType a = owner.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
-            a.AttributeDataType = "xs:anyURI";
+            // #9 remove unused attributes from base
+            
+          //  AttributeType a = owner.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
+          //  a.AttributeDataType = "xs:anyURI";
 
-            AddModifyAttribute(owner.Attribute, "BrowseName", "QualifiedName", Variant.Null);
-            AddModifyAttribute(owner.Attribute, "DisplayName", "LocalizedText", Variant.Null);
+          //  AddModifyAttribute(owner.Attribute, "BrowseName", "QualifiedName", Variant.Null);
+          //  AddModifyAttribute(owner.Attribute, "DisplayName", "LocalizedText", Variant.Null);
 
-            var abs = AddModifyAttribute(owner.Attribute, "IsAbstract", "Boolean", isAbstract);
+          //  var abs = AddModifyAttribute(owner.Attribute, "IsAbstract", "Boolean", isAbstract);
             //   abs.Value = isAbstract ? "true" : "false";
 
-            AddModifyAttribute(owner.Attribute, "Description", "LocalizedText", Variant.Null);
-            AddModifyAttribute(owner.Attribute, "WriteMask", "AttributeWriteMask", Variant.Null);
-            AddModifyAttribute(owner.Attribute, "RolePermissions", "ListOfRolePermissionType", Variant.Null);
-            AddModifyAttribute(owner.Attribute, "AccessRestrictions", "AccessRestrictionType", Variant.Null);
+           // AddModifyAttribute(owner.Attribute, "Description", "LocalizedText", Variant.Null);
+          //  AddModifyAttribute(owner.Attribute, "WriteMask", "AttributeWriteMask", Variant.Null);
+           // AddModifyAttribute(owner.Attribute, "RolePermissions", "ListOfRolePermissionType", Variant.Null);
+          //  AddModifyAttribute(owner.Attribute, "AccessRestrictions", "AccessRestrictionType", Variant.Null);
+            
         }
 
         private void SetBrowseNameUri( AttributeSequence seq, UANode uanode, UANode basenode = null)
@@ -517,7 +520,20 @@ namespace MarkdownProcessor
             var at = ob as AttributeFamilyType;
             AttributeType a = seq[name];  //find the existing attribute with the name
             if (a == null)
-                 a = seq.Append(name);  // not found so create a new one
+            {
+                if (bListOf == false && val.TypeInfo != null)  // look for reasons not to add the attribute because missing == default value
+                {
+                    if (name == "ValueRank" && val == -2 )
+                        return null;
+                    if (name == "IsAbstract" && val == false)
+                        return null;
+                    if (name == "IsSource" && val == false)
+                        return null;
+                    if (name == "Symmetric" && val == false)
+                        return null;
+                }
+                    a = seq.Append(name);  // not found so create a new one
+            }
 
             a.RecreateAttributeInstance(at);
             if (bListOf == false && val.TypeInfo != null)
@@ -790,22 +806,20 @@ namespace MarkdownProcessor
                     {
                         case NodeClass.ObjectType:
                             AddBaseNodeClassAttributes(rtn, false);
-                            AddModifyAttribute(rtn.Attribute, "EventNotifier", "EventNotifierType", Variant.Null);
+                            // AddModifyAttribute(rtn.Attribute, "EventNotifier", "EventNotifierType", Variant.Null); // #9 remove unset attributes
                             SetBrowseNameUri(rtn.Attribute, refnode);
                             break;
                         case NodeClass.VariableType:
                             AddBaseNodeClassAttributes(rtn, true);
-                            AddModifyAttribute(rtn.Attribute, "ArrayDimensions", "ListOfUInt32", Variant.Null);
-                            AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2);
-                            AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null);
-                            AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null);
-                            AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null);
+                            // AddModifyAttribute(rtn.Attribute, "ArrayDimensions", "ListOfUInt32", Variant.Null); // #9 remove unset attributes
+                           // AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2); // #9 remove unset attributes
+                           // AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null); // #9 remove unset attributes
+                           // AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null); // #9 remove unset attributes
+                           // AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null); // #9 remove unset attributes
                             SetBrowseNameUri(rtn.Attribute, refnode);
                             break;
                         case NodeClass.Method:
                             AddBaseNodeClassAttributes(rtn, false);
-                            // AddModifyAttribute(rtn.Attribute, "Executable", "Boolean", true);  // #7 removed Executable an UserExecutable
-                            // AddModifyAttribute(rtn.Attribute, "UserExecutable", "Boolean", true);  // #7 removed Executable an UserExecutable
                             SetBrowseNameUri(rtn.Attribute, refnode);
 
                             break;
@@ -867,7 +881,8 @@ namespace MarkdownProcessor
                                 var modellingId = m_modelManager.FindFirstTarget(reference.TargetId, HasModellingRuleNodeId, true);
                                 var modellingRule = m_modelManager.FindNode<UANode>(modellingId);
                                 if (modellingRule != null)
-                                    destInterface.SetAttributeValue("ModellingRule", modellingRule.DecodedBrowseName.Name);
+                                    AddModifyAttribute(destInterface.Attribute, "ModellingRule", "ModellingRuleType", modellingRule.DecodedBrowseName.Name, false, MetaModelName);
+                                
                             }
                         }
                         else if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, HasInterfaceNodeId) == true)
@@ -940,11 +955,11 @@ namespace MarkdownProcessor
                 //    AddBaseNodeClassAttributes(added.Attribute, true);
 
 
-                AddModifyAttribute(added.Attribute, "InverseName", "LocalizedText", Variant.Null);
-                AddModifyAttribute(added.Attribute, "ModellingRule", "ModellingRuleType", Variant.Null, false, MetaModelName);
-                OverrideBooleanAttribute(added.Attribute, "Symmetric", true);
-                OverrideBooleanAttribute(added.Attribute, "IsAbstract", true);
-                OverrideAttribute(added, IsSource, "xs:boolean", true);
+             //   AddModifyAttribute(added.Attribute, "InverseName", "LocalizedText", Variant.Null);
+             //   AddModifyAttribute(added.Attribute, "ModellingRule", "ModellingRuleType", Variant.Null, false, MetaModelName);
+             //   OverrideBooleanAttribute(added.Attribute, "Symmetric", true);
+             //   OverrideBooleanAttribute(added.Attribute, "IsAbstract", true);
+             //   OverrideAttribute(added, IsSource, "xs:boolean", true);
                 OverrideAttribute(added, RefClassConnectsToPath, "xs:string", added.CAEXPath());
 
             }
@@ -1269,10 +1284,16 @@ namespace MarkdownProcessor
                 }
                 Debug.Assert(suc != null);
 
-                ie = suc.CreateClassInstance();  // this crates GUI IDs for all the sub-elements
+                ie = suc.CreateClassInstance();  // this crates GUID IDs for all the sub-elements
                 ie.Name = toAdd.DecodedBrowseName.Name;
                 ie.ID = AmlIDFromNodeId(toAdd.DecodedNodeId);  // decided not to replace the GUID IDs in the top level instances
                 SetBrowseNameUri(ie.Attribute, toAdd);
+                
+                
+                AttributeType a = ie.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
+                a.AttributeDataType = "xs:anyURI";
+
+                
                 ie.Attribute["UaNodeNamespaceUri"].Value = m_modelManager.FindModelUri(toAdd.DecodedNodeId);
 
                 parent.Insert(ie);
