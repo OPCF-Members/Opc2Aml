@@ -804,8 +804,8 @@ namespace MarkdownProcessor
                             break;
                         case NodeClass.Method:
                             AddBaseNodeClassAttributes(rtn, false);
-                            AddModifyAttribute(rtn.Attribute, "Executable", "Boolean", true);
-                            AddModifyAttribute(rtn.Attribute, "UserExecutable", "Boolean", true);
+                            // AddModifyAttribute(rtn.Attribute, "Executable", "Boolean", true);  // #7 removed Executable an UserExecutable
+                            // AddModifyAttribute(rtn.Attribute, "UserExecutable", "Boolean", true);  // #7 removed Executable an UserExecutable
                             SetBrowseNameUri(rtn.Attribute, refnode);
 
                             break;
@@ -1264,8 +1264,8 @@ namespace MarkdownProcessor
                     suc = m_cAEXDocument.FindByPath( BuildLibraryReference( SUCPrefix, MetaModelName, MethodNodeClass)) as SystemUnitFamilyType;
                     Debug.Assert(suc != null);
                     AddBaseNodeClassAttributes(suc, false);
-                    AddModifyAttribute(suc.Attribute, "Executable", "Boolean", true);
-                    AddModifyAttribute(suc.Attribute, "UserExecutable", "Boolean", true);
+                    // AddModifyAttribute(suc.Attribute, "Executable", "Boolean", true);  // #7 removed Executable an UserExecutable
+                    // AddModifyAttribute(suc.Attribute, "UserExecutable", "Boolean", true);  // #7 removed Executable an UserExecutable
                 }
                 Debug.Assert(suc != null);
 
