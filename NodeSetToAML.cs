@@ -1284,9 +1284,16 @@ namespace MarkdownProcessor
                 }
                 Debug.Assert(suc != null);
 
+                // check if instance already exists before adding a new one  #11
+                string id = AmlIDFromNodeId(toAdd.DecodedNodeId);
+                ie = (InternalElementType)m_cAEXDocument.FindByID(id);
+                if (ie != null)
+                    return ie;
+
+
                 ie = suc.CreateClassInstance();  // this crates GUID IDs for all the sub-elements
                 ie.Name = toAdd.DecodedBrowseName.Name;
-                ie.ID = AmlIDFromNodeId(toAdd.DecodedNodeId);  // decided not to replace the GUID IDs in the top level instances
+                ie.ID = id;  // decided not to replace the GUID IDs in the top level instances
                 SetBrowseNameUri(ie.Attribute, toAdd);
                 
                 
