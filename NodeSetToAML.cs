@@ -566,6 +566,8 @@ namespace MarkdownProcessor
             return a;
         }
 
+        private void UpdateEnumerations(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
+        {
             if (utilized.Equals(MultiStateValueDiscreteNodeId))
             {
                 NodeId instanceNodeId = null;
@@ -1092,7 +1094,6 @@ namespace MarkdownProcessor
             AttributeValueRequirementType avrt = new AttributeValueRequirementType(
                 new System.Xml.Linq.XElement(defaultNS + "Constraint"));
 
-            string constraintName = "";
             // This could now include UADataType and UAVariable
             UANode myNode = FindNode<UANode>(nodeId);
             if (myNode.NodeClass == NodeClass.DataType)
