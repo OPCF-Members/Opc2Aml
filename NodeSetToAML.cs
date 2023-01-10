@@ -99,6 +99,8 @@ namespace MarkdownProcessor
         private readonly NodeId HierarchicalNodeId = new NodeId(33, 0);
         private readonly NodeId OrganizesNodeId = new NodeId(35, 0);
         private readonly NodeId TypesFolderNodeId = new NodeId(86, 0);
+        private readonly NodeId TwoStateDiscreteNodeId = new NodeId(2373, 0);
+        private readonly NodeId MultiStateDiscreteNodeId = new NodeId(2376, 0);
         private readonly NodeId MultiStateValueDiscreteNodeId = new NodeId(11238, 0);
         private readonly System.Xml.Linq.XNamespace defaultNS = "http://www.dke.de/CAEX";
         private const string uaNamespaceURI = "http://opcfoundation.org/UA/";
@@ -568,7 +570,8 @@ namespace MarkdownProcessor
 
         private void UpdateEnumerations(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
         {
-            if (utilized.Equals(MultiStateValueDiscreteNodeId))
+            if (utilized.Equals(MultiStateValueDiscreteNodeId) ||
+                utilized.Equals(MultiStateDiscreteNodeId))
             {
                 NodeId instanceNodeId = null;
 
@@ -585,7 +588,8 @@ namespace MarkdownProcessor
                             UAVariable foundVariable = foundNodeId as UAVariable;
                             if (foundVariable != null)
                             {
-                                if (foundVariable.BrowseName == "EnumValues")
+                                if (foundVariable.BrowseName == "EnumValues" || 
+                                    foundVariable.BrowseName == "EnumStrings")
                                 {
                                     instanceNodeId = new NodeId(instanceReference.Value);
                                     break;
@@ -597,15 +601,20 @@ namespace MarkdownProcessor
 
                 if ( instanceNodeId != null )
                 {
-                    InternalElementType noWayDude = internalElement.InternalElement["CannotFind"];
                     InternalElementType enumValuesInternalElement = internalElement.InternalElement["EnumValues"];
+                    InternalElementType enumStringInternalElement = internalElement.InternalElement["EnumStrings"];
 
-                    if (enumValuesInternalElement != null)
+                    if (enumValuesInternalElement != null || enumStringInternalElement != null)
                     {
-                        AttributeType enumValuesValueAttribute = enumValuesInternalElement.Attribute["Value"];
-                        if (enumValuesValueAttribute != null)
+                        InternalElementType workingInternalElement = enumValuesInternalElement;
+                        if ( workingInternalElement == null )
                         {
-                            AttributeTypeType enumValues = enumValuesValueAttribute as AttributeTypeType;
+                            workingInternalElement = enumStringInternalElement;
+                        }
+                        AttributeType valueAttribute = workingInternalElement.Attribute["Value"];
+                        if (valueAttribute != null)
+                        {
+                            AttributeTypeType enumValues = valueAttribute as AttributeTypeType;
 
                             if (enumValues != null)
                             {
