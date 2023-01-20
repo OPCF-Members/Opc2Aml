@@ -571,9 +571,10 @@ namespace MarkdownProcessor
         private void UpdateEnumerations(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
         {
             if (utilized.Equals(MultiStateValueDiscreteNodeId) ||
-                utilized.Equals(MultiStateDiscreteNodeId))
+                utilized.Equals(MultiStateDiscreteNodeId) ||
+                utilized.Equals(TwoStateDiscreteNodeId))
             {
-                NodeId instanceNodeId = null;
+                List<string> referenceNames = new List<string>();
 
                 var instanceNode = FindNode<UANode>(actual);
 
@@ -581,7 +582,6 @@ namespace MarkdownProcessor
                 {
                     if (instanceReference.IsForward)
                     {
-                        NodeId findNodeId = new NodeId(instanceReference.Value);
                         UANode foundNodeId = FindNode<UANode>(new NodeId(instanceReference.Value));
                         if (foundNodeId.NodeClass == NodeClass.Variable)
                         {
@@ -591,41 +591,45 @@ namespace MarkdownProcessor
                                 if (foundVariable.BrowseName == "EnumValues" || 
                                     foundVariable.BrowseName == "EnumStrings")
                                 {
-                                    instanceNodeId = new NodeId(instanceReference.Value);
+                                    referenceNames.Add(foundVariable.BrowseName);
                                     break;
+                                }
+
+                                if (foundVariable.BrowseName == "TrueState" ||
+                                    foundVariable.BrowseName == "FalseState")
+                                {
+                                    referenceNames.Add(foundVariable.BrowseName);
+                                    if (referenceNames.Count >= 2)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
-                if ( instanceNodeId != null )
+                foreach (string referenceName in referenceNames)
                 {
-                    InternalElementType enumValuesInternalElement = internalElement.InternalElement["EnumValues"];
-                    InternalElementType enumStringInternalElement = internalElement.InternalElement["EnumStrings"];
+                    InternalElementType referenceElement = internalElement.InternalElement[referenceName];
 
-                    if (enumValuesInternalElement != null || enumStringInternalElement != null)
+                    if (referenceElement != null)
                     {
-                        InternalElementType workingInternalElement = enumValuesInternalElement;
-                        if ( workingInternalElement == null )
-                        {
-                            workingInternalElement = enumStringInternalElement;
-                        }
-                        AttributeType valueAttribute = workingInternalElement.Attribute["Value"];
+                        AttributeType valueAttribute = referenceElement.Attribute["Value"];
                         if (valueAttribute != null)
                         {
-                            AttributeTypeType enumValues = valueAttribute as AttributeTypeType;
+                            AttributeTypeType value = valueAttribute as AttributeTypeType;
 
-                            if (enumValues != null)
+                            if (value != null)
                             {
-                                ProcessEnumerations(ref enumValues, actual);
+                                ProcessEnumerations(ref value, actual);
                             }
                         }
                     }
                 }
+
             }
         }
-
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType, Variant val, bool bListOf = false)
         {
@@ -1098,6 +1102,8 @@ namespace MarkdownProcessor
             return rtn;
         }
 
+
+        // Archie This can be reworked to be more efficient
         private void ProcessEnumerations(ref AttributeTypeType att, NodeId nodeId)
         {
             AttributeValueRequirementType avrt = new AttributeValueRequirementType(
@@ -1127,20 +1133,25 @@ namespace MarkdownProcessor
                 var res = avrt.New_NominalType();
 
                 NodeId EnumStringsPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumStrings");
-                NodeId EnumValuesPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumValues");
                 if (EnumStringsPropertyId != null)
                 {
                     att.AttributeDataType = "xs:string";
                     var EnumStringsPropertyNode = FindNode<UANode>(EnumStringsPropertyId);
                     var EnumStrings = EnumStringsPropertyNode as UAVariable;
                     Opc.Ua.LocalizedText[] EnumValues = EnumStrings.DecodedValue.Value as Opc.Ua.LocalizedText[];
-                    foreach (var EnumValue in EnumValues)
+                    if (EnumValues != null)
                     {
-                        res.RequiredValue.Append(EnumValue.Text);
+                        foreach (var EnumValue in EnumValues)
+                        {
+                            res.RequiredValue.Append(EnumValue.Text);
+                        }
+                        var res2 = att.Constraint.Insert(avrt);
+                        return;
                     }
-                    var res2 = att.Constraint.Insert(avrt);
                 }
-                else if (EnumValuesPropertyId != null)
+
+                NodeId EnumValuesPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumValues");
+                if (EnumValuesPropertyId != null)
                 {
                     att.AttributeDataType = "xs:string";
                     var EnumValuesPropertyNode = FindNode<UANode>(EnumValuesPropertyId);
@@ -1155,6 +1166,37 @@ namespace MarkdownProcessor
                             res.RequiredValue.Append(ev.DisplayName.Text);
                         }
                         var res2 = att.Constraint.Insert(avrt);
+                        return;
+                    }
+                }
+
+                NodeId TwoStateTruePropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "TrueState");
+                if (TwoStateTruePropertyId != null)
+                {
+                    att.AttributeDataType = "xs:string";
+                    var TwoStateTruePropertyNode = FindNode<UANode>(TwoStateTruePropertyId);
+                    var TwoStateTrueValue = TwoStateTruePropertyNode as UAVariable;
+
+
+                    var TwoStateTrueVal = TwoStateTrueValue.DecodedValue.Value as Opc.Ua.LocalizedText;
+                    if (TwoStateTrueVal != null)
+                    {
+                        att.Value = TwoStateTrueVal.Text;
+                    }
+                }
+
+                NodeId TwoStateFalsePropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "FalseState");
+                if (TwoStateFalsePropertyId != null)
+                {
+                    att.AttributeDataType = "xs:string";
+                    var TwoStateFalsePropertyNode = FindNode<UANode>(TwoStateFalsePropertyId);
+                    var TwoStateFalseValue = TwoStateFalsePropertyNode as UAVariable;
+
+
+                    var TwoStateFalseVal = TwoStateFalseValue.DecodedValue.Value as Opc.Ua.LocalizedText;
+                    if (TwoStateFalseVal != null)
+                    {
+                        att.Value = TwoStateFalseVal.Text;
                     }
                 }
             }
