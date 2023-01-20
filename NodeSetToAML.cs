@@ -539,29 +539,135 @@ namespace MarkdownProcessor
             }
 
             a.RecreateAttributeInstance(at);
-            if (bListOf == false && val.TypeInfo != null)
+            if ( val.TypeInfo != null)
             {
-                switch (val.TypeInfo.BuiltInType)  // TODO -- consider supporting setting values for more complicated types (enums, structures, Qualified Names ...) and arrays
+                if (bListOf == true)
                 {
-                    case BuiltInType.Boolean:
-                    case BuiltInType.Byte:
-                    case BuiltInType.SByte:
-                    case BuiltInType.Int16:
-                    case BuiltInType.Int32:
-                    case BuiltInType.Int64:
-                    case BuiltInType.DateTime:
-                    case BuiltInType.String:
-                    case BuiltInType.Guid:
-                    case BuiltInType.Double:
-                    case BuiltInType.Float:
-                    case BuiltInType.Integer:
-                    case BuiltInType.Number:
-                    case BuiltInType.UInt16:
-                    case BuiltInType.UInt32:
-                    case BuiltInType.UInt64:
-                    case BuiltInType.UInteger:
-                        a.DefaultAttributeValue = a.AttributeValue = val;
-                        break;
+                    string nodeName = "";
+                    string referenceName = "";
+                    CAEXWrapper reference = seq.CAEXOwner;
+                    if (reference != null )
+                    {
+                        referenceName = reference.Name();
+                        CAEXWrapper parentOfEnumValues = reference.CAEXParent;
+                        if (parentOfEnumValues != null)
+                        {
+                            nodeName = parentOfEnumValues.Name();
+                        }
+                    }
+
+                    if ( refDataType == "EnumValueType" && referenceName == "EnumValues" )
+                    {
+                        AttributeTypeType attributeType = a as AttributeTypeType;
+                        if (attributeType != null)
+                        {
+                            AttributeValueRequirementType avrt = new AttributeValueRequirementType(
+                                new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                            avrt.Name = nodeName + " Constraint";
+                            attributeType.AttributeDataType = "xs:string";
+                            NominalScaledTypeType scaledType = avrt.New_NominalType();
+
+                            var values = val.Value as Opc.Ua.ExtensionObject[];
+                            if (values != null)
+                            {
+                                foreach (var value in values)
+                                {
+                                    var enumValueType = value.Body as Opc.Ua.EnumValueType;
+                                    if (enumValueType != null)
+                                    {
+                                        scaledType.RequiredValue.Append(enumValueType.DisplayName.Text);
+                                    }
+                                }
+                                attributeType.Constraint.Insert(avrt);
+                            }
+                        }
+                        return a;
+                    }
+
+                    if (refDataType == "LocalizedText" && referenceName == "EnumStrings")
+                    {
+                        AttributeTypeType attributeType = a as AttributeTypeType;
+                        if (attributeType != null)
+                        {
+                            AttributeValueRequirementType avrt = new AttributeValueRequirementType(
+                                new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                            avrt.Name = nodeName + " Constraint";
+                            attributeType.AttributeDataType = "xs:string";
+                            NominalScaledTypeType scaledType = avrt.New_NominalType();
+
+                            var values = val.Value as Opc.Ua.LocalizedText[];
+                            if (values != null)
+                            {
+                                foreach (var value in values)
+                                {
+                                    scaledType.RequiredValue.Append(value.Text);
+                                }
+                                var res2 = attributeType.Constraint.Insert(avrt);
+                            }
+                        }
+
+                        return a;
+                    }
+
+                    if ( refDataType == "Argument")
+                    {
+                        var values = val.Value as Opc.Ua.ExtensionObject[];
+                        if (values != null)
+                        {
+                            foreach (var value in values)
+                            {
+                                var argument = value.Body as Opc.Ua.Argument;
+                                if (argument != null)
+                                {
+                                    Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
+                                        " Method Name " + nodeName + " " + referenceName + " " + 
+                                        argument.Name + " Type " + argument.DataType.ToString());
+
+                                }
+                            }
+                        }
+
+                        return a;
+                    }
+
+                    Debug.WriteLine("Unhandled " + name + ":" + refDataType + " " +
+                        " Node Name " + nodeName + " " + referenceName + " " +
+                        " Type " + val.TypeInfo.BuiltInType.ToString());
+                }
+                else
+                {
+                    switch (val.TypeInfo.BuiltInType)  // TODO -- consider supporting setting values for more complicated types (enums, structures, Qualified Names ...) and arrays
+                    {
+                        case BuiltInType.Boolean:
+                        case BuiltInType.Byte:
+                        case BuiltInType.SByte:
+                        case BuiltInType.Int16:
+                        case BuiltInType.Int32:
+                        case BuiltInType.Int64:
+                        case BuiltInType.DateTime:
+                        case BuiltInType.String:
+                        case BuiltInType.Guid:
+                        case BuiltInType.Double:
+                        case BuiltInType.Float:
+                        case BuiltInType.Integer:
+                        case BuiltInType.Number:
+                        case BuiltInType.UInt16:
+                        case BuiltInType.UInt32:
+                        case BuiltInType.UInt64:
+                        case BuiltInType.UInteger:
+                            a.DefaultAttributeValue = a.AttributeValue = val;
+                            break;
+
+                        case BuiltInType.LocalizedText:
+                        {
+                            Opc.Ua.LocalizedText localizedText = (Opc.Ua.LocalizedText)val.Value;
+                            if ( localizedText != null && localizedText.Text != null)
+                            {
+                                a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
+                            }
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -928,7 +1034,8 @@ namespace MarkdownProcessor
                                     AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
                                     ie.SetAttributeValue("ValueRank", varnode.ValueRank);
                                     ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
-
+                                    
+                                    if(!TypeDefNodeId.Equals(reference.TargetId))
                                     {
                                         UpdateEnumerations(ref ie, TypeDefNodeId, reference.TargetId);
                                     }
