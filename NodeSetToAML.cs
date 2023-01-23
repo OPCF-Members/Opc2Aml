@@ -676,9 +676,8 @@ namespace MarkdownProcessor
 
         private void UpdateEnumerations(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
         {
-            if (utilized.Equals(MultiStateValueDiscreteNodeId) ||
-                utilized.Equals(MultiStateDiscreteNodeId) ||
-                utilized.Equals(TwoStateDiscreteNodeId))
+
+            if (utilized.Equals(TwoStateDiscreteNodeId))
             {
                 List<string> referenceNames = new List<string>();
 
@@ -694,13 +693,6 @@ namespace MarkdownProcessor
                             UAVariable foundVariable = foundNodeId as UAVariable;
                             if (foundVariable != null)
                             {
-                                if (foundVariable.BrowseName == "EnumValues" || 
-                                    foundVariable.BrowseName == "EnumStrings")
-                                {
-                                    referenceNames.Add(foundVariable.BrowseName);
-                                    break;
-                                }
-
                                 if (foundVariable.BrowseName == "TrueState" ||
                                     foundVariable.BrowseName == "FalseState")
                                 {
@@ -724,6 +716,60 @@ namespace MarkdownProcessor
                         AttributeType valueAttribute = referenceElement.Attribute["Value"];
                         if (valueAttribute != null)
                         {
+                            NodeId propertyId = m_modelManager.FindFirstTarget(actual, HasPropertyNodeId, true, referenceName);
+                            if (propertyId != null)
+                            {
+                                valueAttribute.AttributeDataType = "xs:string";
+                                var propertyNode = FindNode<UANode>(propertyId);
+                                var propertyNodeValue = propertyNode as UAVariable;
+
+                                var localizedText = propertyNodeValue.DecodedValue.Value as Opc.Ua.LocalizedText;
+                                if (localizedText != null)
+                                {
+                                    valueAttribute.Value = localizedText.Text;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if (utilized.Equals(MultiStateValueDiscreteNodeId) ||
+                utilized.Equals(MultiStateDiscreteNodeId))
+            {
+                string referenceName = "";
+
+                var instanceNode = FindNode<UANode>(actual);
+
+                foreach (var instanceReference in instanceNode.References)
+                {
+                    if (instanceReference.IsForward)
+                    {
+                        UANode foundNodeId = FindNode<UANode>(new NodeId(instanceReference.Value));
+                        if (foundNodeId.NodeClass == NodeClass.Variable)
+                        {
+                            UAVariable foundVariable = foundNodeId as UAVariable;
+                            if (foundVariable != null)
+                            {
+                                if (foundVariable.BrowseName == "EnumValues" || 
+                                    foundVariable.BrowseName == "EnumStrings")
+                                {
+                                    referenceName = foundVariable.BrowseName;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if ( referenceName.Length > 0 )
+                {
+                    InternalElementType referenceElement = internalElement.InternalElement[referenceName];
+
+                    if (referenceElement != null)
+                    {
+                        AttributeType valueAttribute = referenceElement.Attribute["Value"];
+                        if (valueAttribute != null)
+                        {
                             AttributeTypeType value = valueAttribute as AttributeTypeType;
 
                             if (value != null)
@@ -733,7 +779,6 @@ namespace MarkdownProcessor
                         }
                     }
                 }
-
             }
         }
 
@@ -1293,6 +1338,7 @@ namespace MarkdownProcessor
                     {
                         att.Value = TwoStateTrueVal.Text;
                     }
+                    return;
                 }
 
                 NodeId TwoStateFalsePropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "FalseState");
@@ -1308,6 +1354,7 @@ namespace MarkdownProcessor
                     {
                         att.Value = TwoStateFalseVal.Text;
                     }
+                    return;
                 }
             }
         }

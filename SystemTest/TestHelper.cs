@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 
 namespace SystemTest
 {
@@ -58,7 +59,7 @@ namespace SystemTest
         {
             string systemTestDirectory = Directory.GetCurrentDirectory();
             DirectoryInfo systemTestDirectoryInfo = new DirectoryInfo(systemTestDirectory);
-            string testFileDirectory = systemTestDirectoryInfo.FullName + "\\TestFiles";
+            string testFileDirectory = systemTestDirectoryInfo.FullName + "\\NodeSetFiles";
             return new DirectoryInfo(testFileDirectory);
         }
 
@@ -151,6 +152,13 @@ namespace SystemTest
         {
             DirectoryInfo outputDirectoryInfo = GetOpc2AmlDirectory();
             return new DirectoryInfo(Path.Combine(outputDirectoryInfo.FullName, ExtractPrefix + xmlFileName));
+        }
+
+        static public List<FileInfo> GetAmlxFiles()
+        {
+            DirectoryInfo outputDirectoryInfo = GetOpc2AmlDirectory();
+
+            return outputDirectoryInfo.GetFiles("*.amlx").ToList<FileInfo>();
         }
 
         static public List<FileInfo> ExtractAmlxFiles(List<string> testFiles)
