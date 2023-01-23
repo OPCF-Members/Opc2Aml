@@ -1210,11 +1210,9 @@ namespace MarkdownProcessor
         }
 
 
-        // Archie This can be reworked to be more efficient
         private void ProcessEnumerations(ref AttributeTypeType att, NodeId nodeId)
         {
-            AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+            string browseName = "";
 
             // This could now include UADataType and UAVariable
             UANode myNode = FindNode<UANode>(nodeId);
@@ -1223,7 +1221,7 @@ namespace MarkdownProcessor
                 NodeSet.UADataType myDataTypeNode = myNode as NodeSet.UADataType;
                 if (myDataTypeNode != null)
                 {
-                    avrt.Name = myDataTypeNode.DecodedBrowseName.Name + " Constraint";
+                    browseName = myDataTypeNode.DecodedBrowseName.Name + " Constraint";
                 }
             }
             else if (myNode.NodeClass == NodeClass.Variable)
@@ -1231,17 +1229,19 @@ namespace MarkdownProcessor
                 UAVariable myVariableNode = myNode as UAVariable;
                 if (myVariableNode != null)
                 {
-                    avrt.Name = myVariableNode.DecodedBrowseName.Name + " Constraint";
+                    browseName = myVariableNode.DecodedBrowseName.Name + " Constraint";
                 }
             }
 
-            if (avrt.Name.Length > 0)
+            if ( browseName.Length > 0 )
             {
-                var res = avrt.New_NominalType();
-
                 NodeId EnumStringsPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumStrings");
                 if (EnumStringsPropertyId != null)
                 {
+                    AttributeValueRequirementType avrt = new AttributeValueRequirementType(
+                        new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                    avrt.Name = browseName + " Constraint";
+                    var res = avrt.New_NominalType();
                     att.AttributeDataType = "xs:string";
                     var EnumStringsPropertyNode = FindNode<UANode>(EnumStringsPropertyId);
                     var EnumStrings = EnumStringsPropertyNode as UAVariable;
@@ -1260,6 +1260,10 @@ namespace MarkdownProcessor
                 NodeId EnumValuesPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumValues");
                 if (EnumValuesPropertyId != null)
                 {
+                    AttributeValueRequirementType avrt = new AttributeValueRequirementType(
+                        new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                    avrt.Name = browseName + " Constraint";
+                    var res = avrt.New_NominalType();
                     att.AttributeDataType = "xs:string";
                     var EnumValuesPropertyNode = FindNode<UANode>(EnumValuesPropertyId);
                     var EnumValues = EnumValuesPropertyNode as UAVariable;
@@ -1283,7 +1287,6 @@ namespace MarkdownProcessor
                     att.AttributeDataType = "xs:string";
                     var TwoStateTruePropertyNode = FindNode<UANode>(TwoStateTruePropertyId);
                     var TwoStateTrueValue = TwoStateTruePropertyNode as UAVariable;
-
 
                     var TwoStateTrueVal = TwoStateTrueValue.DecodedValue.Value as Opc.Ua.LocalizedText;
                     if (TwoStateTrueVal != null)
