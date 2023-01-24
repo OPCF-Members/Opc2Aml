@@ -539,6 +539,7 @@ namespace MarkdownProcessor
             }
 
             a.RecreateAttributeInstance(at);
+
             if ( val.TypeInfo != null)
             {
                 if (bListOf == true)
@@ -546,93 +547,129 @@ namespace MarkdownProcessor
                     string nodeName = "";
                     string referenceName = "";
                     CAEXWrapper reference = seq.CAEXOwner;
-                    if (reference != null )
+                    if (reference != null)
                     {
                         referenceName = reference.Name();
-                        CAEXWrapper parentOfEnumValues = reference.CAEXParent;
-                        if (parentOfEnumValues != null)
+                        CAEXWrapper referenceParent = reference.CAEXParent;
+                        if (referenceParent != null)
                         {
-                            nodeName = parentOfEnumValues.Name();
+                            nodeName = referenceParent.Name();
                         }
                     }
 
-                    if ( refDataType == "EnumValueType" && referenceName == "EnumValues" )
+                    switch (val.TypeInfo.BuiltInType)
                     {
-                        AttributeTypeType attributeType = a as AttributeTypeType;
-                        if (attributeType != null)
-                        {
-                            AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                                new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                            avrt.Name = nodeName + " Constraint";
-                            attributeType.AttributeDataType = "xs:string";
-                            NominalScaledTypeType scaledType = avrt.New_NominalType();
+                        case BuiltInType.Boolean:
+                        case BuiltInType.Byte:
+                        case BuiltInType.SByte:
+                        case BuiltInType.Int16:
+                        case BuiltInType.Int32:
+                        case BuiltInType.Int64:
+                        case BuiltInType.DateTime:
+                        case BuiltInType.String:
+                        case BuiltInType.Guid:
+                        case BuiltInType.Double:
+                        case BuiltInType.Float:
+                        case BuiltInType.Integer:
+                        case BuiltInType.Number:
+                        case BuiltInType.UInt16:
+                        case BuiltInType.UInt32:
+                        case BuiltInType.UInt64:
+                        case BuiltInType.UInteger:
+                            a.DefaultAttributeValue = a.AttributeValue = val;
+                            break;
 
-                            var values = val.Value as Opc.Ua.ExtensionObject[];
-                            if (values != null)
+                        case BuiltInType.LocalizedText:
                             {
-                                foreach (var value in values)
+                                if (refDataType == "LocalizedText" && referenceName == "EnumStrings")
                                 {
-                                    var enumValueType = value.Body as Opc.Ua.EnumValueType;
-                                    if (enumValueType != null)
+                                    AttributeTypeType attributeType = a as AttributeTypeType;
+                                    if (attributeType != null)
                                     {
-                                        scaledType.RequiredValue.Append(enumValueType.DisplayName.Text);
+                                        AttributeValueRequirementType avrt = new AttributeValueRequirementType(
+                                            new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                                        avrt.Name = nodeName + " Constraint";
+                                        attributeType.AttributeDataType = "xs:string";
+                                        NominalScaledTypeType scaledType = avrt.New_NominalType();
+
+                                        var values = val.Value as Opc.Ua.LocalizedText[];
+                                        if (values != null)
+                                        {
+                                            foreach (var value in values)
+                                            {
+                                                scaledType.RequiredValue.Append(value.Text);
+                                            }
+                                            var res2 = attributeType.Constraint.Insert(avrt);
+                                        }
                                     }
                                 }
-                                attributeType.Constraint.Insert(avrt);
-                            }
-                        }
-                        return a;
-                    }
-
-                    if (refDataType == "LocalizedText" && referenceName == "EnumStrings")
-                    {
-                        AttributeTypeType attributeType = a as AttributeTypeType;
-                        if (attributeType != null)
-                        {
-                            AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                                new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                            avrt.Name = nodeName + " Constraint";
-                            attributeType.AttributeDataType = "xs:string";
-                            NominalScaledTypeType scaledType = avrt.New_NominalType();
-
-                            var values = val.Value as Opc.Ua.LocalizedText[];
-                            if (values != null)
-                            {
-                                foreach (var value in values)
+                                else
                                 {
-                                    scaledType.RequiredValue.Append(value.Text);
+                                    // Do Something else
                                 }
-                                var res2 = attributeType.Constraint.Insert(avrt);
+
+                                break;
                             }
-                        }
 
-                        return a;
-                    }
-
-                    if ( refDataType == "Argument")
-                    {
-                        var values = val.Value as Opc.Ua.ExtensionObject[];
-                        if (values != null)
-                        {
-                            foreach (var value in values)
+                        case BuiltInType.ExtensionObject:
                             {
-                                var argument = value.Body as Opc.Ua.Argument;
-                                if (argument != null)
+                                if (refDataType == "EnumValueType" && referenceName == "EnumValues")
                                 {
-                                    Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
-                                        " Method Name " + nodeName + " " + referenceName + " " + 
-                                        argument.Name + " Type " + argument.DataType.ToString());
+                                    AttributeTypeType attributeType = a as AttributeTypeType;
+                                    if (attributeType != null)
+                                    {
+                                        AttributeValueRequirementType avrt = new AttributeValueRequirementType(
+                                            new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                                        avrt.Name = nodeName + " Constraint";
+                                        attributeType.AttributeDataType = "xs:string";
+                                        NominalScaledTypeType scaledType = avrt.New_NominalType();
 
+                                        var values = val.Value as Opc.Ua.ExtensionObject[];
+                                        if (values != null)
+                                        {
+                                            foreach (var value in values)
+                                            {
+                                                var enumValueType = value.Body as Opc.Ua.EnumValueType;
+                                                if (enumValueType != null)
+                                                {
+                                                    scaledType.RequiredValue.Append(enumValueType.DisplayName.Text);
+                                                }
+                                            }
+                                            attributeType.Constraint.Insert(avrt);
+                                        }
+                                    }
+                                } 
+                                else if (refDataType == "Argument")
+                                {
+                                    var values = val.Value as Opc.Ua.ExtensionObject[];
+                                    if (values != null)
+                                    {
+                                        foreach (var value in values)
+                                        {
+                                            var argument = value.Body as Opc.Ua.Argument;
+                                            if (argument != null)
+                                            {
+                                                Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
+                                                    " Method Name " + nodeName + " " + referenceName + " " +
+                                                    argument.Name + " Type " + argument.DataType.ToString());
+
+                                            }
+                                        }
+                                    }
+
+                                    return a;
                                 }
+
+                                break;
                             }
-                        }
 
-                        return a;
+                        default:
+                            Debug.WriteLine("Unhandled " + name + ":" + refDataType + " " +
+                                " Node Name " + nodeName + " " + referenceName + " " +
+                                " Type " + val.TypeInfo.BuiltInType.ToString());
+
+                            break;
                     }
-
-                    Debug.WriteLine("Unhandled " + name + ":" + refDataType + " " +
-                        " Node Name " + nodeName + " " + referenceName + " " +
-                        " Type " + val.TypeInfo.BuiltInType.ToString());
                 }
                 else
                 {
@@ -674,10 +711,10 @@ namespace MarkdownProcessor
             return a;
         }
 
-        private void UpdateEnumerations(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
-        {
-
-            if (utilized.Equals(TwoStateDiscreteNodeId))
+        private void UpdateDerived(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
+        { 
+            // This should theoretically do all of it.  and run it through a consistent path.
+            if (!utilized.Equals(actual))
             {
                 List<string> referenceNames = new List<string>();
 
@@ -693,15 +730,7 @@ namespace MarkdownProcessor
                             UAVariable foundVariable = foundNodeId as UAVariable;
                             if (foundVariable != null)
                             {
-                                if (foundVariable.BrowseName == "TrueState" ||
-                                    foundVariable.BrowseName == "FalseState")
-                                {
-                                    referenceNames.Add(foundVariable.BrowseName);
-                                    if (referenceNames.Count >= 2)
-                                    {
-                                        break;
-                                    }
-                                }
+                                referenceNames.Add(foundVariable.BrowseName);
                             }
                         }
                     }
@@ -719,64 +748,26 @@ namespace MarkdownProcessor
                             NodeId propertyId = m_modelManager.FindFirstTarget(actual, HasPropertyNodeId, true, referenceName);
                             if (propertyId != null)
                             {
-                                valueAttribute.AttributeDataType = "xs:string";
                                 var propertyNode = FindNode<UANode>(propertyId);
                                 var propertyNodeValue = propertyNode as UAVariable;
 
-                                var localizedText = propertyNodeValue.DecodedValue.Value as Opc.Ua.LocalizedText;
-                                if (localizedText != null)
+                                if ( propertyNodeValue != null)
                                 {
-                                    valueAttribute.Value = localizedText.Text;
+                                    bool bListOf = (propertyNodeValue.ValueRank == 1);
+
+                                    AddModifyAttribute( referenceElement.Attribute, 
+                                        "Value",
+                                        propertyNodeValue.DecodedDataType, 
+                                        propertyNodeValue.DecodedValue, 
+                                        bListOf );
                                 }
                             }
                         }
                     }
-                }
-            }
-            else if (utilized.Equals(MultiStateValueDiscreteNodeId) ||
-                utilized.Equals(MultiStateDiscreteNodeId))
-            {
-                string referenceName = "";
-
-                var instanceNode = FindNode<UANode>(actual);
-
-                foreach (var instanceReference in instanceNode.References)
-                {
-                    if (instanceReference.IsForward)
+                    else
                     {
-                        UANode foundNodeId = FindNode<UANode>(new NodeId(instanceReference.Value));
-                        if (foundNodeId.NodeClass == NodeClass.Variable)
-                        {
-                            UAVariable foundVariable = foundNodeId as UAVariable;
-                            if (foundVariable != null)
-                            {
-                                if (foundVariable.BrowseName == "EnumValues" || 
-                                    foundVariable.BrowseName == "EnumStrings")
-                                {
-                                    referenceName = foundVariable.BrowseName;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if ( referenceName.Length > 0 )
-                {
-                    InternalElementType referenceElement = internalElement.InternalElement[referenceName];
-
-                    if (referenceElement != null)
-                    {
-                        AttributeType valueAttribute = referenceElement.Attribute["Value"];
-                        if (valueAttribute != null)
-                        {
-                            AttributeTypeType value = valueAttribute as AttributeTypeType;
-
-                            if (value != null)
-                            {
-                                ProcessEnumerations(ref value, actual);
-                            }
-                        }
+                        // This is where my Class ValueAsType should go.
+                        Debug.WriteLine("Update Derived cannot find " + referenceName + " for  " + internalElement.Name);
                     }
                 }
             }
@@ -1080,10 +1071,7 @@ namespace MarkdownProcessor
                                     ie.SetAttributeValue("ValueRank", varnode.ValueRank);
                                     ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
                                     
-                                    if(!TypeDefNodeId.Equals(reference.TargetId))
-                                    {
-                                        UpdateEnumerations(ref ie, TypeDefNodeId, reference.TargetId);
-                                    }
+                                    UpdateDerived( ref ie, TypeDefNodeId, reference.TargetId );
                                 }
                                 else if (targetNode.NodeClass == NodeClass.Method)
                                     ie.RefBaseSystemUnitPath = BuildLibraryReference(SUCPrefix, MetaModelName, MethodNodeClass);
@@ -1257,105 +1245,43 @@ namespace MarkdownProcessor
 
         private void ProcessEnumerations(ref AttributeTypeType att, NodeId nodeId)
         {
-            string browseName = "";
-
-            // This could now include UADataType and UAVariable
-            UANode myNode = FindNode<UANode>(nodeId);
-            if (myNode.NodeClass == NodeClass.DataType)
+            NodeId EnumStringsPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumStrings");
+            if (EnumStringsPropertyId != null)
             {
-                NodeSet.UADataType myDataTypeNode = myNode as NodeSet.UADataType;
-                if (myDataTypeNode != null)
+                att.AttributeDataType = "xs:string";
+                var EnumStringsPropertyNode = FindNode<UANode>(EnumStringsPropertyId);
+                var EnumStrings = EnumStringsPropertyNode as UAVariable;
+                AttributeValueRequirementType avrt = new AttributeValueRequirementType(new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                var MyNode = FindNode<UANode>(nodeId) as NodeSet.UADataType;
+                avrt.Name = MyNode.DecodedBrowseName.Name + " Constraint";
+                var res = avrt.New_NominalType();
+                Opc.Ua.LocalizedText[] EnumValues = EnumStrings.DecodedValue.Value as Opc.Ua.LocalizedText[];
+                foreach (var EnumValue in EnumValues)
                 {
-                    browseName = myDataTypeNode.DecodedBrowseName.Name + " Constraint";
+                    res.RequiredValue.Append(EnumValue.Text);
                 }
-            }
-            else if (myNode.NodeClass == NodeClass.Variable)
-            {
-                UAVariable myVariableNode = myNode as UAVariable;
-                if (myVariableNode != null)
-                {
-                    browseName = myVariableNode.DecodedBrowseName.Name + " Constraint";
-                }
+                var res2 = att.Constraint.Insert(avrt);
+                return;
             }
 
-            if ( browseName.Length > 0 )
+            NodeId EnumValuesPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumValues");
+            if (EnumValuesPropertyId != null)
             {
-                NodeId EnumStringsPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumStrings");
-                if (EnumStringsPropertyId != null)
+                att.AttributeDataType = "xs:string";
+                var EnumValuesPropertyNode = FindNode<UANode>(EnumValuesPropertyId);
+                var EnumValues = EnumValuesPropertyNode as UAVariable;
+                AttributeValueRequirementType avrt = new AttributeValueRequirementType(new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                var MyNode = FindNode<UANode>(nodeId) as NodeSet.UADataType;
+                avrt.Name = MyNode.DecodedBrowseName.Name + " Constraint";
+                var res = avrt.New_NominalType();
+
+                var EnumVals = EnumValues.DecodedValue.Value as Opc.Ua.ExtensionObject[];
+                foreach (var EnumValue in EnumVals)
                 {
-                    AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                        new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                    avrt.Name = browseName + " Constraint";
-                    var res = avrt.New_NominalType();
-                    att.AttributeDataType = "xs:string";
-                    var EnumStringsPropertyNode = FindNode<UANode>(EnumStringsPropertyId);
-                    var EnumStrings = EnumStringsPropertyNode as UAVariable;
-                    Opc.Ua.LocalizedText[] EnumValues = EnumStrings.DecodedValue.Value as Opc.Ua.LocalizedText[];
-                    if (EnumValues != null)
-                    {
-                        foreach (var EnumValue in EnumValues)
-                        {
-                            res.RequiredValue.Append(EnumValue.Text);
-                        }
-                        var res2 = att.Constraint.Insert(avrt);
-                        return;
-                    }
+                    var ev = EnumValue.Body as Opc.Ua.EnumValueType;
+                    res.RequiredValue.Append(ev.DisplayName.Text);
                 }
-
-                NodeId EnumValuesPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumValues");
-                if (EnumValuesPropertyId != null)
-                {
-                    AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                        new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                    avrt.Name = browseName + " Constraint";
-                    var res = avrt.New_NominalType();
-                    att.AttributeDataType = "xs:string";
-                    var EnumValuesPropertyNode = FindNode<UANode>(EnumValuesPropertyId);
-                    var EnumValues = EnumValuesPropertyNode as UAVariable;
-
-                    var EnumVals = EnumValues.DecodedValue.Value as Opc.Ua.ExtensionObject[];
-                    if (EnumVals != null)
-                    {
-                        foreach (var EnumValue in EnumVals)
-                        {
-                            var ev = EnumValue.Body as Opc.Ua.EnumValueType;
-                            res.RequiredValue.Append(ev.DisplayName.Text);
-                        }
-                        var res2 = att.Constraint.Insert(avrt);
-                        return;
-                    }
-                }
-
-                NodeId TwoStateTruePropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "TrueState");
-                if (TwoStateTruePropertyId != null)
-                {
-                    att.AttributeDataType = "xs:string";
-                    var TwoStateTruePropertyNode = FindNode<UANode>(TwoStateTruePropertyId);
-                    var TwoStateTrueValue = TwoStateTruePropertyNode as UAVariable;
-
-                    var TwoStateTrueVal = TwoStateTrueValue.DecodedValue.Value as Opc.Ua.LocalizedText;
-                    if (TwoStateTrueVal != null)
-                    {
-                        att.Value = TwoStateTrueVal.Text;
-                    }
-                    return;
-                }
-
-                NodeId TwoStateFalsePropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "FalseState");
-                if (TwoStateFalsePropertyId != null)
-                {
-                    att.AttributeDataType = "xs:string";
-                    var TwoStateFalsePropertyNode = FindNode<UANode>(TwoStateFalsePropertyId);
-                    var TwoStateFalseValue = TwoStateFalsePropertyNode as UAVariable;
-
-
-                    var TwoStateFalseVal = TwoStateFalseValue.DecodedValue.Value as Opc.Ua.LocalizedText;
-                    if (TwoStateFalseVal != null)
-                    {
-                        att.Value = TwoStateFalseVal.Text;
-                    }
-                    return;
-                }
+                var res2 = att.Constraint.Insert(avrt);
             }
         }
 
