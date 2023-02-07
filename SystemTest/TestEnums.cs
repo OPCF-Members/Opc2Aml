@@ -17,48 +17,19 @@ using Newtonsoft.Json.Linq;
 namespace SystemTest
 {
     [TestClass]
-    public class TestEnums
+    public class TestDisplay
     {
-        static List<string> TestFiles;
-        static List<FileInfo> AmlxFiles;
-        static List<FileInfo> AmlFiles;
-
-        private const string RootName = "ns=http#\\\\opcfoundation.org\\UA\\FX\\AML\\TESTING;i=";
-
         CAEXDocument m_document = null;
         AutomationMLContainer m_container = null;
 
         #region Initialize
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext testContext)
-        {
-            const bool EXECUTE_CONVERSION = true;
-
-            TestFiles = TestHelper.GetTestFileNames();
-            if (EXECUTE_CONVERSION)
-            {
-                TestHelper.PrepareUnconvertedXml(TestFiles);
-                System.Threading.Thread.Sleep(1000);
-                TestHelper.Execute();
-                AmlFiles = TestHelper.ExtractAmlxFiles(TestFiles);
-                Assert.AreNotEqual(0, AmlFiles.Count, "Unable to get Converted Aml files");
-            }
-            AmlxFiles = TestHelper.GetAmlxFiles();
-            Assert.AreNotEqual(0, AmlxFiles.Count, "Unable to get Converted Amlx files");
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup()
-        {
-        }
 
         [TestInitialize]
         public void TestInitialize()
         {
             if (m_document == null)
             {
-                foreach (FileInfo fileInfo in AmlxFiles)
+                foreach (FileInfo fileInfo in TestHelper.RetrieveFiles())
                 {
                     if (fileInfo.Name.Equals("TestEnums.xml.amlx"))
                     {
@@ -128,7 +99,7 @@ namespace SystemTest
         public void TwoStateClasses(string nodeId, string expectedTrue, string expectedFalse, bool hasValues)
         {
             CAEXDocument document = GetDocument();
-            CAEXObject initialClass = document.FindByID(RootName + nodeId);
+            CAEXObject initialClass = document.FindByID(TestHelper.GetRootName() + nodeId);
             InternalElementType classToTest = initialClass as InternalElementType;
             Assert.IsNotNull(classToTest, "Unable to retrieve class to test");
 
@@ -232,7 +203,7 @@ namespace SystemTest
         {
             CAEXDocument document = GetDocument();
             InternalElementType objectToTest = null;
-            CAEXObject initialObject = document.FindByID(RootName + nodeId);
+            CAEXObject initialObject = document.FindByID(TestHelper.GetRootName() + nodeId);
             InternalElementType initialInternalElement = initialObject as InternalElementType;
             Assert.IsNotNull(initialInternalElement, "Unable to find Initial Object");
             foreach (InternalElementType element in initialInternalElement.InternalElement)
@@ -305,7 +276,7 @@ namespace SystemTest
             string attributeLookup, string expectedAttributeReferenceName)
         {
             CAEXDocument document = GetDocument();
-            CAEXObject initialClass = document.FindByID(RootName + nodeId);
+            CAEXObject initialClass = document.FindByID(TestHelper.GetRootName() + nodeId);
             InternalElementType classToTest = initialClass as InternalElementType;
             Assert.IsNotNull(classToTest, "Unable to retrieve class to test");
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Aml.Engine.AmlObjects;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +14,35 @@ namespace SystemTest
         public const string ExtractPrefix = "Extract_";
         public const string Opc2AmlName = "Opc2Aml";
         public const string Opc2Aml = Opc2AmlName + ".exe";
+
+        static bool Executed = false;
+
+        public static List<FileInfo> RetrieveFiles()
+        {
+            if (!Executed)
+            {
+                const bool EXECUTE_CONVERSION = true;
+
+                List<string> testFiles = GetTestFileNames();
+                if (EXECUTE_CONVERSION)
+                {
+                    PrepareUnconvertedXml(testFiles);
+                    System.Threading.Thread.Sleep(1000);
+                    Execute();
+                    List<FileInfo> amlFiles = ExtractAmlxFiles(testFiles);
+                    Assert.AreNotEqual(0, amlFiles.Count, "Unable to get Converted Aml files");
+                }
+                Executed = true;
+            }
+            List<FileInfo> amlxFiles = GetAmlxFiles();
+            Assert.AreNotEqual(0, amlxFiles.Count, "Unable to get Converted Amlx files");
+            return amlxFiles;
+        }
+
+        static public string GetRootName()
+        {
+            return "ns=http#\\\\opcfoundation.org\\UA\\FX\\AML\\TESTING;i="; 
+        }
 
         static public string GetConfigurationPath()
         {
