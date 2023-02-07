@@ -59,10 +59,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Drawing.Text;
 using Aml.Engine.AmlObjects.Extensions;
-
-
-
-
+using System.Security.Cryptography.Xml;
 
 namespace MarkdownProcessor
 {
@@ -498,11 +495,20 @@ namespace MarkdownProcessor
                 var uriatt = browse.Attribute["NamespaceURI"];
  
                 uriatt.Value = myuri;
-
+                
+                if (uanode.DisplayName != null &&
+                    uanode.DisplayName.Length > 0 &&
+                    uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
+                {
+                    var displayName = seq["DisplayName"];
+                    if (displayName == null)
+                    {
+                        displayName = AddModifyAttribute(seq, "DisplayName", "LocalizedText",
+                            uanode.DisplayName[0].Value);
+                    }
+                }
             }
          }
-
-
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
         {
@@ -718,19 +724,22 @@ namespace MarkdownProcessor
             {
                 List<string> referenceNames = new List<string>();
 
-                var instanceNode = FindNode<UANode>(actual);
+                List<ReferenceInfo> referenceList = m_modelManager.FindReferences(actual);
 
-                foreach (var instanceReference in instanceNode.References)
+                if (referenceList != null)
                 {
-                    if (instanceReference.IsForward)
+                    foreach (ReferenceInfo referenceInfo in referenceList)
                     {
-                        UANode foundNodeId = FindNode<UANode>(new NodeId(instanceReference.Value));
-                        if (foundNodeId.NodeClass == NodeClass.Variable)
+                        if (referenceInfo.IsForward)
                         {
-                            UAVariable foundVariable = foundNodeId as UAVariable;
-                            if (foundVariable != null)
+                            UANode foundNodeId = FindNode<UANode>(referenceInfo.TargetId);
+                            if (foundNodeId.NodeClass == NodeClass.Variable)
                             {
-                                referenceNames.Add(foundVariable.BrowseName);
+                                UAVariable foundVariable = foundNodeId as UAVariable;
+                                if (foundVariable != null)
+                                {
+                                    referenceNames.Add(foundVariable.BrowseName);
+                                }
                             }
                         }
                     }
