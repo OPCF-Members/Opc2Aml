@@ -495,7 +495,7 @@ namespace MarkdownProcessor
                 var uriatt = browse.Attribute["NamespaceURI"];
  
                 uriatt.Value = myuri;
-                
+
                 if (uanode.DisplayName != null &&
                     uanode.DisplayName.Length > 0 &&
                     uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
@@ -504,11 +504,13 @@ namespace MarkdownProcessor
                     if (displayName == null)
                     {
                         displayName = AddModifyAttribute(seq, "DisplayName", "LocalizedText",
-                            uanode.DisplayName[0].Value);
+                            Variant.Null);
                     }
+                    displayName.SetAttributeValue("Locale", uanode.DisplayName[0].Locale);
+                    displayName.SetAttributeValue("Text", uanode.DisplayName[0].Value);
                 }
             }
-         }
+        }
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
         {

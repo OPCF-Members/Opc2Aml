@@ -73,7 +73,11 @@ namespace SystemTest
             if (expectedToBeFound)
             {
                 Assert.IsNotNull(displayNameAttribute, "DisplayName attribute not found");
-                Assert.AreEqual(expectedDisplayName, displayNameAttribute.Value, "Unexpected value for DisplayName");
+                var locale = displayNameAttribute.Attribute["Locale"];
+                var text = displayNameAttribute.Attribute["Text"];
+                Assert.IsNotNull(locale, "Locale not found");
+                Assert.IsNotNull(text, "Text not found");
+                Assert.AreEqual(expectedDisplayName, text.Value, "Unexpected value for DisplayName");
             }
             else
             {
@@ -91,7 +95,11 @@ namespace SystemTest
             if (expectedToBeFound)
             {
                 Assert.IsNotNull(displayNameAttribute, "DisplayName attribute not found");
-                Assert.AreEqual(expectedDisplayName, displayNameAttribute.Value, "Unexpected value for DisplayName");
+                var locale = displayNameAttribute.Attribute["Locale"];
+                var text = displayNameAttribute.Attribute["Text"];
+                Assert.IsNotNull(locale, "Locale not found");
+                Assert.IsNotNull(text, "Text not found");
+                Assert.AreEqual(expectedDisplayName, text.Value, "Unexpected value for DisplayName");
             }
             else
             {
