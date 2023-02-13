@@ -500,14 +500,8 @@ namespace MarkdownProcessor
                     uanode.DisplayName.Length > 0 &&
                     uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
                 {
-                    var displayName = seq["DisplayName"];
-                    if (displayName == null)
-                    {
-                        displayName = AddModifyAttribute(seq, "DisplayName", "LocalizedText",
-                            Variant.Null);
-                    }
-                    displayName.SetAttributeValue("Locale", uanode.DisplayName[0].Locale);
-                    displayName.SetAttributeValue("Text", uanode.DisplayName[0].Value);
+                    AddModifyAttribute(seq, "DisplayName", "LocalizedText",
+                        uanode.DisplayName[0].Value);
                 }
             }
         }
