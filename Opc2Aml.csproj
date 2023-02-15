@@ -10,6 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="SystemTest\**" />
+    <EmbeddedResource Remove="SystemTest\**" />
+    <None Remove="SystemTest\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Aml.Engine" Version="2.0.9" />
     <PackageReference Include="Aml.Engine.Resources" Version="1.0.1" />
     <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.4.370.12" />
