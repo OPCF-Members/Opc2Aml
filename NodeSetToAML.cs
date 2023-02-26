@@ -60,6 +60,8 @@ using System.Runtime.InteropServices;
 using System.Drawing.Text;
 using Aml.Engine.AmlObjects.Extensions;
 using System.Security.Cryptography.Xml;
+using System.Net;
+using NodeSetToAmlUtils;
 
 namespace MarkdownProcessor
 {
@@ -927,23 +929,11 @@ namespace MarkdownProcessor
 
 
 
-        private string AmlIDFromNodeId(NodeId nodeId, string name = null)
+        private string AmlIDFromNodeId(NodeId nodeId, string prefix = null)
         {
-            string sNodeId = nodeId.ToString();
-            var n = sNodeId.IndexOf(';');
-            if( n >= 0 )
-                sNodeId = sNodeId.Substring(n+1 ); //skip the "ns=nnn;" part
-            string rtn =  "ns=" + m_modelManager.FindModelUri(nodeId) + ";" + sNodeId;
-            if( name != null)
-            {
-                rtn += ";" + name;
-            }
-            // substitute for illlegal chars in AML IDs 
-            rtn = rtn.Replace('/', '\\'); 
-            rtn = rtn.Replace(':', '#');
-            
-            return rtn;
-        }
+            AmlExpandedNodeId a = new AmlExpandedNodeId(nodeId, m_modelManager.FindModelUri(nodeId), prefix);
+            return a.ToString();
+         }
 
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
