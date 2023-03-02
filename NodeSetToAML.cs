@@ -496,15 +496,13 @@ namespace MarkdownProcessor
  
                 uriatt.Value = myuri;
 
-                // Archie - Reverting the DisplayName implementation until the actual issue is addressed
-                // for example, Ensure that the under the hood aml is understood properly
-                //if (uanode.DisplayName != null &&
-                //    uanode.DisplayName.Length > 0 &&
-                //    uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
-                //{
-                //    AddModifyAttribute(seq, "DisplayName", "LocalizedText",
-                //        uanode.DisplayName[0].Value);
-                //}
+                if (uanode.DisplayName != null &&
+                    uanode.DisplayName.Length > 0 &&
+                    uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
+                {
+                    AddModifyAttribute(seq, "DisplayName", "LocalizedText",
+                        uanode.DisplayName[0].Value);
+                }
             }
         }
 

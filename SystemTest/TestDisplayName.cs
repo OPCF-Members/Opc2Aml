@@ -5,9 +5,6 @@ using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
 
 
-// Archie - Reverting the DisplayName implementation until the actual issue is addressed
-// for example, Ensure that the under the hood aml is understood properly
-/*
 namespace SystemTest
 {
     [TestClass]
@@ -149,4 +146,3 @@ namespace SystemTest
         #endregion
     }
 }
-*/
