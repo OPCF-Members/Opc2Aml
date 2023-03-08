@@ -62,6 +62,8 @@ using Aml.Engine.AmlObjects.Extensions;
 using System.Security.Cryptography.Xml;
 using System.Net;
 using NodeSetToAmlUtils;
+using Org.BouncyCastle.Asn1.X500;
+using Org.BouncyCastle.Ocsp;
 
 namespace MarkdownProcessor
 {
@@ -85,6 +87,10 @@ namespace MarkdownProcessor
         private readonly NodeId HasPropertyNodeId = new NodeId(46, 0);
         private readonly NodeId QualifiedNameNodeId = new NodeId(20, 0);
         private readonly NodeId NodeIdNodeId = new NodeId(17, 0);
+        private readonly NodeId ExpandedNodeIdNodeId = new NodeId(18, 0);
+        private readonly NodeId RelativePathElementNodeId = new NodeId(537, 0);
+        private readonly NodeId RelativePathNodeId = new NodeId(540, 0);
+
         private readonly NodeId GuidNodeId = new NodeId(14, 0);
         private readonly NodeId BaseDataTypeNodeId = new NodeId(24, 0);
         private readonly NodeId NumberNodeId = new NodeId(26, 0);
@@ -208,7 +214,7 @@ namespace MarkdownProcessor
                 AddLibaryHeaderInfo(rcl_temp as CAEXBasicObject, modelInfo);
 
                 // Create the SystemUnitClassLibrary
-                var scl_temp = cAEXDocumentTemp.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + modelInfo.NamespaceUri);
+                var scl_temp =  cAEXDocumentTemp.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + modelInfo.NamespaceUri);
                 // var scl_temp = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + modelInfo.NamespaceUri);
                 AddLibaryHeaderInfo(scl_temp as CAEXBasicObject, modelInfo);
 
@@ -410,6 +416,7 @@ namespace MarkdownProcessor
             AddLibaryHeaderInfo(atl_meta as CAEXBasicObject);
 
             var added = new AttributeFamilyType(new System.Xml.Linq.XElement(defaultNS + "AttributeType"));
+            AttributeType added2 = null;
             var att = added as AttributeTypeType;
             added.Name = "ModellingRuleType";
 
@@ -441,6 +448,64 @@ namespace MarkdownProcessor
             att.AttributeDataType = "xs:string";
             att.Constraint.Insert(AttributeIdConstraint());
             atl_meta.AttributeType.Insert(added, false);
+
+            // add NamespaceUri 
+            var NamespaceUriAttr = new AttributeFamilyType(new System.Xml.Linq.XElement(defaultNS + "AttributeType"));
+            att = NamespaceUriAttr as AttributeTypeType;
+            NamespaceUriAttr.Name = "NamespaceUri";
+            att.AttributeDataType = "xs:anyURI";
+            atl_meta.AttributeType.Insert(NamespaceUriAttr, false);
+
+            // add ExplicitNodeId
+            var ExplicitNodeIdAttr = new AttributeFamilyType(new System.Xml.Linq.XElement(defaultNS + "AttributeType"));
+            att = ExplicitNodeIdAttr as AttributeTypeType;
+            ExplicitNodeIdAttr.Name = "ExplicitNodeId";
+            
+            added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+            added2.Name = "NamespaceUri";
+            added2.RecreateAttributeInstance(NamespaceUriAttr);
+            ExplicitNodeIdAttr.Insert(added2, false);
+
+            added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+            added2.Name= "NumericId";
+            added2.AttributeDataType = "xs:long";
+            ExplicitNodeIdAttr.Insert(added2, false);
+
+            added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+            added2.Name = "StringId";
+            added2.AttributeDataType = "xs:string";
+            ExplicitNodeIdAttr.Insert(added2, false);
+
+            added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+            added2.Name = "GuidId";
+            added2.AttributeDataType = "xs:string";
+            ExplicitNodeIdAttr.Insert(added2, false);
+
+            added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+            added2.Name = "OpaqueId";
+            added2.AttributeDataType = "xs:base64Binary";
+            ExplicitNodeIdAttr.Insert(added2, false);
+
+            atl_meta.AttributeType.Insert(ExplicitNodeIdAttr, false);
+
+            // add Alias
+            var AliasAttr = new AttributeFamilyType(new System.Xml.Linq.XElement(defaultNS + "AttributeType"));
+            att = AliasAttr as AttributeTypeType;
+            AliasAttr.Name = "Alias";
+            
+            added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+            added2.Name = "AliasName";
+            added2.AttributeDataType = "xs:string";
+            AliasAttr.Insert(added2, false);
+
+            added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+            added2.Name = "ReferenceTypeFilter";
+            added2.RecreateAttributeInstance(ExplicitNodeIdAttr);
+            AliasAttr.Insert(added2, false);
+
+            atl_meta.AttributeType.Insert(AliasAttr, false);
+
+            
 
             // add UABaseRole to the RCL
             var rcl_meta = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + MetaModelName);
@@ -1300,17 +1365,45 @@ namespace MarkdownProcessor
                     att.Attribute.Insert(a, false);
                 }
             }
-            if (nodeId == NodeIdNodeId)
+            
+
+            if (nodeId == NodeIdNodeId || nodeId == ExpandedNodeIdNodeId)
             {
-                att.AttributeDataType = "";
-                AttributeType ns = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
-                ns.Name = "Id";
-                ns.AttributeDataType = "xs:string";
-                att.Attribute.Insert(ns);
-                AttributeType n = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
-                n.Name = "Path";
-                n.AttributeDataType = "xs:string";
-                att.Attribute.Insert(n, false);
+
+                // add NodeId
+                
+                var added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                added2.Name = "ServerInstanceUri";
+                added2.AttributeDataType = "xs:anyURI";
+                att.Attribute.Insert( added2, false);
+
+                added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                added2.Name = "Alias";
+                string path = BuildLibraryReference(ATLPrefix, MetaModelName, "Alias");
+                var ob = m_cAEXDocument.FindByPath(path);
+                var at = ob as AttributeFamilyType;
+                added2.RecreateAttributeInstance(at);
+                att.Attribute.Insert(added2, false);
+
+                added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                added2.Name = "RootNodeId";
+                path = BuildLibraryReference(ATLPrefix, MetaModelName, "ExplicitNodeId");
+                ob = m_cAEXDocument.FindByPath(path);
+                at = ob as AttributeFamilyType;
+                added2.RecreateAttributeInstance(at);
+                att.Attribute.Insert(added2, false);
+
+                added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                added2.Name = "BrowsePath";
+                path = BuildLibraryReference(ATLPrefix, uaNamespaceURI, "RelativePath");
+                added2.RefAttributeType = BaseRefFromNodeId(RelativePathNodeId, ATLPrefix);
+
+                var b = added2 as AttributeTypeType;
+                RecurseStructures(ref b, RelativePathNodeId );
+                
+                att.Attribute.Insert(added2, false);
+
+
             }
             else if (nodeId == QualifiedNameNodeId)
             {
@@ -1333,9 +1426,12 @@ namespace MarkdownProcessor
 
         private void FillSubAttributes(ref AttributeTypeType att, NodeId nodeId)
         {
-            ProcessOptionSets(ref att, nodeId);
-            ProcessEnumerations(ref att, nodeId);
-            RecurseStructures(ref att, nodeId);
+            
+                ProcessOptionSets(ref att, nodeId);
+                ProcessEnumerations(ref att, nodeId);
+                RecurseStructures(ref att, nodeId);
+                
+
         }
 
         private void MakeBuiltInType(ref AttributeType a)
@@ -1354,9 +1450,27 @@ namespace MarkdownProcessor
         }
 
 
+        private void ProcessRelativePathElement(ref AttributeTypeType att )
+        {
+            // custom build the RelativePathElement to use ExplicitNodeId instead of NodeId
+            var added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+            added2.Name = "ReferenceTypeId";
+            string path = BuildLibraryReference(ATLPrefix, MetaModelName, "ExplicitNodeId");
+            var ob = m_cAEXDocument.FindByPath(path);
+            var at = ob as AttributeFamilyType;
+            added2.RecreateAttributeInstance(at);
+            att.Attribute.Insert(added2, false);
+
+        }
+
+
+
         private void RecurseStructures(ref AttributeTypeType att, NodeId nodeId)
         {
-
+            if( nodeId == RelativePathElementNodeId)
+            {
+                ProcessRelativePathElement(ref att);
+            }
             if (m_modelManager.IsTypeOf(nodeId, structureNode.DecodedNodeId))
             {
                 att.AttributeDataType = "";
@@ -1386,36 +1500,39 @@ namespace MarkdownProcessor
                         {
                             AttributeType a = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
                             a.Name = MyNode.Definition.Field[i].Name;
-                            a.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, MyNode.Definition.Field[i].ValueRank == 1);
-                            a.AttributeDataType = GetAttributeDataType(MyNode.Definition.Field[i].DecodedDataType);
-                            if (nodeId.NamespaceIndex == 0)
+                            if (att.Attribute[a.Name] == null)  // don't add the attribute if it already exists
                             {
-                                if (a.Name == "BuiltInType")
-                                    MakeBuiltInType(ref a);
-                                else if (a.Name == "AttributeId")
-                                    MakeAttributeId(ref a);
-                            }
+                                a.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, MyNode.Definition.Field[i].ValueRank == 1);
+                                a.AttributeDataType = GetAttributeDataType(MyNode.Definition.Field[i].DecodedDataType);
+                                if (nodeId.NamespaceIndex == 0)
+                                {
+                                    if (a.Name == "BuiltInType")
+                                        MakeBuiltInType(ref a);
+                                    else if (a.Name == "AttributeId")
+                                        MakeAttributeId(ref a);
+                                }
 
-                            if (MyNode.Definition.Field[i].ValueRank == 1) // insert the first element in the list as a placeholder
-                            {
-                                AttributeType aa = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
-                                aa.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, false);
-                                aa.AttributeDataType = GetAttributeDataType(MyNode.Definition.Field[i].DecodedDataType);
-                                var BaseNode = m_modelManager.FindNode<UANode>(MyNode.Definition.Field[i].DecodedDataType);
-                                if (BaseNode != null)
-                                    aa.Name = BaseNode.DecodedBrowseName.Name;
+                                if (MyNode.Definition.Field[i].ValueRank == 1) // insert the first element in the list as a placeholder
+                                {
+                                    AttributeType aa = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                                    aa.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, false);
+                                    aa.AttributeDataType = GetAttributeDataType(MyNode.Definition.Field[i].DecodedDataType);
+                                    var BaseNode = m_modelManager.FindNode<UANode>(MyNode.Definition.Field[i].DecodedDataType);
+                                    if (BaseNode != null)
+                                        aa.Name = BaseNode.DecodedBrowseName.Name;
+                                    else
+                                        aa.Name = "0";
+                                    var b = aa as AttributeTypeType;
+                                    FillSubAttributes(ref b, MyNode.Definition.Field[i].DecodedDataType);
+                                    a.Attribute.Insert(aa, false);
+                                }
                                 else
-                                    aa.Name = "0";
-                                var b = aa as AttributeTypeType;
-                                FillSubAttributes(ref b, MyNode.Definition.Field[i].DecodedDataType);
-                                a.Attribute.Insert(aa, false);
+                                {
+                                    var b = a as AttributeTypeType;
+                                    FillSubAttributes(ref b, MyNode.Definition.Field[i].DecodedDataType);
+                                }
+                                att.Attribute.Insert(a, false);
                             }
-                            else
-                            {
-                                var b = a as AttributeTypeType;
-                                FillSubAttributes(ref b, MyNode.Definition.Field[i].DecodedDataType);
-                            }
-                            att.Attribute.Insert(a, false);
                         }
                     }
                 }
@@ -1451,6 +1568,7 @@ namespace MarkdownProcessor
             ProcessOptionSets(ref att, node.DecodedNodeId);
             // structures     
             RecurseStructures(ref att, node.DecodedNodeId);
+       
 
             return added;
         }
