@@ -77,6 +77,8 @@ namespace MarkdownProcessor
         private const string MethodNodeClass = "UaMethodNodeClass";
         private const string RefClassConnectsToPath = "RefClassConnectsToPath";
         private const string IsSource = "IsSource";
+        private const string ForwardPrefix = "f";
+        private const string ReversePrefix = "r";
         private ModelManager m_modelManager;
         private CAEXDocument m_cAEXDocument;
         private AttributeTypeLibType m_atl_temp;
@@ -946,6 +948,7 @@ namespace MarkdownProcessor
                 if (m_modelManager.IsTypeOf(nodeId, BaseInterfaceNodeId) == true)
                 {
                     var rc = rcl.New_RoleClass(refnode.DecodedBrowseName.Name);  // create a RoleClass for UA interfaces
+                    rc.ID = AmlIDFromNodeId(nodeId);
                     if (nodeId == BaseInterfaceNodeId)
                         rc.RefBaseClassPath = RCLPrefix + MetaModelName + "/" + UaBaseRole;
                     else
@@ -1142,6 +1145,7 @@ namespace MarkdownProcessor
         {
             var refnode = FindNode<NodeSet.UAReferenceType>(nodeId);
             var added = icl.InterfaceClass.Append(refnode.DecodedBrowseName.Name);
+            added.ID = AmlIDFromNodeId(nodeId, ForwardPrefix);
             NodeId BaseNodeId = m_modelManager.FindFirstTarget(refnode.DecodedNodeId, HasSubTypeNodeId, false);
             if (BaseNodeId != null)
             {
@@ -1172,6 +1176,7 @@ namespace MarkdownProcessor
                 if (refnode.Symmetric == false && refnode.InverseName[0].Value != refnode.DecodedBrowseName.Name)
                 {
                     inverseAdded = added.InterfaceClass.Append(refnode.InverseName[0].Value);
+                    inverseAdded.ID = AmlIDFromNodeId(nodeId, ReversePrefix);
                     if (BaseNodeId != null)
                         inverseAdded.RefBaseClassPath = BaseRefFromNodeId(BaseNodeId, ICLPrefix, true);
                 }
@@ -1432,6 +1437,7 @@ namespace MarkdownProcessor
             var added = new AttributeFamilyType(new System.Xml.Linq.XElement(defaultNS + "AttributeType"));
             var att = added as AttributeTypeType;
             added.Name = node.DecodedBrowseName.Name;
+            added.ID = AmlIDFromNodeId(node.DecodedNodeId);
             m_atl_temp.AttributeType.Insert(added);
 
             added.AttributeDataType = GetAttributeDataType(node.DecodedNodeId);
