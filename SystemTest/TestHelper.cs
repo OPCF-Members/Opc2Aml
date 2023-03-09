@@ -41,7 +41,7 @@ namespace SystemTest
 
         static public string GetRootName()
         {
-            return "ns=http#\\\\opcfoundation.org\\UA\\FX\\AML\\TESTING;i="; 
+            return "nsu%3Dhttp%3A%2F%2Fopcfoundation.org%2FUA%2FFX%2FAML%2FTESTING%3Bi%3D"; ; 
         }
 
         static public string GetConfigurationPath()
