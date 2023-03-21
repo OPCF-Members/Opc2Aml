@@ -64,6 +64,7 @@ using System.Net;
 using NodeSetToAmlUtils;
 using Org.BouncyCastle.Asn1.X500;
 using Org.BouncyCastle.Ocsp;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace MarkdownProcessor
 {
@@ -1593,6 +1594,8 @@ namespace MarkdownProcessor
 
         InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd) where T : IInternalElementContainer
         {
+            string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
+
             //first see if node already exists
             var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
             if (ie == null)
@@ -1614,15 +1617,13 @@ namespace MarkdownProcessor
                 Debug.Assert(suc != null);
 
                 // check if instance already exists before adding a new one  #11
-                string id = AmlIDFromNodeId(toAdd.DecodedNodeId);
-                ie = (InternalElementType)m_cAEXDocument.FindByID(id);
+                ie = (InternalElementType)m_cAEXDocument.FindByID(amlId);
                 if (ie != null)
                     return ie;
 
 
                 ie = suc.CreateClassInstance();  // this crates GUID IDs for all the sub-elements
                 ie.Name = toAdd.DecodedBrowseName.Name;
-                ie.ID = id;  // decided not to replace the GUID IDs in the top level instances
                 SetBrowseNameUri(ie.Attribute, toAdd);
                 
                 
@@ -1636,6 +1637,10 @@ namespace MarkdownProcessor
 
             }
             Debug.Assert(ie != null);
+
+            // Just because the ie (InternalElement) was found in the parent does not mean that the ID was correctly set.
+            // Set/reset the Id even though it might already be done correctly.
+            ie.ID = amlId;
 
             // set the values to match the values in the nodeset
             if (toAdd.NodeClass == NodeClass.Variable)
