@@ -1001,12 +1001,9 @@ namespace MarkdownProcessor
             return a.ToString();
          }
 
-        private InternalElementType CreateClassInstanceWithIDReplacement(SystemUnitFamilyType child,
-            string name, NodeId nodeId)
+        private InternalElementType CreateClassInstanceWithIDReplacement(SystemUnitFamilyType child)
         {
             InternalElementType internalElementType = child.CreateClassInstance();
-            internalElementType.Name = name;
-            internalElementType.ID = AmlIDFromNodeId(nodeId);
 
             InternalElementSequence originalInternalElements = child.InternalElement;
             InternalElementSequence createdInternalElements = internalElementType.InternalElement;
@@ -1040,6 +1037,59 @@ namespace MarkdownProcessor
                     }
                 }
             }
+        }
+
+        SystemUnitFamilyType GetReferenceSuc(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, 
+            NodeId typedefNodeId, NodeId targetId)
+        {
+            SystemUnitFamilyType referenceSuc = FindOrAddSUC(ref scl, ref rcl, typedefNodeId); 
+
+            if (!typedefNodeId.Equals(targetId))
+            {
+                var targetChild = FindOrAddSUC(ref scl, ref rcl, targetId);
+                InternalElementSequence targetSequence = targetChild.InternalElement;
+                if (targetSequence != null && targetSequence.Count > 0)
+                {
+                    Dictionary<string, InternalElementType> combined = new Dictionary<string, InternalElementType>();
+
+                    // Use the Typedef first.
+                    // Then walk the target, and overwrite duplicates with the target;
+                    InternalElementSequence typedefSequence = referenceSuc.InternalElement;
+                    if (typedefSequence != null)
+                    {
+                        foreach (InternalElementType typeDefInternalElement in typedefSequence)
+                        {
+                            combined.Add(typeDefInternalElement.Name, typeDefInternalElement);
+                        }
+                    }
+
+                    foreach (InternalElementType targetInternalElement in targetSequence)
+                    {
+                        if (combined.ContainsKey(targetInternalElement.Name))
+                        {
+                            InternalElementType current = combined[targetInternalElement.Name];
+                            if (current.ID != targetInternalElement.ID)
+                            {
+                                combined[targetInternalElement.Name] = targetInternalElement;
+                            }
+                        }
+                        else
+                        {
+                            combined.Add(targetInternalElement.Name, targetInternalElement);
+                        }
+                    }
+
+                    targetSequence.Remove();
+                    foreach (InternalElementType element in combined.Values)
+                    {
+                        targetChild.AddInstance(element);
+                    }
+
+                    referenceSuc = targetChild;
+                }
+            }
+
+            return referenceSuc;
         }
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
@@ -1157,11 +1207,16 @@ namespace MarkdownProcessor
                                     TypeDefNodeId = m_modelManager.FindFirstTarget(reference.TargetId, HasTypeDefinitionNodeId, true);
                                 if (TypeDefNodeId == null)
                                     TypeDefNodeId = reference.TargetId;
-                                //var child = FindOrAddSUC(ref scl, ref rcl, TypeDefNodeId);
-                                var referenceTargetIdChild = FindOrAddSUC(ref scl, ref rcl, reference.TargetId);
 
-                                InternalElementType ie = CreateClassInstanceWithIDReplacement(
-                                    referenceTargetIdChild, targetNode.DecodedBrowseName.Name, reference.TargetId);
+                                var combinedChild = GetReferenceSuc(ref scl, ref rcl,
+                                    TypeDefNodeId, reference.TargetId);
+
+                                //var child = FindOrAddSUC(ref scl, ref rcl, TypeDefNodeId);
+                                //var referenceTargetIdChild = FindOrAddSUC(ref scl, ref rcl, reference.TargetId);
+
+                                InternalElementType ie = CreateClassInstanceWithIDReplacement(combinedChild);
+                                ie.Name = targetNode.DecodedBrowseName.Name;
+                                ie.ID = AmlIDFromNodeId(reference.TargetId);
                                 rtn.AddInstance(ie);
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
                                 SetBrowseNameUri(ie.Attribute, targetNode, basenode);
