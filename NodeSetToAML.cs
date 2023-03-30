@@ -1157,11 +1157,11 @@ namespace MarkdownProcessor
                                     TypeDefNodeId = m_modelManager.FindFirstTarget(reference.TargetId, HasTypeDefinitionNodeId, true);
                                 if (TypeDefNodeId == null)
                                     TypeDefNodeId = reference.TargetId;
-                                //var child = FindOrAddSUC(ref scl, ref rcl, TypeDefNodeId);
+                                var child = FindOrAddSUC(ref scl, ref rcl, TypeDefNodeId);
                                 var referenceTargetIdChild = FindOrAddSUC(ref scl, ref rcl, reference.TargetId);
 
                                 InternalElementType ie = CreateClassInstanceWithIDReplacement(
-                                    referenceTargetIdChild, targetNode.DecodedBrowseName.Name, reference.TargetId);
+                                    child, targetNode.DecodedBrowseName.Name, reference.TargetId);
                                 rtn.AddInstance(ie);
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
                                 SetBrowseNameUri(ie.Attribute, targetNode, basenode);
