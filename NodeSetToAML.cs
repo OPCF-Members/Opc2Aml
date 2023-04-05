@@ -1002,19 +1002,22 @@ namespace MarkdownProcessor
             return a.ToString();
          }
 
-        private InternalElementType CreateClassInstanceWithIDReplacement(SystemUnitFamilyType child)
+        private InternalElementType CreateClassInstanceWithIDReplacement(ref SystemUnitClassLibType scl, 
+            ref RoleClassLibType rcl, string prefix, SystemUnitFamilyType child)
         {
             InternalElementType internalElementType = child.CreateClassInstance();
 
             InternalElementSequence originalInternalElements = child.InternalElement;
             InternalElementSequence createdInternalElements = internalElementType.InternalElement;
 
-            CreateClassInstanceUpdateIDs(originalInternalElements, createdInternalElements);
+            CreateClassInstanceUpdateChildIDs(prefix, originalInternalElements, createdInternalElements);
+            CreateClassInstanceUpdateParentIDs(prefix, child, createdInternalElements);
 
             return internalElementType;
         }
 
-        private void CreateClassInstanceUpdateIDs(
+        private void CreateClassInstanceUpdateChildIDs(
+            string prefix,
             InternalElementSequence original,
             InternalElementSequence requiresUpdate)
         {
@@ -1027,25 +1030,119 @@ namespace MarkdownProcessor
 
                     if (internalElementRequiresUpdate != null)
                     {
-                        internalElementRequiresUpdate.ID = originalInternalElement.ID;
-                        CreateClassInstanceUpdateIDs(originalInternalElement.InternalElement,
-                            internalElementRequiresUpdate.InternalElement);
+                        string nodeIdString = IsolateNodeId(originalInternalElement.ID);
+                        string childPrefix = prefix + originalInternalElement.Name + "_";
 
-                    }
-                    else
-                    {
-                        bool error = true;
+                        internalElementRequiresUpdate.ID = childPrefix + nodeIdString;
+                        
+                        CreateClassInstanceUpdateChildIDs(childPrefix, 
+                            originalInternalElement.InternalElement,
+                            internalElementRequiresUpdate.InternalElement);
                     }
                 }
             }
         }
 
-        InternalElementType GetReferenceInternalElement(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl,
+        private void CreateClassInstanceUpdateParentIDs(
+            string prefix,
+            SystemUnitClassType original,
+            InternalElementSequence requiresUpdate)
+        {
+            if (original != null && requiresUpdate != null)
+            {
+                List<string> namesWithGuidIds = new List<string>();
+                Dictionary<string, InternalElementType> elementsWithGuidIds = new Dictionary<string, InternalElementType>();
+                foreach (InternalElementType updateInternalElement in requiresUpdate)
+                {
+                    Guid guidId;
+                    if (Guid.TryParse(updateInternalElement.ID, out guidId))
+                    {
+                        namesWithGuidIds.Add(updateInternalElement.Name);
+                        elementsWithGuidIds.Add(updateInternalElement.Name, updateInternalElement);
+                    }
+                }
+
+                if ( namesWithGuidIds.Count > 0)
+                {
+                    if (original.Reference != null)
+                    {
+                        foreach(InternalElementType more in original.Reference)
+                        {
+                            if ( elementsWithGuidIds.ContainsKey(more.Name) )
+                            {
+                                Guid guidId;
+                                if (!Guid.TryParse(more.ID, out guidId))
+                                {
+                                    string nodeIdString = IsolateNodeId(more.ID);
+                                    elementsWithGuidIds[more.Name].ID = prefix + more.Name + "_" + nodeIdString;
+                                }
+                            }
+                        }
+                        
+                        CreateClassInstanceUpdateParentIDs(prefix, original.Reference, requiresUpdate);
+                    }
+                }
+            }
+        }
+
+        private string GetTypeNamePath(SystemUnitClassType type)
+        {
+            string name = "";
+
+            if ( type.CAEXParent != null)
+            {
+                var baseClassParent = type.CAEXParent as SystemUnitClassLibType;
+                
+                // This prevents going down a useless path
+                if ( baseClassParent == null)
+                {
+                    if (type.Reference != null)
+                    {
+                        name = GetTypeNamePath(type.Reference);
+                    }
+                }
+            }
+
+            name += type.Name + "_";
+
+            return name;
+        }
+
+        private string IsolateNodeId(string nodeIdString)
+        {
+            string nodeId = nodeIdString;
+
+            if (!nodeIdString.StartsWith("nsu%3D") )
+            {
+                int startIndex = nodeIdString.IndexOf("_nsu%3D");
+                if (startIndex > 0)
+                {
+                    nodeId = nodeIdString.Substring(startIndex + 1);
+                }
+            }
+            return nodeId;
+        }
+
+        InternalElementType GetReferenceInternalElement(
+            ref SystemUnitClassLibType scl, 
+            ref RoleClassLibType rcl,
+            SystemUnitFamilyType parent,
             NodeId typedefNodeId, NodeId targetId)
         {
+            string pathToType = GetTypeNamePath(parent);
+
             SystemUnitFamilyType typeDefSuc = FindOrAddSUC(ref scl, ref rcl, typedefNodeId);
-            var typeDefSucCreated = CreateClassInstanceWithIDReplacement(typeDefSuc);
-            //var typeDefSucCreated = typeDefSuc.CreateClassInstance();
+            string prefix = pathToType + typeDefSuc.Name + "_";
+
+            SystemUnitFamilyType targetChild = null;
+
+            if (!typedefNodeId.Equals(targetId))
+            {
+                targetChild = FindOrAddSUC(ref scl, ref rcl, targetId);
+                prefix = pathToType + targetChild.Name + "_";
+            }
+
+            var typeDefSucCreated = CreateClassInstanceWithIDReplacement(ref scl, ref rcl, prefix, typeDefSuc);
 
             if (typedefNodeId.Equals(targetId))
             {
@@ -1053,20 +1150,11 @@ namespace MarkdownProcessor
                 return typeDefSucCreated;
             }
 
-            if (targetId.ToString().Equals("i=9094"))
-            {
-                bool wait = true;
-            }
-
-            if (targetId.ToString().Equals("i=9093") || targetId.ToString().Equals("i=9169"))
-            {
-                bool wait = true;
-            }
-
             // Never seen InternalElement not null
             var typeDefSequence = typeDefSucCreated.InternalElement;
-            var targetChild = FindOrAddSUC(ref scl, ref rcl, targetId);
-            var targetCreated = CreateClassInstanceWithIDReplacement(targetChild);
+            var targetCreated = CreateClassInstanceWithIDReplacement(ref scl, ref rcl, prefix, targetChild);
+
+            // Helpful for debugging
             AddModifyAttribute(targetCreated.Attribute, "NodeId", "String", AmlIDFromNodeId(targetId));
 
             InternalElementSequence targetSequence = targetChild.InternalElement;
@@ -1076,60 +1164,12 @@ namespace MarkdownProcessor
                 InternalElementType targetInternalElement = targetSequence[typeDefInternalElement.Name];
                 if (targetInternalElement == null)
                 {
-                    var attributeName = typeDefInternalElement.Attribute["NodeId"];
-                    Debug.WriteLine("GRIE - Adding " + typeDefInternalElement.Name + " Node Id " + attributeName.Value + " Source " + typedefNodeId.ToString() + " Destination " + targetId.ToString());
-                    var created = typeDefInternalElement.Copy();
                     targetCreated.AddInstance(typeDefInternalElement);
                 }
             }
 
             return targetCreated;
         }
-
-
-        // This Doesn't work.  It messes with the base object, which is not what is desired.
-        // But Perhaps.. at least as a test, if a new is created, or the target is used...
-
-        // Nope.  This is not sufficient.  The original needs recreation, then add in all the stuff SAY IDS - which still needs a proper update, not currently handled.
-        /*
-        SystemUnitFamilyType GetReferenceSuc(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, 
-            NodeId typedefNodeId, NodeId targetId)
-        {
-            SystemUnitFamilyType typeDefSuc = FindOrAddSUC(ref scl, ref rcl, typedefNodeId);
-
-            if (typedefNodeId.Equals(targetId))
-            {
-                // No Work Required
-                return typeDefSuc;
-            }
-
-            // Never seen InternalElement not null
-            var typeDefSequence = typeDefSuc.InternalElement;
-
-            var targetChild = FindOrAddSUC(ref scl, ref rcl, targetId);
-
-            InternalElementSequence targetSequence = targetChild.InternalElement;
-            if ( targetId.ToString().Equals("i=9093"))
-            {
-                bool wait = true;
-                var another = typeDefSuc.CreateClassInstance();
-                var anotherSequence = another.InternalElement;
-                var waiting = true;
-            }
-
-            foreach( InternalElementType typeDefInternalElement in typeDefSequence)
-            {
-                InternalElementType targetInternalElement = targetSequence[typeDefInternalElement.Name];
-                if (targetInternalElement == null)
-                {
-                    var somethingElse = targetInternalElement.Copy();
-                    targetChild.AddInstance(typeDefInternalElement);
-                }
-            }
-
-            return targetChild;
-        }
-        */
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
         {
@@ -1139,18 +1179,8 @@ namespace MarkdownProcessor
                 path = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refnode.DecodedNodeId), refnode.DecodedBrowseName.Name);
             SystemUnitFamilyType rtn = scl.CAEXDocument.FindByPath(path) as SystemUnitFamilyType;
 
-            if (path.Equals("[SUC_http://opcfoundation.org/UA/]/[Id]"))
-            {
-                bool wait = true;
-
-                // Looking for the second derived call for this.
-                // 2756, then 9094, and something else
-            }
-
             if (rtn == null)
             {
-                //string amlNodeIdString = AmlIDFromNodeId(nodeId);
-
                 if (m_modelManager.IsTypeOf(nodeId, BaseInterfaceNodeId) == true)
                 {
                     var rc = rcl.New_RoleClass(refnode.DecodedBrowseName.Name);  // create a RoleClass for UA interfaces
@@ -1174,12 +1204,9 @@ namespace MarkdownProcessor
                 }
                 // now add the SUC with the immediate elements
                 // starting with the attributes
-                if (nodeId.ToString().Equals("i=9093"))
-                {
-                    bool wait = true;
-                }
 
                 rtn = scl.SystemUnitClass.Append(refnode.DecodedBrowseName.Name);
+                // Helpful for Debugging
                 AddModifyAttribute(rtn.Attribute, "NodeId", "String", AmlIDFromNodeId(nodeId));
                 if (BaseNodeId != null)
                 {
@@ -1263,20 +1290,13 @@ namespace MarkdownProcessor
                                 if (TypeDefNodeId == null)
                                     TypeDefNodeId = reference.TargetId;
 
-                                Debug.WriteLine("Calling GetReferenceSuc for " + refnode.BrowseName);
-                                //var combinedChild = GetReferenceSuc(ref scl, ref rcl,
-                                //    TypeDefNodeId, reference.TargetId);
                                 var ie = GetReferenceInternalElement(ref scl, ref rcl,
-                                    TypeDefNodeId, reference.TargetId);
-                                Debug.WriteLine("Completed GetReferenceSuc for " + refnode.BrowseName);
+                                    rtn, TypeDefNodeId, reference.TargetId);
 
-                                //var child = FindOrAddSUC(ref scl, ref rcl, TypeDefNodeId);
-                                //var referenceTargetIdChild = FindOrAddSUC(ref scl, ref rcl, reference.TargetId);
-
-                                //InternalElementType ie = CreateClassInstanceWithIDReplacement(combinedChild);
                                 ie.Name = targetNode.DecodedBrowseName.Name;
                                 ie.ID = AmlIDFromNodeId(reference.TargetId);
                                 rtn.AddInstance(ie);
+
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
                                 SetBrowseNameUri(ie.Attribute, targetNode, basenode);
                                 if (targetNode.NodeClass == NodeClass.Variable)
@@ -1326,28 +1346,6 @@ namespace MarkdownProcessor
                 }
                 rtn.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);  // all UA SUCs support the UaBaseRole
 
-            }
-            else
-            {
-                // Found an existing return Value.
-                var desiredNodeId = AmlIDFromNodeId(nodeId);
-                var existingNodeId = rtn.Attribute["NodeId"];
-                if (!existingNodeId.Value.Equals(desiredNodeId))
-                {
-                    // This just doesn't work.
-                    var aCopy = rtn.Copy();
-                    var replace = aCopy as SystemUnitFamilyType;
-                    if (replace != null)
-                    {
-                        AddModifyAttribute(replace.Attribute, "NodeId", "String", desiredNodeId);
-                        bool nowWhat = true;
-//                        rtn = replace;
-                    }
-                    else
-                    {
-                        bool howQuestion = true;
-                    }
-                }
             }
 
             return rtn;
