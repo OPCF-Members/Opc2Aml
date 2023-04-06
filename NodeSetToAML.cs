@@ -331,7 +331,6 @@ namespace MarkdownProcessor
                         rcl.Insert(rft, false);
                     }
                 }
-
             }
 
             CreateInstances(); //  add the instances for each model
@@ -1034,7 +1033,8 @@ namespace MarkdownProcessor
                         string childPrefix = prefix + originalInternalElement.Name + "_";
 
                         internalElementRequiresUpdate.ID = childPrefix + nodeIdString;
-                        
+
+                        // Does not create infinite loop
                         CreateClassInstanceUpdateChildIDs(childPrefix, 
                             originalInternalElement.InternalElement,
                             internalElementRequiresUpdate.InternalElement);
@@ -1070,12 +1070,12 @@ namespace MarkdownProcessor
                         {
                             if ( elementsWithGuidIds.ContainsKey(more.Name) )
                             {
-                                Guid guidId;
-                                if (!Guid.TryParse(more.ID, out guidId))
-                                {
-                                    string nodeIdString = IsolateNodeId(more.ID);
-                                    elementsWithGuidIds[more.Name].ID = prefix + more.Name + "_" + nodeIdString;
-                                }
+                                InternalElementType type = elementsWithGuidIds[more.Name];
+                                string nodeIdString = IsolateNodeId(more.ID);
+                                string addPrefix = prefix + more.Name + "_";
+                                type.ID = addPrefix + nodeIdString;
+                                // Now Go Down the hierarchy
+                                CreateClassInstanceUpdateChildIDs(addPrefix, more.InternalElement, type.InternalElement);
                             }
                         }
                         
