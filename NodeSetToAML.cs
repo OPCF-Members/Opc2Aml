@@ -1001,8 +1001,7 @@ namespace MarkdownProcessor
             return a.ToString();
          }
 
-        private InternalElementType CreateClassInstanceWithIDReplacement(ref SystemUnitClassLibType scl, 
-            ref RoleClassLibType rcl, string prefix, SystemUnitFamilyType child)
+        private InternalElementType CreateClassInstanceWithIDReplacement(string prefix, SystemUnitFamilyType child)
         {
             InternalElementType internalElementType = child.CreateClassInstance();
 
@@ -1142,7 +1141,7 @@ namespace MarkdownProcessor
                 prefix = pathToType + targetChild.Name + "_";
             }
 
-            var typeDefSucCreated = CreateClassInstanceWithIDReplacement(ref scl, ref rcl, prefix, typeDefSuc);
+            var typeDefSucCreated = CreateClassInstanceWithIDReplacement(prefix, typeDefSuc);
 
             if (typedefNodeId.Equals(targetId))
             {
@@ -1152,7 +1151,7 @@ namespace MarkdownProcessor
 
             // Never seen InternalElement not null
             var typeDefSequence = typeDefSucCreated.InternalElement;
-            var targetCreated = CreateClassInstanceWithIDReplacement(ref scl, ref rcl, prefix, targetChild);
+            var targetCreated = CreateClassInstanceWithIDReplacement(prefix, targetChild);
 
             // Helpful for debugging
             AddModifyAttribute(targetCreated.Attribute, "NodeId", "String", AmlIDFromNodeId(targetId));
@@ -1776,7 +1775,7 @@ namespace MarkdownProcessor
                 var TypeDefNodeId = m_modelManager.FindFirstTarget(toAdd.DecodedNodeId, HasTypeDefinitionNodeId, true);
                 var path = BaseRefFromNodeId(TypeDefNodeId, SUCPrefix);
                 suc = m_cAEXDocument.FindByPath(path) as SystemUnitFamilyType;
-              
+
                 if (suc == null && toAdd.NodeClass == NodeClass.Method)
                 {
                     suc = m_cAEXDocument.FindByPath( BuildLibraryReference( SUCPrefix, MetaModelName, MethodNodeClass)) as SystemUnitFamilyType;
@@ -1792,11 +1791,15 @@ namespace MarkdownProcessor
                 if (ie != null)
                     return ie;
 
+                string prefix = toAdd.DecodedBrowseName.Name;
+                if ( prefix.StartsWith("http://"))
+                {
+                    prefix = WebUtility.UrlEncode(toAdd.DecodedBrowseName.Name);
+                }
 
-                ie = suc.CreateClassInstance();  // this crates GUID IDs for all the sub-elements
+                ie = CreateClassInstanceWithIDReplacement(prefix + "_", suc);
                 ie.Name = toAdd.DecodedBrowseName.Name;
                 SetBrowseNameUri(ie.Attribute, toAdd);
-                
                 
                 AttributeType a = ie.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
                 a.AttributeDataType = "xs:anyURI";
