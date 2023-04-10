@@ -1154,7 +1154,7 @@ namespace MarkdownProcessor
             var targetCreated = CreateClassInstanceWithIDReplacement(prefix, targetChild);
 
             // Helpful for debugging
-            AddModifyAttribute(targetCreated.Attribute, "NodeId", "String", AmlIDFromNodeId(targetId));
+            //AddModifyAttribute(targetCreated.Attribute, "NodeId", "String", AmlIDFromNodeId(targetId));
 
             InternalElementSequence targetSequence = targetChild.InternalElement;
 
@@ -1206,7 +1206,7 @@ namespace MarkdownProcessor
 
                 rtn = scl.SystemUnitClass.Append(refnode.DecodedBrowseName.Name);
                 // Helpful for Debugging
-                AddModifyAttribute(rtn.Attribute, "NodeId", "String", AmlIDFromNodeId(nodeId));
+                //AddModifyAttribute(rtn.Attribute, "NodeId", "String", AmlIDFromNodeId(nodeId));
                 if (BaseNodeId != null)
                 {
                     rtn.ID = AmlIDFromNodeId(nodeId);
