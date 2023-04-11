@@ -721,9 +721,9 @@ namespace MarkdownProcessor
                                             var argument = value.Body as Opc.Ua.Argument;
                                             if (argument != null)
                                             {
-                                                Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
-                                                    " Method Name " + nodeName + " " + referenceName + " " +
-                                                    argument.Name + " Type " + argument.DataType.ToString());
+                                                //Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
+                                                //    " Method Name " + nodeName + " " + referenceName + " " +
+                                                //    argument.Name + " Type " + argument.DataType.ToString());
 
                                             }
                                         }
@@ -1153,21 +1153,25 @@ namespace MarkdownProcessor
             var typeDefSequence = typeDefSucCreated.InternalElement;
             var targetCreated = CreateClassInstanceWithIDReplacement(prefix, targetChild);
 
-            // Helpful for debugging
-            //AddModifyAttribute(targetCreated.Attribute, "NodeId", "String", AmlIDFromNodeId(targetId));
+            // Walk through the targetCreated, and only add those items that are missing in the typedefsuccreated.
+            // TargetChild should never be returned.
 
-            InternalElementSequence targetSequence = targetChild.InternalElement;
+            InternalElementSequence targetSequence = targetCreated.InternalElement;
 
-            foreach (InternalElementType typeDefInternalElement in typeDefSequence)
+            foreach (InternalElementType targetInternalElement in targetSequence)
             {
-                InternalElementType targetInternalElement = targetSequence[typeDefInternalElement.Name];
-                if (targetInternalElement == null)
+                InternalElementType typeDefInternalElement = typeDefSequence[targetInternalElement.Name];
+                if (typeDefInternalElement == null)
                 {
-                    targetCreated.AddInstance(typeDefInternalElement);
+                    typeDefSucCreated.AddInstance(targetInternalElement);
+                }
+                else
+                {
+                    typeDefInternalElement.ID = targetInternalElement.ID;
                 }
             }
 
-            return targetCreated;
+            return typeDefSucCreated;
         }
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
