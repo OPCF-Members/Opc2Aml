@@ -1113,10 +1113,10 @@ namespace MarkdownProcessor
 
             if (!nodeIdString.StartsWith("nsu%3D") )
             {
-                int startIndex = nodeIdString.IndexOf("_nsu%3D");
+                int startIndex = nodeIdString.IndexOf("nsu%3D");
                 if (startIndex > 0)
                 {
-                    nodeId = nodeIdString.Substring(startIndex + 1);
+                    nodeId = nodeIdString.Substring(startIndex);
                 }
             }
             return nodeId;
