@@ -126,9 +126,8 @@ namespace SystemTest
                 Assert.IsNull(falseValueAttribute.Value, "Unexpected FalseState Attribute");
             }
 
-            // Test can be improved to take added ValueAsText, once that functionality is added.
-            //InternalElementType valueAsText = classToTest.InternalElement["ValueAsText"];
-            //Assert.IsNotNull(valueAsText, "Unable to Find ValueAsText Property");
+            InternalElementType valueAsText = classToTest.InternalElement["ValueAsText"];
+            Assert.IsNotNull(valueAsText, "Unable to Find ValueAsText Property");
         }
 
         [TestMethod]
@@ -318,9 +317,8 @@ namespace SystemTest
                 Assert.AreEqual(0, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
             }
 
-            // Test can be improved to take added ValueAsText, once that functionality is added.
-            //InternalElementType valueAsText = classToTest.InternalElement["ValueAsText"];
-            //Assert.IsNotNull(valueAsText, "Unable to Find ValueAsText Property");
+            InternalElementType valueAsText = classToTest.InternalElement["ValueAsText"];
+            Assert.IsNotNull(valueAsText, "Unable to Find ValueAsText Property");
         }
 
         #endregion
