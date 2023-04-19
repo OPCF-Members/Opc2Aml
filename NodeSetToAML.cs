@@ -48,6 +48,7 @@ using Opc.Ua.Export;
 using UANode = MarkdownProcessor.NodeSet.UANode;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
+using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
 using System.Data;
 using Aml.Engine.Adapter;
 using System.Xml.Linq;
@@ -116,6 +117,7 @@ namespace MarkdownProcessor
         private const string OpcLibInfoNamespace = "http://opcfoundation.org/UA/FX/2021/08/OpcUaLibInfo.xsd";
         private UANode structureNode;
         private readonly List<string> ExcludedDataTypeList = new List<string>() { "InstanceNode", "TypeNode" };
+        private Dictionary<string, Dictionary<string,string>> LookupNames = new Dictionary<string, Dictionary<string, string>>();
 
         private List<string> PreventInfiniteRecursionList = new List<string>();
         private const int ua2xslookup_count = 16;
@@ -299,7 +301,24 @@ namespace MarkdownProcessor
 
                 foreach (var obType in SortedObjectTypes)
                 {
-                    FindOrAddSUC(ref scl_temp, ref rcl_temp, obType.Value);
+                    var something = FindOrAddSUC(ref scl_temp, ref rcl_temp, obType.Value);
+                    //if ( obType.Value.ToString().Equals("i=2915"))
+                    //{
+                    //    var somethingElse = something.InternalElement["ShelvingState"];
+                    //    if (somethingElse != null)
+                    //    {
+                    //        var currentState = somethingElse.InternalElement["CurrentState"];
+                    //        if ( currentState != null )
+                    //        {
+                    //            var id = currentState.InternalElement["Id"];
+                    //            if ( id != null )
+                    //            {
+                    //                Debug.WriteLine("CurrentState NodeId = " + id.ID);
+                    //                bool wait = true;
+                    //            }
+                    //        }
+                    //    }
+                    //}
                 }
 
                 // re-order the rcl_temp and scl_temp in alpha order into the real rcl and scl
@@ -1130,6 +1149,11 @@ namespace MarkdownProcessor
         {
             string pathToType = GetTypeNamePath(parent);
 
+            if ( targetId.ToString().Equals("i=9179"))
+            {
+                bool wait = true;
+            }
+
             SystemUnitFamilyType typeDefSuc = FindOrAddSUC(ref scl, ref rcl, typedefNodeId);
             string prefix = pathToType + typeDefSuc.Name + "_";
 
@@ -1167,11 +1191,150 @@ namespace MarkdownProcessor
                 }
                 else
                 {
-                    typeDefInternalElement.ID = targetInternalElement.ID;
+                    // This isn't sufficient
+                    // Need to remove it, and readd it.
+                    typeDefSequence.RemoveElement(typeDefInternalElement);
+                    typeDefSucCreated.AddInstance(targetInternalElement);
+
+
+
+
+//                    typeDefInternalElement.ID = targetInternalElement.ID;
                 }
             }
 
             return typeDefSucCreated;
+        }
+
+        private string GetExistingCreatedPathName(UANode node)
+        {
+            string createdPathName = "";
+
+            string uri = m_modelManager.FindModelUri(node.DecodedNodeId);
+            Dictionary<string, string> uriMap;
+            if (LookupNames.TryGetValue(uri, out uriMap))
+            {
+                string nodePath;
+                if (uriMap.TryGetValue(node.DecodedNodeId.ToString(), out nodePath))
+                {
+                    createdPathName = nodePath;
+                }
+            }
+
+            return createdPathName;
+        }
+
+        private string EqualizeParentNodeId(UAInstance node)
+        {
+            string parentNodeId = node.ParentNodeId;
+
+            string[] parentSplit = node.ParentNodeId.Split(";");
+            if ( parentSplit.Length > 1)
+            {
+                string[] nodeIdSplit = node.DecodedNodeId.ToString().Split(";");
+                if ( nodeIdSplit.Length == parentSplit.Length ) 
+                {
+                    if ( nodeIdSplit.Length != 2 )
+                    {
+                        bool unexpected = true;
+                    }
+                    parentNodeId = nodeIdSplit[0] + ";" + parentSplit[1];
+                }
+                else
+                {
+                    bool unexpected = true;
+                }
+             }
+
+            return parentNodeId;
+        }
+
+        private string GetCreatedPathName(UANode node)
+        {
+            if ( node.NodeId.Equals("i=9178"))
+            {
+                bool wait = true;
+            }
+            string pathName = GetExistingCreatedPathName(node);
+
+            if (pathName.Length == 0)
+            {
+                UAInstance uaInstance = node as UAInstance;
+                if (uaInstance != null)
+                {
+                    if (uaInstance.ParentNodeId.Length > 0)
+                    {
+                        string parentNodeId = EqualizeParentNodeId(uaInstance);
+                        UANode parentNode = FindNode<NodeSet.UANode>(new NodeId(parentNodeId));
+                        pathName = GetCreatedPathName(parentNode);
+                    }
+                }
+
+                if (pathName.Length > 0)
+                {
+                    pathName += "_";
+                }
+
+                pathName += node.DecodedBrowseName.Name;
+
+                string uri = m_modelManager.FindModelUri(node.DecodedNodeId);
+                if (!LookupNames.ContainsKey(uri))
+                {
+                    LookupNames.Add(uri, new Dictionary<string, string>());
+                }
+
+                string nodeIdString = node.DecodedNodeId.ToString();
+                //string nodeIdString = node.NodeId;
+
+                Dictionary<string, string> uriMap = LookupNames[uri];
+
+                // It's still possible that this has already been added, as it is a recursive method
+                string existingPathName;
+                if (!uriMap.TryGetValue(nodeIdString, out existingPathName))
+                {
+                    uriMap.Add(nodeIdString, pathName);
+                }
+                else
+                {
+                    if (!pathName.Equals(existingPathName))
+                    {
+                        bool wait = true;
+                    }
+                }
+            }
+
+            return pathName;
+        }
+
+        void archieDebug(SystemUnitClassType type, string[] elements)
+        {
+            string name = type.Name;
+            InternalElementType next = null;
+            foreach (string element in elements)
+            {
+                if (next == null)
+                {
+                    var potentialInitial = type.InternalElement[element];
+                    if (potentialInitial != null)
+                    {
+                        name = name + ":" + element;
+                        next = potentialInitial;
+                    }
+                }
+                else
+                {
+                    var potential = next.InternalElement[element];
+                    if (potential != null)
+                    {
+                        name = name + ":" + element;
+                        next = potential;
+                    }
+                }
+            }
+            if ( next != null ) { 
+                Debug.WriteLine("Archie Debug " + name + " NodeId = " + next.ID);
+                bool wait = true;
+            }
         }
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
@@ -1179,8 +1342,33 @@ namespace MarkdownProcessor
             var refnode = FindNode<NodeSet.UANode>(nodeId);
             string path = "";
             if (refnode.NodeClass != NodeClass.Method)
-                path = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refnode.DecodedNodeId), refnode.DecodedBrowseName.Name);
+                path = BuildLibraryReference(SUCPrefix, 
+                    m_modelManager.FindModelUri(refnode.DecodedNodeId), 
+                    GetCreatedPathName(refnode));
             SystemUnitFamilyType rtn = scl.CAEXDocument.FindByPath(path) as SystemUnitFamilyType;
+            string message = String.Format("FindOrAddSUC {0} - {1}:{2} ", 
+                rtn == null ? "Creating": "Returning Existing",
+                refnode.BrowseName,
+                refnode.NodeId);
+//            Debug.WriteLine(message + "Starting");
+            bool alarmType = false;
+            bool shelvingState = false;
+            bool currentState = false;
+
+            if (refnode.NodeId.Equals("i=2915"))
+            {
+                alarmType = true;
+            }
+
+            if (refnode.NodeId.Equals("i=9178"))
+            {
+                shelvingState = true;
+            }
+
+            if (refnode.NodeId.Equals("i=9179"))
+            {
+                currentState = true;
+            }
 
             if (rtn == null)
             {
@@ -1293,8 +1481,20 @@ namespace MarkdownProcessor
                                 if (TypeDefNodeId == null)
                                     TypeDefNodeId = reference.TargetId;
 
+                                if (alarmType && targetNode.NodeId.Equals("i=9178"))
+                                {
+                                    bool wait = true;
+                                }
+
                                 var ie = GetReferenceInternalElement(ref scl, ref rcl,
                                     rtn, TypeDefNodeId, reference.TargetId);
+
+                                if (alarmType && targetNode.NodeId.Equals("i=9178"))
+                                {
+                                    archieDebug(ie, new string[]{ "CurrentState", "Id"});
+                                }
+
+                                
 
                                 ie.Name = targetNode.DecodedBrowseName.Name;
                                 ie.ID = AmlIDFromNodeId(reference.TargetId);
@@ -1351,6 +1551,22 @@ namespace MarkdownProcessor
 
             }
 
+            if ( alarmType )
+            {
+                archieDebug(rtn, new string[] { "ShelvingState", "CurrentState", "Id" });
+            }
+
+            if (shelvingState)
+            {
+                archieDebug(rtn, new string[] { "CurrentState", "Id" });
+            }
+
+            if (currentState)
+            {
+                archieDebug(rtn, new string[] { "Id" });
+            }
+
+            //Debug.WriteLine(message + "Completed");
             return rtn;
 
         }
