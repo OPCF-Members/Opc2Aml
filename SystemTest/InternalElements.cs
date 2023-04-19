@@ -139,7 +139,95 @@ namespace SystemTest
             expectedIds.Add("TrueState", trueState);
             expectedIds.Add("FalseState", falseState);
 
-            foreach(KeyValuePair<string, uint> entry in expectedIds)
+            foreach (KeyValuePair<string, uint> entry in expectedIds)
+            {
+                InternalElementType internalElement = classToTest.InternalElement[entry.Key];
+                Assert.IsNotNull(internalElement, "Unable to retrieve " + entry.Key);
+
+                string expectedId = String.Format("{0}_{1}_{2}{3}", prefix, entry.Key, root, entry.Value.ToString());
+
+                Assert.AreEqual(expectedId, internalElement.ID, "Unexpected Id for " + entry.Key);
+            }
+        }
+
+        [TestMethod]
+        [DataRow(
+            Opc.Ua.Variables.StateMachineType_CurrentState,
+            Opc.Ua.Variables.StateVariableType_Name,
+            Opc.Ua.Variables.StateVariableType_Number,
+            Opc.Ua.Variables.StateVariableType_EffectiveDisplayName,
+            Opc.Ua.Variables.StateMachineType_CurrentState_Id,
+            "StateMachineType_CurrentState",
+            false,
+            DisplayName = "StateMachineType_CurrentState")]
+        [DataRow(
+            Opc.Ua.Variables.FiniteStateMachineType_CurrentState,
+            Opc.Ua.Variables.StateVariableType_Name,
+            Opc.Ua.Variables.StateVariableType_Number,
+            Opc.Ua.Variables.StateVariableType_EffectiveDisplayName,
+            Opc.Ua.Variables.FiniteStateMachineType_CurrentState_Id,
+            "FiniteStateMachineType_CurrentState",
+            false,
+            DisplayName = "FiniteStateMachineType_CurrentState")]
+        [DataRow(
+            Opc.Ua.Variables.TemporaryFileTransferType_TransferState_Placeholder_CurrentState,
+            Opc.Ua.Variables.StateVariableType_Name,
+            Opc.Ua.Variables.StateVariableType_Number,
+            Opc.Ua.Variables.StateVariableType_EffectiveDisplayName,
+            Opc.Ua.Variables.TemporaryFileTransferType_TransferState_Placeholder_CurrentState_Id,
+            "TemporaryFileTransferType_<TransferState>_CurrentState",
+            true,
+            DisplayName = "TemporaryFileTransferType_<TransferState>_CurrentState")]
+        [DataRow(
+            Opc.Ua.Variables.ExclusiveLimitAlarmType_LimitState_CurrentState,
+            Opc.Ua.Variables.StateVariableType_Name,
+            Opc.Ua.Variables.StateVariableType_Number,
+            Opc.Ua.Variables.StateVariableType_EffectiveDisplayName,
+            Opc.Ua.Variables.ExclusiveLimitAlarmType_LimitState_CurrentState_Id,
+            "ExclusiveLimitAlarmType_LimitState_CurrentState",
+            true,
+            DisplayName = "ExclusiveLimitAlarmType_LimitState_CurrentState")]
+        [DataRow(
+            Opc.Ua.Variables.ProgramStateMachineType_CurrentState,
+            Opc.Ua.Variables.StateVariableType_Name,
+            Opc.Ua.Variables.ProgramStateMachineType_CurrentState_Number,
+            Opc.Ua.Variables.StateVariableType_EffectiveDisplayName,
+            Opc.Ua.Variables.ProgramStateMachineType_CurrentState_Id,
+            "ProgramStateMachineType_CurrentState",
+            false,
+            DisplayName = "ProgramStateMachineType_CurrentState")]
+        [DataRow(
+            Opc.Ua.Variables.AlarmConditionType_ShelvingState_CurrentState,
+            Opc.Ua.Variables.StateVariableType_Name,
+            Opc.Ua.Variables.StateVariableType_Number,
+            Opc.Ua.Variables.StateVariableType_EffectiveDisplayName,
+            Opc.Ua.Variables.AlarmConditionType_ShelvingState_CurrentState_Id,
+            "AlarmConditionType_ShelvingState_CurrentState",
+            true,
+            DisplayName = "AlarmConditionType_ShelvingState_CurrentState")]
+
+        public void TestDerivedCurrentState(uint objectType,
+            uint name, uint number, uint effectiveDisplayName, uint id,
+            string prefix, bool usePrefixInLookup)
+        {
+            string root = TestHelper.GetOpcRootName();
+            string lookup = root + objectType.ToString();
+            if (usePrefixInLookup)
+            {
+                lookup = prefix + "_" + lookup;
+            }
+
+            CAEXObject initialClass = m_document.FindByID(lookup);
+            SystemUnitClassType classToTest = initialClass as SystemUnitClassType;
+            Assert.IsNotNull(classToTest, "Unable to retrieve class to test");
+
+            Dictionary<string, uint> expectedIds = new Dictionary<string, uint>();
+            expectedIds.Add("Name", name);
+            expectedIds.Add("Number", number);
+            expectedIds.Add("EffectiveDisplayName", effectiveDisplayName);
+            expectedIds.Add("Id", id);
+
+            foreach (KeyValuePair<string, uint> entry in expectedIds)
             {
                 InternalElementType internalElement = classToTest.InternalElement[entry.Key];
                 Assert.IsNotNull(internalElement, "Unable to retrieve " + entry.Key);
@@ -156,7 +244,7 @@ namespace SystemTest
         public void TestSecurityGroupInstance()
         {
             string root = TestHelper.GetOpcRootName();
-            CAEXObject initialClass = m_document.FindByID(root + 
+            CAEXObject initialClass = m_document.FindByID(root +
                 Opc.Ua.Objects.PublishSubscribe_SecurityGroups.ToString());
             InternalElementType classToTest = initialClass as InternalElementType;
             Assert.IsNotNull(classToTest, "Unable to retrieve class to test");
@@ -201,10 +289,10 @@ namespace SystemTest
             expectedIdsWithPrefixes.Add("RemoveSecurityGroupFolder", 25315);
             expectedIdsWithPrefixes.Add("SupportedSecurityPolicyUris", 25317);
 
-            foreach(KeyValuePair<string, uint> entry in expectedIdsWithPrefixes)
+            foreach (KeyValuePair<string, uint> entry in expectedIdsWithPrefixes)
             {
                 expectedIds.Add(entry.Key,
-                    String.Format("PublishSubscribe_SecurityGroups_{0}_{1}{2}", 
+                    String.Format("PublishSubscribe_SecurityGroups_{0}_{1}{2}",
                     entry.Key, root, entry.Value.ToString()));
             }
 
