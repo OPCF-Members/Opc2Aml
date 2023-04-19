@@ -1191,15 +1191,33 @@ namespace MarkdownProcessor
                 }
                 else
                 {
-                    // This isn't sufficient
-                    // Need to remove it, and readd it.
                     typeDefSequence.RemoveElement(typeDefInternalElement);
                     typeDefSucCreated.AddInstance(targetInternalElement);
 
+                    Dictionary<string, string> oldExternalInterface = new Dictionary<string, string>();
+                    foreach (ExternalInterfaceType externalInterface in typeDefInternalElement.ExternalInterface)
+                    {
+                        oldExternalInterface.Add(externalInterface.ID, externalInterface.Name);
+                    }
 
+                    Dictionary<string, string> newExternalInterface = new Dictionary<string, string>();
+                    foreach (ExternalInterfaceType externalInterface in targetInternalElement.ExternalInterface)
+                    {
+                        newExternalInterface.Add(externalInterface.Name, externalInterface.ID);
+                    }
 
-
-//                    typeDefInternalElement.ID = targetInternalElement.ID;
+                    foreach (InternalLinkType existingLink in typeDefSucCreated.InternalLink)
+                    {
+                        string linkName;
+                        if (oldExternalInterface.TryGetValue(existingLink.RefPartnerSideB, out linkName))
+                        {
+                            string newLink;
+                            if (newExternalInterface.TryGetValue(linkName, out newLink))
+                            {
+                                existingLink.RefPartnerSideB = newLink;
+                            }
+                        }
+                    }
                 }
             }
 
