@@ -1010,13 +1010,16 @@ namespace MarkdownProcessor
             InternalElementSequence originalInternalElements = child.InternalElement;
             InternalElementSequence createdInternalElements = internalElementType.InternalElement;
 
-            CreateClassInstanceUpdateChildIDs(prefix, originalInternalElements, createdInternalElements);
-            CreateClassInstanceUpdateParentIDs(prefix, child, createdInternalElements);
+            UpdateInternalElementChildIds(prefix, originalInternalElements, createdInternalElements);
+            UpdateInternalElementParentIds(prefix, child, createdInternalElements);
+
+            UpdateExternalInterfaceChildIds(prefix, child, internalElementType, processChildren: true);
+
 
             return internalElementType;
         }
 
-        private void CreateClassInstanceUpdateChildIDs(
+        private void UpdateInternalElementChildIds(
             string prefix,
             InternalElementSequence original,
             InternalElementSequence requiresUpdate)
@@ -1036,7 +1039,7 @@ namespace MarkdownProcessor
                         internalElementRequiresUpdate.ID = childPrefix + nodeIdString;
 
                         // Does not create infinite loop
-                        CreateClassInstanceUpdateChildIDs(childPrefix, 
+                        UpdateInternalElementChildIds(childPrefix, 
                             originalInternalElement.InternalElement,
                             internalElementRequiresUpdate.InternalElement);
                     }
@@ -1044,7 +1047,7 @@ namespace MarkdownProcessor
             }
         }
 
-        private void CreateClassInstanceUpdateParentIDs(
+        private void UpdateInternalElementParentIds(
             string prefix,
             SystemUnitClassType original,
             InternalElementSequence requiresUpdate)
@@ -1076,15 +1079,235 @@ namespace MarkdownProcessor
                                 string addPrefix = prefix + more.Name + "_";
                                 type.ID = addPrefix + nodeIdString;
                                 // Now Go Down the hierarchy
-                                CreateClassInstanceUpdateChildIDs(addPrefix, more.InternalElement, type.InternalElement);
+                                UpdateInternalElementChildIds(addPrefix, more.InternalElement, type.InternalElement);
                             }
                         }
                         
-                        CreateClassInstanceUpdateParentIDs(prefix, original.Reference, requiresUpdate);
+                        UpdateInternalElementParentIds(prefix, original.Reference, requiresUpdate);
                     }
                 }
             }
         }
+
+        private void UpdateExternalInterfaceChildIds(
+            string prefix,
+            SystemUnitClassType original,
+            SystemUnitClassType requiresUpdate,
+            bool processChildren)
+        {
+            if (original != null && requiresUpdate != null)
+            {
+                if (prefix.StartsWith("3DFrameType_CartesianCoordinates_"))
+                {
+                    bool wait = true;
+                }
+                Dictionary<string, string> linkMap = new Dictionary<string, string>();
+                if (original.InternalLink.Count != requiresUpdate.InternalLink.Count)
+                {
+                    Debug.WriteLine(prefix + " Counts differ original " + original.InternalLink.Count +
+                        " requires update " + requiresUpdate.InternalLink.Count);
+                }
+
+
+                // This logic only updates the link if it is all found
+                Dictionary<string, string> linkMap2 = new Dictionary<string, string>();
+                int requiredCounter = 0;
+                foreach (InternalLinkType requiresUpdateLink in requiresUpdate.InternalLink)
+                {
+                    Guid currentId;
+                    if (Guid.TryParse(requiresUpdateLink.RefPartnerSideB, out currentId))
+                    {
+                        InternalLinkType originalLink = original.InternalLink[requiresUpdateLink.Name];
+                        if (originalLink != null)
+                        {
+                            string newParentLink = CreateUpdatedLinkName(prefix, originalLink.RefPartnerSideA);
+                            string newThisLink = CreateUpdatedLinkName(prefix, originalLink.RefPartnerSideB);
+
+                            if (!linkMap2.ContainsKey(requiresUpdateLink.RefPartnerSideA))
+                            {
+                                linkMap2.Add(requiresUpdateLink.RefPartnerSideA, newParentLink);
+                            }
+                            linkMap2.Add(requiresUpdateLink.RefPartnerSideB, newThisLink);
+
+                            requiresUpdateLink.RefPartnerSideA = newParentLink;
+                            requiresUpdateLink.RefPartnerSideB = newThisLink;
+                        }
+                        else
+                        {
+                            requiredCounter++;
+                            bool wait = true;
+                        }
+                    }
+                    else
+                    {
+                        // This is already fixed
+                        bool wait = true;
+                    }
+                }
+
+                foreach (ExternalInterfaceType externalInterface in requiresUpdate.ExternalInterface)
+                {
+                    string updatedId = "";
+                    if (linkMap2.TryGetValue(externalInterface.ID, out updatedId))
+                    {
+                        externalInterface.ID = updatedId;
+                    }
+                }
+
+                foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
+                {
+                    foreach (ExternalInterfaceType externalInterface in internalElement.ExternalInterface)
+                    {
+                        string updatedId = "";
+                        if (linkMap2.TryGetValue(externalInterface.ID, out updatedId))
+                        {
+                            externalInterface.ID = updatedId;
+                        }
+                    }
+                }
+
+                //foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
+                //{
+                //    foreach (ExternalInterfaceType externalInterface in internalElement.ExternalInterface)
+                //    {
+                //        string updatedId = "";
+                //        if (linkMap.TryGetValue(externalInterface.ID, out updatedId))
+                //        {
+                //            externalInterface.ID = updatedId;
+                //        }
+                //    }
+                //}
+
+                if (processChildren)
+                {
+                    foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
+                    {
+                        InternalElementType originalInternalElement = original.InternalElement[internalElement.Name];
+                        if (originalInternalElement != null)
+                        {
+                            string childPrefix = prefix + internalElement.Name + "_";
+                            UpdateExternalInterfaceChildIds(childPrefix, originalInternalElement, internalElement, true);
+                        }
+                    }
+                }
+
+                if (requiredCounter > 0)
+                {
+                    if (prefix.StartsWith("3DFrameType_CartesianCoordinates_"))
+                    {
+                        bool wait = true;
+                    }
+
+                    //  This is working, however a limit is required.
+                    UpdateExternalInterfaceChildIds(prefix,
+                        original.Reference as SystemUnitClassType,
+                        requiresUpdate as SystemUnitClassType,
+                        processChildren: false);
+                }
+
+
+
+
+
+
+
+                //foreach ( InternalLinkType link in original.InternalLink )
+                //{
+                //    string linkName = link.Name;
+                //    InternalLinkType linkToUpdate = requiresUpdate.InternalLink[linkName];
+                //    if ( linkToUpdate != null)
+                //    {
+                //        string newParentLink = CreateUpdatedLinkName(prefix, link.RefPartnerSideA);
+                //        string newThisLink = CreateUpdatedLinkName(prefix, link.RefPartnerSideB);
+
+                //        if (!linkMap.ContainsKey(linkToUpdate.RefPartnerSideA) )
+                //        {
+                //            linkMap.Add(linkToUpdate.RefPartnerSideA, newParentLink);
+                //        }
+                //        linkMap.Add(linkToUpdate.RefPartnerSideB, newThisLink);
+
+                //        linkToUpdate.RefPartnerSideA = newParentLink;
+                //        linkToUpdate.RefPartnerSideB = newThisLink;
+                //    }
+                //}
+
+                //int parentCount = 0;
+                //foreach (ExternalInterfaceType externalInterface in requiresUpdate.ExternalInterface)
+                //{
+                //    string updatedId = "";
+                //    if ( linkMap.TryGetValue(externalInterface.ID, out updatedId))
+                //    {
+                //        externalInterface.ID = updatedId;
+                //    }
+                //    else
+                //    {
+                //        // Is it already complete?
+                //        Guid possible;
+                //        if (Guid.TryParse(externalInterface.ID, out possible))
+                //        {
+                //            parentCount++;
+                //        }
+                //    }
+                //}
+
+                // if the linkMap still contains entries, then need to walk up the tree.
+                //if (parentCount > 0 )
+                //{
+                //    //  This is working, however a limit is required.
+                //    UpdateExternalInterfaceChildIds(prefix,
+                //        original.Reference as SystemUnitClassType,
+                //        requiresUpdate as SystemUnitClassType,
+                //        processChildren: false);
+                //}
+
+
+                //foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
+                //{
+                //    foreach(ExternalInterfaceType externalInterface in internalElement.ExternalInterface)
+                //    {
+                //        string updatedId = "";
+                //        if (linkMap.TryGetValue(externalInterface.ID, out updatedId))
+                //        {
+                //            externalInterface.ID = updatedId;
+                //        }
+                //    }
+                //}
+
+                //if (processChildren)
+                //{
+                //    foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
+                //    {
+                //        InternalElementType originalInternalElement = original.InternalElement[internalElement.Name];
+                //        if (originalInternalElement != null)
+                //        {
+                //            string childPrefix = prefix + internalElement.Name + "_";
+                //            UpdateExternalInterfaceChildIds(childPrefix, originalInternalElement, internalElement, true);
+                //        }
+                //    }
+                //}
+            }
+        }
+
+        private string CreateUpdatedLinkName(string prefix, string refString)
+        {
+            // Guids
+            //Guid potential;
+            //if (Guid.TryParse(refString, out potential))
+            //{
+            //    // This has already been done
+            //    return refString;
+            //}
+            string link = refString;
+
+            // Parse the name out (HasProperty, ComponentOf)
+            string name = GetNodeIdPrefix(refString);
+            string nodeId = IsolateNodeId(refString);
+
+            // Create a new Link
+            //return WebUtility.UrlEncode(name + prefix + nodeId);
+            return name + prefix + nodeId;
+        }
+
 
         private string GetTypeNamePath(SystemUnitClassType type)
         {
@@ -1123,6 +1346,18 @@ namespace MarkdownProcessor
             }
             return nodeId;
         }
+
+        private string GetNodeIdPrefix(string nodeIdString)
+        {
+            string nodeId = IsolateNodeId(nodeIdString);
+
+            int nodeIdIndex = nodeIdString.IndexOf(nodeId);
+
+            string prefix = nodeIdString.Substring(0, nodeIdIndex);
+
+            return prefix;
+        }
+
 
         InternalElementType GetReferenceInternalElement(
             ref SystemUnitClassLibType scl, 
