@@ -301,24 +301,7 @@ namespace MarkdownProcessor
 
                 foreach (var obType in SortedObjectTypes)
                 {
-                    var something = FindOrAddSUC(ref scl_temp, ref rcl_temp, obType.Value);
-                    //if ( obType.Value.ToString().Equals("i=2915"))
-                    //{
-                    //    var somethingElse = something.InternalElement["ShelvingState"];
-                    //    if (somethingElse != null)
-                    //    {
-                    //        var currentState = somethingElse.InternalElement["CurrentState"];
-                    //        if ( currentState != null )
-                    //        {
-                    //            var id = currentState.InternalElement["Id"];
-                    //            if ( id != null )
-                    //            {
-                    //                Debug.WriteLine("CurrentState NodeId = " + id.ID);
-                    //                bool wait = true;
-                    //            }
-                    //        }
-                    //    }
-                    //}
+                    FindOrAddSUC(ref scl_temp, ref rcl_temp, obType.Value);
                 }
 
                 // re-order the rcl_temp and scl_temp in alpha order into the real rcl and scl
