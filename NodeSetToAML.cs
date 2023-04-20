@@ -48,6 +48,7 @@ using Opc.Ua.Export;
 using UANode = MarkdownProcessor.NodeSet.UANode;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
+using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
 using System.Data;
 using Aml.Engine.Adapter;
 using System.Xml.Linq;
@@ -116,6 +117,7 @@ namespace MarkdownProcessor
         private const string OpcLibInfoNamespace = "http://opcfoundation.org/UA/FX/2021/08/OpcUaLibInfo.xsd";
         private UANode structureNode;
         private readonly List<string> ExcludedDataTypeList = new List<string>() { "InstanceNode", "TypeNode" };
+        private Dictionary<string, Dictionary<string,string>> LookupNames = new Dictionary<string, Dictionary<string, string>>();
 
         private List<string> PreventInfiniteRecursionList = new List<string>();
         private const int ua2xslookup_count = 16;
@@ -1172,7 +1174,7 @@ namespace MarkdownProcessor
                     typeDefSucCreated.AddInstance(targetInternalElement);
 
                     Dictionary<string, string> oldExternalInterface = new Dictionary<string, string>();
-                    foreach(ExternalInterfaceType externalInterface in typeDefInternalElement.ExternalInterface)
+                    foreach (ExternalInterfaceType externalInterface in typeDefInternalElement.ExternalInterface)
                     {
                         oldExternalInterface.Add(externalInterface.ID, externalInterface.Name);
                     }
@@ -1183,7 +1185,7 @@ namespace MarkdownProcessor
                         newExternalInterface.Add(externalInterface.Name, externalInterface.ID);
                     }
 
-                    foreach( InternalLinkType existingLink in typeDefSucCreated.InternalLink)
+                    foreach (InternalLinkType existingLink in typeDefSucCreated.InternalLink)
                     {
                         string linkName;
                         if (oldExternalInterface.TryGetValue(existingLink.RefPartnerSideB, out linkName))
@@ -1201,12 +1203,93 @@ namespace MarkdownProcessor
             return typeDefSucCreated;
         }
 
+        private string GetExistingCreatedPathName(UANode node)
+        {
+            string createdPathName = "";
+
+            string uri = m_modelManager.FindModelUri(node.DecodedNodeId);
+            Dictionary<string, string> uriMap;
+            if (LookupNames.TryGetValue(uri, out uriMap))
+            {
+                string nodePath;
+                if (uriMap.TryGetValue(node.DecodedNodeId.ToString(), out nodePath))
+                {
+                    createdPathName = nodePath;
+                }
+            }
+
+            return createdPathName;
+        }
+
+        private string EqualizeParentNodeId(UAInstance node)
+        {
+            string parentNodeId = node.ParentNodeId;
+
+            string[] parentSplit = node.ParentNodeId.Split(";");
+            if ( parentSplit.Length > 1)
+            {
+                ModelInfo modelInfo = m_modelManager.FindModel(node.DecodedNodeId);
+                parentNodeId = String.Format("ns={0};{1}", 
+                    modelInfo.NamespaceIndex, parentSplit[1]);
+             }
+
+            return parentNodeId;
+        }
+
+        private string GetCreatedPathName(UANode node)
+        {
+            string pathName = GetExistingCreatedPathName(node);
+
+            if (pathName.Length == 0)
+            {
+                UAInstance uaInstance = node as UAInstance;
+                if (uaInstance != null)
+                {
+                    if (uaInstance.ParentNodeId.Length > 0)
+                    {
+                        string parentNodeId = EqualizeParentNodeId(uaInstance);
+                        UANode parentNode = FindNode<NodeSet.UANode>(new NodeId(parentNodeId));
+                        pathName = GetCreatedPathName(parentNode);
+                    }
+                }
+
+                if (pathName.Length > 0)
+                {
+                    pathName += "_";
+                }
+
+                pathName += node.DecodedBrowseName.Name;
+
+                string uri = m_modelManager.FindModelUri(node.DecodedNodeId);
+                if (!LookupNames.ContainsKey(uri))
+                {
+                    LookupNames.Add(uri, new Dictionary<string, string>());
+                }
+
+                string nodeIdString = node.DecodedNodeId.ToString();
+
+                Dictionary<string, string> uriMap = LookupNames[uri];
+
+                // It's still possible that this has already been added, as it is a recursive method
+                string existingPathName;
+                if (!uriMap.TryGetValue(nodeIdString, out existingPathName))
+                {
+                    uriMap.Add(nodeIdString, pathName);
+                }
+            }
+
+            return pathName;
+        }
+
+
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
         {
             var refnode = FindNode<NodeSet.UANode>(nodeId);
             string path = "";
             if (refnode.NodeClass != NodeClass.Method)
-                path = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refnode.DecodedNodeId), refnode.DecodedBrowseName.Name);
+                path = BuildLibraryReference(SUCPrefix, 
+                    m_modelManager.FindModelUri(refnode.DecodedNodeId), 
+                    GetCreatedPathName(refnode));
             SystemUnitFamilyType rtn = scl.CAEXDocument.FindByPath(path) as SystemUnitFamilyType;
 
             if (rtn == null)
@@ -1379,7 +1462,6 @@ namespace MarkdownProcessor
             }
 
             return rtn;
-
         }
 
         #endregion
