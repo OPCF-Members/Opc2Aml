@@ -48,6 +48,7 @@ using Opc.Ua.Export;
 using UANode = MarkdownProcessor.NodeSet.UANode;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
+using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
 using System.Data;
 using Aml.Engine.Adapter;
 using System.Xml.Linq;
@@ -64,6 +65,8 @@ using System.Net;
 using NodeSetToAmlUtils;
 using Org.BouncyCastle.Asn1.X500;
 using Org.BouncyCastle.Ocsp;
+using Org.BouncyCastle.Asn1.Ocsp;
+using static Opc.Ua.RelativePathFormatter;
 
 namespace MarkdownProcessor
 {
@@ -114,6 +117,7 @@ namespace MarkdownProcessor
         private const string OpcLibInfoNamespace = "http://opcfoundation.org/UA/FX/2021/08/OpcUaLibInfo.xsd";
         private UANode structureNode;
         private readonly List<string> ExcludedDataTypeList = new List<string>() { "InstanceNode", "TypeNode" };
+        private Dictionary<string, Dictionary<string,string>> LookupNames = new Dictionary<string, Dictionary<string, string>>();
 
         private List<string> PreventInfiniteRecursionList = new List<string>();
         private const int ua2xslookup_count = 16;
@@ -329,7 +333,6 @@ namespace MarkdownProcessor
                         rcl.Insert(rft, false);
                     }
                 }
-
             }
 
             CreateInstances(); //  add the instances for each model
@@ -611,7 +614,7 @@ namespace MarkdownProcessor
 
             a.RecreateAttributeInstance(at);
 
-            if ( val.TypeInfo != null)
+            if (val.TypeInfo != null)
             {
                 if (bListOf == true)
                 {
@@ -709,7 +712,7 @@ namespace MarkdownProcessor
                                             attributeType.Constraint.Insert(avrt);
                                         }
                                     }
-                                } 
+                                }
                                 else if (refDataType == "Argument")
                                 {
                                     var values = val.Value as Opc.Ua.ExtensionObject[];
@@ -720,9 +723,9 @@ namespace MarkdownProcessor
                                             var argument = value.Body as Opc.Ua.Argument;
                                             if (argument != null)
                                             {
-                                                Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
-                                                    " Method Name " + nodeName + " " + referenceName + " " +
-                                                    argument.Name + " Type " + argument.DataType.ToString());
+                                                //Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
+                                                //    " Method Name " + nodeName + " " + referenceName + " " +
+                                                //    argument.Name + " Type " + argument.DataType.ToString());
 
                                             }
                                         }
@@ -767,14 +770,14 @@ namespace MarkdownProcessor
                             break;
 
                         case BuiltInType.LocalizedText:
-                        {
-                            Opc.Ua.LocalizedText localizedText = (Opc.Ua.LocalizedText)val.Value;
-                            if ( localizedText != null && localizedText.Text != null)
                             {
-                                a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
+                                Opc.Ua.LocalizedText localizedText = (Opc.Ua.LocalizedText)val.Value;
+                                if (localizedText != null && localizedText.Text != null)
+                                {
+                                    a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
+                                }
+                                break;
                             }
-                            break;
-                        }
                     }
                 }
             }
@@ -1000,14 +1003,295 @@ namespace MarkdownProcessor
             return a.ToString();
          }
 
+        private InternalElementType CreateClassInstanceWithIDReplacement(string prefix, SystemUnitFamilyType child)
+        {
+            InternalElementType internalElementType = child.CreateClassInstance();
+
+            InternalElementSequence originalInternalElements = child.InternalElement;
+            InternalElementSequence createdInternalElements = internalElementType.InternalElement;
+
+            CreateClassInstanceUpdateChildIDs(prefix, originalInternalElements, createdInternalElements);
+            CreateClassInstanceUpdateParentIDs(prefix, child, createdInternalElements);
+
+            return internalElementType;
+        }
+
+        private void CreateClassInstanceUpdateChildIDs(
+            string prefix,
+            InternalElementSequence original,
+            InternalElementSequence requiresUpdate)
+        {
+            if (original != null && requiresUpdate != null)
+            {
+                foreach (InternalElementType originalInternalElement in original)
+                {
+                    InternalElementType internalElementRequiresUpdate =
+                        requiresUpdate[originalInternalElement.Name];
+
+                    if (internalElementRequiresUpdate != null)
+                    {
+                        string nodeIdString = IsolateNodeId(originalInternalElement.ID);
+                        string childPrefix = prefix + originalInternalElement.Name + "_";
+
+                        internalElementRequiresUpdate.ID = childPrefix + nodeIdString;
+
+                        // Does not create infinite loop
+                        CreateClassInstanceUpdateChildIDs(childPrefix, 
+                            originalInternalElement.InternalElement,
+                            internalElementRequiresUpdate.InternalElement);
+                    }
+                }
+            }
+        }
+
+        private void CreateClassInstanceUpdateParentIDs(
+            string prefix,
+            SystemUnitClassType original,
+            InternalElementSequence requiresUpdate)
+        {
+            if (original != null && requiresUpdate != null)
+            {
+                List<string> namesWithGuidIds = new List<string>();
+                Dictionary<string, InternalElementType> elementsWithGuidIds = new Dictionary<string, InternalElementType>();
+                foreach (InternalElementType updateInternalElement in requiresUpdate)
+                {
+                    Guid guidId;
+                    if (Guid.TryParse(updateInternalElement.ID, out guidId))
+                    {
+                        namesWithGuidIds.Add(updateInternalElement.Name);
+                        elementsWithGuidIds.Add(updateInternalElement.Name, updateInternalElement);
+                    }
+                }
+
+                if ( namesWithGuidIds.Count > 0)
+                {
+                    if (original.Reference != null)
+                    {
+                        foreach(InternalElementType more in original.Reference)
+                        {
+                            if ( elementsWithGuidIds.ContainsKey(more.Name) )
+                            {
+                                InternalElementType type = elementsWithGuidIds[more.Name];
+                                string nodeIdString = IsolateNodeId(more.ID);
+                                string addPrefix = prefix + more.Name + "_";
+                                type.ID = addPrefix + nodeIdString;
+                                // Now Go Down the hierarchy
+                                CreateClassInstanceUpdateChildIDs(addPrefix, more.InternalElement, type.InternalElement);
+                            }
+                        }
+                        
+                        CreateClassInstanceUpdateParentIDs(prefix, original.Reference, requiresUpdate);
+                    }
+                }
+            }
+        }
+
+        private string GetTypeNamePath(SystemUnitClassType type)
+        {
+            string name = "";
+
+            if ( type.CAEXParent != null)
+            {
+                var baseClassParent = type.CAEXParent as SystemUnitClassLibType;
+                
+                // This prevents going down a useless path
+                if ( baseClassParent == null)
+                {
+                    if (type.Reference != null)
+                    {
+                        name = GetTypeNamePath(type.Reference);
+                    }
+                }
+            }
+
+            name += type.Name + "_";
+
+            return name;
+        }
+
+        private string IsolateNodeId(string nodeIdString)
+        {
+            string nodeId = nodeIdString;
+
+            if (!nodeIdString.StartsWith("nsu%3D") )
+            {
+                int startIndex = nodeIdString.IndexOf("nsu%3D");
+                if (startIndex > 0)
+                {
+                    nodeId = nodeIdString.Substring(startIndex);
+                }
+            }
+            return nodeId;
+        }
+
+        InternalElementType GetReferenceInternalElement(
+            ref SystemUnitClassLibType scl, 
+            ref RoleClassLibType rcl,
+            SystemUnitFamilyType parent,
+            NodeId typedefNodeId, NodeId targetId)
+        {
+            string pathToType = GetTypeNamePath(parent);
+
+            SystemUnitFamilyType typeDefSuc = FindOrAddSUC(ref scl, ref rcl, typedefNodeId);
+            string prefix = pathToType + typeDefSuc.Name + "_";
+
+            SystemUnitFamilyType targetChild = null;
+
+            if (!typedefNodeId.Equals(targetId))
+            {
+                targetChild = FindOrAddSUC(ref scl, ref rcl, targetId);
+                prefix = pathToType + targetChild.Name + "_";
+            }
+
+            var typeDefSucCreated = CreateClassInstanceWithIDReplacement(prefix, typeDefSuc);
+
+            if (typedefNodeId.Equals(targetId))
+            {
+                // No Work Required
+                return typeDefSucCreated;
+            }
+
+            // Never seen InternalElement not null
+            var typeDefSequence = typeDefSucCreated.InternalElement;
+            var targetCreated = CreateClassInstanceWithIDReplacement(prefix, targetChild);
+
+            // Walk through the targetCreated, and only add those items that are missing in the typedefsuccreated.
+            // TargetChild should never be returned.
+
+            InternalElementSequence targetSequence = targetCreated.InternalElement;
+
+            foreach (InternalElementType targetInternalElement in targetSequence)
+            {
+                InternalElementType typeDefInternalElement = typeDefSequence[targetInternalElement.Name];
+                if (typeDefInternalElement == null)
+                {
+                    typeDefSucCreated.AddInstance(targetInternalElement);
+                    // ExternalInterfaces??
+                }
+                else
+                {
+                    typeDefSequence.RemoveElement(typeDefInternalElement);
+                    typeDefSucCreated.AddInstance(targetInternalElement);
+
+                    Dictionary<string, string> oldExternalInterface = new Dictionary<string, string>();
+                    foreach (ExternalInterfaceType externalInterface in typeDefInternalElement.ExternalInterface)
+                    {
+                        oldExternalInterface.Add(externalInterface.ID, externalInterface.Name);
+                    }
+
+                    Dictionary<string, string> newExternalInterface = new Dictionary<string, string>();
+                    foreach (ExternalInterfaceType externalInterface in targetInternalElement.ExternalInterface)
+                    {
+                        newExternalInterface.Add(externalInterface.Name, externalInterface.ID);
+                    }
+
+                    foreach (InternalLinkType existingLink in typeDefSucCreated.InternalLink)
+                    {
+                        string linkName;
+                        if (oldExternalInterface.TryGetValue(existingLink.RefPartnerSideB, out linkName))
+                        {
+                            string newLink;
+                            if (newExternalInterface.TryGetValue(linkName, out newLink))
+                            {
+                                existingLink.RefPartnerSideB = newLink;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return typeDefSucCreated;
+        }
+
+        private string GetExistingCreatedPathName(UANode node)
+        {
+            string createdPathName = "";
+
+            string uri = m_modelManager.FindModelUri(node.DecodedNodeId);
+            Dictionary<string, string> uriMap;
+            if (LookupNames.TryGetValue(uri, out uriMap))
+            {
+                string nodePath;
+                if (uriMap.TryGetValue(node.DecodedNodeId.ToString(), out nodePath))
+                {
+                    createdPathName = nodePath;
+                }
+            }
+
+            return createdPathName;
+        }
+
+        private string EqualizeParentNodeId(UAInstance node)
+        {
+            string parentNodeId = node.ParentNodeId;
+
+            string[] parentSplit = node.ParentNodeId.Split(";");
+            if ( parentSplit.Length > 1)
+            {
+                ModelInfo modelInfo = m_modelManager.FindModel(node.DecodedNodeId);
+                parentNodeId = String.Format("ns={0};{1}", 
+                    modelInfo.NamespaceIndex, parentSplit[1]);
+             }
+
+            return parentNodeId;
+        }
+
+        private string GetCreatedPathName(UANode node)
+        {
+            string pathName = GetExistingCreatedPathName(node);
+
+            if (pathName.Length == 0)
+            {
+                UAInstance uaInstance = node as UAInstance;
+                if (uaInstance != null)
+                {
+                    if (uaInstance.ParentNodeId.Length > 0)
+                    {
+                        string parentNodeId = EqualizeParentNodeId(uaInstance);
+                        UANode parentNode = FindNode<NodeSet.UANode>(new NodeId(parentNodeId));
+                        pathName = GetCreatedPathName(parentNode);
+                    }
+                }
+
+                if (pathName.Length > 0)
+                {
+                    pathName += "_";
+                }
+
+                pathName += node.DecodedBrowseName.Name;
+
+                string uri = m_modelManager.FindModelUri(node.DecodedNodeId);
+                if (!LookupNames.ContainsKey(uri))
+                {
+                    LookupNames.Add(uri, new Dictionary<string, string>());
+                }
+
+                string nodeIdString = node.DecodedNodeId.ToString();
+
+                Dictionary<string, string> uriMap = LookupNames[uri];
+
+                // It's still possible that this has already been added, as it is a recursive method
+                string existingPathName;
+                if (!uriMap.TryGetValue(nodeIdString, out existingPathName))
+                {
+                    uriMap.Add(nodeIdString, pathName);
+                }
+            }
+
+            return pathName;
+        }
+
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
         {
             var refnode = FindNode<NodeSet.UANode>(nodeId);
             string path = "";
             if (refnode.NodeClass != NodeClass.Method)
-                path = BuildLibraryReference(SUCPrefix, m_modelManager.FindModelUri(refnode.DecodedNodeId), refnode.DecodedBrowseName.Name);
+                path = BuildLibraryReference(SUCPrefix, 
+                    m_modelManager.FindModelUri(refnode.DecodedNodeId), 
+                    GetCreatedPathName(refnode));
             SystemUnitFamilyType rtn = scl.CAEXDocument.FindByPath(path) as SystemUnitFamilyType;
+
             if (rtn == null)
             {
                 if (m_modelManager.IsTypeOf(nodeId, BaseInterfaceNodeId) == true)
@@ -1033,7 +1317,10 @@ namespace MarkdownProcessor
                 }
                 // now add the SUC with the immediate elements
                 // starting with the attributes
+
                 rtn = scl.SystemUnitClass.Append(refnode.DecodedBrowseName.Name);
+                // Helpful for Debugging
+                //AddModifyAttribute(rtn.Attribute, "NodeId", "String", AmlIDFromNodeId(nodeId));
                 if (BaseNodeId != null)
                 {
                     rtn.ID = AmlIDFromNodeId(nodeId);
@@ -1095,7 +1382,6 @@ namespace MarkdownProcessor
                     }
                                      
                 }
-                
 
                 // now add the references and contained objects
                 var refList = m_modelManager.FindReferences(nodeId);
@@ -1116,13 +1402,14 @@ namespace MarkdownProcessor
                                     TypeDefNodeId = m_modelManager.FindFirstTarget(reference.TargetId, HasTypeDefinitionNodeId, true);
                                 if (TypeDefNodeId == null)
                                     TypeDefNodeId = reference.TargetId;
-                                var child = FindOrAddSUC(ref scl, ref rcl, TypeDefNodeId);
 
-                                // var ie = suc.New_InternalElement(targetotNode.DecodedBrowseName.Name);
-                                var ie = child.CreateClassInstance();  //need to rewite to eliminate calls to CreateClassInstance in order to set the ID.
-                                rtn.AddInstance(ie);
+                                var ie = GetReferenceInternalElement(ref scl, ref rcl,
+                                    rtn, TypeDefNodeId, reference.TargetId);
+
                                 ie.Name = targetNode.DecodedBrowseName.Name;
                                 ie.ID = AmlIDFromNodeId(reference.TargetId);
+                                rtn.AddInstance(ie);
+
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
                                 SetBrowseNameUri(ie.Attribute, targetNode, basenode);
                                 if (targetNode.NodeClass == NodeClass.Variable)
@@ -1167,17 +1454,14 @@ namespace MarkdownProcessor
                             {
                                 rtn.InternalElement.Append(element);
                             }
-
-
-
                         }
                     }
                 }
                 rtn.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);  // all UA SUCs support the UaBaseRole
+
             }
 
             return rtn;
-
         }
 
         #endregion
@@ -1593,6 +1877,8 @@ namespace MarkdownProcessor
 
         InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd) where T : IInternalElementContainer
         {
+            string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
+
             //first see if node already exists
             var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
             if (ie == null)
@@ -1602,7 +1888,7 @@ namespace MarkdownProcessor
                 var TypeDefNodeId = m_modelManager.FindFirstTarget(toAdd.DecodedNodeId, HasTypeDefinitionNodeId, true);
                 var path = BaseRefFromNodeId(TypeDefNodeId, SUCPrefix);
                 suc = m_cAEXDocument.FindByPath(path) as SystemUnitFamilyType;
-              
+
                 if (suc == null && toAdd.NodeClass == NodeClass.Method)
                 {
                     suc = m_cAEXDocument.FindByPath( BuildLibraryReference( SUCPrefix, MetaModelName, MethodNodeClass)) as SystemUnitFamilyType;
@@ -1614,17 +1900,19 @@ namespace MarkdownProcessor
                 Debug.Assert(suc != null);
 
                 // check if instance already exists before adding a new one  #11
-                string id = AmlIDFromNodeId(toAdd.DecodedNodeId);
-                ie = (InternalElementType)m_cAEXDocument.FindByID(id);
+                ie = (InternalElementType)m_cAEXDocument.FindByID(amlId);
                 if (ie != null)
                     return ie;
 
+                string prefix = toAdd.DecodedBrowseName.Name;
+                if ( prefix.StartsWith("http://"))
+                {
+                    prefix = WebUtility.UrlEncode(toAdd.DecodedBrowseName.Name);
+                }
 
-                ie = suc.CreateClassInstance();  // this crates GUID IDs for all the sub-elements
+                ie = CreateClassInstanceWithIDReplacement(prefix + "_", suc);
                 ie.Name = toAdd.DecodedBrowseName.Name;
-                ie.ID = id;  // decided not to replace the GUID IDs in the top level instances
                 SetBrowseNameUri(ie.Attribute, toAdd);
-                
                 
                 AttributeType a = ie.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
                 a.AttributeDataType = "xs:anyURI";
@@ -1636,6 +1924,10 @@ namespace MarkdownProcessor
 
             }
             Debug.Assert(ie != null);
+
+            // Just because the ie (InternalElement) was found in the parent does not mean that the ID was correctly set.
+            // Set/reset the Id even though it might already be done correctly.
+            ie.ID = amlId;
 
             // set the values to match the values in the nodeset
             if (toAdd.NodeClass == NodeClass.Variable)
