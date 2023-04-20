@@ -1149,11 +1149,6 @@ namespace MarkdownProcessor
         {
             string pathToType = GetTypeNamePath(parent);
 
-            if ( targetId.ToString().Equals("i=9179"))
-            {
-                bool wait = true;
-            }
-
             SystemUnitFamilyType typeDefSuc = FindOrAddSUC(ref scl, ref rcl, typedefNodeId);
             string prefix = pathToType + typeDefSuc.Name + "_";
 
@@ -1249,19 +1244,9 @@ namespace MarkdownProcessor
             string[] parentSplit = node.ParentNodeId.Split(";");
             if ( parentSplit.Length > 1)
             {
-                string[] nodeIdSplit = node.DecodedNodeId.ToString().Split(";");
-                if ( nodeIdSplit.Length == parentSplit.Length ) 
-                {
-                    if ( nodeIdSplit.Length != 2 )
-                    {
-                        bool unexpected = true;
-                    }
-                    parentNodeId = nodeIdSplit[0] + ";" + parentSplit[1];
-                }
-                else
-                {
-                    bool unexpected = true;
-                }
+                ModelInfo modelInfo = m_modelManager.FindModel(node.DecodedNodeId);
+                parentNodeId = String.Format("ns={0};{1}", 
+                    modelInfo.NamespaceIndex, parentSplit[1]);
              }
 
             return parentNodeId;
@@ -1269,10 +1254,6 @@ namespace MarkdownProcessor
 
         private string GetCreatedPathName(UANode node)
         {
-            if ( node.NodeId.Equals("i=9178"))
-            {
-                bool wait = true;
-            }
             string pathName = GetExistingCreatedPathName(node);
 
             if (pathName.Length == 0)
@@ -1302,7 +1283,6 @@ namespace MarkdownProcessor
                 }
 
                 string nodeIdString = node.DecodedNodeId.ToString();
-                //string nodeIdString = node.NodeId;
 
                 Dictionary<string, string> uriMap = LookupNames[uri];
 
@@ -1312,48 +1292,11 @@ namespace MarkdownProcessor
                 {
                     uriMap.Add(nodeIdString, pathName);
                 }
-                else
-                {
-                    if (!pathName.Equals(existingPathName))
-                    {
-                        bool wait = true;
-                    }
-                }
             }
 
             return pathName;
         }
 
-        void archieDebug(SystemUnitClassType type, string[] elements)
-        {
-            string name = type.Name;
-            InternalElementType next = null;
-            foreach (string element in elements)
-            {
-                if (next == null)
-                {
-                    var potentialInitial = type.InternalElement[element];
-                    if (potentialInitial != null)
-                    {
-                        name = name + ":" + element;
-                        next = potentialInitial;
-                    }
-                }
-                else
-                {
-                    var potential = next.InternalElement[element];
-                    if (potential != null)
-                    {
-                        name = name + ":" + element;
-                        next = potential;
-                    }
-                }
-            }
-            if ( next != null ) { 
-                Debug.WriteLine("Archie Debug " + name + " NodeId = " + next.ID);
-                bool wait = true;
-            }
-        }
 
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
         {
@@ -1364,29 +1307,6 @@ namespace MarkdownProcessor
                     m_modelManager.FindModelUri(refnode.DecodedNodeId), 
                     GetCreatedPathName(refnode));
             SystemUnitFamilyType rtn = scl.CAEXDocument.FindByPath(path) as SystemUnitFamilyType;
-            string message = String.Format("FindOrAddSUC {0} - {1}:{2} ", 
-                rtn == null ? "Creating": "Returning Existing",
-                refnode.BrowseName,
-                refnode.NodeId);
-//            Debug.WriteLine(message + "Starting");
-            bool alarmType = false;
-            bool shelvingState = false;
-            bool currentState = false;
-
-            if (refnode.NodeId.Equals("i=2915"))
-            {
-                alarmType = true;
-            }
-
-            if (refnode.NodeId.Equals("i=9178"))
-            {
-                shelvingState = true;
-            }
-
-            if (refnode.NodeId.Equals("i=9179"))
-            {
-                currentState = true;
-            }
 
             if (rtn == null)
             {
@@ -1499,20 +1419,8 @@ namespace MarkdownProcessor
                                 if (TypeDefNodeId == null)
                                     TypeDefNodeId = reference.TargetId;
 
-                                if (alarmType && targetNode.NodeId.Equals("i=9178"))
-                                {
-                                    bool wait = true;
-                                }
-
                                 var ie = GetReferenceInternalElement(ref scl, ref rcl,
                                     rtn, TypeDefNodeId, reference.TargetId);
-
-                                if (alarmType && targetNode.NodeId.Equals("i=9178"))
-                                {
-                                    archieDebug(ie, new string[]{ "CurrentState", "Id"});
-                                }
-
-                                
 
                                 ie.Name = targetNode.DecodedBrowseName.Name;
                                 ie.ID = AmlIDFromNodeId(reference.TargetId);
@@ -1569,24 +1477,7 @@ namespace MarkdownProcessor
 
             }
 
-            if ( alarmType )
-            {
-                archieDebug(rtn, new string[] { "ShelvingState", "CurrentState", "Id" });
-            }
-
-            if (shelvingState)
-            {
-                archieDebug(rtn, new string[] { "CurrentState", "Id" });
-            }
-
-            if (currentState)
-            {
-                archieDebug(rtn, new string[] { "Id" });
-            }
-
-            //Debug.WriteLine(message + "Completed");
             return rtn;
-
         }
 
         #endregion
