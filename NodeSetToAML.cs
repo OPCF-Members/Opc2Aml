@@ -67,7 +67,6 @@ using Org.BouncyCastle.Asn1.X500;
 using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.Asn1.Ocsp;
 using static Opc.Ua.RelativePathFormatter;
-using Org.BouncyCastle.Tls;
 
 namespace MarkdownProcessor
 {
@@ -1173,8 +1172,6 @@ namespace MarkdownProcessor
             string name = GetNodeIdPrefix(refString);
             string nodeId = IsolateNodeId(refString);
 
-            // Create a new Link
-            //return WebUtility.UrlEncode(name + prefix + nodeId);
             return name + prefix + nodeId;
         }
 
@@ -1331,23 +1328,6 @@ namespace MarkdownProcessor
                 // No Work Required
                 return typeDefSucCreated;
             }
-
-            string title = "GetReferenceInternalElement " + prefix + " ";
-
-            // So, originally, the typedef was returned, but that was after the target overwrote anything that did not exist.
-            // A better approach might be to gather everything in the target, then walk the typedef, and add anything that doesn't exist.
-            // Not sure when the rename needs to take place.
-            // Gather the information first.
-
-            // So now we have the proper source external interface, I hope
-            // What happens with this?  Same approach
-
-            // to start, save all internalentities, internal links, and externalinterfaces.
-
-            // The Internal Link has the name.
-
-            // If there is an internalEntity, it must have an internal link.  Right?
-            // Then if there is an InternalEntity, I can create the ExternalInterface.
 
             var targetCreated = CreateClassInstanceWithIDReplacement(prefix, targetChild);
 

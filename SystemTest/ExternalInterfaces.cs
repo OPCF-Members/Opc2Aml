@@ -24,11 +24,10 @@ namespace SystemTest
             {
                 foreach (FileInfo fileInfo in TestHelper.RetrieveFiles())
                 {
-                    if (fileInfo.Name.Equals("Opc.Ua.NodeSet2.xml.amlx"))
-//                        if (fileInfo.Name.Equals("TestEnums.xml.amlx"))
-                        {
-                            m_container = new AutomationMLContainer(fileInfo.FullName,
-                            System.IO.FileMode.Open, FileAccess.Read);
+                    if (fileInfo.Name.Equals("TestEnums.xml.amlx"))
+                    {
+                        m_container = new AutomationMLContainer(fileInfo.FullName,
+                        System.IO.FileMode.Open, FileAccess.Read);
                         Assert.IsNotNull(m_container, "Unable to find container");
                         CAEXDocument document = CAEXDocument.LoadFromStream(m_container.RootDocumentStream());
                         Assert.IsNotNull(document, "Unable to find document");
