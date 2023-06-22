@@ -232,5 +232,30 @@ namespace SystemTest
 
             return resultingAmlFile;
         }
+
+        static public bool WriteFile(string fileName, List<string> lines)
+        {
+            bool success = false;
+
+            try
+            {
+                System.IO.StreamWriter writer = new System.IO.StreamWriter(fileName);
+
+                for (int index = 0; index < lines.Count; index++)
+                {
+                    writer.WriteLine(lines[index]);
+                }
+
+                writer.Close();
+
+                success = true;
+            }
+            catch
+            {
+            }
+
+            return success;
+        }
+
     }
 }

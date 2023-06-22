@@ -67,6 +67,7 @@ using Org.BouncyCastle.Asn1.X500;
 using Org.BouncyCastle.Ocsp;
 using Org.BouncyCastle.Asn1.Ocsp;
 using static Opc.Ua.RelativePathFormatter;
+using Org.BouncyCastle.Tls;
 
 namespace MarkdownProcessor
 {
@@ -841,11 +842,6 @@ namespace MarkdownProcessor
                             }
                         }
                     }
-                    else
-                    {
-                        // This is where my Class ValueAsType should go.
-                        Debug.WriteLine("Update Derived cannot find " + referenceName + " for  " + internalElement.Name);
-                    }
                 }
             }
         }
@@ -1006,6 +1002,8 @@ namespace MarkdownProcessor
         private InternalElementType CreateClassInstanceWithIDReplacement(string prefix, SystemUnitFamilyType child)
         {
             InternalElementType internalElementType = child.CreateClassInstance();
+            
+            CompareLinksToExternaInterfaces(child, internalElementType);
 
             InternalElementSequence originalInternalElements = child.InternalElement;
             InternalElementSequence createdInternalElements = internalElementType.InternalElement;
@@ -1013,8 +1011,7 @@ namespace MarkdownProcessor
             UpdateInternalElementChildIds(prefix, originalInternalElements, createdInternalElements);
             UpdateInternalElementParentIds(prefix, child, createdInternalElements);
 
-            UpdateExternalInterfaceChildIds(prefix, child, internalElementType, processChildren: true);
-
+            UpdateExternalInterfaceChildIds(prefix, child, internalElementType);
 
             return internalElementType;
         }
@@ -1092,23 +1089,11 @@ namespace MarkdownProcessor
         private void UpdateExternalInterfaceChildIds(
             string prefix,
             SystemUnitClassType original,
-            SystemUnitClassType requiresUpdate,
-            bool processChildren)
+            SystemUnitClassType requiresUpdate)
         {
             if (original != null && requiresUpdate != null)
             {
-                if (prefix.StartsWith("3DFrameType_CartesianCoordinates_"))
-                {
-                    bool wait = true;
-                }
                 Dictionary<string, string> linkMap = new Dictionary<string, string>();
-                if (original.InternalLink.Count != requiresUpdate.InternalLink.Count)
-                {
-                    Debug.WriteLine(prefix + " Counts differ original " + original.InternalLink.Count +
-                        " requires update " + requiresUpdate.InternalLink.Count);
-                }
-
-
                 // This logic only updates the link if it is all found
                 Dictionary<string, string> linkMap2 = new Dictionary<string, string>();
                 int requiredCounter = 0;
@@ -1135,13 +1120,7 @@ namespace MarkdownProcessor
                         else
                         {
                             requiredCounter++;
-                            bool wait = true;
                         }
-                    }
-                    else
-                    {
-                        // This is already fixed
-                        bool wait = true;
                     }
                 }
 
@@ -1166,137 +1145,28 @@ namespace MarkdownProcessor
                     }
                 }
 
-                //foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
-                //{
-                //    foreach (ExternalInterfaceType externalInterface in internalElement.ExternalInterface)
-                //    {
-                //        string updatedId = "";
-                //        if (linkMap.TryGetValue(externalInterface.ID, out updatedId))
-                //        {
-                //            externalInterface.ID = updatedId;
-                //        }
-                //    }
-                //}
-
-                if (processChildren)
+                foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
                 {
-                    foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
+                    InternalElementType originalInternalElement = original.InternalElement[internalElement.Name];
+                    if (originalInternalElement != null)
                     {
-                        InternalElementType originalInternalElement = original.InternalElement[internalElement.Name];
-                        if (originalInternalElement != null)
-                        {
-                            string childPrefix = prefix + internalElement.Name + "_";
-                            UpdateExternalInterfaceChildIds(childPrefix, originalInternalElement, internalElement, true);
-                        }
+                        string childPrefix = prefix + internalElement.Name + "_";
+                        UpdateExternalInterfaceChildIds(childPrefix, originalInternalElement, internalElement);
                     }
                 }
 
                 if (requiredCounter > 0)
                 {
-                    if (prefix.StartsWith("3DFrameType_CartesianCoordinates_"))
-                    {
-                        bool wait = true;
-                    }
-
                     //  This is working, however a limit is required.
                     UpdateExternalInterfaceChildIds(prefix,
                         original.Reference as SystemUnitClassType,
-                        requiresUpdate as SystemUnitClassType,
-                        processChildren: false);
+                        requiresUpdate as SystemUnitClassType);
                 }
-
-
-
-
-
-
-
-                //foreach ( InternalLinkType link in original.InternalLink )
-                //{
-                //    string linkName = link.Name;
-                //    InternalLinkType linkToUpdate = requiresUpdate.InternalLink[linkName];
-                //    if ( linkToUpdate != null)
-                //    {
-                //        string newParentLink = CreateUpdatedLinkName(prefix, link.RefPartnerSideA);
-                //        string newThisLink = CreateUpdatedLinkName(prefix, link.RefPartnerSideB);
-
-                //        if (!linkMap.ContainsKey(linkToUpdate.RefPartnerSideA) )
-                //        {
-                //            linkMap.Add(linkToUpdate.RefPartnerSideA, newParentLink);
-                //        }
-                //        linkMap.Add(linkToUpdate.RefPartnerSideB, newThisLink);
-
-                //        linkToUpdate.RefPartnerSideA = newParentLink;
-                //        linkToUpdate.RefPartnerSideB = newThisLink;
-                //    }
-                //}
-
-                //int parentCount = 0;
-                //foreach (ExternalInterfaceType externalInterface in requiresUpdate.ExternalInterface)
-                //{
-                //    string updatedId = "";
-                //    if ( linkMap.TryGetValue(externalInterface.ID, out updatedId))
-                //    {
-                //        externalInterface.ID = updatedId;
-                //    }
-                //    else
-                //    {
-                //        // Is it already complete?
-                //        Guid possible;
-                //        if (Guid.TryParse(externalInterface.ID, out possible))
-                //        {
-                //            parentCount++;
-                //        }
-                //    }
-                //}
-
-                // if the linkMap still contains entries, then need to walk up the tree.
-                //if (parentCount > 0 )
-                //{
-                //    //  This is working, however a limit is required.
-                //    UpdateExternalInterfaceChildIds(prefix,
-                //        original.Reference as SystemUnitClassType,
-                //        requiresUpdate as SystemUnitClassType,
-                //        processChildren: false);
-                //}
-
-
-                //foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
-                //{
-                //    foreach(ExternalInterfaceType externalInterface in internalElement.ExternalInterface)
-                //    {
-                //        string updatedId = "";
-                //        if (linkMap.TryGetValue(externalInterface.ID, out updatedId))
-                //        {
-                //            externalInterface.ID = updatedId;
-                //        }
-                //    }
-                //}
-
-                //if (processChildren)
-                //{
-                //    foreach (InternalElementType internalElement in requiresUpdate.InternalElement)
-                //    {
-                //        InternalElementType originalInternalElement = original.InternalElement[internalElement.Name];
-                //        if (originalInternalElement != null)
-                //        {
-                //            string childPrefix = prefix + internalElement.Name + "_";
-                //            UpdateExternalInterfaceChildIds(childPrefix, originalInternalElement, internalElement, true);
-                //        }
-                //    }
-                //}
             }
         }
 
         private string CreateUpdatedLinkName(string prefix, string refString)
         {
-            // Guids
-            //Guid potential;
-            //if (Guid.TryParse(refString, out potential))
-            //{
-            //    // This has already been done
-            //    return refString;
-            //}
             string link = refString;
 
             // Parse the name out (HasProperty, ComponentOf)
@@ -1358,12 +1228,88 @@ namespace MarkdownProcessor
             return prefix;
         }
 
+        private void CompareLinksToExternaInterfaces(SystemUnitClassType child, SystemUnitClassType checkIt)
+        {
+            // The externalInterfaces should be RefA in the links
+            Dictionary<string, bool> externalInterfaces = new Dictionary<string, bool>();
+            foreach (ExternalInterfaceType externalInterface in checkIt.ExternalInterface)
+            {
+                externalInterfaces.Add(externalInterface.ID, false);
+            }
+
+            foreach(InternalLinkType internalLink in checkIt.InternalLink)
+            {
+                if (externalInterfaces.ContainsKey(internalLink.RefPartnerSideA))
+                {
+                    externalInterfaces[internalLink.RefPartnerSideA] = true;
+                }
+            }
+
+            bool outputAll = false;
+            foreach(KeyValuePair<string, bool> entry in externalInterfaces)
+            {
+                if (!entry.Value) 
+                {
+                    outputAll = true;
+                }
+            }
+
+            if ( outputAll )
+            {
+                bool deleted = true;
+                while (deleted)
+                {
+                    deleted = false;
+                    foreach (ExternalInterfaceType externalInterface in checkIt.ExternalInterface)
+                    {
+                        bool found = externalInterfaces[externalInterface.ID];
+                        // Debugging
+                        //Debug.WriteLine("CompareLinksToExternaInterfaces " + checkIt.Name + " - " + externalInterface.Name +
+                        //    " ID " + externalInterface.ID +
+                        //    " [" + found.ToString() + "]");
+
+                        if (!found)
+                        {
+                            checkIt.ExternalInterface.RemoveElement(externalInterface);
+                            deleted = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        string GetExternalInterfaceName(ExternalInterfaceSequence externalInterfaces, InternalLinkType internalLinkType, bool source)
+        {
+            string interfaceName = "";
+
+            string internalLinkReference = internalLinkType.RefPartnerSideB;
+            if ( source  )
+            {
+                internalLinkReference = internalLinkType.RefPartnerSideA;
+            }
+
+            foreach( ExternalInterfaceType externalInterfaceType in externalInterfaces)
+            {
+                if ( externalInterfaceType.ID == internalLinkReference )
+                {
+                    interfaceName = externalInterfaceType.Name;
+                }
+            }
+            return interfaceName;
+        }
+
+        private struct InternalElementsAndLinks
+        {
+            public InternalElementType ElementType;
+            public InternalLinkType LinkType;
+        };
 
         InternalElementType GetReferenceInternalElement(
-            ref SystemUnitClassLibType scl, 
+            ref SystemUnitClassLibType scl,
             ref RoleClassLibType rcl,
             SystemUnitFamilyType parent,
-            NodeId typedefNodeId, NodeId targetId)
+            NodeId typedefNodeId,
+            NodeId targetId)
         {
             string pathToType = GetTypeNamePath(parent);
 
@@ -1386,54 +1332,123 @@ namespace MarkdownProcessor
                 return typeDefSucCreated;
             }
 
-            // Never seen InternalElement not null
-            var typeDefSequence = typeDefSucCreated.InternalElement;
+            string title = "GetReferenceInternalElement " + prefix + " ";
+
+            // So, originally, the typedef was returned, but that was after the target overwrote anything that did not exist.
+            // A better approach might be to gather everything in the target, then walk the typedef, and add anything that doesn't exist.
+            // Not sure when the rename needs to take place.
+            // Gather the information first.
+
+            // So now we have the proper source external interface, I hope
+            // What happens with this?  Same approach
+
+            // to start, save all internalentities, internal links, and externalinterfaces.
+
+            // The Internal Link has the name.
+
+            // If there is an internalEntity, it must have an internal link.  Right?
+            // Then if there is an InternalEntity, I can create the ExternalInterface.
+
             var targetCreated = CreateClassInstanceWithIDReplacement(prefix, targetChild);
 
-            // Walk through the targetCreated, and only add those items that are missing in the typedefsuccreated.
-            // TargetChild should never be returned.
+            Dictionary<string, InternalElementsAndLinks> typeDefDictionary = new Dictionary<string, InternalElementsAndLinks>();
+            Dictionary<string, InternalElementsAndLinks> targetDictionary = new Dictionary<string, InternalElementsAndLinks>();
 
-            InternalElementSequence targetSequence = targetCreated.InternalElement;
-
-            foreach (InternalElementType targetInternalElement in targetSequence)
+            foreach (InternalElementType internalElementType in targetCreated.InternalElement)
             {
-                InternalElementType typeDefInternalElement = typeDefSequence[targetInternalElement.Name];
-                if (typeDefInternalElement == null)
+                InternalLinkType internalLinkType = targetCreated.InternalLink[internalElementType.Name];
+
+                // Never seen null
+                if (internalLinkType != null) 
                 {
-                    typeDefSucCreated.AddInstance(targetInternalElement);
-                    // ExternalInterfaces??
+                    InternalElementsAndLinks addThis = new InternalElementsAndLinks();
+                    addThis.ElementType = internalElementType;
+                    addThis.LinkType = internalLinkType;
+                    targetDictionary.Add(internalElementType.Name, addThis);
                 }
-                else
+            }
+
+            foreach (InternalElementType internalElementType in typeDefSucCreated.InternalElement)
+            {
+                InternalLinkType internalLinkType = typeDefSucCreated.InternalLink[internalElementType.Name];
+                // Never seen null
+                if (internalLinkType != null)
                 {
-                    typeDefSequence.RemoveElement(typeDefInternalElement);
-                    typeDefSucCreated.AddInstance(targetInternalElement);
+                    InternalElementsAndLinks addThis = new InternalElementsAndLinks();
+                    addThis.ElementType = internalElementType;
+                    addThis.LinkType = internalLinkType;
+                    typeDefDictionary.Add(internalElementType.Name, addThis);
+                }
+            }
 
-                    Dictionary<string, string> oldExternalInterface = new Dictionary<string, string>();
-                    foreach (ExternalInterfaceType externalInterface in typeDefInternalElement.ExternalInterface)
-                    {
-                        oldExternalInterface.Add(externalInterface.ID, externalInterface.Name);
-                    }
+            Dictionary<string, ExternalInterfaceType> usedInterfaces = new Dictionary<string, ExternalInterfaceType>();
+            Dictionary<string, InternalElementsAndLinks> usedInternalElements = new Dictionary<string, InternalElementsAndLinks>();
 
-                    Dictionary<string, string> newExternalInterface = new Dictionary<string, string>();
-                    foreach (ExternalInterfaceType externalInterface in targetInternalElement.ExternalInterface)
+            foreach (KeyValuePair<string, InternalElementsAndLinks> entry in typeDefDictionary)
+            {
+                InternalLinkType internalLinkType = entry.Value.LinkType;
+                foreach (ExternalInterfaceType externalInterfaceType in typeDefSucCreated.ExternalInterface)
+                {
+                    if (internalLinkType.RefPartnerSideA.Equals(externalInterfaceType.ID))
                     {
-                        newExternalInterface.Add(externalInterface.Name, externalInterface.ID);
-                    }
-
-                    foreach (InternalLinkType existingLink in typeDefSucCreated.InternalLink)
-                    {
-                        string linkName;
-                        if (oldExternalInterface.TryGetValue(existingLink.RefPartnerSideB, out linkName))
+                        if (!usedInterfaces.ContainsKey(externalInterfaceType.Name))
                         {
-                            string newLink;
-                            if (newExternalInterface.TryGetValue(linkName, out newLink))
-                            {
-                                existingLink.RefPartnerSideB = newLink;
-                            }
+                            usedInterfaces.Add(externalInterfaceType.Name, externalInterfaceType);
                         }
+
+                        ExternalInterfaceType externalInterface = usedInterfaces[externalInterfaceType.Name];
+                        
+                        internalLinkType.RefPartnerSideA = externalInterface.ID;
+                        usedInternalElements.Add(entry.Key, entry.Value);
+                        break;
                     }
                 }
             }
+
+            foreach (KeyValuePair<string, InternalElementsAndLinks> entry in targetDictionary)
+            {
+                InternalLinkType internalLinkType = entry.Value.LinkType;
+                foreach (ExternalInterfaceType externalInterfaceType in targetCreated.ExternalInterface)
+                {
+                    if (internalLinkType.RefPartnerSideA.Equals(externalInterfaceType.ID))
+                    {
+                        if (!usedInterfaces.ContainsKey(externalInterfaceType.Name))
+                        {
+                            usedInterfaces.Add(externalInterfaceType.Name, externalInterfaceType);
+                        }
+                        ExternalInterfaceType externalInterface = usedInterfaces[externalInterfaceType.Name];
+                        internalLinkType.RefPartnerSideA = externalInterface.ID;
+                        if (usedInternalElements.ContainsKey(entry.Key))
+                        {
+                            usedInternalElements[entry.Key] = entry.Value;
+                        }
+                        else
+                        {
+                            usedInternalElements.Add(entry.Key, entry.Value);
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            // Rebuild.
+            typeDefSucCreated.ExternalInterface.Remove();
+            typeDefSucCreated.InternalLink.Remove();
+            typeDefSucCreated.InternalElement.Remove();
+
+            foreach (ExternalInterfaceType externalInterface in usedInterfaces.Values)
+            {
+                typeDefSucCreated.ExternalInterface.Insert(externalInterface);
+            }
+
+            foreach (KeyValuePair<string, InternalElementsAndLinks> entry in usedInternalElements)
+            {
+                typeDefSucCreated.InternalElement.Insert(entry.Value.ElementType);
+                typeDefSucCreated.InternalLink.Insert(entry.Value.LinkType);
+            }
+
+            CompareLinksToExternaInterfaces(typeDefSucCreated, typeDefSucCreated);
 
             return typeDefSucCreated;
         }
@@ -1618,6 +1633,7 @@ namespace MarkdownProcessor
                                      
                 }
 
+
                 // now add the references and contained objects
                 var refList = m_modelManager.FindReferences(nodeId);
                 foreach (var reference in refList)
@@ -1693,7 +1709,6 @@ namespace MarkdownProcessor
                     }
                 }
                 rtn.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);  // all UA SUCs support the UaBaseRole
-
             }
 
             return rtn;
@@ -2122,6 +2137,7 @@ namespace MarkdownProcessor
                 
                 var TypeDefNodeId = m_modelManager.FindFirstTarget(toAdd.DecodedNodeId, HasTypeDefinitionNodeId, true);
                 var path = BaseRefFromNodeId(TypeDefNodeId, SUCPrefix);
+
                 suc = m_cAEXDocument.FindByPath(path) as SystemUnitFamilyType;
 
                 if (suc == null && toAdd.NodeClass == NodeClass.Method)
@@ -2205,6 +2221,8 @@ namespace MarkdownProcessor
                     }
                 }
             }
+            CompareLinksToExternaInterfaces(ie, ie);
+
             return ie;
         }
 
@@ -2215,6 +2233,10 @@ namespace MarkdownProcessor
             {
                 if (link.RefPartnerSideA == sourceID && link.RefPartnerSideB == destinationID)
                     return link;  // link already exists
+                if (link.Name == linkName)
+                {
+                    ie.InternalLink.RemoveElement(link);
+                }
             }
             // add a new link
             var internalLink = ie.New_InternalLink(linkName);
