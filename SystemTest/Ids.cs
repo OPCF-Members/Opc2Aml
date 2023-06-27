@@ -146,6 +146,7 @@ namespace SystemTest
                 {
                     elements.Add(potentialGuid, path);
                 }
+                WalkInstanceHierarchy(internalElement, interfaces, elements, next);
             }
         }
 
