@@ -31,42 +31,21 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
-using System.Reflection;
 using System.Text;
-//using Microsoft.Office.Interop.Word;
-// using Word = Microsoft.Office.Interop.Word;
 using Opc.Ua;
-using MarkdownProcessor.NodeSet;
 using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
-using System.Reflection.Metadata.Ecma335;
-using Opc.Ua.Export;
 using UANode = MarkdownProcessor.NodeSet.UANode;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
 using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
-using System.Data;
 using Aml.Engine.Adapter;
 using System.Xml.Linq;
-using System.ComponentModel;
-using System.CodeDom;
-// using System.Windows.Forms;
 using System.Linq;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Drawing.Text;
-using Aml.Engine.AmlObjects.Extensions;
-using System.Security.Cryptography.Xml;
 using System.Net;
 using NodeSetToAmlUtils;
-using Org.BouncyCastle.Asn1.X500;
-using Org.BouncyCastle.Ocsp;
-using Org.BouncyCastle.Asn1.Ocsp;
-using static Opc.Ua.RelativePathFormatter;
 
 namespace MarkdownProcessor
 {
@@ -143,17 +122,10 @@ namespace MarkdownProcessor
 
         };
 
-
-
-
-
-
         public NodeSetToAML(ModelManager modelManager)
         {
             m_modelManager = modelManager;
-
         }
-
 
         public T FindNode<T>(NodeId sourceId) where T : UANode 
         {
@@ -164,8 +136,6 @@ namespace MarkdownProcessor
                 throw new Exception( "Can't find node: " + sourceId.ToString() + "   Is your nodeset file missing a <RequiredModel> element?");
             return node as T;
         }
-
-
 
         public void CreateAML(string modelPath, string modelName = null)
         {
@@ -345,8 +315,6 @@ namespace MarkdownProcessor
             container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + modelName + ".aml", UriKind.Relative));
             container.Close();
         }
-
-
 
         private void AddLibaryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
         {
@@ -1433,6 +1401,80 @@ namespace MarkdownProcessor
             return typeDefSucCreated;
         }
 
+        private void RebuildExternalInterfaces(
+            SystemUnitFamilyType parent,
+            SystemUnitClassType systemUnitClass)
+        {
+            string pathToType = GetTypeNamePath(parent);
+            string prefix = pathToType + systemUnitClass.Name + "_";
+
+            RebuildExternalInterfaces(prefix, systemUnitClass);
+        }
+
+
+        private void RebuildExternalInterfaces(
+            string prefix,
+            SystemUnitClassType systemUnitClass )
+        {
+            // The purpose here is to modify the InternalLinks and ExternalInterfaces to be more readable
+            // from the perspective of the systemUnitClass itself.
+
+            string named = ";" + prefix + WebUtility.UrlDecode(systemUnitClass.ID);
+            Debug.WriteLine("Check " + systemUnitClass.ID + " against " + named);
+
+            Dictionary<string, string> oldIdToNewName = new Dictionary<string, string>();
+            Dictionary<string,string>oldToNewName = new Dictionary<string, string>();
+            Dictionary<string, ExternalInterfaceType> newTypes = new Dictionary<string, ExternalInterfaceType>();
+
+            foreach ( ExternalInterfaceType externalInterface in systemUnitClass.ExternalInterface )
+            {
+                AttributeType sourceType = externalInterface.Attribute["IsSource"];
+                if ( sourceType != null )
+                {
+                    if(sourceType.Value.Equals("true"))
+                    {
+                        string[] splitName = externalInterface.Name.Split(":");
+                        if ( splitName.Length > 0 )
+                        {
+                            string newName = splitName[0];
+                            if (!oldToNewName.ContainsKey(externalInterface.Name) )
+                            {
+                                oldIdToNewName.Add(externalInterface.ID, newName);
+                                oldToNewName.Add(externalInterface.Name, newName);
+                                if (!newTypes.ContainsKey(newName))
+                                {
+                                    ExternalInterfaceType replace = (ExternalInterfaceType)externalInterface.Copy(deepCopy: true);
+                                    replace.Name = newName;
+                                    replace.ID = WebUtility.UrlEncode(newName + named);
+                                    newTypes.Add(newName, replace);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach( InternalLinkType internalLink in systemUnitClass.InternalLink)
+            {
+                string newName;
+                if ( oldIdToNewName.TryGetValue(internalLink.RefPartnerSideA, out newName) )
+                {
+                    ExternalInterfaceType newType;
+                    if ( newTypes.TryGetValue(newName, out newType) )
+                    {
+                        internalLink.RefPartnerSideA = newType.ID;
+                    }
+                }
+            }
+
+            // Now wipe the externalInterfaces and add all the new ones
+            systemUnitClass.ExternalInterface.Remove();
+            foreach( ExternalInterfaceType externalInterface in newTypes.Values )
+            {
+                systemUnitClass.ExternalInterface.Insert( externalInterface );
+            }
+        }
+
         private string GetExistingCreatedPathName(UANode node)
         {
             string createdPathName = "";
@@ -1639,6 +1681,10 @@ namespace MarkdownProcessor
 
                                 ie.Name = targetNode.DecodedBrowseName.Name;
                                 ie.ID = AmlIDFromNodeId(reference.TargetId);
+
+                                RebuildExternalInterfaces(rtn, ie);
+
+
                                 rtn.AddInstance(ie);
 
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
@@ -2142,12 +2188,14 @@ namespace MarkdownProcessor
                 }
 
                 ie = CreateClassInstanceWithIDReplacement(prefix + "_", suc);
+                ie.ID = amlId;
                 ie.Name = toAdd.DecodedBrowseName.Name;
                 SetBrowseNameUri(ie.Attribute, toAdd);
-                
+
+                RebuildExternalInterfaces(prefix + "_", ie);
+
                 AttributeType a = ie.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
                 a.AttributeDataType = "xs:anyURI";
-
                 
                 ie.Attribute["UaNodeNamespaceUri"].Value = m_modelManager.FindModelUri(toAdd.DecodedNodeId);
 

@@ -76,8 +76,6 @@ namespace SystemTest
             TestHelper.WriteFile("WalkInstanceHierarchy.txt", output);
 
             Assert.AreEqual(0, LinkInternalElementDifferentCount);
-
-            bool wait = true;
         }
 
         private void WalkInstanceHierarchy(InternalElementType instance, List<string> output, string title, int level = 0)
