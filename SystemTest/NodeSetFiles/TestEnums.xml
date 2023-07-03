@@ -391,6 +391,7 @@
     </UAVariable>
     <UAObject NodeId="ns=1;i=5001" BrowseName="1:EnumTesting" ParentNodeId="i=85">
         <DisplayName>Enumeration Testing</DisplayName>
+		<Description>A Folder to store instances specifically for testing purposes</Description>
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
