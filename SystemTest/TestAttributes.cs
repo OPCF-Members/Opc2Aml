@@ -63,10 +63,22 @@ namespace SystemTest
             "Test a MultiStateValue with Predefined Values on the Type",
             true, DisplayName = "Object Expected Description")]
         [DataRow("Description", "1007", "", false, DisplayName = "Object No Description")]
+
+
         [DataRow("DisplayName", "5001", "Enumeration Testing", true, DisplayName = "Instance Expected DisplayName")]
         [DataRow("DisplayName", "5002", "", false, DisplayName = "Instance No DisplayName")]
         [DataRow("DisplayName", "1007", "Test Connector Type Display Name", true, DisplayName = "Object Expected DisplayName")]
         [DataRow("DisplayName", "1000", "", false, DisplayName = "Object No DisplayName")]
+
+        [DataRow("Description", "7009",
+            "This Method Has a Description",
+            true, DisplayName = "Instance Method Expect Description")]
+        [DataRow("Description", "7018", "", false, DisplayName = "Instance Method No Description")]
+        [DataRow("Description", "7000",
+            "This Method Has a Description",
+            true, DisplayName = "Object Method Expect Description")]
+        [DataRow("Description", "7001", "", false, DisplayName = "Object Method No Description")]
+
         public void TestAttribute(string attribute, string nodeId, 
             string expected, bool expectedToBeFound)
         {
@@ -83,65 +95,9 @@ namespace SystemTest
             }
         }
 
-
-/*
-        [TestMethod]
-        [DataRow("5001", 
-            "A Folder to store instances specifically for testing purposes", 
-            true, DisplayName = "Instance Expected Description")]
-        [DataRow("5002", "", false, DisplayName = "Instance No Description")]
-        public void InstanceDescription(string nodeId, string expectedDescription, bool expectedToBeFound)
-        {
-            TestAttribute("Description", nodeId, expectedDescription, expectedToBeFound);
-        }
-
-        [TestMethod]
-        [DataRow("1000", 
-            "Test a MultiStateValue with Predefined Values on the Type", 
-            true, DisplayName = "Object Expected Description")]
-        [DataRow("1007", "", false, DisplayName = "Object No Description")]
-        public void ObjectDescription(string nodeId, string expectedDescription, bool expectedToBeFound)
-        {
-            TestAttribute("Description", nodeId, expectedDescription, expectedToBeFound);
-        }
-
-
-        [TestMethod]
-        [DataRow("5001", "Enumeration Testing", true, DisplayName = "Instance Expected DisplayName")]
-        [DataRow("5002", "", false, DisplayName = "Instance No DisplayName")]
-        public void InstanceDisplayName(string nodeId, string expectedDisplayName, bool expectedToBeFound)
-        {
-            TestAttribute("DisplayName", nodeId, expectedDisplayName, expectedToBeFound);
-        }
-
-        [TestMethod]
-        [DataRow("1007", "Test Connector Type Display Name", true, DisplayName = "Object Expected DisplayName")]
-        [DataRow("1000", "", false, DisplayName = "Object No DisplayName")]
-        public void ObjectDisplayName(string nodeId, string expectedDisplayName, bool expectedToBeFound)
-        {
-            TestAttribute("DisplayName", nodeId, expectedDisplayName, expectedToBeFound);
-        }
-*/
-
         #endregion
 
         #region Helpers
-
-/*        private void TestAttribute(string attribute, string nodeId, string expected, bool expectedToBeFound)
-        {
-            SystemUnitClassType objectToTest = GetTestObject(nodeId);
-            AttributeType attributeType = objectToTest.Attribute[attribute];
-            if (expectedToBeFound)
-            {
-                Assert.IsNotNull(attributeType, attribute + " attribute not found");
-                Assert.AreEqual(expected, attributeType.Value, "Unexpected value for DisplayName");
-            }
-            else
-            {
-                Assert.IsNull(attributeType, "Unexpected attribute found for " + attribute);
-            }
-        }
-*/
 
         private CAEXDocument GetDocument()
         {

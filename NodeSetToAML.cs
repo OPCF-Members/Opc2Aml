@@ -528,53 +528,41 @@ namespace MarkdownProcessor
 
         }
 
-
-
-        private void AddBaseNodeClassAttributes(IClassWithBaseClassReference owner, bool isAbstract)
-        {
-            // #9 remove unused attributes from base
-            
-          //  AttributeType a = owner.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
-          //  a.AttributeDataType = "xs:anyURI";
-
-          //  AddModifyAttribute(owner.Attribute, "BrowseName", "QualifiedName", Variant.Null);
-          //  AddModifyAttribute(owner.Attribute, "DisplayName", "LocalizedText", Variant.Null);
-
-          //  var abs = AddModifyAttribute(owner.Attribute, "IsAbstract", "Boolean", isAbstract);
-            //   abs.Value = isAbstract ? "true" : "false";
-
-           // AddModifyAttribute(owner.Attribute, "Description", "LocalizedText", Variant.Null);
-          //  AddModifyAttribute(owner.Attribute, "WriteMask", "AttributeWriteMask", Variant.Null);
-           // AddModifyAttribute(owner.Attribute, "RolePermissions", "ListOfRolePermissionType", Variant.Null);
-          //  AddModifyAttribute(owner.Attribute, "AccessRestrictions", "AccessRestrictionType", Variant.Null);
-            
-        }
-
-        private void SetBrowseNameUri( AttributeSequence seq, UANode uanode, UANode basenode = null)
+        private void AddBaseNodeClassAttributes( AttributeSequence seq, UANode uanode, UANode basenode = null)
         {
             // only set the value if different from the base node
             string baseuri = "";
             if (basenode != null )
               baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
             string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
+
+            var browse = seq["BrowseName"];
+            if (browse == null)
+            {
+                browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
+            }
+
             if (myuri != baseuri)
             {
-                var browse = seq["BrowseName"];
-                if (browse == null)
-                {
-                    browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
-                }
                 var uriatt = browse.Attribute["NamespaceURI"];
- 
-                uriatt.Value = myuri;
 
-                if (uanode.DisplayName != null &&
-                    uanode.DisplayName.Length > 0 &&
-                    uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
-                {
-                    AddModifyAttribute(seq, "DisplayName", "LocalizedText",
-                        uanode.DisplayName[0].Value);
-                }
+                uriatt.Value = myuri;
+            }
+
+            if (uanode.DisplayName != null &&
+                uanode.DisplayName.Length > 0 &&
+                uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
+            {
+                AddModifyAttribute(seq, "DisplayName", "LocalizedText",
+                    uanode.DisplayName[0].Value);
+            }
+
+            if (uanode.Description != null &&
+                uanode.Description.Length > 0 &&
+                uanode.Description[0].Value.Length > 0)
+            {
+                AddModifyAttribute(seq, "Description", "LocalizedText",
+                    uanode.Description[0].Value);
             }
         }
 
@@ -1330,7 +1318,7 @@ namespace MarkdownProcessor
                     // override any attribute values
 
                     var basenode = FindNode<NodeSet.UANode>(BaseNodeId);
-                    SetBrowseNameUri(rtn.Attribute, refnode, basenode);
+                    AddBaseNodeClassAttributes(rtn.Attribute, refnode, basenode);
                     switch (refnode.NodeClass)
                     {
                         case NodeClass.ObjectType:
@@ -1361,22 +1349,19 @@ namespace MarkdownProcessor
                     switch (refnode.NodeClass)
                     {
                         case NodeClass.ObjectType:
-                            AddBaseNodeClassAttributes(rtn, false);
                             // AddModifyAttribute(rtn.Attribute, "EventNotifier", "EventNotifierType", Variant.Null); // #9 remove unset attributes
-                            SetBrowseNameUri(rtn.Attribute, refnode);
+                            AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                             break;
                         case NodeClass.VariableType:
-                            AddBaseNodeClassAttributes(rtn, true);
                             // AddModifyAttribute(rtn.Attribute, "ArrayDimensions", "ListOfUInt32", Variant.Null); // #9 remove unset attributes
                            // AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2); // #9 remove unset attributes
                            // AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null); // #9 remove unset attributes
                            // AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null); // #9 remove unset attributes
                            // AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null); // #9 remove unset attributes
-                            SetBrowseNameUri(rtn.Attribute, refnode);
+                            AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                             break;
                         case NodeClass.Method:
-                            AddBaseNodeClassAttributes(rtn, false);
-                            SetBrowseNameUri(rtn.Attribute, refnode);
+                            AddBaseNodeClassAttributes(rtn.Attribute, refnode);
 
                             break;
                     }
@@ -1411,7 +1396,7 @@ namespace MarkdownProcessor
                                 rtn.AddInstance(ie);
 
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
-                                SetBrowseNameUri(ie.Attribute, targetNode, basenode);
+                                AddBaseNodeClassAttributes(ie.Attribute, targetNode, basenode);
                                 if (targetNode.NodeClass == NodeClass.Variable)
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
@@ -1506,9 +1491,6 @@ namespace MarkdownProcessor
             else
             {
                 added.RefBaseClassPath = "AutomationMLInterfaceClassLib/AutomationMLBaseInterface";
-                // add the attributes to the base ReferenceType
-                //    AddBaseNodeClassAttributes(added.Attribute, true);
-
 
              //   AddModifyAttribute(added.Attribute, "InverseName", "LocalizedText", Variant.Null);
              //   AddModifyAttribute(added.Attribute, "ModellingRule", "ModellingRuleType", Variant.Null, false, MetaModelName);
@@ -1893,7 +1875,6 @@ namespace MarkdownProcessor
                 {
                     suc = m_cAEXDocument.FindByPath( BuildLibraryReference( SUCPrefix, MetaModelName, MethodNodeClass)) as SystemUnitFamilyType;
                     Debug.Assert(suc != null);
-                    AddBaseNodeClassAttributes(suc, false);
                     // AddModifyAttribute(suc.Attribute, "Executable", "Boolean", true);  // #7 removed Executable an UserExecutable
                     // AddModifyAttribute(suc.Attribute, "UserExecutable", "Boolean", true);  // #7 removed Executable an UserExecutable
                 }
@@ -1912,7 +1893,7 @@ namespace MarkdownProcessor
 
                 ie = CreateClassInstanceWithIDReplacement(prefix + "_", suc);
                 ie.Name = toAdd.DecodedBrowseName.Name;
-                SetBrowseNameUri(ie.Attribute, toAdd);
+                AddBaseNodeClassAttributes(ie.Attribute, toAdd);
                 
                 AttributeType a = ie.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
                 a.AttributeDataType = "xs:anyURI";
