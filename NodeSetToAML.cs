@@ -2154,6 +2154,7 @@ namespace MarkdownProcessor
         InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd) where T : IInternalElementContainer
         {
             string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
+            string prefix = toAdd.DecodedBrowseName.Name;
 
             //first see if node already exists
             var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
@@ -2181,7 +2182,6 @@ namespace MarkdownProcessor
                 if (ie != null)
                     return ie;
 
-                string prefix = toAdd.DecodedBrowseName.Name;
                 if ( prefix.StartsWith("http://"))
                 {
                     prefix = WebUtility.UrlEncode(toAdd.DecodedBrowseName.Name);
@@ -2191,8 +2191,6 @@ namespace MarkdownProcessor
                 ie.ID = amlId;
                 ie.Name = toAdd.DecodedBrowseName.Name;
                 SetBrowseNameUri(ie.Attribute, toAdd);
-
-                RebuildExternalInterfaces(prefix + "_", ie);
 
                 AttributeType a = ie.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
                 a.AttributeDataType = "xs:anyURI";
@@ -2249,6 +2247,9 @@ namespace MarkdownProcessor
                     }
                 }
             }
+
+            RebuildExternalInterfaces(prefix + "_", ie);
+
             CompareLinksToExternaInterfaces(ie, ie);
 
             return ie;
