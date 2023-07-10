@@ -123,10 +123,8 @@ namespace SystemTest
         public InternalElementType GetObjectToTest(string nodeId)
         {
             CAEXDocument document = GetDocument();
-            InternalElementType objectToTest = null;
             CAEXObject initialObject = document.FindByID(TestHelper.GetRootName() + nodeId);
             Assert.IsNotNull(initialObject, "Unable to find Initial Object");
-            //return initialObject;
             InternalElementType initialInternalElement = initialObject as InternalElementType;
             Assert.IsNotNull(initialInternalElement, "Unable to find Initial Object");
             return initialInternalElement;
