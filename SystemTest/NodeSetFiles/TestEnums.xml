@@ -211,6 +211,8 @@
             <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
             <Reference ReferenceType="HasProperty">ns=1;i=6014</Reference>
             <Reference ReferenceType="HasProperty">ns=1;i=6015</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=7000</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=7001</Reference>
         </References>
     </UAObjectType>
     <UAVariable DataType="UInt16" NodeId="ns=1;i=6014" BrowseName="1:Id" ParentNodeId="ns=1;i=1007" UserAccessLevel="3" AccessLevel="3">
@@ -391,6 +393,7 @@
     </UAVariable>
     <UAObject NodeId="ns=1;i=5001" BrowseName="1:EnumTesting" ParentNodeId="i=85">
         <DisplayName>Enumeration Testing</DisplayName>
+		<Description>A Folder to store instances specifically for testing purposes</Description>
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
@@ -1073,5 +1076,459 @@
                 <uax:Text>InstanceFalseState</uax:Text>
             </uax:LocalizedText>
         </Value>
+    </UAVariable>
+    <UAMethod NodeId="ns=1;i=7000" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=1007">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6078</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6079</Reference>
+        </References>
+    </UAMethod>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6078" BrowseName="InputArguments" ParentNodeId="ns=1;i=7000">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6079" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7000">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+        </References>
+    </UAVariable>
+    <UAMethod NodeId="ns=1;i=7001" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=1007">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6080</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6081</Reference>
+        </References>
+    </UAMethod>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6080" BrowseName="InputArguments" ParentNodeId="ns=1;i=7001">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6081" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7001">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+        </References>
+    </UAVariable>
+    <UAMethod NodeId="ns=1;i=7002" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5006">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5006</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7003" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5005">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5005</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7004" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5007">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5007</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7005" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5010">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5010</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7006" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5008">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5008</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7007" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5009">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7008" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5017">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5017</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7009" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5015">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5015</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7010" BrowseName="1:DescriptionMethod" ParentNodeId="ns=1;i=5016">
+        <DisplayName>DescriptionMethod</DisplayName>
+        <Description>This Method Has a Description</Description>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5016</Reference>
+        </References>
+    </UAMethod>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6082" BrowseName="InputArguments" ParentNodeId="ns=1;i=7002">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7002</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6083" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7002">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7002</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6084" BrowseName="InputArguments" ParentNodeId="ns=1;i=7003">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7003</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6085" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7003">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7003</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6086" BrowseName="InputArguments" ParentNodeId="ns=1;i=7004">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7004</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6087" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7004">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7004</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6088" BrowseName="InputArguments" ParentNodeId="ns=1;i=7005">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7005</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6089" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7005">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7005</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6090" BrowseName="InputArguments" ParentNodeId="ns=1;i=7006">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7006</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6091" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7006">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7006</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6092" BrowseName="InputArguments" ParentNodeId="ns=1;i=7007">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7007</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6093" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7007">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7007</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6094" BrowseName="InputArguments" ParentNodeId="ns=1;i=7008">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7008</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6095" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7008">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7008</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6096" BrowseName="InputArguments" ParentNodeId="ns=1;i=7009">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7009</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6097" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7009">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7009</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6098" BrowseName="InputArguments" ParentNodeId="ns=1;i=7010">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7010</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6099" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7010">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:DescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7010</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAMethod NodeId="ns=1;i=7011" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5006">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5006</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7012" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5005">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5005</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7013" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5007">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5007</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7014" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5010">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5010</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7015" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5008">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5008</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7016" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5009">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7017" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5017">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5017</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7018" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5015">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5015</Reference>
+        </References>
+    </UAMethod>
+    <UAMethod NodeId="ns=1;i=7019" BrowseName="1:NoDescriptionMethod" ParentNodeId="ns=1;i=5016">
+        <DisplayName>NoDescriptionMethod</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5016</Reference>
+        </References>
+    </UAMethod>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6100" BrowseName="InputArguments" ParentNodeId="ns=1;i=7011">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7011</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6101" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7011">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7011</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6102" BrowseName="InputArguments" ParentNodeId="ns=1;i=7012">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7012</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6103" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7012">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7012</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6104" BrowseName="InputArguments" ParentNodeId="ns=1;i=7013">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7013</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6105" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7013">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7013</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6106" BrowseName="InputArguments" ParentNodeId="ns=1;i=7014">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7014</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6107" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7014">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7014</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6108" BrowseName="InputArguments" ParentNodeId="ns=1;i=7015">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7015</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6109" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7015">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7015</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6110" BrowseName="InputArguments" ParentNodeId="ns=1;i=7016">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7016</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6111" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7016">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7016</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6112" BrowseName="InputArguments" ParentNodeId="ns=1;i=7017">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7017</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6113" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7017">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7017</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6114" BrowseName="InputArguments" ParentNodeId="ns=1;i=7018">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7018</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6115" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7018">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7018</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6116" BrowseName="InputArguments" ParentNodeId="ns=1;i=7019">
+        <DisplayName>InputArguments</DisplayName>
+        <Description>the definition of the input argument of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7019</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6117" BrowseName="OutputArguments" ParentNodeId="ns=1;i=7019">
+        <DisplayName>OutputArguments</DisplayName>
+        <Description>the definition of the output arguments of method 1:Test_ConnectorType.1:NoDescriptionMethod</Description>
+        <References>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7019</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+        </References>
     </UAVariable>
 </UANodeSet>
