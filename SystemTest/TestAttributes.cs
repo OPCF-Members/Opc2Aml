@@ -83,6 +83,7 @@ namespace SystemTest
             string expected, bool expectedToBeFound)
         {
             SystemUnitClassType objectToTest = GetTestObject(nodeId);
+            Assert.IsNotNull(objectToTest);
             AttributeType attributeType = objectToTest.Attribute[attribute];
             if (expectedToBeFound)
             {
