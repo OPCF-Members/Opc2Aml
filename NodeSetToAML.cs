@@ -532,6 +532,12 @@ namespace MarkdownProcessor
                 AddModifyAttribute(seq, "Description", "LocalizedText",
                     uanode.Description[0].Value);
             }
+
+            UAType uaType = uanode as UAType;
+            if (  uaType != null && uaType.IsAbstract )
+            {
+                AddModifyAttribute(seq, "IsAbstract", "Boolean", uaType.IsAbstract);
+            }
         }
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
