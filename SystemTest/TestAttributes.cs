@@ -78,12 +78,14 @@ namespace SystemTest
             "This Method Has a Description",
             true, DisplayName = "Object Method Expect Description")]
         [DataRow("Description", "7001", "", false, DisplayName = "Object Method No Description")]
+        [DataRow("IsAbstract", "2782", "true", true, true, DisplayName = "ConditionType should be Abstract")]
+        [DataRow("IsAbstract", "2881", "", 
+            false, true, DisplayName = "AcknowledgeableConditionType should not be Abstract")]
 
         public void TestAttribute(string attribute, string nodeId, 
-            string expected, bool expectedToBeFound)
+            string expected, bool expectedToBeFound, bool foundationRoot = false)
         {
-            SystemUnitClassType objectToTest = GetTestObject(nodeId);
-            Assert.IsNotNull(objectToTest);
+            SystemUnitClassType objectToTest = GetTestObject(nodeId, foundationRoot);
             AttributeType attributeType = objectToTest.Attribute[attribute];
             if (expectedToBeFound)
             {
@@ -106,10 +108,15 @@ namespace SystemTest
             return m_document;
         }
 
-        public SystemUnitClassType GetTestObject(string nodeId)
+        public SystemUnitClassType GetTestObject(string nodeId, bool foundationRoot = false)
         {
             CAEXDocument document = GetDocument();
-            CAEXObject initialObject = document.FindByID(TestHelper.GetRootName() + nodeId);
+            string rootName = TestHelper.GetRootName();
+            if ( foundationRoot )
+            {
+                rootName = TestHelper.GetOpcRootName();
+            }
+            CAEXObject initialObject = document.FindByID(rootName + nodeId);
             Assert.IsNotNull(initialObject, "Unable to find Initial Object");
             SystemUnitClassType theObject = initialObject as SystemUnitClassType;
             Assert.IsNotNull(theObject, "Unable to Cast Initial Object");

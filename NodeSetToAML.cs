@@ -532,6 +532,12 @@ namespace MarkdownProcessor
                 AddModifyAttribute(seq, "Description", "LocalizedText",
                     uanode.Description[0].Value);
             }
+
+            UAType uaType = uanode as UAType;
+            if (  uaType != null && uaType.IsAbstract )
+            {
+                AddModifyAttribute(seq, "IsAbstract", "Boolean", uaType.IsAbstract);
+            }
         }
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
@@ -1789,6 +1795,10 @@ namespace MarkdownProcessor
                 }
             }
 
+            // Only sets it if it is true -
+            // It doesn't matter if 'References' is set x times,
+            // it would take more time to look it up each time
+            OverrideBooleanAttribute( added.Attribute, "IsAbstract", refnode.IsAbstract );
 
             // ovveride any attribute values
             if (BaseNodeId != null)
