@@ -1795,6 +1795,10 @@ namespace MarkdownProcessor
                 }
             }
 
+            // Only sets it if it is true -
+            // It doesn't matter if 'References' is set x times,
+            // it would take more time to look it up each time
+            OverrideBooleanAttribute( added.Attribute, "IsAbstract", refnode.IsAbstract );
 
             // ovveride any attribute values
             if (BaseNodeId != null)
