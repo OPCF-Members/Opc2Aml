@@ -249,52 +249,9 @@ namespace SystemTest
             InternalElementType classToTest = initialClass as InternalElementType;
             Assert.IsNotNull(classToTest, "Unable to retrieve class to test");
 
-            #region Nodeset Source Data
-            /*
-              <UAObject NodeId="i=15443" BrowseName="SecurityGroups" ParentNodeId="i=14443">
-                <DisplayName>SecurityGroups</DisplayName>
-                <References>
-                  <Reference ReferenceType="HasComponent" BrowseName="AddSecurityGroup">i=15444</Reference>
-                  <Reference ReferenceType="HasComponent" BrowseName="RemoveSecurityGroup">i=15447</Reference>
-                  <Reference ReferenceType="HasTypeDefinition" BrowseName="SecurityGroupFolderType">i=15452</Reference>
-                  <Reference ReferenceType="HasComponent" IsForward="false" BrowseName="PublishSubscribe">i=14443</Reference>
-                </References>
-              </UAObject>
-              <UAObjectType NodeId="i=15452" BrowseName="SecurityGroupFolderType">
-                <DisplayName>SecurityGroupFolderType</DisplayName>
-                <Documentation>https://reference.opcfoundation.org/v104/Core/docs/Part14/8.7</Documentation>
-                <References>
-                  <Reference ReferenceType="Organizes" BrowseName="&lt;SecurityGroupFolderName&gt;">i=15453</Reference>
-                  <Reference ReferenceType="HasComponent" BrowseName="&lt;SecurityGroupName&gt;">i=15459</Reference>
-                  <Reference ReferenceType="HasComponent" BrowseName="AddSecurityGroup">i=15461</Reference>
-                  <Reference ReferenceType="HasComponent" BrowseName="RemoveSecurityGroup">i=15464</Reference>
-                  <Reference ReferenceType="HasComponent" BrowseName="AddSecurityGroupFolder">i=25312</Reference>
-                  <Reference ReferenceType="HasComponent" BrowseName="RemoveSecurityGroupFolder">i=25315</Reference>
-                  <Reference ReferenceType="HasProperty" BrowseName="SupportedSecurityPolicyUris">i=25317</Reference>
-                  <Reference ReferenceType="HasSubtype" IsForward="false" BrowseName="FolderType">i=61</Reference>
-                </References>
-              </UAObjectType>
-             */
-
-            #endregion
-
             Dictionary<string, string> expectedIds = new Dictionary<string, string>();
             expectedIds.Add("AddSecurityGroup", root + Opc.Ua.Methods.PublishSubscribe_SecurityGroups_AddSecurityGroup.ToString());
             expectedIds.Add("RemoveSecurityGroup", root + Opc.Ua.Methods.PublishSubscribe_SecurityGroups_RemoveSecurityGroup.ToString());
-
-            Dictionary<string, uint> expectedIdsWithPrefixes = new Dictionary<string, uint>();
-            expectedIdsWithPrefixes.Add("<SecurityGroupName>",
-                Opc.Ua.Objects.SecurityGroupFolderType_SecurityGroupName_Placeholder);
-            expectedIdsWithPrefixes.Add("AddSecurityGroupFolder", 25312);
-            expectedIdsWithPrefixes.Add("RemoveSecurityGroupFolder", 25315);
-            expectedIdsWithPrefixes.Add("SupportedSecurityPolicyUris", 25317);
-
-            foreach (KeyValuePair<string, uint> entry in expectedIdsWithPrefixes)
-            {
-                expectedIds.Add(entry.Key,
-                    String.Format("PublishSubscribe_SecurityGroups_{0}_{1}{2}",
-                    entry.Key, root, entry.Value.ToString()));
-            }
 
             foreach (KeyValuePair<string, string> entry in expectedIds)
             {
@@ -304,6 +261,105 @@ namespace SystemTest
             }
         }
 
+
+        [TestMethod]
+        [DataRow(new string[]
+        {
+            "DescriptionMethod",
+            "NoDescriptionMethod",
+            "Name",
+            "Test_MultiStateValue_No_Values_Kind",
+            "Alarm",
+            "AlarmSource"
+        }, "5014", true, DisplayName = "OptionalAdditions Expected to be there")]
+        [DataRow(new string[]
+        {
+            "Id"
+        }, "5014", false, DisplayName = "OptionalAdditions Expected to be removed")]
+        [DataRow(new string[]
+        {
+            "Definition",
+            "EnumValues",
+            "ValueAsText"
+        }, "6136", true, DisplayName = "Kind Expected to be there")]
+        [DataRow(new string[]
+        {
+            "ValuePrecision"
+        }, "6136", false, DisplayName = "Kind Expected to be removed")]
+        [DataRow(new string[]
+        {
+            "AudibleEnabled",
+            "AudibleSound",
+            "BaseHighLimit",
+            "HighLimit",
+            "HighState",
+            "AckedState",
+            "ActiveState",
+            "AddComment"
+        }, "5018", true, DisplayName = "Alarm Expected to be there")]
+        [DataRow(new string[]
+        {
+            "BaseHighHighLimit",
+            "BaseLowLimit",
+            "BaseLowLowLimit",
+            "HighHighLimit",
+            "LowLimit",
+            "LowLowLimit",
+            "HighHighState",
+            "LowState",
+            "LowLowState",
+            "LatchedState",
+            "LocalTime",
+            "MaxTimeShelved",
+            "OutOfServiceState",
+            "PlaceInService"
+        }, "5018", false, DisplayName = "Alarm Expected to be removed")]
+        public void TestInstanceInternalElements(string[] internalElements, string nodeId, bool expectedToBeFound)
+        {
+            // Test is specifically for Issue 34/35
+            // https://github.com/OPCF-Members/Opc2Aml/issues/34
+            // Instances should only add InternalElements with defined unique NodeIds
+            // https://github.com/OPCF-Members/Opc2Aml/issues/35
+            // Instances should add internal elements not defined by SystemUnitClass
+
+            SystemUnitClassType objectToTest = GetTestObject(nodeId);
+            Assert.IsNotNull(objectToTest);
+            foreach (string internalElement in internalElements)
+            {
+                InternalElementType internalElementType = objectToTest.InternalElement[internalElement];
+                if (expectedToBeFound)
+                {
+                    Assert.IsNotNull(internalElementType, internalElement + " internal element not found");
+                }
+                else
+                {
+                    Assert.IsNull(internalElementType, "Unexpected internal element found for " + internalElement);
+                }
+            }
+        }
+
+
         #endregion
+
+        #region Helpers
+
+        private CAEXDocument GetDocument()
+        {
+            Assert.IsNotNull(m_document, "Unable to retrieve Document");
+            return m_document;
+        }
+
+        public SystemUnitClassType GetTestObject(string nodeId)
+        {
+            CAEXDocument document = GetDocument();
+            CAEXObject initialObject = document.FindByID(TestHelper.GetRootName() + nodeId);
+            Assert.IsNotNull(initialObject, "Unable to find Initial Object");
+            SystemUnitClassType theObject = initialObject as SystemUnitClassType;
+            Assert.IsNotNull(theObject, "Unable to Cast Initial Object");
+            return theObject;
+        }
+
+        #endregion
+
     }
 }

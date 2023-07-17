@@ -2208,6 +2208,7 @@ namespace MarkdownProcessor
                 ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
 
             }
+
             // TODO set the values of the other attributes to match the instance ??
 
             // follow forward hierarchical references to add the children
@@ -2217,6 +2218,7 @@ namespace MarkdownProcessor
             var refList = m_modelManager.FindReferences(nodeId);
             if (refList != null)
             {
+                HashSet<string> foundInternalElements = new HashSet<string>();
                 foreach (var reference in refList)
                 {
                     if (reference.IsForward == true)
@@ -2231,10 +2233,62 @@ namespace MarkdownProcessor
                             if (reference.TargetId != TypesFolderNodeId)
                             {
                                 var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode);
+                                foundInternalElements.Add(childIE.Name);
                                 var destInterface = FindOrAddInterface(ref childIE, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, targetNode.DecodedNodeId);
                                 FindOrAddInternalLink(ref ie, sourceInterface.ID, destInterface.ID, targetNode.DecodedBrowseName.Name);
                             }
                         }
+                    }
+                }
+
+                // Are there internal Elements that are not handled by the references?
+                // Should they be removed?
+                List<InternalElementType> internalElementsToRemove = new List<InternalElementType>();
+                foreach (InternalElementType internalElement in ie.InternalElement)
+                {
+                    if (!foundInternalElements.Contains(internalElement.Name))
+                    {
+                        internalElementsToRemove.Add(internalElement);
+                    }
+                }
+
+                foreach (InternalElementType internalElement in internalElementsToRemove)
+                {
+                    InternalLinkType link = ie.InternalLink[internalElement.Name];
+                    if (link != null)
+                    {
+                        ExternalInterfaceType externalInterface = null;
+                        foreach (ExternalInterfaceType external in internalElement.ExternalInterface)
+                        {
+                            if (external.ID.Equals(link.RefPartnerSideB))
+                            {
+                                externalInterface = external;
+                                break;
+                            }
+                        }
+
+                        if (externalInterface != null)
+                        {
+                            bool delete = true;
+                            foreach (ExternalInterfaceType external in internalElement.ExternalInterface)
+                            {
+                                if (!external.Equals(externalInterface))
+                                {
+                                    if (external.ID.Equals(link.RefPartnerSideA))
+                                    {
+                                        delete = false;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (delete)
+                            {
+                                ie.ExternalInterface.RemoveElement(externalInterface);
+                            }
+                        }
+                        ie.InternalLink.RemoveElement(link);
+                        ie.InternalElement.RemoveElement(internalElement);
                     }
                 }
             }
