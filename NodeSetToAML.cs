@@ -1415,7 +1415,6 @@ namespace MarkdownProcessor
             // from the perspective of the systemUnitClass itself.
 
             string named = ";" + prefix + WebUtility.UrlDecode(systemUnitClass.ID);
-            Debug.WriteLine("Check " + systemUnitClass.ID + " against " + named);
 
             Dictionary<string, string> oldIdToNewName = new Dictionary<string, string>();
             Dictionary<string,string>oldToNewName = new Dictionary<string, string>();
@@ -1467,6 +1466,25 @@ namespace MarkdownProcessor
             foreach( ExternalInterfaceType externalInterface in newTypes.Values )
             {
                 systemUnitClass.ExternalInterface.Insert( externalInterface );
+            }
+        }
+
+        private void UpdateIsAbstract( UANode targetNode, SystemUnitClassType systemUnitClass )
+        {
+            bool isTargetAbstract = false;
+            UAType targetType = targetNode as UAType;
+            if( targetType != null && targetType.IsAbstract )
+            {
+                isTargetAbstract = true;
+            }
+
+            if( !isTargetAbstract )
+            {
+                AttributeType isAbstractAttribute = systemUnitClass.Attribute[ "IsAbstract" ];
+                if( isAbstractAttribute != null )
+                {
+                    systemUnitClass.Attribute.RemoveElement( isAbstractAttribute );
+                }
             }
         }
 
@@ -1678,8 +1696,9 @@ namespace MarkdownProcessor
                                 ie.Name = targetNode.DecodedBrowseName.Name;
                                 ie.ID = AmlIDFromNodeId(reference.TargetId);
 
-                                RebuildExternalInterfaces(rtn, ie);
+                                UpdateIsAbstract( targetNode, ie );
 
+                                RebuildExternalInterfaces(rtn, ie);
 
                                 rtn.AddInstance(ie);
 

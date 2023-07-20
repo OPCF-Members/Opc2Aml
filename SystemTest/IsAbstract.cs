@@ -61,7 +61,7 @@ namespace SystemTest
 
         Dictionary<int, string> AbstractNodeIds = new Dictionary<int, string>();
         Dictionary<int, bool> Confirm = new Dictionary<int, bool>();
-        List<string> Output = new List<string>();
+        List<string> ShouldBeAbstract = new List<string>();
         List<string> ShouldNotBeAbstract = new List<string>();
         List<string> BadId = new List<string>();
 
@@ -110,7 +110,7 @@ namespace SystemTest
                     SystemUnitClassType classType = internalElement as SystemUnitClassType;
                     if( classType != null )
                     {
-                        WalkHierarchy( classType );
+                        WalkHierarchy( classType, instances: true );
                     }
                 }
             }
@@ -128,7 +128,7 @@ namespace SystemTest
                             SystemUnitClassType classType = familyType as SystemUnitClassType;
                             if( classType != null )
                             {
-                                WalkHierarchy( classType );
+                                WalkHierarchy( classType, instances: false );
                             }
                         }
                     }
@@ -146,7 +146,7 @@ namespace SystemTest
                         if( interfaceType != null )
                         {
                             Check( interfaceType.Name, interfaceType.ID, 
-                                IsInterfaceAbstract( interfaceType ) );
+                                IsInterfaceAbstract( interfaceType ), instances: false );
                         }
                     }
                 }
@@ -159,50 +159,40 @@ namespace SystemTest
                 if( !entry.Value )
                 {
                     string name = AbstractNodeIds[ entry.Key ];
-                    Output.Add( name + " [" + entry.Key + "] Should have been marked abstract, but was not" );
+                    ShouldBeAbstract.Add( name + " [" + entry.Key + 
+                        "] Should have been marked abstract, but was not" );
                 }
             }
 
-            #region Bugs to be logged
+            // Make sure all files are written before checks are done
 
-            if( ShouldNotBeAbstract.Count == 0 )
+            int shouldNotBeAbstractCount = ShouldNotBeAbstract.Count;
+            int badIdCount = BadId.Count;
+            int shouldBeAbstractCount = ShouldBeAbstract.Count;
+
+            WriteTestFile( outputDirectoryInfo, "ShouldNotBeAbstract.txt", ShouldNotBeAbstract );
+            WriteTestFile( outputDirectoryInfo, "BadIds.txt", BadId );
+            WriteTestFile( outputDirectoryInfo, "ShouldBeAbstract.txt", ShouldBeAbstract );
+
+            Assert.AreEqual( 0, shouldBeAbstractCount, "There were " + shouldBeAbstractCount.ToString() +
+                " shouldBeAbstract errors - check ShouldBeAbstract.txt" );
+            Assert.AreEqual( 0, badIdCount, "There were " + badIdCount.ToString() +
+                " bad Id errors - check StillBadIds.txt" );
+            Assert.AreEqual( 0, shouldNotBeAbstractCount, "There were " + shouldNotBeAbstractCount.ToString() +
+                " shouldNotBeAbstract errors - check ShouldNotBeAbstract.txt" );
+        }
+
+        public void WriteTestFile( DirectoryInfo outputDirectory, string fileName, List<string> output)
+        {
+            if( output.Count == 0 )
             {
-                ShouldNotBeAbstract.Add( "No Errors found" );
+                output.Add( "No Errors found" );
             }
 
-            FileInfo shouldNotBeAbstract = new FileInfo(
-                Path.Combine( outputDirectoryInfo.FullName, "ShouldNotBeAbstract.txt" ) );
+            FileInfo writeFile = new FileInfo(
+                Path.Combine( outputDirectory.FullName, fileName ) );
 
-            TestHelper.WriteFile( shouldNotBeAbstract.FullName, ShouldNotBeAbstract );
-
-            if( BadId.Count == 0 )
-            {
-                BadId.Add( "No Errors found" );
-            }
-
-            FileInfo stillBadIds = new FileInfo(
-                Path.Combine( outputDirectoryInfo.FullName, "StillBadIds.txt" ) );
-
-            TestHelper.WriteFile( stillBadIds.FullName, BadId );
-
-            #endregion
-
-            FileInfo abstractErrorsFile = new FileInfo(
-                Path.Combine( outputDirectoryInfo.FullName, "AbstractErrors.txt" ) );
-
-            if( Output.Count > 0 )
-            {
-                TestHelper.WriteFile( abstractErrorsFile.FullName, Output );
-                Assert.Fail( "There were " + Output.Count.ToString() +
-                    " errors - check AbstractErrors.txt" );
-            }
-            else
-            {
-                if ( abstractErrorsFile.Exists )
-                {
-                    File.Delete( abstractErrorsFile.FullName );
-                }
-            }
+            TestHelper.WriteFile( writeFile.FullName, output );
         }
 
         public void Recurse( XmlNode xmlNode, List<XmlNode> abstractNodes )
@@ -235,13 +225,13 @@ namespace SystemTest
             return value;
         }
 
-        private void WalkHierarchy( SystemUnitClassType classType )
+        private void WalkHierarchy( SystemUnitClassType classType, bool instances )
         {
-            Check( classType.Name, classType.ID, IsSucAbstract( classType ) );
+            Check( classType.Name, classType.ID, IsSucAbstract( classType ), instances );
 
             foreach( InternalElementType internalElement in classType.InternalElement )
             {
-                WalkHierarchy( internalElement );
+                WalkHierarchy( internalElement, instances );
             }
         }
 
@@ -274,7 +264,7 @@ namespace SystemTest
             return isAbstract;
         }
 
-        private void Check( string name, string id, bool isAbstract )
+        private void Check( string name, string id, bool isAbstract, bool instances )
         {
             if( id != null )
             {
@@ -292,13 +282,24 @@ namespace SystemTest
                         }
                         else
                         {
-                            ShouldNotBeAbstract.Add( name + " [" + id + "] Marked Abstract when it should not be" );
+                            if ( instances )
+                            {
+                                ShouldNotBeAbstract.Add( " Instance " + name + " [" + id + "] Marked Abstract when it should not be" );
+                            }
+                            else
+                            {
+                                ShouldNotBeAbstract.Add( name + " [" + id + "] Marked Abstract when it should not be" );
+                            }
                         }
                     }
                 }
                 else
                 {
-                    BadId.Add( "Unable to check " + name + " [" + id + "]" );
+                    // UaMethodNodeClass is not in a nodeset.
+                    if( !name.Equals( "UaMethodNodeClass" ) )
+                    {
+                        BadId.Add( "Unable to check " + name + " [" + id + "]" );
+                    }
                 }
             }
         }
