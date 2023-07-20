@@ -187,17 +187,22 @@ namespace SystemTest
 
             #endregion
 
+            FileInfo abstractErrorsFile = new FileInfo(
+                Path.Combine( outputDirectoryInfo.FullName, "AbstractErrors.txt" ) );
+
             if( Output.Count > 0 )
             {
-                FileInfo modifiedNodeSet = new FileInfo(
-                    Path.Combine( outputDirectoryInfo.FullName, "AbstractErrors.txt" ) );
-
-                TestHelper.WriteFile( modifiedNodeSet.FullName, Output );
+                TestHelper.WriteFile( abstractErrorsFile.FullName, Output );
                 Assert.Fail( "There were " + Output.Count.ToString() +
                     " errors - check AbstractErrors.txt" );
             }
-
-
+            else
+            {
+                if ( abstractErrorsFile.Exists )
+                {
+                    File.Delete( abstractErrorsFile.FullName );
+                }
+            }
         }
 
         public void Recurse( XmlNode xmlNode, List<XmlNode> abstractNodes )

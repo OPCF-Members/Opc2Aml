@@ -489,6 +489,7 @@ namespace MarkdownProcessor
             // add meta model SUC
             var suc_meta = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + MetaModelName);
             // add MethodNodeClass to the SUC
+            // This will add a guid ID, as UaMethodNodeClass is not in the Nodeset file
             var mb = suc_meta.New_SystemUnitClass(MethodNodeClass);
             mb.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);
             AddLibaryHeaderInfo(suc_meta as CAEXBasicObject);
@@ -1627,15 +1628,19 @@ namespace MarkdownProcessor
                     switch (refnode.NodeClass)
                     {
                         case NodeClass.ObjectType:
+                            rtn.ID = AmlIDFromNodeId( nodeId );
+
                             // AddModifyAttribute(rtn.Attribute, "EventNotifier", "EventNotifierType", Variant.Null); // #9 remove unset attributes
                             AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                             break;
                         case NodeClass.VariableType:
+                            rtn.ID = AmlIDFromNodeId( nodeId );
+
                             // AddModifyAttribute(rtn.Attribute, "ArrayDimensions", "ListOfUInt32", Variant.Null); // #9 remove unset attributes
-                           // AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2); // #9 remove unset attributes
-                           // AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null); // #9 remove unset attributes
-                           // AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null); // #9 remove unset attributes
-                           // AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null); // #9 remove unset attributes
+                            // AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2); // #9 remove unset attributes
+                            // AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null); // #9 remove unset attributes
+                            // AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null); // #9 remove unset attributes
+                            // AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null); // #9 remove unset attributes
                             AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                             break;
                         case NodeClass.Method:
