@@ -890,7 +890,11 @@ namespace MarkdownProcessor
 
             foreach (var e in iface.GetInheritedAttributes())
             {
-                eit.Attribute.Insert(e);
+                // No External Interface should have IsAbstract
+                if( e.Name != "IsAbstract" )
+                {
+                    eit.Attribute.Insert( e );
+                }
             }
 
         }

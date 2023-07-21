@@ -65,6 +65,14 @@ namespace SystemTest
         List<string> ShouldNotBeAbstract = new List<string>();
         List<string> BadId = new List<string>();
 
+        enum CheckType
+        {
+            SucType,
+            InstanceType,
+            InterfaceType,
+            ExternalInterfaceType
+        };
+
         [TestMethod]
         public void TestAllIsAbstract()
         {
@@ -146,7 +154,7 @@ namespace SystemTest
                         if( interfaceType != null )
                         {
                             Check( interfaceType.Name, interfaceType.ID, 
-                                IsInterfaceAbstract( interfaceType ), instances: false );
+                                IsInterfaceAbstract( interfaceType ), CheckType.InterfaceType );
                         }
                     }
                 }
@@ -227,7 +235,19 @@ namespace SystemTest
 
         private void WalkHierarchy( SystemUnitClassType classType, bool instances )
         {
-            Check( classType.Name, classType.ID, IsSucAbstract( classType ), instances );
+            CheckType checkType = CheckType.SucType;
+            if ( instances )
+            {
+                checkType = CheckType.InstanceType;
+            }
+
+            Check( classType.Name, classType.ID, IsSucAbstract( classType ), checkType );
+
+            foreach( ExternalInterfaceType externalInterface in classType.ExternalInterface)
+            {
+                Check( externalInterface.Name, externalInterface.ID,
+                    IsExternalInterfaceAbstract( externalInterface ), CheckType.ExternalInterfaceType );
+            }
 
             foreach( InternalElementType internalElement in classType.InternalElement )
             {
@@ -249,6 +269,13 @@ namespace SystemTest
             return IsAttributeAbstract( isAbstractAttribute );
         }
 
+        private bool IsExternalInterfaceAbstract( ExternalInterfaceType interfaceType )
+        {
+            AttributeType isAbstractAttribute = interfaceType.Attribute[ "IsAbstract" ];
+
+            return IsAttributeAbstract( isAbstractAttribute );
+        }
+
         private bool IsAttributeAbstract( AttributeType attribute )
         {
             bool isAbstract = false;
@@ -264,7 +291,7 @@ namespace SystemTest
             return isAbstract;
         }
 
-        private void Check( string name, string id, bool isAbstract, bool instances )
+        private void Check( string name, string id, bool isAbstract, CheckType checkType )
         {
             if( id != null )
             {
@@ -282,14 +309,26 @@ namespace SystemTest
                         }
                         else
                         {
-                            if ( instances )
+                            string prefix = "";
+
+                            if ( checkType == CheckType.InstanceType )
                             {
-                                ShouldNotBeAbstract.Add( " Instance " + name + " [" + id + "] Marked Abstract when it should not be" );
+                                prefix = "Instance ";
                             }
-                            else
+                            else if( checkType == CheckType.ExternalInterfaceType )
                             {
-                                ShouldNotBeAbstract.Add( name + " [" + id + "] Marked Abstract when it should not be" );
+                                prefix = "External Interface ";
                             }
+                            else if( checkType == CheckType.InterfaceType )
+                            {
+                                prefix = "Interface ";
+                            }
+                            else if( checkType == CheckType.SucType )
+                            {
+                                prefix = "System Unit Class ";
+                            }
+
+                            ShouldNotBeAbstract.Add( prefix + name + " [" + id + "] Marked Abstract when it should not be" );
                         }
                     }
                 }
