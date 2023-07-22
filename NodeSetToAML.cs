@@ -489,7 +489,11 @@ namespace MarkdownProcessor
             // add meta model SUC
             var suc_meta = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + MetaModelName);
             // add MethodNodeClass to the SUC
+            // This will add a guid ID, as UaMethodNodeClass is not in the Nodeset file
             var mb = suc_meta.New_SystemUnitClass(MethodNodeClass);
+            // Give this a known repeatable ID, as there is no node ID for it.
+            string methodNodeClassUniqueId = "686619c7-0101-4869-b398-aa0f98bc5f54";
+            mb.ID = methodNodeClassUniqueId;
             mb.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);
             AddLibaryHeaderInfo(suc_meta as CAEXBasicObject);
 
@@ -889,7 +893,11 @@ namespace MarkdownProcessor
 
             foreach (var e in iface.GetInheritedAttributes())
             {
-                eit.Attribute.Insert(e);
+                // No External Interface should have IsAbstract
+                if( e.Name != "IsAbstract" )
+                {
+                    eit.Attribute.Insert( e );
+                }
             }
 
         }
@@ -1414,7 +1422,6 @@ namespace MarkdownProcessor
             // from the perspective of the systemUnitClass itself.
 
             string named = ";" + prefix + WebUtility.UrlDecode(systemUnitClass.ID);
-            Debug.WriteLine("Check " + systemUnitClass.ID + " against " + named);
 
             Dictionary<string, string> oldIdToNewName = new Dictionary<string, string>();
             Dictionary<string,string>oldToNewName = new Dictionary<string, string>();
@@ -1466,6 +1473,25 @@ namespace MarkdownProcessor
             foreach( ExternalInterfaceType externalInterface in newTypes.Values )
             {
                 systemUnitClass.ExternalInterface.Insert( externalInterface );
+            }
+        }
+
+        private void UpdateIsAbstract( UANode targetNode, SystemUnitClassType systemUnitClass )
+        {
+            bool isTargetAbstract = false;
+            UAType targetType = targetNode as UAType;
+            if( targetType != null && targetType.IsAbstract )
+            {
+                isTargetAbstract = true;
+            }
+
+            if( !isTargetAbstract )
+            {
+                AttributeType isAbstractAttribute = systemUnitClass.Attribute[ "IsAbstract" ];
+                if( isAbstractAttribute != null )
+                {
+                    systemUnitClass.Attribute.RemoveElement( isAbstractAttribute );
+                }
             }
         }
 
@@ -1627,15 +1653,19 @@ namespace MarkdownProcessor
                     switch (refnode.NodeClass)
                     {
                         case NodeClass.ObjectType:
+                            rtn.ID = AmlIDFromNodeId( nodeId );
+
                             // AddModifyAttribute(rtn.Attribute, "EventNotifier", "EventNotifierType", Variant.Null); // #9 remove unset attributes
                             AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                             break;
                         case NodeClass.VariableType:
+                            rtn.ID = AmlIDFromNodeId( nodeId );
+
                             // AddModifyAttribute(rtn.Attribute, "ArrayDimensions", "ListOfUInt32", Variant.Null); // #9 remove unset attributes
-                           // AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2); // #9 remove unset attributes
-                           // AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null); // #9 remove unset attributes
-                           // AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null); // #9 remove unset attributes
-                           // AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null); // #9 remove unset attributes
+                            // AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2); // #9 remove unset attributes
+                            // AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null); // #9 remove unset attributes
+                            // AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null); // #9 remove unset attributes
+                            // AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null); // #9 remove unset attributes
                             AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                             break;
                         case NodeClass.Method:
@@ -1673,8 +1703,9 @@ namespace MarkdownProcessor
                                 ie.Name = targetNode.DecodedBrowseName.Name;
                                 ie.ID = AmlIDFromNodeId(reference.TargetId);
 
-                                RebuildExternalInterfaces(rtn, ie);
+                                UpdateIsAbstract( targetNode, ie );
 
+                                RebuildExternalInterfaces(rtn, ie);
 
                                 rtn.AddInstance(ie);
 
