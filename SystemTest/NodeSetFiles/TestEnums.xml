@@ -2073,4 +2073,141 @@
 			<Reference ReferenceType="HasTypeDefinition">i=68</Reference>
 		</References>
 	</UAVariable>
+    <UAObject NodeId="ns=1;i=5011" BrowseName="1:Arrays" ParentNodeId="ns=1;i=5013">
+        <DisplayName>Arrays</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+        </References>
+    </UAObject>
+    <UAVariable DataType="Int32" ValueRank="1" NodeId="ns=1;i=6126" ArrayDimensions="10" BrowseName="1:OneDimension" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>OneDimension</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:ListOfInt32>
+                <uax:Int32>0</uax:Int32>
+                <uax:Int32>1</uax:Int32>
+                <uax:Int32>2</uax:Int32>
+                <uax:Int32>3</uax:Int32>
+                <uax:Int32>4</uax:Int32>
+                <uax:Int32>5</uax:Int32>
+                <uax:Int32>6</uax:Int32>
+                <uax:Int32>7</uax:Int32>
+                <uax:Int32>8</uax:Int32>
+                <uax:Int32>9</uax:Int32>
+            </uax:ListOfInt32>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="Int32" ValueRank="2" NodeId="ns=1;i=6127" ArrayDimensions="2,5" BrowseName="1:TwoDimensions" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>TwoDimensions</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:ListOfInt32>
+                <uax:Int32>0</uax:Int32>
+                <uax:Int32>1</uax:Int32>
+                <uax:Int32>2</uax:Int32>
+                <uax:Int32>3</uax:Int32>
+                <uax:Int32>4</uax:Int32>
+                <uax:Int32>5</uax:Int32>
+                <uax:Int32>6</uax:Int32>
+                <uax:Int32>7</uax:Int32>
+                <uax:Int32>8</uax:Int32>
+                <uax:Int32>9</uax:Int32>
+            </uax:ListOfInt32>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="Int32" ValueRank="5" NodeId="ns=1;i=6128" ArrayDimensions="2,2,2,2,2" BrowseName="1:FiveDimensions" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>FiveDimensions</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:ListOfInt32>
+                <uax:Int32>0</uax:Int32>
+                <uax:Int32>1</uax:Int32>
+                <uax:Int32>2</uax:Int32>
+                <uax:Int32>3</uax:Int32>
+                <uax:Int32>4</uax:Int32>
+                <uax:Int32>5</uax:Int32>
+                <uax:Int32>6</uax:Int32>
+                <uax:Int32>7</uax:Int32>
+                <uax:Int32>8</uax:Int32>
+                <uax:Int32>9</uax:Int32>
+                <uax:Int32>10</uax:Int32>
+                <uax:Int32>11</uax:Int32>
+                <uax:Int32>12</uax:Int32>
+                <uax:Int32>13</uax:Int32>
+                <uax:Int32>14</uax:Int32>
+                <uax:Int32>15</uax:Int32>
+                <uax:Int32>16</uax:Int32>
+                <uax:Int32>17</uax:Int32>
+                <uax:Int32>18</uax:Int32>
+                <uax:Int32>19</uax:Int32>
+                <uax:Int32>20</uax:Int32>
+                <uax:Int32>21</uax:Int32>
+                <uax:Int32>22</uax:Int32>
+                <uax:Int32>23</uax:Int32>
+                <uax:Int32>24</uax:Int32>
+                <uax:Int32>25</uax:Int32>
+                <uax:Int32>26</uax:Int32>
+                <uax:Int32>27</uax:Int32>
+                <uax:Int32>28</uax:Int32>
+                <uax:Int32>29</uax:Int32>
+                <uax:Int32>30</uax:Int32>
+                <uax:Int32>31</uax:Int32>
+            </uax:ListOfInt32>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="Int32" ValueRank="3" NodeId="ns=1;i=6129" ArrayDimensions="3,3,3" BrowseName="1:ThreeDimensions" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>ThreeDimensions</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:ListOfInt32>
+                <uax:Int32>0</uax:Int32>
+                <uax:Int32>1</uax:Int32>
+                <uax:Int32>2</uax:Int32>
+                <uax:Int32>3</uax:Int32>
+                <uax:Int32>4</uax:Int32>
+                <uax:Int32>5</uax:Int32>
+                <uax:Int32>6</uax:Int32>
+                <uax:Int32>7</uax:Int32>
+                <uax:Int32>8</uax:Int32>
+                <uax:Int32>9</uax:Int32>
+                <uax:Int32>10</uax:Int32>
+                <uax:Int32>11</uax:Int32>
+                <uax:Int32>12</uax:Int32>
+                <uax:Int32>13</uax:Int32>
+                <uax:Int32>14</uax:Int32>
+                <uax:Int32>15</uax:Int32>
+                <uax:Int32>16</uax:Int32>
+                <uax:Int32>17</uax:Int32>
+                <uax:Int32>18</uax:Int32>
+                <uax:Int32>19</uax:Int32>
+                <uax:Int32>20</uax:Int32>
+                <uax:Int32>21</uax:Int32>
+                <uax:Int32>22</uax:Int32>
+                <uax:Int32>23</uax:Int32>
+                <uax:Int32>24</uax:Int32>
+                <uax:Int32>25</uax:Int32>
+                <uax:Int32>26</uax:Int32>
+            </uax:ListOfInt32>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="Int32" ValueRank="3" NodeId="ns=1;i=6134" ArrayDimensions="1,1,1" BrowseName="1:ThreeDimensionsNoValues" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>ThreeDimensionsNoValues</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+    </UAVariable>
 </UANodeSet>
