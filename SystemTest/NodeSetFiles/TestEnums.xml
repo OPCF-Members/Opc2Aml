@@ -2203,7 +2203,7 @@
             </uax:ListOfInt32>
         </Value>
     </UAVariable>
-    <UAVariable DataType="Int32" ValueRank="3" NodeId="ns=1;i=6134" ArrayDimensions="1,1,1" BrowseName="1:ThreeDimensionsNoValues" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
+    <UAVariable DataType="Int32" ValueRank="3" NodeId="ns=1;i=6134" ArrayDimensions="3,3,3" BrowseName="1:ThreeDimensionsNoValues" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
         <DisplayName>ThreeDimensionsNoValues</DisplayName>
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
