@@ -98,6 +98,27 @@ namespace SystemTest
             }
         }
 
+        [TestMethod]
+        public void TestMethodClassAttributes()
+        {
+            CAEXDocument document = GetDocument();
+            CAEXObject initialObject = document.FindByID( "686619c7-0101-4869-b398-aa0f98bc5f54" );
+            Assert.IsNotNull( initialObject );
+            SystemUnitClassType objectToTest = initialObject as SystemUnitClassType;
+            Assert.IsNotNull( objectToTest );
+
+            AttributeType browseNameAttribute = objectToTest.Attribute[ "BrowseName" ];
+            Assert.IsNotNull( browseNameAttribute );
+
+            AttributeType namespaceUriAttribute = browseNameAttribute.Attribute[ "NamespaceURI" ];
+            Assert.IsNotNull( namespaceUriAttribute );
+            Assert.AreEqual( "xs:anyURI", namespaceUriAttribute.AttributeDataType );
+
+            AttributeType nameAttribute = browseNameAttribute.Attribute[ "Name" ];
+            Assert.IsNotNull( nameAttribute );
+            Assert.AreEqual( "xs:string", nameAttribute.AttributeDataType );
+        }
+
         #endregion
 
         #region Helpers
