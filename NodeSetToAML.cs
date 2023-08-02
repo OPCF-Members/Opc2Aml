@@ -178,21 +178,21 @@ namespace MarkdownProcessor
 
                 m_atl_temp = cAEXDocumentTemp.CAEXFile.AttributeTypeLib.Append(ATLPrefix + modelInfo.NamespaceUri);
 
-                AddLibaryHeaderInfo(m_atl_temp as CAEXBasicObject, modelInfo);
+                AddLibraryHeaderInfo(m_atl_temp as CAEXBasicObject, modelInfo);
 
                 // create the InterfaceClassLibrary
                 var icl_temp = cAEXDocumentTemp.CAEXFile.InterfaceClassLib.Append(ICLPrefix + modelInfo.NamespaceUri);
-                AddLibaryHeaderInfo(icl_temp as CAEXBasicObject, modelInfo);
+                AddLibraryHeaderInfo(icl_temp as CAEXBasicObject, modelInfo);
 
                 // Create the RoleClassLibrary
                 var rcl_temp = cAEXDocumentTemp.CAEXFile.RoleClassLib.Append(RCLPrefix + modelInfo.NamespaceUri);
                 // var rcl_temp = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + modelInfo.NamespaceUri);
-                AddLibaryHeaderInfo(rcl_temp as CAEXBasicObject, modelInfo);
+                AddLibraryHeaderInfo(rcl_temp as CAEXBasicObject, modelInfo);
 
                 // Create the SystemUnitClassLibrary
                 var scl_temp =  cAEXDocumentTemp.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + modelInfo.NamespaceUri);
                 // var scl_temp = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + modelInfo.NamespaceUri);
-                AddLibaryHeaderInfo(scl_temp as CAEXBasicObject, modelInfo);
+                AddLibraryHeaderInfo(scl_temp as CAEXBasicObject, modelInfo);
 
                 SortedDictionary<string, AttributeFamilyType> SortedDataTypes = new SortedDictionary<string, AttributeFamilyType>();
                 SortedDictionary<string, NodeId> SortedReferenceTypes = new SortedDictionary<string, NodeId>();
@@ -231,7 +231,7 @@ namespace MarkdownProcessor
                     if (atl == null)
                     {
                         atl = m_cAEXDocument.CAEXFile.AttributeTypeLib.Append(ATLPrefix + modelInfo.NamespaceUri);
-                        AddLibaryHeaderInfo(atl as CAEXBasicObject, modelInfo);
+                        AddLibraryHeaderInfo(atl as CAEXBasicObject, modelInfo);
                     }
                     atl.AttributeType.Insert(dicEntry.Value, false);  // insert into the AML document in alpha order
                 }
@@ -260,7 +260,7 @@ namespace MarkdownProcessor
                         {
                             // Create the InterfaceClassLibrary
                             icl = m_cAEXDocument.CAEXFile.InterfaceClassLib.Append(ICLPrefix + modelInfo.NamespaceUri);
-                            AddLibaryHeaderInfo(icl as CAEXBasicObject, modelInfo);
+                            AddLibraryHeaderInfo(icl as CAEXBasicObject, modelInfo);
                         }
                         icl.Insert(ict, false);
                     }
@@ -286,7 +286,7 @@ namespace MarkdownProcessor
                         if (scl == null)
                         {
                             scl = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + modelInfo.NamespaceUri);
-                            AddLibaryHeaderInfo(scl as CAEXBasicObject, modelInfo);
+                            AddLibraryHeaderInfo(scl as CAEXBasicObject, modelInfo);
                         }
                         scl.Insert(sft, false);
                     }
@@ -298,7 +298,7 @@ namespace MarkdownProcessor
                         if (rcl == null)
                         {
                             rcl = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + modelInfo.NamespaceUri);
-                            AddLibaryHeaderInfo(rcl as CAEXBasicObject, modelInfo);
+                            AddLibraryHeaderInfo(rcl as CAEXBasicObject, modelInfo);
                         }
                         rcl.Insert(rft, false);
                     }
@@ -316,7 +316,7 @@ namespace MarkdownProcessor
             container.Close();
         }
 
-        private void AddLibaryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
+        private void AddLibraryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
         {
             bo.Description = "AutomationML Library to support OPC UA meta model";
             bo.Copyright = "\xA9 OPC Foundation";
@@ -386,7 +386,7 @@ namespace MarkdownProcessor
 
 
             AttributeTypeLibType atl_meta = doc.CAEXFile.AttributeTypeLib.Append(ATLPrefix + MetaModelName);
-            AddLibaryHeaderInfo(atl_meta as CAEXBasicObject);
+            AddLibraryHeaderInfo(atl_meta as CAEXBasicObject);
 
             var added = new AttributeFamilyType(new System.Xml.Linq.XElement(defaultNS + "AttributeType"));
             AttributeType added2 = null;
@@ -484,7 +484,7 @@ namespace MarkdownProcessor
             var rcl_meta = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + MetaModelName);
             var br = rcl_meta.New_RoleClass(UaBaseRole);
             br.RefBaseClassPath = "AutomationMLBaseRoleClassLib/AutomationMLBaseRole";
-            AddLibaryHeaderInfo(rcl_meta as CAEXBasicObject);
+            AddLibraryHeaderInfo(rcl_meta as CAEXBasicObject);
 
             // add meta model SUC
             var suc_meta = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + MetaModelName);
@@ -495,7 +495,7 @@ namespace MarkdownProcessor
             string methodNodeClassUniqueId = "686619c7-0101-4869-b398-aa0f98bc5f54";
             mb.ID = methodNodeClassUniqueId;
             mb.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);
-            AddLibaryHeaderInfo(suc_meta as CAEXBasicObject);
+            AddLibraryHeaderInfo(suc_meta as CAEXBasicObject);
 
 
         }
@@ -2167,7 +2167,7 @@ namespace MarkdownProcessor
         {
             // add an InstanceHierarchy to the ROOT CAEXFile element
             var myIH = m_cAEXDocument.CAEXFile.New_InstanceHierarchy("OPC UA Instance Hierarchy");
-            AddLibaryHeaderInfo(myIH);
+            AddLibraryHeaderInfo(myIH);
 
             var RootNode = FindNode<UANode>(RootNodeId);
             RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode);
