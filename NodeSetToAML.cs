@@ -490,14 +490,21 @@ namespace MarkdownProcessor
             var suc_meta = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + MetaModelName);
             // add MethodNodeClass to the SUC
             // This will add a guid ID, as UaMethodNodeClass is not in the Nodeset file
-            var mb = suc_meta.New_SystemUnitClass(MethodNodeClass);
+            var methodNodeClass = suc_meta.New_SystemUnitClass( MethodNodeClass );
             // Give this a known repeatable ID, as there is no node ID for it.
             string methodNodeClassUniqueId = "686619c7-0101-4869-b398-aa0f98bc5f54";
-            mb.ID = methodNodeClassUniqueId;
-            mb.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);
-            AddLibraryHeaderInfo(suc_meta as CAEXBasicObject);
+            methodNodeClass.ID = methodNodeClassUniqueId;
+            methodNodeClass.New_SupportedRoleClass( RCLPrefix + MetaModelName + "/" + UaBaseRole, false );
+            // Issue 16 Add BrowseName to SUC UaMethodNodeClass
+            // Manually add these to simulate what the AddModifyAttribute would do if it were possible
+            AttributeType browseNameAttributeType = methodNodeClass.Attribute.Append( "BrowseName" );
+            browseNameAttributeType.RefAttributeType = "[" + ATLPrefix + Opc.Ua.Namespaces.OpcUa + "]/[QualifiedName]";
+            AttributeType namespaceUriAttributeType = browseNameAttributeType.Attribute.Append( "NamespaceURI" );
+            namespaceUriAttributeType.AttributeDataType = "xs:anyURI";
+            AttributeType nameAttributeType = browseNameAttributeType.Attribute.Append( "Name" );
+            nameAttributeType.AttributeDataType = "xs:string";
 
-
+            AddLibraryHeaderInfo( suc_meta as CAEXBasicObject);
         }
 
         private void AddBaseNodeClassAttributes( AttributeSequence seq, UANode uanode, UANode basenode = null)
