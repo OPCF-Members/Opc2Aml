@@ -796,7 +796,7 @@ namespace MarkdownProcessor
 
                                 if ( propertyNodeValue != null)
                                 {
-                                    bool bListOf = (propertyNodeValue.ValueRank == 1);
+                                    bool bListOf = (propertyNodeValue.ValueRank >= ValueRanks.OneDimension );
 
                                     AddModifyAttribute( referenceElement.Attribute, 
                                         "Value",
@@ -1714,7 +1714,7 @@ namespace MarkdownProcessor
                                 if (targetNode.NodeClass == NodeClass.Variable)
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
-                                    bool bListOf = (varnode.ValueRank == 1);  // use ListOf when its a UA array
+                                    bool bListOf = (varnode.ValueRank >= ValueRanks.OneDimension);  // use ListOf when its a UA array
 
                                     AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
                                     ie.SetAttributeValue("ValueRank", varnode.ValueRank);
@@ -2088,7 +2088,8 @@ namespace MarkdownProcessor
                             a.Name = MyNode.Definition.Field[i].Name;
                             if (att.Attribute[a.Name] == null)  // don't add the attribute if it already exists
                             {
-                                a.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, MyNode.Definition.Field[i].ValueRank == 1);
+                                a.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, 
+                                    MyNode.Definition.Field[i].ValueRank >= ValueRanks.OneDimension );
                                 a.AttributeDataType = GetAttributeDataType(MyNode.Definition.Field[i].DecodedDataType);
                                 if (nodeId.NamespaceIndex == 0)
                                 {
@@ -2098,7 +2099,7 @@ namespace MarkdownProcessor
                                         MakeAttributeId(ref a);
                                 }
 
-                                if (MyNode.Definition.Field[i].ValueRank == 1) // insert the first element in the list as a placeholder
+                                if (MyNode.Definition.Field[i].ValueRank >= ValueRanks.OneDimension) // insert the first element in the list as a placeholder
                                 {
                                     AttributeType aa = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
                                     aa.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, false);
@@ -2232,7 +2233,7 @@ namespace MarkdownProcessor
             if (toAdd.NodeClass == NodeClass.Variable)
             {  //  Set the datatype for Value
                 var varnode = toAdd as NodeSet.UAVariable;
-                bool bListOf = (varnode.ValueRank == 1);  // use ListOf when its a UA array
+                bool bListOf = ( varnode.ValueRank >= ValueRanks.OneDimension ); // use ListOf when its a UA array
 
                 AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
                 ie.SetAttributeValue("ValueRank", varnode.ValueRank);
