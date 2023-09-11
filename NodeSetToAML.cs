@@ -682,8 +682,8 @@ namespace MarkdownProcessor
                             {
                                 Variant elementVariant = new Variant( valueAsList[ index ] );
                                 bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
-                                AttributeType elementAttribute = AddModifyAttribute( a.Attribute,
-                                    index.ToString(), refDataType, elementVariant, elementListOf );
+                                AddModifyAttribute( a.Attribute, index.ToString(), refDataType, 
+                                    elementVariant, elementListOf );
                             }
                         }
                     }
