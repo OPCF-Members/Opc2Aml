@@ -46,6 +46,8 @@ using System.Linq;
 using System.Diagnostics;
 using System.Net;
 using NodeSetToAmlUtils;
+using Newtonsoft.Json.Linq;
+using System.Collections;
 
 namespace MarkdownProcessor
 {
@@ -604,55 +606,34 @@ namespace MarkdownProcessor
                         }
                     }
 
-                    switch (val.TypeInfo.BuiltInType)
-                    {
-                        case BuiltInType.Boolean:
-                        case BuiltInType.Byte:
-                        case BuiltInType.SByte:
-                        case BuiltInType.Int16:
-                        case BuiltInType.Int32:
-                        case BuiltInType.Int64:
-                        case BuiltInType.DateTime:
-                        case BuiltInType.String:
-                        case BuiltInType.Guid:
-                        case BuiltInType.Double:
-                        case BuiltInType.Float:
-                        case BuiltInType.Integer:
-                        case BuiltInType.Number:
-                        case BuiltInType.UInt16:
-                        case BuiltInType.UInt32:
-                        case BuiltInType.UInt64:
-                        case BuiltInType.UInteger:
-                            a.DefaultAttributeValue = a.AttributeValue = val;
-                            break;
+                    bool addElements = true;
 
+                    switch( val.TypeInfo.BuiltInType )
+                    {
                         case BuiltInType.LocalizedText:
                             {
-                                if (refDataType == "LocalizedText" && referenceName == "EnumStrings")
+                                if( refDataType == "LocalizedText" && referenceName == "EnumStrings" )
                                 {
+                                    addElements = false;
                                     AttributeTypeType attributeType = a as AttributeTypeType;
-                                    if (attributeType != null)
+                                    if( attributeType != null )
                                     {
                                         AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                                            new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                                            new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
                                         avrt.Name = nodeName + " Constraint";
                                         attributeType.AttributeDataType = "xs:string";
                                         NominalScaledTypeType scaledType = avrt.New_NominalType();
 
                                         var values = val.Value as Opc.Ua.LocalizedText[];
-                                        if (values != null)
+                                        if( values != null )
                                         {
-                                            foreach (var value in values)
+                                            foreach( var value in values )
                                             {
-                                                scaledType.RequiredValue.Append(value.Text);
+                                                scaledType.RequiredValue.Append( value.Text );
                                             }
-                                            var res2 = attributeType.Constraint.Insert(avrt);
+                                            var res2 = attributeType.Constraint.Insert( avrt );
                                         }
                                     }
-                                }
-                                else
-                                {
-                                    // Do Something else
                                 }
 
                                 break;
@@ -660,62 +641,51 @@ namespace MarkdownProcessor
 
                         case BuiltInType.ExtensionObject:
                             {
-                                if (refDataType == "EnumValueType" && referenceName == "EnumValues")
+                                if( refDataType == "EnumValueType" && referenceName == "EnumValues" )
                                 {
+                                    addElements = false;
                                     AttributeTypeType attributeType = a as AttributeTypeType;
-                                    if (attributeType != null)
+                                    if( attributeType != null )
                                     {
                                         AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                                            new System.Xml.Linq.XElement(defaultNS + "Constraint"));
+                                            new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
                                         avrt.Name = nodeName + " Constraint";
                                         attributeType.AttributeDataType = "xs:string";
                                         NominalScaledTypeType scaledType = avrt.New_NominalType();
 
                                         var values = val.Value as Opc.Ua.ExtensionObject[];
-                                        if (values != null)
+                                        if( values != null )
                                         {
-                                            foreach (var value in values)
+                                            foreach( var value in values )
                                             {
                                                 var enumValueType = value.Body as Opc.Ua.EnumValueType;
-                                                if (enumValueType != null)
+                                                if( enumValueType != null )
                                                 {
-                                                    scaledType.RequiredValue.Append(enumValueType.DisplayName.Text);
+                                                    scaledType.RequiredValue.Append( enumValueType.DisplayName.Text );
                                                 }
                                             }
-                                            attributeType.Constraint.Insert(avrt);
+                                            attributeType.Constraint.Insert( avrt );
                                         }
                                     }
-                                }
-                                else if (refDataType == "Argument")
-                                {
-                                    var values = val.Value as Opc.Ua.ExtensionObject[];
-                                    if (values != null)
-                                    {
-                                        foreach (var value in values)
-                                        {
-                                            var argument = value.Body as Opc.Ua.Argument;
-                                            if (argument != null)
-                                            {
-                                                //Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
-                                                //    " Method Name " + nodeName + " " + referenceName + " " +
-                                                //    argument.Name + " Type " + argument.DataType.ToString());
-
-                                            }
-                                        }
-                                    }
-
-                                    return a;
                                 }
 
                                 break;
                             }
+                    }
 
-                        default:
-                            Debug.WriteLine("Unhandled " + name + ":" + refDataType + " " +
-                                " Node Name " + nodeName + " " + referenceName + " " +
-                                " Type " + val.TypeInfo.BuiltInType.ToString());
-
-                            break;
+                    if( addElements )
+                    {
+                        IList valueAsList = val.Value as IList;
+                        if( valueAsList != null )
+                        {
+                            for( int index = 0; index < valueAsList.Count; index++ )
+                            {
+                                Variant elementVariant = new Variant( valueAsList[ index ] );
+                                bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+                                AttributeType elementAttribute = AddModifyAttribute( a.Attribute,
+                                    index.ToString(), refDataType, elementVariant, elementListOf );
+                            }
+                        }
                     }
                 }
                 else

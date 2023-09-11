@@ -55,16 +55,14 @@ namespace SystemTest
         #region Tests
 
         [TestMethod]
-        [DataRow( "6134", "3", "3,3,3", "", DisplayName = "Three Dimensions, no Value" )]
-        [DataRow( "6126", "1", "10", "{0|1|2|3|4|5|6|7|8|9}", DisplayName = "One Dimension" )]
-        [DataRow( "6127", "2", "2,5", "{0|1|2|3|4|5|6|7|8|9}", DisplayName = "Two Dimensions" )]
-        [DataRow( "6129", "3", "3,3,3", "{0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26}", DisplayName = "Three Dimensions" )]
-        [DataRow( "6128", "5", "2,2,2,2,2", 
-            "{0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31}", 
-            DisplayName = "Five Dimensions" )]
-        [DataRow( "2994", "-1", "", "", true, DisplayName = "Auditing" )]
+        [DataRow( "6134", "3", "3,3,3", false, DisplayName = "Three Dimensions, no Value" )]
+        [DataRow( "6126", "1", "10", true, DisplayName = "One Dimension" )]
+        [DataRow( "6127", "2", "2,5", true, DisplayName = "Two Dimensions" )]
+        [DataRow( "6129", "3", "3,3,3", true, DisplayName = "Three Dimensions" )]
+        [DataRow( "6128", "5", "2,2,2,2,2", true, DisplayName = "Five Dimensions" )]
+        [DataRow( "2994", "-1", "", false, true, DisplayName = "Auditing" )]
         public void TestArray( string nodeId, string valueRank, string arrayDimensions, 
-            string value, bool foundationRoot = false)
+            bool expectValues, bool foundationRoot = false)
         {
             SystemUnitClassType objectToTest = GetTestObject(nodeId, foundationRoot);
             Assert.IsNotNull( objectToTest, "Unable to find nodeId" );
@@ -85,14 +83,39 @@ namespace SystemTest
             }
 
             AttributeType valueAttribute = objectToTest.Attribute[ "Value" ];
-            Assert.IsNotNull( valueAttribute, "Unable to find ValueRank" );
-            if ( value.Length > 0 )
+            Assert.IsNotNull( valueAttribute, "Unable to find Value Attribute" );
+
+
+            string[] arrayDimensionList = arrayDimensions.Split( ',' );
+            int arrayDimensionCount = 0;
+            foreach( string dimension in arrayDimensionList )
             {
-                Assert.AreEqual( value, valueAttribute.Value );
+                int dimensionValue;
+                if ( int.TryParse( dimension, out dimensionValue ) )
+                {
+                    if( arrayDimensionCount == 0 )
+                    {
+                        arrayDimensionCount = dimensionValue;
+                    }
+                    else
+                    {
+                        arrayDimensionCount *= dimensionValue;
+                    }
+                }
+            }
+
+            if ( expectValues )
+            {
+                for( int index = 0; index < arrayDimensionCount; index++ )
+                {
+                    AttributeType elementAttribute = valueAttribute.Attribute[ index.ToString() ];
+                    Assert.IsNotNull( elementAttribute, "Unable to find index Element value" );
+                    Assert.AreEqual( index.ToString(), elementAttribute.Value );
+                }
             }
             else
             {
-                Assert.IsNull( valueAttribute.Value );
+                Assert.AreEqual( 0, valueAttribute.Attribute.Count );
             }
         }
 
