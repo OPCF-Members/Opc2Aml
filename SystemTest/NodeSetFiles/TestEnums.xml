@@ -2263,7 +2263,7 @@
         </References>
         <Value>
             <uax:NodeId>
-                <uax:Identifier>ns=1;s=AStringNodeId</uax:Identifier>
+                <uax:Identifier>ns=1;s=StringNodeId</uax:Identifier>
             </uax:NodeId>
         </Value>
     </UAVariable>
@@ -2287,7 +2287,7 @@
         </References>
         <Value>
             <uax:NodeId>
-                <uax:Identifier>ns=0;i=0</uax:Identifier>
+                <uax:Identifier>ns=1;b=T3BhcXVlTm9kZUlk</uax:Identifier>
             </uax:NodeId>
         </Value>
     </UAVariable>
@@ -2297,6 +2297,11 @@
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5019</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
         </References>
+        <Value>
+            <uax:NodeId>
+                <uax:Identifier>ns=1;g=7E1B677A-6AE8-49FA-933E-769A4AA9C524</uax:Identifier>
+            </uax:NodeId>
+        </Value>
     </UAVariable>
     <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6181" BrowseName="1:NumericNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
         <DisplayName>NumericNodeId</DisplayName>
@@ -2306,7 +2311,7 @@
         </References>
         <Value>
             <uax:ExpandedNodeId>
-                <uax:Identifier>ns=0;i=0;serverIndex:1</uax:Identifier>
+                <uax:Identifier>ns=1;i=12345;serverIndex:1</uax:Identifier>
             </uax:ExpandedNodeId>
         </Value>
     </UAVariable>
@@ -2316,6 +2321,11 @@
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
         </References>
+        <Value>
+            <uax:ExpandedNodeId>
+                <uax:Identifier>ns=1;s=StringNodeId;serverIndex:1</uax:Identifier>
+            </uax:ExpandedNodeId>
+        </Value>
     </UAVariable>
     <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6183" BrowseName="1:GuidNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
         <DisplayName>GuidNodeId</DisplayName>
@@ -2323,6 +2333,11 @@
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
         </References>
+        <Value>
+            <uax:ExpandedNodeId>
+                <uax:Identifier>ns=1;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B;serverIndex:1</uax:Identifier>
+            </uax:ExpandedNodeId>
+        </Value>
     </UAVariable>
     <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6184" BrowseName="1:OpaqueNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
         <DisplayName>OpaqueNodeId</DisplayName>
@@ -2331,4 +2346,9 @@
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
         </References>
     </UAVariable>
+    <Value>
+        <uax:ExpandedNodeId>
+            <uax:Identifier>ns=1;b=T3BhcXVlTm9kZUlk</uax:Identifier>
+        </uax:ExpandedNodeId>
+    </Value>
 </UANodeSet>
