@@ -2221,7 +2221,7 @@
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
         </References>
     </UAVariable>
-    <UAVariable NodeId="ns=1;i=6185" BrowseName="1:Qualified" WriteMask="96" DataType="QualifiedName" AccessLevel="3">
+    <UAVariable NodeId="ns=1;i=6190" BrowseName="1:Qualified" WriteMask="96" DataType="QualifiedName" AccessLevel="3">
         <DisplayName Locale="en">Qualified</DisplayName>
         <References>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -2232,6 +2232,18 @@
                 <uax:NamespaceIndex>1</uax:NamespaceIndex>
                 <uax:Name>MyQualifiedName</uax:Name>
             </uax:QualifiedName>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6191" BrowseName="1:Guid" WriteMask="96" DataType="Guid" AccessLevel="3">
+        <DisplayName Locale="en">Guid</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:Guid>
+                <uax:String>d23c82b6-1715-4951-acd1-84fb898d6b6c</uax:String>
+            </uax:Guid>
         </Value>
     </UAVariable>
     <UAObject NodeId="ns=1;i=5012" BrowseName="1:NodeIds" ParentNodeId="ns=1;i=5013">
@@ -2311,7 +2323,8 @@
         </References>
         <Value>
             <uax:ExpandedNodeId>
-                <uax:Identifier>ns=1;i=12345;serverIndex:1</uax:Identifier>
+                <uax:Identifier>ns=1;i=12345</uax:Identifier>
+                <!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;i=12345</uax:Identifier>-->
             </uax:ExpandedNodeId>
         </Value>
     </UAVariable>
@@ -2323,7 +2336,8 @@
         </References>
         <Value>
             <uax:ExpandedNodeId>
-                <uax:Identifier>ns=1;s=StringNodeId;serverIndex:1</uax:Identifier>
+                <uax:Identifier>ns=1;s=StringNodeId</uax:Identifier>
+                <!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;s=StringNodeId</uax:Identifier>-->
             </uax:ExpandedNodeId>
         </Value>
     </UAVariable>
@@ -2335,7 +2349,8 @@
         </References>
         <Value>
             <uax:ExpandedNodeId>
-                <uax:Identifier>ns=1;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B;serverIndex:1</uax:Identifier>
+                <uax:Identifier>ns=1;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B</uax:Identifier>
+                <!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B</uax:Identifier>-->
             </uax:ExpandedNodeId>
         </Value>
     </UAVariable>
@@ -2345,10 +2360,11 @@
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
         </References>
+        <Value>
+            <uax:ExpandedNodeId>
+                <uax:Identifier>ns=1;b=T3BhcXVlTm9kZUlk</uax:Identifier>
+                <!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;b=T3BhcXVlTm9kZUlk</uax:Identifier>-->
+            </uax:ExpandedNodeId>
+        </Value>
     </UAVariable>
-    <Value>
-        <uax:ExpandedNodeId>
-            <uax:Identifier>ns=1;b=T3BhcXVlTm9kZUlk</uax:Identifier>
-        </uax:ExpandedNodeId>
-    </Value>
 </UANodeSet>
