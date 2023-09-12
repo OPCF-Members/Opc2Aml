@@ -48,6 +48,9 @@ using System.Net;
 using NodeSetToAmlUtils;
 using Newtonsoft.Json.Linq;
 using System.Collections;
+using System.Reflection;
+using System.Security.AccessControl;
+using Org.BouncyCastle.Utilities;
 
 namespace MarkdownProcessor
 {
@@ -693,34 +696,201 @@ namespace MarkdownProcessor
                     switch (val.TypeInfo.BuiltInType)  // TODO -- consider supporting setting values for more complicated types (enums, structures, Qualified Names ...) and arrays
                     {
                         case BuiltInType.Boolean:
-                        case BuiltInType.Byte:
                         case BuiltInType.SByte:
+                        case BuiltInType.Byte:
                         case BuiltInType.Int16:
-                        case BuiltInType.Int32:
-                        case BuiltInType.Int64:
-                        case BuiltInType.DateTime:
-                        case BuiltInType.String:
-                        case BuiltInType.Guid:
-                        case BuiltInType.Double:
-                        case BuiltInType.Float:
-                        case BuiltInType.Integer:
-                        case BuiltInType.Number:
                         case BuiltInType.UInt16:
+                        case BuiltInType.Int32:
                         case BuiltInType.UInt32:
+                        case BuiltInType.Int64:
                         case BuiltInType.UInt64:
+                        case BuiltInType.Float:
+                        case BuiltInType.Double:
+                        case BuiltInType.String:
+                        case BuiltInType.DateTime:
+                        case BuiltInType.Guid:
+                        case BuiltInType.XmlElement:
+                        case BuiltInType.Number:
+                        case BuiltInType.Integer:
                         case BuiltInType.UInteger:
-                            a.DefaultAttributeValue = a.AttributeValue = val;
-                            break;
+                            {
+                                a.DefaultAttributeValue = a.AttributeValue = val;
+                                break;
+                            }
+
+                        case BuiltInType.ByteString:
+                            {
+                                byte[] bytes = val.Value as byte[];
+                                if ( bytes != null )
+                                {
+                                    string encoded = Convert.ToBase64String( bytes, 0, bytes.Length );
+                                    a.DefaultAttributeValue = a.AttributeValue = new Variant( encoded.ToString() );
+                                    //StringBuilder stringBuilder = new StringBuilder();
+                                    //for( int index = 0; index < bytes.Length; index++ )
+                                    //{
+                                    //    stringBuilder.Append( (char)bytes[ index ] );
+                                    //}
+                                    //a.DefaultAttributeValue = a.AttributeValue = new Variant( stringBuilder.ToString() );
+                                }
+
+                                break;
+                            }
+
+
+                        case BuiltInType.NodeId:
+                        case BuiltInType.ExpandedNodeId:
+                            {
+                                NodeId nodeId = null;
+                                ExpandedNodeId expandedNodeId = null;
+                                if( val.TypeInfo.BuiltInType == BuiltInType.NodeId )
+                                {
+                                    nodeId = val.Value as NodeId;
+                                }
+                                else
+                                {
+                                    expandedNodeId = val.Value as ExpandedNodeId;
+                                    nodeId = ExpandedNodeId.ToNodeId( expandedNodeId, m_modelManager.NamespaceUris);
+                                }
+
+                                if ( nodeId != null )
+                                {
+                                    a.DefaultAttributeValue = a.AttributeValue = nodeId;
+                                    AttributeType rootNodeId = a.Attribute[ "RootNodeId" ];
+                                    if ( rootNodeId != null )
+                                    {
+                                        AttributeType namespaceUri = rootNodeId.Attribute[ "NamespaceUri" ];
+                                        if ( namespaceUri != null )
+                                        {
+                                            namespaceUri.Value = m_modelManager.ModelNamespaceIndexes[ nodeId.NamespaceIndex ].NamespaceUri;
+                                        }
+
+                                        switch( nodeId.IdType )
+                                        {
+                                            case IdType.Numeric:
+                                                {
+                                                    AttributeType id = rootNodeId.Attribute[ "NumericId" ];
+                                                    id.Value = nodeId.Identifier.ToString();
+                                                    break;
+                                                }
+
+                                            case IdType.String:
+                                                {
+                                                    AttributeType id = rootNodeId.Attribute[ "StringId" ];
+                                                    id.Value = nodeId.Identifier.ToString();
+                                                    break;
+                                                }
+
+                                            case IdType.Guid:
+                                                {
+                                                    AttributeType id = rootNodeId.Attribute[ "GuidId" ];
+                                                    id.Value = nodeId.Identifier.ToString();
+                                                    break;
+                                                }
+
+                                            case IdType.Opaque:
+                                                {
+                                                    byte[] bytes = nodeId.Identifier as byte[];
+                                                    if( bytes != null )
+                                                    {
+                                                        AttributeType id = rootNodeId.Attribute[ "OpaqueId" ];
+                                                        string encoded = Convert.ToBase64String(
+                                                            bytes, 0, bytes.Length );
+                                                        id.Value = encoded;
+                                                    }
+                                                    break;
+                                                }
+                                        }
+                                    }
+                                    a.DefaultValue = null;
+                                    a.Value = null;
+                                }
+
+                                if ( expandedNodeId != null )
+                                {
+                                    if ( expandedNodeId.ServerIndex > 0 )
+                                    {
+                                        if( expandedNodeId.ServerIndex < m_modelManager.ModelNamespaceIndexes.Count )
+                                        {
+                                            string serverUri = m_modelManager.ModelNamespaceIndexes[ (int)expandedNodeId.ServerIndex ].NamespaceUri;
+                                            AttributeType serverInstanceUri = a.Attribute[ "ServerInstanceUri" ];
+                                            if ( serverInstanceUri != null )
+                                            {
+                                                serverInstanceUri.Value = serverUri;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                break;
+                            }
+
+                        case BuiltInType.StatusCode:
+                            {
+                                // Archie - Cannot Get ModelManager to read a status code.
+                                /*    <Value>
+                                 *      <uax:StatusCode>
+                                 *          <uax:Code>2150891520</uax:Code>
+                                 *      </uax:StatusCode>
+                                 *    </Value>
+                                 */
+
+                                break;
+                            }
+
+                        case BuiltInType.QualifiedName:
+                            {
+                                a.DefaultAttributeValue = a.AttributeValue = val;
+
+                                QualifiedName qualifiedName = val.Value as QualifiedName;
+                                if( qualifiedName != null )
+                                {
+                                    AttributeType uri = a.Attribute[ "NamespaceURI" ];
+                                    uri.Value = m_modelManager.ModelNamespaceIndexes[ qualifiedName.NamespaceIndex ].NamespaceUri;
+                                    AttributeType nameAttribute = a.Attribute[ "Name" ];
+                                    nameAttribute.Value = qualifiedName.Name;
+                                    a.DefaultValue = null;
+                                    a.Value = null;
+                                }
+
+                                break;
+                            }
 
                         case BuiltInType.LocalizedText:
                             {
                                 Opc.Ua.LocalizedText localizedText = (Opc.Ua.LocalizedText)val.Value;
-                                if (localizedText != null && localizedText.Text != null)
+                                if( localizedText != null && localizedText.Text != null )
                                 {
                                     a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
                                 }
                                 break;
                             }
+
+                        case BuiltInType.ExtensionObject:
+                            {
+                                break;
+                            }
+
+                        case BuiltInType.DataValue:
+                            {
+                                break;
+                            }
+
+                        case BuiltInType.Variant:
+                            {
+                                break;
+                            }
+
+                        case BuiltInType.DiagnosticInfo:
+                            {
+                                break;
+                            }
+
+                        case BuiltInType.Enumeration:
+                            {
+                                break;
+                            }
+
+
                     }
                 }
             }
@@ -2157,6 +2327,15 @@ namespace MarkdownProcessor
             string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
             string prefix = toAdd.DecodedBrowseName.Name;
 
+            bool interesting = false;
+            if ( toAdd.NodeId.Contains( "5018" ) ||
+                toAdd.NodeId.Contains( "6159" ) ||
+                toAdd.NodeId.Contains( "6144" ) )
+            {
+                interesting = true;
+
+            }
+
             //first see if node already exists
             var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
             if (ie == null)
@@ -2230,8 +2409,18 @@ namespace MarkdownProcessor
                 HashSet<string> foundInternalElements = new HashSet<string>();
                 foreach (var reference in refList)
                 {
+                    if ( interesting )
+                    {
+                        bool wait = true;
+                    }
                     if (reference.IsForward == true)
                     {
+                        if ( interesting && 
+                            ( reference.TargetId.ToString().Contains( "6159" ) ||
+                            reference.TargetId.ToString().Contains( "6144" ) ) )
+                        {
+                            bool wait = true;
+                        }
                         if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, HierarchicalNodeId) == true )
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
