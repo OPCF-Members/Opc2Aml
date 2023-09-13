@@ -50,7 +50,8 @@ using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Reflection;
 using System.Security.AccessControl;
-using Org.BouncyCastle.Utilities;
+using System.IO.Packaging;
+using MarkdownProcessor.NodeSet;
 
 namespace MarkdownProcessor
 {
@@ -102,9 +103,11 @@ namespace MarkdownProcessor
         private UANode structureNode;
         private readonly List<string> ExcludedDataTypeList = new List<string>() { "InstanceNode", "TypeNode" };
         private Dictionary<string, Dictionary<string,string>> LookupNames = new Dictionary<string, Dictionary<string, string>>();
+        private HashSet<string> ExtensionObjectExclusions = null;
+        private HashSet<string> EmptyExclusions = null;
 
         private List<string> PreventInfiniteRecursionList = new List<string>();
-        private const int ua2xslookup_count = 16;
+        private const int ua2xslookup_count = 18;
         private const int ua2xslookup_uaname = 0;
         private const int ua2xslookup_xsname = 1;
         private readonly string[,] ua2xsLookup = new string[ua2xslookup_count, 2] {
@@ -123,8 +126,9 @@ namespace MarkdownProcessor
             { "DateTime" , "xs:dateTime"  },
             { "ByteString" , "xs:base64Binary"  },
             { "LocalizedText" , "xs:string"  },
-            { "QualifiedName" , "xs:anyURI"  }
-
+            { "QualifiedName" , "xs:anyURI"  },
+            { "StatusCode" , "xs:unsignedInt"  },
+            { "Enumeration" , "xs:int"  }
         };
 
         public NodeSetToAML(ModelManager modelManager)
@@ -713,6 +717,7 @@ namespace MarkdownProcessor
                         case BuiltInType.Number:
                         case BuiltInType.Integer:
                         case BuiltInType.UInteger:
+                        case BuiltInType.Enumeration:
                             {
                                 a.DefaultAttributeValue = a.AttributeValue = val;
                                 break;
@@ -735,7 +740,6 @@ namespace MarkdownProcessor
 
                                 break;
                             }
-
 
                         case BuiltInType.NodeId:
                         case BuiltInType.ExpandedNodeId:
@@ -826,13 +830,8 @@ namespace MarkdownProcessor
 
                         case BuiltInType.StatusCode:
                             {
-                                // Archie - Cannot Get ModelManager to read a status code.
-                                /*    <Value>
-                                 *      <uax:StatusCode>
-                                 *          <uax:Code>2150891520</uax:Code>
-                                 *      </uax:StatusCode>
-                                 *    </Value>
-                                 */
+                                StatusCode statusCode = (StatusCode)val.Value;
+                                a.DefaultAttributeValue = a.AttributeValue = statusCode.Code;
 
                                 break;
                             }
@@ -867,36 +866,126 @@ namespace MarkdownProcessor
 
                         case BuiltInType.ExtensionObject:
                             {
+                                ExtensionObject extensionObject = val.Value as ExtensionObject;
+                                if ( extensionObject != null && extensionObject.Body != null )
+                                {
+                                    AddModifyAttributeObject( a, extensionObject.Body, extensionObject: true );
+                                }
+
                                 break;
                             }
 
                         case BuiltInType.DataValue:
                             {
+                                DataValue dataValue = val.Value as DataValue;
+                                if( dataValue != null )
+                                {
+                                    Variant actualValue = new Variant( dataValue.Value );
+                                    NodeId dataTypeNodeId = Opc.Ua.TypeInfo.GetDataTypeId( actualValue.Value );
+
+                                    bool actualListOf = actualValue.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+
+                                    AddModifyAttribute( a.Attribute, "Value", dataTypeNodeId, actualValue, actualListOf );
+                                    AddModifyAttribute( a.Attribute, "StatusCode", "StatusCode",
+                                        dataValue.StatusCode );
+                                    AddModifyAttribute( a.Attribute, "SourceTimestamp", "DateTime",
+                                        dataValue.SourceTimestamp );
+                                    if( dataValue.SourcePicoseconds > 0 )
+                                    {
+                                        AddModifyAttribute( a.Attribute, "SourcePicoseconds", "UInt32",
+                                            dataValue.SourcePicoseconds );
+                                    }
+                                    AddModifyAttribute( a.Attribute, "ServerTimestamp", "DateTime",
+                                        dataValue.ServerTimestamp );
+                                    if ( dataValue.ServerPicoseconds > 0 )
+                                    {
+                                        AddModifyAttribute( a.Attribute, "ServerPicoseconds", "UInt32",
+                                            dataValue.ServerPicoseconds );
+                                    }
+                                }
                                 break;
                             }
 
                         case BuiltInType.Variant:
                             {
+                                Variant internalVariant = new Variant( val.Value );
+                                NodeId dataTypeNodeId = Opc.Ua.TypeInfo.GetDataTypeId( internalVariant.Value );
+
+                                bool internalListOf = internalVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+
+                                AddModifyAttribute( a.Attribute, "Value", dataTypeNodeId, internalVariant, internalListOf );
+
                                 break;
                             }
 
                         case BuiltInType.DiagnosticInfo:
                             {
+                                AddModifyAttributeIterateObject( a, val );
                                 break;
                             }
-
-                        case BuiltInType.Enumeration:
-                            {
-                                break;
-                            }
-
-
+                        
                     }
                 }
             }
 
             return a;
         }
+
+        private void AddModifyAttributeIterateObject( AttributeType attribute, 
+            Variant value )
+        {
+            AddModifyAttributeObject( attribute, value.Value, extensionObject: false );
+        }
+
+        private void AddModifyAttributeObject( AttributeType attribute, object value, bool extensionObject )
+        {
+            PropertyInfo[] properties = value.GetType().GetProperties();
+
+            HashSet<string> exclusions = GetExclusions( extensionObject );
+
+            foreach( PropertyInfo property in properties )
+            {
+                NodeId propertyNodeId = Opc.Ua.TypeInfo.GetDataTypeId( property.PropertyType );
+                var propertyValue = property.GetValue( value );
+                if( propertyValue != null )
+                {
+                    if( !exclusions.Contains( property.Name ) )
+                    {
+                        AddModifyAttribute( attribute.Attribute,
+                            property.Name, propertyNodeId,
+                            new Variant( propertyValue ),
+                            property.PropertyType.IsArray );
+                    }
+                }
+            }
+        }
+
+        private HashSet<string> GetExclusions( bool extensionObject )
+        {
+            HashSet<string> exclusions = null;
+            if ( extensionObject )
+            {
+                if ( ExtensionObjectExclusions == null )
+                {
+                    ExtensionObjectExclusions = new HashSet<string>();
+                    ExtensionObjectExclusions.Add( "BinaryEncodingId" );
+                    ExtensionObjectExclusions.Add( "JsonEncodingId" );
+                    ExtensionObjectExclusions.Add( "XmlEncodingId" );
+                    ExtensionObjectExclusions.Add( "TypeId" );
+                }
+                exclusions = ExtensionObjectExclusions;
+            }
+            else
+            {
+                if ( EmptyExclusions == null )
+                {
+                    EmptyExclusions = new HashSet<string>();
+                }
+                exclusions = EmptyExclusions;
+            }
+
+            return exclusions;
+    }
 
         private void UpdateDerived(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
         { 
@@ -1862,7 +1951,6 @@ namespace MarkdownProcessor
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
                                     bool bListOf = (varnode.ValueRank >= ValueRanks.OneDimension);  // use ListOf when its a UA array
-
                                     AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
                                     ie.SetAttributeValue("ValueRank", varnode.ValueRank);
                                     ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
@@ -2327,15 +2415,6 @@ namespace MarkdownProcessor
             string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
             string prefix = toAdd.DecodedBrowseName.Name;
 
-            bool interesting = false;
-            if ( toAdd.NodeId.Contains( "5018" ) ||
-                toAdd.NodeId.Contains( "6159" ) ||
-                toAdd.NodeId.Contains( "6144" ) )
-            {
-                interesting = true;
-
-            }
-
             //first see if node already exists
             var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
             if (ie == null)
@@ -2409,18 +2488,8 @@ namespace MarkdownProcessor
                 HashSet<string> foundInternalElements = new HashSet<string>();
                 foreach (var reference in refList)
                 {
-                    if ( interesting )
-                    {
-                        bool wait = true;
-                    }
                     if (reference.IsForward == true)
                     {
-                        if ( interesting && 
-                            ( reference.TargetId.ToString().Contains( "6159" ) ||
-                            reference.TargetId.ToString().Contains( "6144" ) ) )
-                        {
-                            bool wait = true;
-                        }
                         if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, HierarchicalNodeId) == true )
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);

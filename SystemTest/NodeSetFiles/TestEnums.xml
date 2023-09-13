@@ -19,9 +19,12 @@
         <Alias Alias="ByteString">i=15</Alias>
         <Alias Alias="NodeId">i=17</Alias>
         <Alias Alias="ExpandedNodeId">i=18</Alias>
+        <Alias Alias="StatusCode">i=19</Alias>
         <Alias Alias="QualifiedName">i=20</Alias>
         <Alias Alias="LocalizedText">i=21</Alias>
-        <Alias Alias="StatusCode">i=19</Alias>
+        <Alias Alias="DataValue">i=23</Alias>
+        <Alias Alias="DiagnosticInfo">i=25</Alias>
+        <Alias Alias="Enumeration">i=29</Alias>
         <Alias Alias="HasComponent">i=47</Alias>
         <Alias Alias="HasProperty">i=46</Alias>
         <Alias Alias="Organizes">i=35</Alias>
@@ -2367,4 +2370,163 @@
             </uax:ExpandedNodeId>
         </Value>
     </UAVariable>
+    <UAVariable NodeId="ns=1;i=6192" BrowseName="1:DataValue" WriteMask="96" DataType="DataValue" AccessLevel="3">
+        <DisplayName Locale="en">DataValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:DataValue>
+                <uax:Value>
+                    <uax:Value>
+                        <uax:Int32>12345</uax:Int32>
+                    </uax:Value>
+                </uax:Value>
+                <uax:StatusCode>
+                    <uax:Code>2165637120</uax:Code>
+                </uax:StatusCode>
+                <uax:SourceTimestamp>2023-09-13T14:39:08.791Z</uax:SourceTimestamp>
+                <uax:ServerTimestamp>2023-09-13T14:39:08.791Z</uax:ServerTimestamp>
+                <!--<uax:SourcePicoseconds>10</uax:SourcePicoseconds>
+                <uax:ServerPicoseconds>5</uax:ServerPicoseconds>-->
+            </uax:DataValue>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6193" BrowseName="1:DateTime" WriteMask="96" DataType="DateTime" AccessLevel="3">
+        <DisplayName Locale="en">DateTime</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:DateTime>2023-09-13T15:19:08.867Z</uax:DateTime>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6194" BrowseName="1:ComplexDataValue" WriteMask="96" DataType="DataValue" AccessLevel="3">
+        <DisplayName Locale="en">ComplexDataValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:DataValue>
+                <uax:Value>
+                    <uax:Value>
+                        <uax:DataValue>
+                            <uax:Value>
+                                <uax:Value>
+                                    <uax:Int32>12345</uax:Int32>
+                                </uax:Value>
+                            </uax:Value>
+                            <uax:StatusCode>
+                                <uax:Code>2165637120</uax:Code>
+                            </uax:StatusCode>
+                            <uax:SourceTimestamp>2023-09-13T16:47:00.868Z</uax:SourceTimestamp>
+                            <uax:SourcePicoseconds>10</uax:SourcePicoseconds>
+                            <uax:ServerTimestamp>2023-09-13T16:47:00.868Z</uax:ServerTimestamp>
+                            <uax:ServerPicoseconds>5</uax:ServerPicoseconds>
+                        </uax:DataValue>
+                    </uax:Value>
+                </uax:Value>
+                <uax:StatusCode>
+                    <uax:Code>2165178368</uax:Code>
+                </uax:StatusCode>
+                <uax:SourceTimestamp>2023-09-13T16:47:00.868Z</uax:SourceTimestamp>
+                <uax:ServerTimestamp>2023-09-13T16:47:00.868Z</uax:ServerTimestamp>
+            </uax:DataValue>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6195" BrowseName="1:Enumeration" WriteMask="96" DataType="Enumeration" AccessLevel="3">
+        <DisplayName Locale="en">Enumeration</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:Int32>75</uax:Int32>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6196" BrowseName="1:DiagnosticHolder" WriteMask="96" DataType="DataValue" AccessLevel="3">
+        <DisplayName Locale="en">DiagnosticHolder</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:DataValue>
+                <uax:Value>
+                    <uax:Value>
+                        <uax:DiagnosticInfo>
+                            <uax:SymbolicId>11</uax:SymbolicId>
+                            <uax:NamespaceUri>22</uax:NamespaceUri>
+                            <uax:Locale>33</uax:Locale>
+                            <uax:LocalizedText>44</uax:LocalizedText>
+                            <uax:AdditionalInfo>Embedded Diagnostic Information</uax:AdditionalInfo>
+                        </uax:DiagnosticInfo>
+                    </uax:Value>
+                </uax:Value>
+                <uax:StatusCode>
+                    <uax:Code>2165637120</uax:Code>
+                </uax:StatusCode>
+                <uax:SourceTimestamp>2023-09-13T14:39:08.791Z</uax:SourceTimestamp>
+                <uax:ServerTimestamp>2023-09-13T14:39:08.791Z</uax:ServerTimestamp>
+            </uax:DataValue>
+        </Value>
+    </UAVariable>
+
+  <UAVariable NodeId="ns=1;i=6197" BrowseName="1:ComplexNumberHolderDataValue" WriteMask="96" DataType="DataValue" AccessLevel="3">
+    <DisplayName Locale="en">complexNumberHolderDataValue</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+    </References>
+    <Value>
+      <uax:DataValue>
+        <uax:Value>
+          <uax:Value>
+            <uax:ExtensionObject>
+              <uax:TypeId>
+                <uax:Identifier>i=12173</uax:Identifier>
+              </uax:TypeId>
+              <uax:Body>
+                <uax:ComplexNumberType>
+                  <uax:Real>123.456</uax:Real>
+                  <uax:Imaginary>789.012</uax:Imaginary>
+                </uax:ComplexNumberType>
+              </uax:Body>
+            </uax:ExtensionObject>
+          </uax:Value>
+        </uax:Value>
+        <uax:StatusCode>
+          <uax:Code>2165178368</uax:Code>
+        </uax:StatusCode>
+        <uax:SourceTimestamp>2023-09-13T20:42:15.649Z</uax:SourceTimestamp>
+        <uax:ServerTimestamp>2023-09-13T20:42:15.649Z</uax:ServerTimestamp>
+      </uax:DataValue>
+    </Value>
+  </UAVariable>
+    
+  <UAVariable NodeId="ns=1;i=6198" BrowseName="1:ComplexNumber" WriteMask="96" DataType="DataValue" AccessLevel="3">
+    <DisplayName Locale="en">ComplexNumber</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+    </References>
+    <Value>
+      <uax:ExtensionObject>
+        <uax:TypeId>
+          <uax:Identifier>i=12173</uax:Identifier>
+        </uax:TypeId>
+        <uax:Body>
+          <uax:ComplexNumberType>
+            <uax:Real>123.456</uax:Real>
+            <uax:Imaginary>789.012</uax:Imaginary>
+          </uax:ComplexNumberType>
+        </uax:Body>
+      </uax:ExtensionObject>
+    </Value>
+  </UAVariable>
+    
+    <!--Next integer number 6199-->
 </UANodeSet>
