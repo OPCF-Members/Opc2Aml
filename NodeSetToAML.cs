@@ -52,6 +52,7 @@ using System.Reflection;
 using System.Security.AccessControl;
 using System.IO.Packaging;
 using MarkdownProcessor.NodeSet;
+using System.Xml;
 
 namespace MarkdownProcessor
 {
@@ -939,24 +940,45 @@ namespace MarkdownProcessor
 
         private void AddModifyAttributeObject( AttributeType attribute, object value, bool extensionObject )
         {
-            PropertyInfo[] properties = value.GetType().GetProperties();
+            Type valueType = value.GetType();
 
-            HashSet<string> exclusions = GetExclusions( extensionObject );
-
-            foreach( PropertyInfo property in properties )
+            if( valueType.FullName.StartsWith( "Opc.Ua." ) )
             {
-                NodeId propertyNodeId = Opc.Ua.TypeInfo.GetDataTypeId( property.PropertyType );
-                var propertyValue = property.GetValue( value );
-                if( propertyValue != null )
+
+                PropertyInfo[] properties = value.GetType().GetProperties();
+
+                HashSet<string> exclusions = GetExclusions( extensionObject );
+
+                foreach( PropertyInfo property in properties )
                 {
-                    if( !exclusions.Contains( property.Name ) )
+                    NodeId propertyNodeId = Opc.Ua.TypeInfo.GetDataTypeId( property.PropertyType );
+                    var propertyValue = property.GetValue( value );
+                    if( propertyValue != null )
                     {
-                        AddModifyAttribute( attribute.Attribute,
-                            property.Name, propertyNodeId,
-                            new Variant( propertyValue ),
-                            property.PropertyType.IsArray );
+                        if( !exclusions.Contains( property.Name ) )
+                        {
+                            AddModifyAttribute( attribute.Attribute,
+                                property.Name, propertyNodeId,
+                                new Variant( propertyValue ),
+                                property.PropertyType.IsArray );
+                        }
                     }
                 }
+            }
+            else
+            {
+                string elementName = "";
+                XmlElement xmlElement= value as XmlElement;
+                if ( xmlElement != null )
+                {
+                    elementName = xmlElement.Name;
+                }
+                // Archie - When the defined element in the body has an attribute, it crashes the system
+                // This still needs to be addressed and fixed
+                // for example
+                // <uax:Body><FxVersion xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
+                // <uax:Body><RelatedEndpointDataType xmlns="http://opcfoundation.org/UA/FX/Data/Types.xsd">
+                Debug.WriteLine( "AddModifyAttributeObject Unhandled Type " + valueType.FullName + "[" + elementName + "]" );
             }
         }
 
