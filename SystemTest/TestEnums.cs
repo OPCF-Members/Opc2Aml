@@ -13,6 +13,8 @@ using System.Reflection.Metadata;
 using Aml.Engine.Adapter;
 using System.ComponentModel;
 using Newtonsoft.Json.Linq;
+using System;
+using Opc.Ua;
 
 namespace SystemTest
 {
@@ -167,6 +169,42 @@ namespace SystemTest
             EnumClassTest(nodeId, values, hasValues, "EnumStrings", "ListOfLocalizedText");
         }
 
+        [TestMethod]
+
+        [DataRow( Opc.Ua.DataTypes.NodeClass, new NodeClass(), DisplayName = "EnumValue Constraints - NodeClass" )]
+        [DataRow( Opc.Ua.DataTypes.MessageSecurityMode, new MessageSecurityMode(), DisplayName = "EnumString Constraints - MessageSecurityMode" )]
+
+        public void TestConstraints( uint nodeId, object enumObject )
+        {
+            int[] enumValuesArray = (int[])Enum.GetValues( enumObject.GetType() );
+            string[] enumStringsArray = (string[])Enum.GetNames( enumObject.GetType() );
+
+            List<int> enumValues = enumValuesArray.ToList<int>();
+            List<string> values = enumStringsArray.ToList<string>();
+
+            Assert.AreEqual( enumValues.Count, values.Count );
+
+            AttributeFamilyType objectToTest = GetTestAttribute( nodeId.ToString() );
+            Assert.IsNotNull( objectToTest );
+            Assert.AreEqual( "xs:string", objectToTest.AttributeDataType );
+
+
+            AttributeValueRequirementType enumValuesConstraint = null;
+            AttributeValueRequirementType enumStringsConstraint = null;
+
+            GetConstraints( objectToTest, out enumValuesConstraint, out enumStringsConstraint );
+
+            Assert.AreEqual( enumValuesConstraint.NominalScaledType.ValueAttributes.Count, enumStringsConstraint.NominalScaledType.ValueAttributes.Count );
+            Assert.AreEqual( enumValuesConstraint.NominalScaledType.ValueAttributes.Count, enumValues.Count );
+
+            for( int index = 0; index < enumValues.Count; index++ )
+            {
+                Assert.AreEqual( enumValues[ index ].ToString(), enumValuesConstraint.NominalScaledType.ValueAttributes[ index ].Value );
+                Assert.AreEqual( values[ index ], enumStringsConstraint.NominalScaledType.ValueAttributes[ index ].Value );
+            }
+        }
+
+
         #endregion
 
         #region Helpers
@@ -243,8 +281,14 @@ namespace SystemTest
                 "Unexpected AttributeTypeReference Name");
 
             Assert.IsNotNull(enumAttribute.Constraint, "Unable to Find Constraint");
-            Assert.AreEqual(1, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
-            AttributeValueRequirementType requirementType = enumAttribute.Constraint.First();
+            Assert.AreEqual(2, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
+
+            AttributeValueRequirementType enumValueRequirement = null;
+            AttributeValueRequirementType enumStringConstraint = null;
+
+            GetConstraints( enumAttribute, out enumValueRequirement, out enumStringConstraint );
+
+            AttributeValueRequirementType requirementType = enumStringConstraint;
 
             Assert.IsNotNull(requirementType, "Unable to Find Constraint RequirementType");
             Assert.IsNotNull(requirementType.NominalScaledType, "Unable to find Scaled Type");
@@ -280,7 +324,7 @@ namespace SystemTest
             Assert.IsNotNull(classToTest, "Unable to retrieve class to test");
 
             InternalElementType enumElement = classToTest.InternalElement[attributeLookup];
-            Assert.IsNotNull(enumElement, "Unable to Find " + attributeLookup + " Property");
+            Assert.IsNotNull(enumElement, "Unable to Find " + attributeLookup + " Property"); 
 
             AttributeType enumAttribute = enumElement.Attribute["Value"];
             Assert.IsNotNull(enumAttribute, "Unable to Find " + attributeLookup + " Attribute");
@@ -294,8 +338,15 @@ namespace SystemTest
             Assert.IsNotNull(enumAttribute.Constraint, "Unable to Find Constraint");
             if ( hasValues)
             {
-                Assert.AreEqual(1, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
-                AttributeValueRequirementType requirementType = enumAttribute.Constraint.First();
+                Assert.AreEqual(2, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
+
+
+                AttributeValueRequirementType enumValueRequirement = null;
+                AttributeValueRequirementType enumStringConstraint = null;
+
+                GetConstraints( enumAttribute, out enumValueRequirement, out enumStringConstraint );
+
+                AttributeValueRequirementType requirementType = enumStringConstraint;
 
                 Assert.IsNotNull(requirementType, "Unable to Find Constraint RequirementType");
                 Assert.IsNotNull(requirementType.NominalScaledType, "Unable to find Scaled Type");
@@ -320,6 +371,69 @@ namespace SystemTest
             InternalElementType valueAsText = classToTest.InternalElement["ValueAsText"];
             Assert.IsNotNull(valueAsText, "Unable to Find ValueAsText Property");
         }
+
+        public AttributeFamilyType GetTestAttribute( string nodeId )
+        {
+            CAEXDocument document = GetDocument();
+            string rootName = TestHelper.GetOpcRootName();
+            string desiredName = rootName + nodeId;
+            Console.WriteLine( "Looking for " + rootName + nodeId );
+            CAEXObject initialObject = document.FindByID( rootName + nodeId );
+            if( initialObject == null )
+            {
+                Console.WriteLine( "Cant find, use back for " + desiredName );
+
+                AttributeTypeLibType archie = document.CAEXFile.AttributeTypeLib[ "ATL_http://opcfoundation.org/UA/" ];
+
+                if( archie != null )
+                {
+                    foreach( AttributeFamilyType familyType in archie )
+                    {
+                        if( familyType.ID.Equals( desiredName, StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            initialObject = familyType;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            Assert.IsNotNull( initialObject, "Unable to find Initial Object" );
+            AttributeFamilyType theObject = initialObject as AttributeFamilyType;
+            Assert.IsNotNull( theObject, "Unable to Cast Initial Object" );
+            return theObject;
+        }
+
+        public void GetConstraints( AttributeTypeType attributeType, 
+            out AttributeValueRequirementType enumValues, 
+            out AttributeValueRequirementType stringValues )
+        {
+            AttributeValueRequirementType enumValuesConstraint = null;
+            AttributeValueRequirementType enumStringsConstraint = null;
+
+            foreach( AttributeValueRequirementType valueRequirementType in attributeType.Constraint )
+            {
+                if( valueRequirementType.Name.EndsWith( " EnumValue" ) )
+                {
+                    enumValuesConstraint = valueRequirementType;
+                }
+                else if( valueRequirementType.Name.EndsWith( "Constraint" ) )
+                {
+                    enumStringsConstraint = valueRequirementType;
+                }
+            }
+
+            Assert.IsNotNull( enumValuesConstraint );
+            Assert.IsNotNull( enumValuesConstraint.NominalScaledType );
+            Assert.IsNotNull( enumValuesConstraint.NominalScaledType.ValueAttributes );
+            Assert.IsNotNull( enumStringsConstraint );
+            Assert.IsNotNull( enumStringsConstraint.NominalScaledType );
+            Assert.IsNotNull( enumStringsConstraint.NominalScaledType.ValueAttributes );
+
+            enumValues = enumValuesConstraint;
+            stringValues = enumStringsConstraint;
+        }
+
 
         #endregion
     }

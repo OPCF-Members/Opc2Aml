@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,9 @@ using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
 using Opc.Ua;
-
+using Newtonsoft.Json.Linq;
+using System.Linq;
+using System.Diagnostics;
 
 namespace SystemTest
 {
@@ -96,16 +99,42 @@ namespace SystemTest
             string attributeThree = "",
             string attributeFour = "")
         {
+            Test( nodeId, expectedValue, expectedType, "Value", attributeTwo, attributeThree, attributeFour );
+        }
+
+        [TestMethod]
+
+        [DataRow( "6199", "16", "xs:int", "EnumValue", DisplayName = "Node Class Enum Numeric EnumValue" )]
+        [DataRow( "6199", "VariableType", "xs:string", "Value", DisplayName = "Node Class Enum Numeric EnumValue" )]
+
+        public void TestNodeClassVariable( string nodeId,
+            string expectedValue,
+            string expectedType,
+            string attributeOne )
+        {
+            Test( nodeId, expectedValue, expectedType, attributeOne );
+        }
+
+        public void Test( string nodeId,
+            string expectedValue,
+            string expectedType,
+            string attributeOne,
+            string attributeTwo = "",
+            string attributeThree = "",
+            string attributeFour = "" )
+        {
             SystemUnitClassType objectToTest = GetTestObject( nodeId );
             Assert.IsNotNull( objectToTest );
 
             List<string> attributes = new List<string>();
-            attributes.Add( "Value" );
-            if ( attributeTwo.Length > 0 )
+            attributes.Add( attributeOne );
+
+            if( attributeTwo.Length > 0 )
             {
                 attributes.Add( attributeTwo );
             }
             if( attributeThree.Length > 0 )
+
             {
                 attributes.Add( attributeThree );
             }
@@ -115,11 +144,12 @@ namespace SystemTest
             }
 
             AttributeType attribute = GetAttribute( objectToTest, attributes );
-            Assert.IsNotNull ( attribute );
+            Assert.IsNotNull( attribute );
 
             Assert.AreEqual( expectedValue, attribute.Value );
             Assert.AreEqual( expectedType, attribute.AttributeDataType );
         }
+
 
         #endregion
 
@@ -160,11 +190,12 @@ namespace SystemTest
             return m_document;
         }
 
-        public SystemUnitClassType GetTestObject(string nodeId)
+        public SystemUnitClassType GetTestObject( string nodeId )
         {
             CAEXDocument document = GetDocument();
             string rootName = TestHelper.GetRootName();
-            CAEXObject initialObject = document.FindByID(rootName + nodeId);
+            CAEXObject initialObject = document.FindByID( rootName + nodeId );
+
             Assert.IsNotNull(initialObject, "Unable to find Initial Object");
             SystemUnitClassType theObject = initialObject as SystemUnitClassType;
             Assert.IsNotNull(theObject, "Unable to Cast Initial Object");

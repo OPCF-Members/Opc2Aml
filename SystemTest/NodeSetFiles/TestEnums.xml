@@ -287,7 +287,7 @@
                     </uax:TypeId>
                     <uax:Body>
                         <uax:EnumValueType>
-                            <uax:Value>0</uax:Value>
+                            <uax:Value>1</uax:Value>
                             <uax:DisplayName>
                                 <uax:Text>OneValue</uax:Text>
                             </uax:DisplayName>
@@ -680,7 +680,7 @@
                     </uax:TypeId>
                     <uax:Body>
                         <uax:EnumValueType>
-                            <uax:Value>0</uax:Value>
+                            <uax:Value>1</uax:Value>
                             <uax:DisplayName>
                                 <uax:Text>OneValue</uax:Text>
                             </uax:DisplayName>
@@ -753,7 +753,7 @@
                     </uax:TypeId>
                     <uax:Body>
                         <uax:EnumValueType>
-                            <uax:Value>0</uax:Value>
+                            <uax:Value>1</uax:Value>
                             <uax:DisplayName>
                                 <uax:Text>OverrideOne</uax:Text>
                             </uax:DisplayName>
@@ -842,7 +842,7 @@
                     </uax:TypeId>
                     <uax:Body>
                         <uax:EnumValueType>
-                            <uax:Value>0</uax:Value>
+                            <uax:Value>1</uax:Value>
                             <uax:DisplayName>
                                 <uax:Text>InstanceOne</uax:Text>
                             </uax:DisplayName>
@@ -2527,6 +2527,16 @@
       </uax:ExtensionObject>
     </Value>
   </UAVariable>
-    
-    <!--Next integer number 6199-->
+    <UAVariable DataType="i=257" NodeId="ns=1;i=6199" BrowseName="1:NodeClassEnumerationValue" ParentNodeId="i=85" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>enum</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5001</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:Int32>16</uax:Int32>
+        </Value>
+    </UAVariable>
+
+    <!--Next integer number 6200-->
 </UANodeSet>
