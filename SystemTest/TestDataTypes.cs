@@ -92,6 +92,8 @@ namespace SystemTest
         [DataRow( "6198", "123.456", "xs:float", "Real", DisplayName = "ExtensionObject Complex Number Real" )]
         [DataRow( "6198", "789.012", "xs:float", "Imaginary", DisplayName = "ExtensionObject Complex Number Imaginary" )]
 
+        [DataRow( "6199", "VariableType", "xs:string", DisplayName = "Node Class StringValue" )]
+
         public void TestDataTypeAttribute(string nodeId, 
             string expectedValue, 
             string expectedType, 
@@ -99,35 +101,11 @@ namespace SystemTest
             string attributeThree = "",
             string attributeFour = "")
         {
-            Test( nodeId, expectedValue, expectedType, "Value", attributeTwo, attributeThree, attributeFour );
-        }
-
-        [TestMethod]
-
-        [DataRow( "6199", "16", "xs:int", "EnumValue", DisplayName = "Node Class Enum Numeric EnumValue" )]
-        [DataRow( "6199", "VariableType", "xs:string", "Value", DisplayName = "Node Class Enum Numeric EnumValue" )]
-
-        public void TestNodeClassVariable( string nodeId,
-            string expectedValue,
-            string expectedType,
-            string attributeOne )
-        {
-            Test( nodeId, expectedValue, expectedType, attributeOne );
-        }
-
-        public void Test( string nodeId,
-            string expectedValue,
-            string expectedType,
-            string attributeOne,
-            string attributeTwo = "",
-            string attributeThree = "",
-            string attributeFour = "" )
-        {
             SystemUnitClassType objectToTest = GetTestObject( nodeId );
             Assert.IsNotNull( objectToTest );
 
             List<string> attributes = new List<string>();
-            attributes.Add( attributeOne );
+            attributes.Add( "Value" );
 
             if( attributeTwo.Length > 0 )
             {
