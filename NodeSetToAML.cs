@@ -1113,14 +1113,6 @@ namespace MarkdownProcessor
                         {
                             enumerationValue = enumerationValues[ 0 ];
                         }
-                        else
-                        {
-                            bool unexpected = true;
-                        }
-                    }
-                    else
-                    {
-                        bool unexpected = true;
                     }
 
                     if( enumerationValue >= 0 )
@@ -1138,16 +1130,9 @@ namespace MarkdownProcessor
                                     {
                                         Variant enumerationAsString = new Variant( field.Name );
 
-                                        AddModifyAttribute( seq,
-                                            "EnumValue",
-                                            "Int32",
-                                            enumerationValue,
-                                            bListOf: false,
-                                            sURI: sURI );
-
                                         returnAttributeType = AddModifyAttribute( seq,
-                                            "Value",
-                                            "String",
+                                            name,
+                                            sUADataType,
                                             enumerationAsString,
                                             bListOf: false,
                                             sURI: sURI );
