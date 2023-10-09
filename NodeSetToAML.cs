@@ -991,6 +991,8 @@ namespace MarkdownProcessor
                 XmlElement xmlElement= value as XmlElement;
                 if ( xmlElement != null )
                 {
+
+
                     elementName = xmlElement.Name;
                 }
                 // Archie - When the defined element in the body has an attribute, it crashes the system
