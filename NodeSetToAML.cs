@@ -634,24 +634,14 @@ namespace MarkdownProcessor
                                         attributeType.AttributeDataType = "xs:string";
                                         NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
 
-                                        AttributeValueRequirementType enumValueRequirement = new AttributeValueRequirementType( 
-                                            new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
-                                        enumValueRequirement.Name = stringValueRequirement.Name + " EnumValue";
-                                        NominalScaledTypeType enumValueNominalType = enumValueRequirement.New_NominalType();
-
-
                                         Opc.Ua.LocalizedText[] values = val.Value as Opc.Ua.LocalizedText[];
-                                        int counter = 0;
                                         if( values != null )
                                         {
                                             foreach( Opc.Ua.LocalizedText value in values )
                                             {
                                                 stringValueNominalType.RequiredValue.Append( value.Text );
-                                                enumValueNominalType.RequiredValue.Append( counter.ToString() );
-                                                counter++;
                                             }
                                             attributeType.Constraint.Insert( stringValueRequirement );
-                                            attributeType.Constraint.Insert( enumValueRequirement );
                                         }
                                     }
                                 }
@@ -673,12 +663,6 @@ namespace MarkdownProcessor
                                         attributeType.AttributeDataType = "xs:string";
                                         NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
 
-                                        AttributeValueRequirementType enumValueRequirement = new AttributeValueRequirementType( 
-                                            new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
-                                        enumValueRequirement.Name = stringValueRequirement.Name + " EnumValue";
-                                        NominalScaledTypeType enumValueNominalType = enumValueRequirement.New_NominalType();
-
-
                                         ExtensionObject[] values = val.Value as ExtensionObject[];
                                         if( values != null )
                                         {
@@ -688,11 +672,9 @@ namespace MarkdownProcessor
                                                 if( enumValueType != null )
                                                 {
                                                     stringValueNominalType.RequiredValue.Append( enumValueType.DisplayName.Text );
-                                                    enumValueNominalType.RequiredValue.Append( enumValueType.Value.ToString() );
                                                 }
                                             }
                                             attributeType.Constraint.Insert( stringValueRequirement );
-                                            attributeType.Constraint.Insert( enumValueRequirement );
                                         }
                                     }
                                 }
@@ -991,8 +973,6 @@ namespace MarkdownProcessor
                 XmlElement xmlElement= value as XmlElement;
                 if ( xmlElement != null )
                 {
-
-
                     elementName = xmlElement.Name;
                 }
                 // Archie - When the defined element in the body has an attribute, it crashes the system
@@ -2242,22 +2222,13 @@ namespace MarkdownProcessor
                 stringValueRequirement.Name = MyNode.DecodedBrowseName.Name + " Constraint";
                 NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
 
-                AttributeValueRequirementType enumValueRequirement = new AttributeValueRequirementType( new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
-                enumValueRequirement.Name = MyNode.DecodedBrowseName.Name + " EnumValue";
-                NominalScaledTypeType enumValueNominalType = enumValueRequirement.New_NominalType();
-
-
                 Opc.Ua.LocalizedText[] EnumValues = EnumStrings.DecodedValue.Value as Opc.Ua.LocalizedText[];
-                int counter = 0;
                 foreach ( Opc.Ua.LocalizedText EnumValue in EnumValues )
                 {
                     stringValueNominalType.RequiredValue.Append( EnumValue.Text );
-                    enumValueNominalType.RequiredValue.Append( counter.ToString() );
-                    counter++;
                 }
 
                 att.Constraint.Insert( stringValueRequirement );
-                att.Constraint.Insert( enumValueRequirement );
                 return;
             }
 
@@ -2272,21 +2243,14 @@ namespace MarkdownProcessor
                 stringValueRequirement.Name = MyNode.DecodedBrowseName.Name + " Constraint";
                 NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
 
-                AttributeValueRequirementType enumValueRequirement = new AttributeValueRequirementType( new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
-                enumValueRequirement.Name = MyNode.DecodedBrowseName.Name + " EnumValue";
-                NominalScaledTypeType enumValueNominalType = enumValueRequirement.New_NominalType();
-
-
                 ExtensionObject[] EnumVals = EnumValues.DecodedValue.Value as ExtensionObject[];
                 foreach ( ExtensionObject EnumValue in EnumVals )
                 {
                     EnumValueType ev = EnumValue.Body as EnumValueType;
                     stringValueNominalType.RequiredValue.Append( ev.DisplayName.Text );
-                    enumValueNominalType.RequiredValue.Append( ev.Value.ToString() );
                 }
 
                 att.Constraint.Insert( stringValueRequirement );
-                att.Constraint.Insert( enumValueRequirement );
             }
         }
 

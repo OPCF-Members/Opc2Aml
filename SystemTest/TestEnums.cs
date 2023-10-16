@@ -189,17 +189,12 @@ namespace SystemTest
             Assert.AreEqual( "xs:string", objectToTest.AttributeDataType );
 
 
-            AttributeValueRequirementType enumValuesConstraint = null;
             AttributeValueRequirementType enumStringsConstraint = null;
 
-            GetConstraints( objectToTest, out enumValuesConstraint, out enumStringsConstraint );
-
-            Assert.AreEqual( enumValuesConstraint.NominalScaledType.ValueAttributes.Count, enumStringsConstraint.NominalScaledType.ValueAttributes.Count );
-            Assert.AreEqual( enumValuesConstraint.NominalScaledType.ValueAttributes.Count, enumValues.Count );
+            GetConstraints( objectToTest, out enumStringsConstraint );
 
             for( int index = 0; index < enumValues.Count; index++ )
             {
-                Assert.AreEqual( enumValues[ index ].ToString(), enumValuesConstraint.NominalScaledType.ValueAttributes[ index ].Value );
                 Assert.AreEqual( values[ index ], enumStringsConstraint.NominalScaledType.ValueAttributes[ index ].Value );
             }
         }
@@ -281,12 +276,11 @@ namespace SystemTest
                 "Unexpected AttributeTypeReference Name");
 
             Assert.IsNotNull(enumAttribute.Constraint, "Unable to Find Constraint");
-            Assert.AreEqual(2, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
+            Assert.AreEqual(1, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
 
-            AttributeValueRequirementType enumValueRequirement = null;
             AttributeValueRequirementType enumStringConstraint = null;
 
-            GetConstraints( enumAttribute, out enumValueRequirement, out enumStringConstraint );
+            GetConstraints( enumAttribute, out enumStringConstraint );
 
             AttributeValueRequirementType requirementType = enumStringConstraint;
 
@@ -338,13 +332,11 @@ namespace SystemTest
             Assert.IsNotNull(enumAttribute.Constraint, "Unable to Find Constraint");
             if ( hasValues)
             {
-                Assert.AreEqual(2, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
+                Assert.AreEqual(1, enumAttribute.Constraint.Count, "Unexpected Constraint Count");
 
-
-                AttributeValueRequirementType enumValueRequirement = null;
                 AttributeValueRequirementType enumStringConstraint = null;
 
-                GetConstraints( enumAttribute, out enumValueRequirement, out enumStringConstraint );
+                GetConstraints( enumAttribute, out enumStringConstraint );
 
                 AttributeValueRequirementType requirementType = enumStringConstraint;
 
@@ -405,32 +397,22 @@ namespace SystemTest
         }
 
         public void GetConstraints( AttributeTypeType attributeType, 
-            out AttributeValueRequirementType enumValues, 
             out AttributeValueRequirementType stringValues )
         {
-            AttributeValueRequirementType enumValuesConstraint = null;
             AttributeValueRequirementType enumStringsConstraint = null;
 
             foreach( AttributeValueRequirementType valueRequirementType in attributeType.Constraint )
             {
-                if( valueRequirementType.Name.EndsWith( " EnumValue" ) )
-                {
-                    enumValuesConstraint = valueRequirementType;
-                }
-                else if( valueRequirementType.Name.EndsWith( "Constraint" ) )
+                if( valueRequirementType.Name.EndsWith( "Constraint" ) )
                 {
                     enumStringsConstraint = valueRequirementType;
                 }
             }
 
-            Assert.IsNotNull( enumValuesConstraint );
-            Assert.IsNotNull( enumValuesConstraint.NominalScaledType );
-            Assert.IsNotNull( enumValuesConstraint.NominalScaledType.ValueAttributes );
             Assert.IsNotNull( enumStringsConstraint );
             Assert.IsNotNull( enumStringsConstraint.NominalScaledType );
             Assert.IsNotNull( enumStringsConstraint.NominalScaledType.ValueAttributes );
 
-            enumValues = enumValuesConstraint;
             stringValues = enumStringsConstraint;
         }
 
