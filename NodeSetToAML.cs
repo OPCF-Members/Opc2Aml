@@ -46,6 +46,13 @@ using System.Linq;
 using System.Diagnostics;
 using System.Net;
 using NodeSetToAmlUtils;
+using Newtonsoft.Json.Linq;
+using System.Collections;
+using System.Reflection;
+using System.Security.AccessControl;
+using System.IO.Packaging;
+using MarkdownProcessor.NodeSet;
+using System.Xml;
 
 namespace MarkdownProcessor
 {
@@ -63,6 +70,7 @@ namespace MarkdownProcessor
         private const string IsSource = "IsSource";
         private const string ForwardPrefix = "f";
         private const string ReversePrefix = "r";
+        private const string Enumeration = "Enumeration";
         private ModelManager m_modelManager;
         private CAEXDocument m_cAEXDocument;
         private AttributeTypeLibType m_atl_temp;
@@ -91,15 +99,18 @@ namespace MarkdownProcessor
         private readonly NodeId TwoStateDiscreteNodeId = new NodeId(2373, 0);
         private readonly NodeId MultiStateDiscreteNodeId = new NodeId(2376, 0);
         private readonly NodeId MultiStateValueDiscreteNodeId = new NodeId(11238, 0);
+        private readonly NodeId EnumerationNodeId = Opc.Ua.DataTypeIds.Enumeration;
         private readonly System.Xml.Linq.XNamespace defaultNS = "http://www.dke.de/CAEX";
         private const string uaNamespaceURI = "http://opcfoundation.org/UA/";
         private const string OpcLibInfoNamespace = "http://opcfoundation.org/UA/FX/2021/08/OpcUaLibInfo.xsd";
         private UANode structureNode;
         private readonly List<string> ExcludedDataTypeList = new List<string>() { "InstanceNode", "TypeNode" };
         private Dictionary<string, Dictionary<string,string>> LookupNames = new Dictionary<string, Dictionary<string, string>>();
+        private HashSet<string> ExtensionObjectExclusions = null;
+        private HashSet<string> EmptyExclusions = null;
 
         private List<string> PreventInfiniteRecursionList = new List<string>();
-        private const int ua2xslookup_count = 16;
+        private const int ua2xslookup_count = 18;
         private const int ua2xslookup_uaname = 0;
         private const int ua2xslookup_xsname = 1;
         private readonly string[,] ua2xsLookup = new string[ua2xslookup_count, 2] {
@@ -118,8 +129,9 @@ namespace MarkdownProcessor
             { "DateTime" , "xs:dateTime"  },
             { "ByteString" , "xs:base64Binary"  },
             { "LocalizedText" , "xs:string"  },
-            { "QualifiedName" , "xs:anyURI"  }
-
+            { "QualifiedName" , "xs:anyURI"  },
+            { "StatusCode" , "xs:unsignedInt"  },
+            { Enumeration , "xs:int"  }
         };
 
         public NodeSetToAML(ModelManager modelManager)
@@ -604,55 +616,34 @@ namespace MarkdownProcessor
                         }
                     }
 
-                    switch (val.TypeInfo.BuiltInType)
-                    {
-                        case BuiltInType.Boolean:
-                        case BuiltInType.Byte:
-                        case BuiltInType.SByte:
-                        case BuiltInType.Int16:
-                        case BuiltInType.Int32:
-                        case BuiltInType.Int64:
-                        case BuiltInType.DateTime:
-                        case BuiltInType.String:
-                        case BuiltInType.Guid:
-                        case BuiltInType.Double:
-                        case BuiltInType.Float:
-                        case BuiltInType.Integer:
-                        case BuiltInType.Number:
-                        case BuiltInType.UInt16:
-                        case BuiltInType.UInt32:
-                        case BuiltInType.UInt64:
-                        case BuiltInType.UInteger:
-                            a.DefaultAttributeValue = a.AttributeValue = val;
-                            break;
+                    bool addElements = true;
 
+                    switch( val.TypeInfo.BuiltInType )
+                    {
                         case BuiltInType.LocalizedText:
                             {
-                                if (refDataType == "LocalizedText" && referenceName == "EnumStrings")
+                                if( refDataType == "LocalizedText" && referenceName == "EnumStrings" )
                                 {
+                                    addElements = false;
                                     AttributeTypeType attributeType = a as AttributeTypeType;
-                                    if (attributeType != null)
+                                    if( attributeType != null )
                                     {
-                                        AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                                            new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                                        avrt.Name = nodeName + " Constraint";
+                                        AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType(
+                                            new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
+                                        stringValueRequirement.Name = nodeName + " Constraint";
                                         attributeType.AttributeDataType = "xs:string";
-                                        NominalScaledTypeType scaledType = avrt.New_NominalType();
+                                        NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
 
-                                        var values = val.Value as Opc.Ua.LocalizedText[];
-                                        if (values != null)
+                                        Opc.Ua.LocalizedText[] values = val.Value as Opc.Ua.LocalizedText[];
+                                        if( values != null )
                                         {
-                                            foreach (var value in values)
+                                            foreach( Opc.Ua.LocalizedText value in values )
                                             {
-                                                scaledType.RequiredValue.Append(value.Text);
+                                                stringValueNominalType.RequiredValue.Append( value.Text );
                                             }
-                                            var res2 = attributeType.Constraint.Insert(avrt);
+                                            attributeType.Constraint.Insert( stringValueRequirement );
                                         }
                                     }
-                                }
-                                else
-                                {
-                                    // Do Something else
                                 }
 
                                 break;
@@ -660,62 +651,51 @@ namespace MarkdownProcessor
 
                         case BuiltInType.ExtensionObject:
                             {
-                                if (refDataType == "EnumValueType" && referenceName == "EnumValues")
+                                if( refDataType == "EnumValueType" && referenceName == "EnumValues" )
                                 {
+                                    addElements = false;
                                     AttributeTypeType attributeType = a as AttributeTypeType;
-                                    if (attributeType != null)
+                                    if( attributeType != null )
                                     {
-                                        AttributeValueRequirementType avrt = new AttributeValueRequirementType(
-                                            new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                                        avrt.Name = nodeName + " Constraint";
+                                        AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType(
+                                            new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
+                                        stringValueRequirement.Name = nodeName + " Constraint";
                                         attributeType.AttributeDataType = "xs:string";
-                                        NominalScaledTypeType scaledType = avrt.New_NominalType();
+                                        NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
 
-                                        var values = val.Value as Opc.Ua.ExtensionObject[];
-                                        if (values != null)
+                                        ExtensionObject[] values = val.Value as ExtensionObject[];
+                                        if( values != null )
                                         {
-                                            foreach (var value in values)
+                                            foreach( ExtensionObject value in values )
                                             {
-                                                var enumValueType = value.Body as Opc.Ua.EnumValueType;
-                                                if (enumValueType != null)
+                                                EnumValueType enumValueType = value.Body as EnumValueType;
+                                                if( enumValueType != null )
                                                 {
-                                                    scaledType.RequiredValue.Append(enumValueType.DisplayName.Text);
+                                                    stringValueNominalType.RequiredValue.Append( enumValueType.DisplayName.Text );
                                                 }
                                             }
-                                            attributeType.Constraint.Insert(avrt);
+                                            attributeType.Constraint.Insert( stringValueRequirement );
                                         }
                                     }
-                                }
-                                else if (refDataType == "Argument")
-                                {
-                                    var values = val.Value as Opc.Ua.ExtensionObject[];
-                                    if (values != null)
-                                    {
-                                        foreach (var value in values)
-                                        {
-                                            var argument = value.Body as Opc.Ua.Argument;
-                                            if (argument != null)
-                                            {
-                                                //Debug.WriteLine("Argument " + name + ":" + refDataType + " " +
-                                                //    " Method Name " + nodeName + " " + referenceName + " " +
-                                                //    argument.Name + " Type " + argument.DataType.ToString());
-
-                                            }
-                                        }
-                                    }
-
-                                    return a;
                                 }
 
                                 break;
                             }
+                    }
 
-                        default:
-                            Debug.WriteLine("Unhandled " + name + ":" + refDataType + " " +
-                                " Node Name " + nodeName + " " + referenceName + " " +
-                                " Type " + val.TypeInfo.BuiltInType.ToString());
-
-                            break;
+                    if( addElements )
+                    {
+                        IList valueAsList = val.Value as IList;
+                        if( valueAsList != null )
+                        {
+                            for( int index = 0; index < valueAsList.Count; index++ )
+                            {
+                                Variant elementVariant = new Variant( valueAsList[ index ] );
+                                bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+                                AddModifyAttribute( a.Attribute, index.ToString(), refDataType, 
+                                    elementVariant, elementListOf );
+                            }
+                        }
                     }
                 }
                 else
@@ -723,40 +703,313 @@ namespace MarkdownProcessor
                     switch (val.TypeInfo.BuiltInType)  // TODO -- consider supporting setting values for more complicated types (enums, structures, Qualified Names ...) and arrays
                     {
                         case BuiltInType.Boolean:
-                        case BuiltInType.Byte:
                         case BuiltInType.SByte:
+                        case BuiltInType.Byte:
                         case BuiltInType.Int16:
-                        case BuiltInType.Int32:
-                        case BuiltInType.Int64:
-                        case BuiltInType.DateTime:
-                        case BuiltInType.String:
-                        case BuiltInType.Guid:
-                        case BuiltInType.Double:
-                        case BuiltInType.Float:
-                        case BuiltInType.Integer:
-                        case BuiltInType.Number:
                         case BuiltInType.UInt16:
+                        case BuiltInType.Int32:
                         case BuiltInType.UInt32:
+                        case BuiltInType.Int64:
                         case BuiltInType.UInt64:
+                        case BuiltInType.Float:
+                        case BuiltInType.Double:
+                        case BuiltInType.String:
+                        case BuiltInType.DateTime:
+                        case BuiltInType.Guid:
+                        case BuiltInType.XmlElement:
+                        case BuiltInType.Number:
+                        case BuiltInType.Integer:
                         case BuiltInType.UInteger:
-                            a.DefaultAttributeValue = a.AttributeValue = val;
-                            break;
+                        case BuiltInType.Enumeration:
+                            {
+                                a.DefaultAttributeValue = a.AttributeValue = val;
+                                break;
+                            }
+
+                        case BuiltInType.ByteString:
+                            {
+                                byte[] bytes = val.Value as byte[];
+                                if ( bytes != null )
+                                {
+                                    string encoded = Convert.ToBase64String( bytes, 0, bytes.Length );
+                                    a.DefaultAttributeValue = a.AttributeValue = new Variant( encoded.ToString() );
+                                    //StringBuilder stringBuilder = new StringBuilder();
+                                    //for( int index = 0; index < bytes.Length; index++ )
+                                    //{
+                                    //    stringBuilder.Append( (char)bytes[ index ] );
+                                    //}
+                                    //a.DefaultAttributeValue = a.AttributeValue = new Variant( stringBuilder.ToString() );
+                                }
+
+                                break;
+                            }
+
+                        case BuiltInType.NodeId:
+                        case BuiltInType.ExpandedNodeId:
+                            {
+                                NodeId nodeId = null;
+                                ExpandedNodeId expandedNodeId = null;
+                                if( val.TypeInfo.BuiltInType == BuiltInType.NodeId )
+                                {
+                                    nodeId = val.Value as NodeId;
+                                }
+                                else
+                                {
+                                    expandedNodeId = val.Value as ExpandedNodeId;
+                                    nodeId = ExpandedNodeId.ToNodeId( expandedNodeId, m_modelManager.NamespaceUris);
+                                }
+
+                                if ( nodeId != null )
+                                {
+                                    a.DefaultAttributeValue = a.AttributeValue = nodeId;
+                                    AttributeType rootNodeId = a.Attribute[ "RootNodeId" ];
+                                    if ( rootNodeId != null )
+                                    {
+                                        AttributeType namespaceUri = rootNodeId.Attribute[ "NamespaceUri" ];
+                                        if ( namespaceUri != null )
+                                        {
+                                            namespaceUri.Value = m_modelManager.ModelNamespaceIndexes[ nodeId.NamespaceIndex ].NamespaceUri;
+                                        }
+
+                                        switch( nodeId.IdType )
+                                        {
+                                            case IdType.Numeric:
+                                                {
+                                                    AttributeType id = rootNodeId.Attribute[ "NumericId" ];
+                                                    id.Value = nodeId.Identifier.ToString();
+                                                    break;
+                                                }
+
+                                            case IdType.String:
+                                                {
+                                                    AttributeType id = rootNodeId.Attribute[ "StringId" ];
+                                                    id.Value = nodeId.Identifier.ToString();
+                                                    break;
+                                                }
+
+                                            case IdType.Guid:
+                                                {
+                                                    AttributeType id = rootNodeId.Attribute[ "GuidId" ];
+                                                    id.Value = nodeId.Identifier.ToString();
+                                                    break;
+                                                }
+
+                                            case IdType.Opaque:
+                                                {
+                                                    byte[] bytes = nodeId.Identifier as byte[];
+                                                    if( bytes != null )
+                                                    {
+                                                        AttributeType id = rootNodeId.Attribute[ "OpaqueId" ];
+                                                        string encoded = Convert.ToBase64String(
+                                                            bytes, 0, bytes.Length );
+                                                        id.Value = encoded;
+                                                    }
+                                                    break;
+                                                }
+                                        }
+                                    }
+                                    a.DefaultValue = null;
+                                    a.Value = null;
+                                }
+
+                                if ( expandedNodeId != null )
+                                {
+                                    if ( expandedNodeId.ServerIndex > 0 )
+                                    {
+                                        if( expandedNodeId.ServerIndex < m_modelManager.ModelNamespaceIndexes.Count )
+                                        {
+                                            string serverUri = m_modelManager.ModelNamespaceIndexes[ (int)expandedNodeId.ServerIndex ].NamespaceUri;
+                                            AttributeType serverInstanceUri = a.Attribute[ "ServerInstanceUri" ];
+                                            if ( serverInstanceUri != null )
+                                            {
+                                                serverInstanceUri.Value = serverUri;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                break;
+                            }
+
+                        case BuiltInType.StatusCode:
+                            {
+                                StatusCode statusCode = (StatusCode)val.Value;
+                                a.DefaultAttributeValue = a.AttributeValue = statusCode.Code;
+
+                                break;
+                            }
+
+                        case BuiltInType.QualifiedName:
+                            {
+                                a.DefaultAttributeValue = a.AttributeValue = val;
+
+                                QualifiedName qualifiedName = val.Value as QualifiedName;
+                                if( qualifiedName != null )
+                                {
+                                    AttributeType uri = a.Attribute[ "NamespaceURI" ];
+                                    uri.Value = m_modelManager.ModelNamespaceIndexes[ qualifiedName.NamespaceIndex ].NamespaceUri;
+                                    AttributeType nameAttribute = a.Attribute[ "Name" ];
+                                    nameAttribute.Value = qualifiedName.Name;
+                                    a.DefaultValue = null;
+                                    a.Value = null;
+                                }
+
+                                break;
+                            }
 
                         case BuiltInType.LocalizedText:
                             {
                                 Opc.Ua.LocalizedText localizedText = (Opc.Ua.LocalizedText)val.Value;
-                                if (localizedText != null && localizedText.Text != null)
+                                if( localizedText != null && localizedText.Text != null )
                                 {
                                     a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
                                 }
                                 break;
                             }
+
+                        case BuiltInType.ExtensionObject:
+                            {
+                                ExtensionObject extensionObject = val.Value as ExtensionObject;
+                                if ( extensionObject != null && extensionObject.Body != null )
+                                {
+                                    AddModifyAttributeObject( a, extensionObject.Body, extensionObject: true );
+                                }
+
+                                break;
+                            }
+
+                        case BuiltInType.DataValue:
+                            {
+                                DataValue dataValue = val.Value as DataValue;
+                                if( dataValue != null )
+                                {
+                                    Variant actualValue = new Variant( dataValue.Value );
+                                    NodeId dataTypeNodeId = Opc.Ua.TypeInfo.GetDataTypeId( actualValue.Value );
+
+                                    bool actualListOf = actualValue.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+
+                                    AddModifyAttribute( a.Attribute, "Value", dataTypeNodeId, actualValue, actualListOf );
+                                    AddModifyAttribute( a.Attribute, "StatusCode", "StatusCode",
+                                        dataValue.StatusCode );
+                                    AddModifyAttribute( a.Attribute, "SourceTimestamp", "DateTime",
+                                        dataValue.SourceTimestamp );
+                                    if( dataValue.SourcePicoseconds > 0 )
+                                    {
+                                        AddModifyAttribute( a.Attribute, "SourcePicoseconds", "UInt32",
+                                            dataValue.SourcePicoseconds );
+                                    }
+                                    AddModifyAttribute( a.Attribute, "ServerTimestamp", "DateTime",
+                                        dataValue.ServerTimestamp );
+                                    if ( dataValue.ServerPicoseconds > 0 )
+                                    {
+                                        AddModifyAttribute( a.Attribute, "ServerPicoseconds", "UInt32",
+                                            dataValue.ServerPicoseconds );
+                                    }
+                                }
+                                break;
+                            }
+
+                        case BuiltInType.Variant:
+                            {
+                                Variant internalVariant = new Variant( val.Value );
+                                NodeId dataTypeNodeId = Opc.Ua.TypeInfo.GetDataTypeId( internalVariant.Value );
+
+                                bool internalListOf = internalVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+
+                                AddModifyAttribute( a.Attribute, "Value", dataTypeNodeId, internalVariant, internalListOf );
+
+                                break;
+                            }
+
+                        case BuiltInType.DiagnosticInfo:
+                            {
+                                AddModifyAttributeIterateObject( a, val );
+                                break;
+                            }
+                        
                     }
                 }
             }
 
             return a;
         }
+
+        private void AddModifyAttributeIterateObject( AttributeType attribute, 
+            Variant value )
+        {
+            AddModifyAttributeObject( attribute, value.Value, extensionObject: false );
+        }
+
+        private void AddModifyAttributeObject( AttributeType attribute, object value, bool extensionObject )
+        {
+            Type valueType = value.GetType();
+
+            if( valueType.FullName.StartsWith( "Opc.Ua." ) )
+            {
+
+                PropertyInfo[] properties = value.GetType().GetProperties();
+
+                HashSet<string> exclusions = GetExclusions( extensionObject );
+
+                foreach( PropertyInfo property in properties )
+                {
+                    NodeId propertyNodeId = Opc.Ua.TypeInfo.GetDataTypeId( property.PropertyType );
+                    var propertyValue = property.GetValue( value );
+                    if( propertyValue != null )
+                    {
+                        if( !exclusions.Contains( property.Name ) )
+                        {
+                            AddModifyAttribute( attribute.Attribute,
+                                property.Name, propertyNodeId,
+                                new Variant( propertyValue ),
+                                property.PropertyType.IsArray );
+                        }
+                    }
+                }
+            }
+            else
+            {
+                string elementName = "";
+                XmlElement xmlElement= value as XmlElement;
+                if ( xmlElement != null )
+                {
+                    elementName = xmlElement.Name;
+                }
+                // Archie - When the defined element in the body has an attribute, it crashes the system
+                // This still needs to be addressed and fixed
+                // for example
+                // <uax:Body><FxVersion xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
+                // <uax:Body><RelatedEndpointDataType xmlns="http://opcfoundation.org/UA/FX/Data/Types.xsd">
+                Debug.WriteLine( "AddModifyAttributeObject Unhandled Type " + valueType.FullName + "[" + elementName + "]" );
+            }
+        }
+
+        private HashSet<string> GetExclusions( bool extensionObject )
+        {
+            HashSet<string> exclusions = null;
+            if ( extensionObject )
+            {
+                if ( ExtensionObjectExclusions == null )
+                {
+                    ExtensionObjectExclusions = new HashSet<string>();
+                    ExtensionObjectExclusions.Add( "BinaryEncodingId" );
+                    ExtensionObjectExclusions.Add( "JsonEncodingId" );
+                    ExtensionObjectExclusions.Add( "XmlEncodingId" );
+                    ExtensionObjectExclusions.Add( "TypeId" );
+                }
+                exclusions = ExtensionObjectExclusions;
+            }
+            else
+            {
+                if ( EmptyExclusions == null )
+                {
+                    EmptyExclusions = new HashSet<string>();
+                }
+                exclusions = EmptyExclusions;
+            }
+
+            return exclusions;
+    }
 
         private void UpdateDerived(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
         { 
@@ -823,7 +1076,64 @@ namespace MarkdownProcessor
             var DataTypeNode = FindNode<UANode>(refDataType);
             var sUADataType = DataTypeNode.DecodedBrowseName.Name;
             var sURI = m_modelManager.FindModelUri(DataTypeNode.DecodedNodeId);
-            return AddModifyAttribute(seq, name, sUADataType, val, bListOf, sURI);
+
+            AttributeType returnAttributeType = null;
+
+            if( m_modelManager.IsTypeOf( DataTypeNode.DecodedNodeId, EnumerationNodeId ) == true )
+            {
+                if( val.TypeInfo != null )
+                {
+                    int enumerationValue = -1;
+                    if( val.TypeInfo.ValueRank == ValueRanks.Scalar )
+                    {
+                        enumerationValue = (int)val.Value;
+                    }
+                    else if( val.TypeInfo.ValueRank == ValueRanks.OneDimension )
+                    {
+                        int[] enumerationValues = (int[])val.Value;
+                        if( enumerationValues.Length == 1 )
+                        {
+                            enumerationValue = enumerationValues[ 0 ];
+                        }
+                    }
+
+                    if( enumerationValue >= 0 )
+                    {
+                        UADataType enumerationNode = FindNode<UADataType>( DataTypeNode.DecodedNodeId );
+                        if( enumerationNode != null )
+                        {
+                            if( enumerationNode.Definition != null &&
+                                enumerationNode.Definition.Field != null &&
+                                enumerationNode.Definition.Field.Length > 0 )
+                            {
+                                foreach( DataTypeField field in enumerationNode.Definition.Field )
+                                {
+                                    if( field.Value == enumerationValue )
+                                    {
+                                        Variant enumerationAsString = new Variant( field.Name );
+
+                                        returnAttributeType = AddModifyAttribute( seq,
+                                            name,
+                                            sUADataType,
+                                            enumerationAsString,
+                                            bListOf: false,
+                                            sURI: sURI );
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ( returnAttributeType == null )
+            {
+                returnAttributeType = AddModifyAttribute( seq, name, sUADataType, val, bListOf, sURI );
+            }
+
+            return returnAttributeType;
         }
 
 
@@ -1722,7 +2032,6 @@ namespace MarkdownProcessor
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
                                     bool bListOf = (varnode.ValueRank >= ValueRanks.OneDimension);  // use ListOf when its a UA array
-
                                     AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
                                     ie.SetAttributeValue("ValueRank", varnode.ValueRank);
                                     ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
@@ -1903,19 +2212,23 @@ namespace MarkdownProcessor
             NodeId EnumStringsPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumStrings");
             if (EnumStringsPropertyId != null)
             {
+                UADataType enumNode = FindNode<UADataType>( nodeId );
+
                 att.AttributeDataType = "xs:string";
-                var EnumStringsPropertyNode = FindNode<UANode>(EnumStringsPropertyId);
-                var EnumStrings = EnumStringsPropertyNode as UAVariable;
-                AttributeValueRequirementType avrt = new AttributeValueRequirementType(new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                var MyNode = FindNode<UANode>(nodeId) as NodeSet.UADataType;
-                avrt.Name = MyNode.DecodedBrowseName.Name + " Constraint";
-                var res = avrt.New_NominalType();
+                UAVariable EnumStrings = FindNode<UAVariable>(EnumStringsPropertyId);
+
+                AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType( new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
+                UADataType MyNode = FindNode<UADataType>(nodeId);
+                stringValueRequirement.Name = MyNode.DecodedBrowseName.Name + " Constraint";
+                NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
+
                 Opc.Ua.LocalizedText[] EnumValues = EnumStrings.DecodedValue.Value as Opc.Ua.LocalizedText[];
-                foreach (var EnumValue in EnumValues)
+                foreach ( Opc.Ua.LocalizedText EnumValue in EnumValues )
                 {
-                    res.RequiredValue.Append(EnumValue.Text);
+                    stringValueNominalType.RequiredValue.Append( EnumValue.Text );
                 }
-                var res2 = att.Constraint.Insert(avrt);
+
+                att.Constraint.Insert( stringValueRequirement );
                 return;
             }
 
@@ -1923,20 +2236,21 @@ namespace MarkdownProcessor
             if (EnumValuesPropertyId != null)
             {
                 att.AttributeDataType = "xs:string";
-                var EnumValuesPropertyNode = FindNode<UANode>(EnumValuesPropertyId);
-                var EnumValues = EnumValuesPropertyNode as UAVariable;
-                AttributeValueRequirementType avrt = new AttributeValueRequirementType(new System.Xml.Linq.XElement(defaultNS + "Constraint"));
-                var MyNode = FindNode<UANode>(nodeId) as NodeSet.UADataType;
-                avrt.Name = MyNode.DecodedBrowseName.Name + " Constraint";
-                var res = avrt.New_NominalType();
+                UAVariable EnumValues = FindNode<UAVariable>(EnumValuesPropertyId);
+                AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType( new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
+                UADataType MyNode = FindNode<UADataType>(nodeId);
 
-                var EnumVals = EnumValues.DecodedValue.Value as Opc.Ua.ExtensionObject[];
-                foreach (var EnumValue in EnumVals)
+                stringValueRequirement.Name = MyNode.DecodedBrowseName.Name + " Constraint";
+                NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
+
+                ExtensionObject[] EnumVals = EnumValues.DecodedValue.Value as ExtensionObject[];
+                foreach ( ExtensionObject EnumValue in EnumVals )
                 {
-                    var ev = EnumValue.Body as Opc.Ua.EnumValueType;
-                    res.RequiredValue.Append(ev.DisplayName.Text);
+                    EnumValueType ev = EnumValue.Body as EnumValueType;
+                    stringValueNominalType.RequiredValue.Append( ev.DisplayName.Text );
                 }
-                var res2 = att.Constraint.Insert(avrt);
+
+                att.Constraint.Insert( stringValueRequirement );
             }
         }
 
@@ -2242,7 +2556,10 @@ namespace MarkdownProcessor
                 var varnode = toAdd as NodeSet.UAVariable;
                 bool bListOf = ( varnode.ValueRank >= ValueRanks.OneDimension ); // use ListOf when its a UA array
 
-                AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
+                AddModifyAttribute( ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
+                var DataTypeNode = FindNode<UANode>( varnode.DecodedDataType );
+                var sUADataType = DataTypeNode.DecodedBrowseName.Name;
+
                 ie.SetAttributeValue("ValueRank", varnode.ValueRank);
                 ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
 

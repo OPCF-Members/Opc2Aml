@@ -9,24 +9,30 @@
         </Model>
     </Models>
 	<Aliases>
-		<Alias Alias="Boolean">i=1</Alias>
-		<Alias Alias="UInt16">i=5</Alias>
-		<Alias Alias="Int32">i=6</Alias>
-		<Alias Alias="Double">i=11</Alias>
-		<Alias Alias="DateTime">i=13</Alias>
-		<Alias Alias="String">i=12</Alias>
-		<Alias Alias="ByteString">i=15</Alias>
-		<Alias Alias="NodeId">i=17</Alias>
-		<Alias Alias="LocalizedText">i=21</Alias>
-		<Alias Alias="StatusCode">i=19</Alias>
-		<Alias Alias="HasComponent">i=47</Alias>
-		<Alias Alias="HasProperty">i=46</Alias>
-		<Alias Alias="Organizes">i=35</Alias>
-		<Alias Alias="HasSubtype">i=45</Alias>
-		<Alias Alias="HasTypeDefinition">i=40</Alias>
-		<Alias Alias="HasModellingRule">i=37</Alias>
-		<Alias Alias="HasTrueSubState">i=9004</Alias>
-	</Aliases>
+        <Alias Alias="Boolean">i=1</Alias>
+        <Alias Alias="UInt16">i=5</Alias>
+        <Alias Alias="Int32">i=6</Alias>
+        <Alias Alias="Double">i=11</Alias>
+        <Alias Alias="DateTime">i=13</Alias>
+        <Alias Alias="String">i=12</Alias>
+        <Alias Alias="Guid">i=14</Alias>
+        <Alias Alias="ByteString">i=15</Alias>
+        <Alias Alias="NodeId">i=17</Alias>
+        <Alias Alias="ExpandedNodeId">i=18</Alias>
+        <Alias Alias="StatusCode">i=19</Alias>
+        <Alias Alias="QualifiedName">i=20</Alias>
+        <Alias Alias="LocalizedText">i=21</Alias>
+        <Alias Alias="DataValue">i=23</Alias>
+        <Alias Alias="DiagnosticInfo">i=25</Alias>
+        <Alias Alias="Enumeration">i=29</Alias>
+        <Alias Alias="HasComponent">i=47</Alias>
+        <Alias Alias="HasProperty">i=46</Alias>
+        <Alias Alias="Organizes">i=35</Alias>
+        <Alias Alias="HasSubtype">i=45</Alias>
+        <Alias Alias="HasTypeDefinition">i=40</Alias>
+        <Alias Alias="HasModellingRule">i=37</Alias>
+        <Alias Alias="HasTrueSubState">i=9004</Alias>
+    </Aliases>
 	<Extensions>
         <Extension>
             <si:Generator Product="SiOME" Edition="Standard" Version="2.6.3"/>
@@ -281,7 +287,7 @@
                     </uax:TypeId>
                     <uax:Body>
                         <uax:EnumValueType>
-                            <uax:Value>0</uax:Value>
+                            <uax:Value>1</uax:Value>
                             <uax:DisplayName>
                                 <uax:Text>OneValue</uax:Text>
                             </uax:DisplayName>
@@ -674,7 +680,7 @@
                     </uax:TypeId>
                     <uax:Body>
                         <uax:EnumValueType>
-                            <uax:Value>0</uax:Value>
+                            <uax:Value>1</uax:Value>
                             <uax:DisplayName>
                                 <uax:Text>OneValue</uax:Text>
                             </uax:DisplayName>
@@ -747,7 +753,7 @@
                     </uax:TypeId>
                     <uax:Body>
                         <uax:EnumValueType>
-                            <uax:Value>0</uax:Value>
+                            <uax:Value>1</uax:Value>
                             <uax:DisplayName>
                                 <uax:Text>OverrideOne</uax:Text>
                             </uax:DisplayName>
@@ -836,7 +842,7 @@
                     </uax:TypeId>
                     <uax:Body>
                         <uax:EnumValueType>
-                            <uax:Value>0</uax:Value>
+                            <uax:Value>1</uax:Value>
                             <uax:DisplayName>
                                 <uax:Text>InstanceOne</uax:Text>
                             </uax:DisplayName>
@@ -1712,7 +1718,10 @@
 			<Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5018</Reference>
 			<Reference ReferenceType="HasTypeDefinition">i=68</Reference>
 		</References>
-	</UAVariable>
+        <Value>
+            <uax:ByteString>MzFmYTIxOTc2ZTc2NDYyOGE3ZTQyMjI4Mzk4ZDk5ZWI=</uax:ByteString>
+        </Value>
+    </UAVariable>
 	<UAVariable DataType="NodeId" NodeId="ns=1;i=6145" BrowseName="EventType" ParentNodeId="ns=1;i=5018">
 		<DisplayName>EventType</DisplayName>
 		<References>
@@ -1839,7 +1848,12 @@
 			<Reference ReferenceType="HasTypeDefinition">i=9002</Reference>
 		</References>
 	</UAVariable>
-	<UAVariable DataType="Boolean" NodeId="ns=1;i=6160" BrowseName="Retain" ParentNodeId="ns=1;i=5018">
+    <!--<Value>
+        <uax:StatusCode>
+            <uax:Code>2150891520</uax:Code>
+        </uax:StatusCode>
+    </Value>-->
+    <UAVariable DataType="Boolean" NodeId="ns=1;i=6160" BrowseName="Retain" ParentNodeId="ns=1;i=5018">
 		<DisplayName>Retain</DisplayName>
 		<References>
 			<Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5018</Reference>
@@ -2210,4 +2224,319 @@
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
         </References>
     </UAVariable>
+    <UAVariable NodeId="ns=1;i=6190" BrowseName="1:Qualified" WriteMask="96" DataType="QualifiedName" AccessLevel="3">
+        <DisplayName Locale="en">Qualified</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:QualifiedName>
+                <uax:NamespaceIndex>1</uax:NamespaceIndex>
+                <uax:Name>MyQualifiedName</uax:Name>
+            </uax:QualifiedName>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6191" BrowseName="1:Guid" WriteMask="96" DataType="Guid" AccessLevel="3">
+        <DisplayName Locale="en">Guid</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:Guid>
+                <uax:String>d23c82b6-1715-4951-acd1-84fb898d6b6c</uax:String>
+            </uax:Guid>
+        </Value>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5012" BrowseName="1:NodeIds" ParentNodeId="ns=1;i=5013">
+        <DisplayName>NodeIds</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5019" BrowseName="1:NodeIds" ParentNodeId="ns=1;i=5012">
+        <DisplayName>NodeIds</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5012</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5020" BrowseName="1:ExpandedNodeIds" ParentNodeId="ns=1;i=5012">
+        <DisplayName>ExpandedNodeIds</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5012</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+        </References>
+    </UAObject>
+    <UAVariable DataType="NodeId" NodeId="ns=1;i=6139" BrowseName="1:StringNodeId" ParentNodeId="ns=1;i=5019" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>StringNodeId</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5019</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:NodeId>
+                <uax:Identifier>ns=1;s=StringNodeId</uax:Identifier>
+            </uax:NodeId>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="NodeId" NodeId="ns=1;i=6142" BrowseName="1:NumericNodeId" ParentNodeId="ns=1;i=5019" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>NumericNodeId</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5019</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:NodeId>
+                <uax:Identifier>ns=1;i=12345</uax:Identifier>
+            </uax:NodeId>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="NodeId" NodeId="ns=1;i=6143" BrowseName="1:OpaqueNodeId" ParentNodeId="ns=1;i=5019" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>OpaqueNodeId</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5019</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:NodeId>
+                <uax:Identifier>ns=1;b=T3BhcXVlTm9kZUlk</uax:Identifier>
+            </uax:NodeId>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="NodeId" NodeId="ns=1;i=6180" BrowseName="1:GuidNodeId" ParentNodeId="ns=1;i=5019" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>GuidNodeId</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5019</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:NodeId>
+                <uax:Identifier>ns=1;g=7E1B677A-6AE8-49FA-933E-769A4AA9C524</uax:Identifier>
+            </uax:NodeId>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6181" BrowseName="1:NumericNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>NumericNodeId</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:ExpandedNodeId>
+                <uax:Identifier>ns=1;i=12345</uax:Identifier>
+                <!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;i=12345</uax:Identifier>-->
+            </uax:ExpandedNodeId>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6182" BrowseName="1:StringNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>StringNodeId</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:ExpandedNodeId>
+                <uax:Identifier>ns=1;s=StringNodeId</uax:Identifier>
+                <!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;s=StringNodeId</uax:Identifier>-->
+            </uax:ExpandedNodeId>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6183" BrowseName="1:GuidNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>GuidNodeId</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:ExpandedNodeId>
+                <uax:Identifier>ns=1;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B</uax:Identifier>
+                <!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B</uax:Identifier>-->
+            </uax:ExpandedNodeId>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6184" BrowseName="1:OpaqueNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>OpaqueNodeId</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:ExpandedNodeId>
+                <uax:Identifier>ns=1;b=T3BhcXVlTm9kZUlk</uax:Identifier>
+                <!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;b=T3BhcXVlTm9kZUlk</uax:Identifier>-->
+            </uax:ExpandedNodeId>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6192" BrowseName="1:DataValue" WriteMask="96" DataType="DataValue" AccessLevel="3">
+        <DisplayName Locale="en">DataValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:DataValue>
+                <uax:Value>
+                    <uax:Value>
+                        <uax:Int32>12345</uax:Int32>
+                    </uax:Value>
+                </uax:Value>
+                <uax:StatusCode>
+                    <uax:Code>2165637120</uax:Code>
+                </uax:StatusCode>
+                <uax:SourceTimestamp>2023-09-13T14:39:08.791Z</uax:SourceTimestamp>
+                <uax:ServerTimestamp>2023-09-13T14:39:08.791Z</uax:ServerTimestamp>
+                <!--<uax:SourcePicoseconds>10</uax:SourcePicoseconds>
+                <uax:ServerPicoseconds>5</uax:ServerPicoseconds>-->
+            </uax:DataValue>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6193" BrowseName="1:DateTime" WriteMask="96" DataType="DateTime" AccessLevel="3">
+        <DisplayName Locale="en">DateTime</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:DateTime>2023-09-13T15:19:08.867Z</uax:DateTime>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6194" BrowseName="1:ComplexDataValue" WriteMask="96" DataType="DataValue" AccessLevel="3">
+        <DisplayName Locale="en">ComplexDataValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:DataValue>
+                <uax:Value>
+                    <uax:Value>
+                        <uax:DataValue>
+                            <uax:Value>
+                                <uax:Value>
+                                    <uax:Int32>12345</uax:Int32>
+                                </uax:Value>
+                            </uax:Value>
+                            <uax:StatusCode>
+                                <uax:Code>2165637120</uax:Code>
+                            </uax:StatusCode>
+                            <uax:SourceTimestamp>2023-09-13T16:47:00.868Z</uax:SourceTimestamp>
+                            <uax:SourcePicoseconds>10</uax:SourcePicoseconds>
+                            <uax:ServerTimestamp>2023-09-13T16:47:00.868Z</uax:ServerTimestamp>
+                            <uax:ServerPicoseconds>5</uax:ServerPicoseconds>
+                        </uax:DataValue>
+                    </uax:Value>
+                </uax:Value>
+                <uax:StatusCode>
+                    <uax:Code>2165178368</uax:Code>
+                </uax:StatusCode>
+                <uax:SourceTimestamp>2023-09-13T16:47:00.868Z</uax:SourceTimestamp>
+                <uax:ServerTimestamp>2023-09-13T16:47:00.868Z</uax:ServerTimestamp>
+            </uax:DataValue>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6195" BrowseName="1:Enumeration" WriteMask="96" DataType="Enumeration" AccessLevel="3">
+        <DisplayName Locale="en">Enumeration</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:Int32>75</uax:Int32>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6196" BrowseName="1:DiagnosticHolder" WriteMask="96" DataType="DataValue" AccessLevel="3">
+        <DisplayName Locale="en">DiagnosticHolder</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+        <Value>
+            <uax:DataValue>
+                <uax:Value>
+                    <uax:Value>
+                        <uax:DiagnosticInfo>
+                            <uax:SymbolicId>11</uax:SymbolicId>
+                            <uax:NamespaceUri>22</uax:NamespaceUri>
+                            <uax:Locale>33</uax:Locale>
+                            <uax:LocalizedText>44</uax:LocalizedText>
+                            <uax:AdditionalInfo>Embedded Diagnostic Information</uax:AdditionalInfo>
+                        </uax:DiagnosticInfo>
+                    </uax:Value>
+                </uax:Value>
+                <uax:StatusCode>
+                    <uax:Code>2165637120</uax:Code>
+                </uax:StatusCode>
+                <uax:SourceTimestamp>2023-09-13T14:39:08.791Z</uax:SourceTimestamp>
+                <uax:ServerTimestamp>2023-09-13T14:39:08.791Z</uax:ServerTimestamp>
+            </uax:DataValue>
+        </Value>
+    </UAVariable>
+
+  <UAVariable NodeId="ns=1;i=6197" BrowseName="1:ComplexNumberHolderDataValue" WriteMask="96" DataType="DataValue" AccessLevel="3">
+    <DisplayName Locale="en">complexNumberHolderDataValue</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+    </References>
+    <Value>
+      <uax:DataValue>
+        <uax:Value>
+          <uax:Value>
+            <uax:ExtensionObject>
+              <uax:TypeId>
+                <uax:Identifier>i=12173</uax:Identifier>
+              </uax:TypeId>
+              <uax:Body>
+                <uax:ComplexNumberType>
+                  <uax:Real>123.456</uax:Real>
+                  <uax:Imaginary>789.012</uax:Imaginary>
+                </uax:ComplexNumberType>
+              </uax:Body>
+            </uax:ExtensionObject>
+          </uax:Value>
+        </uax:Value>
+        <uax:StatusCode>
+          <uax:Code>2165178368</uax:Code>
+        </uax:StatusCode>
+        <uax:SourceTimestamp>2023-09-13T20:42:15.649Z</uax:SourceTimestamp>
+        <uax:ServerTimestamp>2023-09-13T20:42:15.649Z</uax:ServerTimestamp>
+      </uax:DataValue>
+    </Value>
+  </UAVariable>
+    
+  <UAVariable NodeId="ns=1;i=6198" BrowseName="1:ComplexNumber" WriteMask="96" DataType="DataValue" AccessLevel="3">
+    <DisplayName Locale="en">ComplexNumber</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+    </References>
+    <Value>
+      <uax:ExtensionObject>
+        <uax:TypeId>
+          <uax:Identifier>i=12173</uax:Identifier>
+        </uax:TypeId>
+        <uax:Body>
+          <uax:ComplexNumberType>
+            <uax:Real>123.456</uax:Real>
+            <uax:Imaginary>789.012</uax:Imaginary>
+          </uax:ComplexNumberType>
+        </uax:Body>
+      </uax:ExtensionObject>
+    </Value>
+  </UAVariable>
+    <UAVariable DataType="i=257" NodeId="ns=1;i=6199" BrowseName="1:NodeClassEnumerationValue" ParentNodeId="i=85" UserAccessLevel="3" AccessLevel="3">
+        <DisplayName>enum</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5001</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+        </References>
+        <Value>
+            <uax:Int32>16</uax:Int32>
+        </Value>
+    </UAVariable>
+
+    <!--Next integer number 6200-->
 </UANodeSet>
