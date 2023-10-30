@@ -54,12 +54,20 @@ namespace MarkdownProcessor
 
         private Dictionary<NodeId, List<ReferenceInfo>> References;
 
-        private class Context
+        private Context m_context = null;
+    
+
+        public class Context
         {
             public UANodeSet NodeSet;
             public List<ushort> NamespaceMappings;
             public List<uint> ServerUriMappings;
             public Dictionary<string, NodeId> Aliases;
+        }
+
+        public Context GetContext() 
+        { 
+            return m_context; 
         }
 
         public ModelManager()
@@ -201,6 +209,8 @@ namespace MarkdownProcessor
                 ServerUriMappings = serverUriMappings,
                 Aliases = aliases
             };
+            
+            m_context = context;
 
             if (nodeset.Items != null && nodeset.Items.Length > 0)
             {

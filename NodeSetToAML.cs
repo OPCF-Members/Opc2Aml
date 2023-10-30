@@ -974,6 +974,87 @@ namespace MarkdownProcessor
                 if ( xmlElement != null )
                 {
                     elementName = xmlElement.Name;
+
+                    if( attribute.RefAttributeType != null )
+                    {
+                        AttributeFamilyType definition = m_atl_temp.FindReferencedClass<AttributeFamilyType>( attribute.RefAttributeType );
+
+                        if( definition != null && definition.Name.Equals( "FxVersion", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            StructureDefinition structureDefinition = new StructureDefinition();
+                            //                            structureDefinition.Fields.Add()
+
+                            foreach( AttributeType attributeField in definition.Attribute )
+                            {
+                                StructureField structureField = new StructureField();
+                                structureField.Name = attributeField.Name;
+                                //structureField.DataType
+
+                                XmlElement attributeNode = xmlElement[ attributeField.Name ];
+                                if( attributeNode != null )
+                                {
+
+                                    AttributeFamilyType attributeDefinition = m_atl_temp.FindReferencedClass<AttributeFamilyType>( attributeField.RefAttributeType );
+                                    if( attributeDefinition != null )
+                                    {
+                                        XmlNode aValueQuestion = attributeNode.FirstChild;
+                                        if( aValueQuestion != null )
+                                        {
+                                            structureField.DataType = Opc.Ua.DataTypeIds.UInt16;
+                                            structureField.ValueRank = ValueRanks.Scalar;
+                                            structureDefinition.Fields.Add( structureField );
+
+                                            Debug.WriteLine( "Building Complex - " + definition.Name + " attribute " + attributeField.Name + " DataType " +
+                                                attributeDefinition.Name + " value " + aValueQuestion.Value );
+                                        }
+                                    }
+                                    //IServiceMessageContext messageContext = new ServiceMessageContext()
+                                    //{
+                                    //    NamespaceUris = m_modelManager.NamespaceUris,
+                                    //    ServerUris = m_modelManager.ServerUris,
+                                    //};
+
+                                    //XmlDecoder decoder = new XmlDecoder( attributeNode, messageContext );
+                                    //Opc.Ua.TypeInfo typeInfo = null;
+
+                                    //object something = decoder.ReadVariantContents( out typeInfo );
+                                    //Variant aVarariant = new Variant( something );
+
+                                    //decoder.Close();
+                                    // Can I decode this? I hope so.
+                                }
+
+                                if( definition != null && definition.CAEXParent != null && definition.CAEXParent.Name().StartsWith( ATLPrefix ) )
+                                {
+                                    string definitionUri = definition.CAEXParent.Name().Replace( ATLPrefix, "" );
+
+                                    int namespaceIndex = -1;
+
+                                    foreach( ModelInfo modelInfo in m_modelManager.ModelNamespaceIndexes )
+                                    {
+                                        if( modelInfo.NamespaceUri.Equals( definitionUri, StringComparison.OrdinalIgnoreCase ) )
+                                        {
+                                            namespaceIndex = modelInfo.NamespaceIndex;
+                                            break;
+                                        }
+                                    }
+
+                                    if( namespaceIndex >= 0 )
+                                    {
+                                        Opc.Ua.Client.ComplexTypes.IComplexTypeFactory factory = new Opc.Ua.Client.ComplexTypes.ComplexTypeBuilderFactory();
+
+                                        Opc.Ua.Client.ComplexTypes.IComplexTypeBuilder builder = factory.Create( definitionUri, namespaceIndex );
+
+                                        Opc.Ua.Client.ComplexTypes.IComplexTypeFieldBuilder result = builder.AddStructuredType( "FxVersion", structureDefinition );
+
+                                        bool nowWhat = true;
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }
                 }
                 // Archie - When the defined element in the body has an attribute, it crashes the system
                 // This still needs to be addressed and fixed
