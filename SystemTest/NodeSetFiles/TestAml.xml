@@ -32,15 +32,36 @@
         <Alias Alias="HasTypeDefinition">i=40</Alias>
         <Alias Alias="HasModellingRule">i=37</Alias>
         <Alias Alias="HasTrueSubState">i=9004</Alias>
+        <Alias Alias="HasEncoding">i=38</Alias>
+        <Alias Alias="HasDescription">i=39</Alias>
+        <Alias Alias="IdType">i=256</Alias>
+        <Alias Alias="NumericRange">i=291</Alias>
+        <Alias Alias="LowLevelStructure">ns=1;i=3003</Alias>
+
     </Aliases>
-	<Extensions>
-        <Extension>
-            <si:Generator Product="SiOME" Edition="Standard" Version="2.6.3"/>
-        </Extension>
-        <Extension>
-            <si:GeneratorExtension Hash="576f63eab816631735d5ded37845e48d"/>
-        </Extension>
-    </Extensions>
+
+    <UADataType NodeId="ns=1;i=3003" BrowseName="1:LowLevelStructure">
+        <DisplayName>LowLevelStructure</DisplayName>
+        <References>
+            <Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
+        </References>
+        <Definition Name="1:LowLevelStructure">
+            <Field DataType="String" Name="Name"/>
+            <Field DataType="Double" Name="Value"/>
+        </Definition>
+    </UADataType>
+
+    <UAVariableType ValueRank="-2" NodeId="ns=1;i=2003" BrowseName="1:ComplexVariableType">
+        <DisplayName>ComplexVariableType</DisplayName>
+        <References>
+            <Reference ReferenceType="HasProperty">ns=1;i=6201</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6202</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6203</Reference>
+            <Reference ReferenceType="HasSubtype" IsForward="false">i=63</Reference>
+        </References>
+    </UAVariableType>
+
+
     <UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING" NodeId="ns=1;i=5000" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING" ParentNodeId="i=11715">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING</DisplayName>
         <References>
@@ -1606,7 +1627,14 @@
 			<Reference ReferenceType="HasTypeDefinition">i=61</Reference>
 		</References>
 	</UAObject>
-	<UAObject NodeId="ns=1;i=5014" BrowseName="1:OptionalAdditions" ParentNodeId="ns=1;i=5013">
+    <UAObject SymbolicName="Complex_Testing" NodeId="ns=1;i=5021" BrowseName="1:Complex Testing" ParentNodeId="i=85">
+        <DisplayName>Complex Testing</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5014" BrowseName="1:OptionalAdditions" ParentNodeId="ns=1;i=5013">
 		<DisplayName>OptionalAdditions</DisplayName>
 		<References>
 			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
@@ -2538,5 +2566,219 @@
         </Value>
     </UAVariable>
 
-    <!--Next integer number 6200-->
+    <UAVariable DataType="String" ParentNodeId="ns=1;i=2003" NodeId="ns=1;i=6201" BrowseName="1:Name" AccessLevel="3">
+        <DisplayName>Name</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=2003</Reference>
+        </References>
+    </UAVariable>
+
+    <UAVariable DataType="Double" ParentNodeId="ns=1;i=2003" NodeId="ns=1;i=6202" BrowseName="1:ComplexValue" AccessLevel="3">
+        <DisplayName>ComplexValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=2003</Reference>
+        </References>
+    </UAVariable>
+
+    <UAVariable DataType="LowLevelStructure" ParentNodeId="ns=1;i=2003" NodeId="ns=1;i=6203" BrowseName="1:Structure" AccessLevel="3">
+        <DisplayName>Structure</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=2003</Reference>
+        </References>
+    </UAVariable>
+
+    <UAObjectType NodeId="ns=1;i=1008" BrowseName="1:ComplexObject">
+        <DisplayName>ComplexObject</DisplayName>
+        <References>
+            <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6204</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6211</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6212</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6213</Reference>
+        </References>
+    </UAObjectType>
+
+    <UAVariable DataType="String" ParentNodeId="ns=1;i=1008" NodeId="ns=1;i=6204" BrowseName="1:Name" AccessLevel="3">
+        <DisplayName>Name</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=1008</Reference>
+        </References>
+    </UAVariable>
+
+    <UAVariable DataType="Double" ParentNodeId="ns=1;i=1008" NodeId="ns=1;i=6211" BrowseName="1:ComplexValue" AccessLevel="3">
+        <DisplayName>ComplexValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=1008</Reference>
+        </References>
+    </UAVariable>
+
+    <UAVariable DataType="LowLevelStructure" ParentNodeId="ns=1;i=1008" NodeId="ns=1;i=6212" BrowseName="1:ComplexStructure" AccessLevel="3">
+        <DisplayName>ComplexStructure</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1008</Reference>
+        </References>
+    </UAVariable>
+
+    <UAVariable ParentNodeId="ns=1;i=1008" NodeId="ns=1;i=6213" BrowseName="1:ComplexVariable" AccessLevel="3">
+        <DisplayName>ComplexVariable</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=1;i=2003</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6214</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6215</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6216</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1008</Reference>
+        </References>
+    </UAVariable>
+
+    <UAVariable DataType="LowLevelStructure" ParentNodeId="ns=1;i=6213" NodeId="ns=1;i=6214" BrowseName="1:Structure" AccessLevel="3">
+        <DisplayName>Structure</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=6213</Reference>
+        </References>
+    </UAVariable>
+
+    <UAVariable DataType="Double" ParentNodeId="ns=1;i=6213" NodeId="ns=1;i=6215" BrowseName="1:ComplexValue" AccessLevel="3">
+        <DisplayName>ComplexValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=6213</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="String" ParentNodeId="ns=1;i=6213" NodeId="ns=1;i=6216" BrowseName="1:Name" AccessLevel="3">
+        <DisplayName>Name</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasModellingRule">i=78</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=6213</Reference>
+        </References>
+    </UAVariable>
+
+    <UAObject NodeId="ns=1;i=5022" BrowseName="1:HighLevel">
+        <DisplayName>HighLevel</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=1;i=1008</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6217</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6218</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6219</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6223</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5021</Reference>
+        </References>
+    </UAObject>
+
+    <UAVariable DataType="LowLevelStructure" ParentNodeId="ns=1;i=5022" NodeId="ns=1;i=6217" BrowseName="1:ComplexStructure" AccessLevel="3">
+        <DisplayName>ComplexStructure</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5022</Reference>
+        </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>ns=1;i=5002</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <LowLevelStructure xmlns="http://opcfoundation.org/Investigation/ComplexTypes/Types.xsd">
+                        <Name>High Level Structure Name</Name>
+                        <Value>-12.34</Value>
+                    </LowLevelStructure>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="Double" ParentNodeId="ns=1;i=5022" NodeId="ns=1;i=6218" BrowseName="1:ComplexValue" AccessLevel="3">
+        <DisplayName>ComplexValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5022</Reference>
+        </References>
+        <Value>
+            <uax:Double>123.45</uax:Double>
+        </Value>
+    </UAVariable>
+    <UAVariable ParentNodeId="ns=1;i=5022" NodeId="ns=1;i=6219" BrowseName="1:ComplexVariable" AccessLevel="3">
+        <DisplayName>ComplexVariable</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=1;i=2003</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6220</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6221</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6222</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5022</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="Double" ParentNodeId="ns=1;i=6219" NodeId="ns=1;i=6220" BrowseName="1:ComplexValue" AccessLevel="3">
+        <DisplayName>ComplexValue</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=6219</Reference>
+        </References>
+        <Value>
+            <uax:Double>67.89</uax:Double>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="String" ParentNodeId="ns=1;i=6219" NodeId="ns=1;i=6221" BrowseName="1:Name" AccessLevel="3">
+        <DisplayName>Name</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=6219</Reference>
+        </References>
+        <Value>
+            <uax:String>This is the Complex Name</uax:String>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="LowLevelStructure" ParentNodeId="ns=1;i=6219" NodeId="ns=1;i=6222" BrowseName="1:Structure" AccessLevel="3">
+        <DisplayName>Structure</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=6219</Reference>
+        </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>ns=1;i=5002</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <LowLevelStructure xmlns="http://opcfoundation.org/Investigation/ComplexTypes/Types.xsd">
+                        <Name>Embedded Structure Name</Name>
+                        <Value>-67.89</Value>
+                    </LowLevelStructure>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+
+    <UAVariable DataType="String" ParentNodeId="ns=1;i=5022" NodeId="ns=1;i=6223" BrowseName="1:Name" AccessLevel="3">
+        <DisplayName>Name</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5022</Reference>
+        </References>
+        <Value>
+            <uax:String>This is the High Level Name</uax:String>
+        </Value>
+    </UAVariable>
+
+
+    <!-- Next Numbers
+    ObjectType 1009
+    VariableType 2001
+    DataType 3004
+    Object 5023
+    Variable 6224
+    -->
 </UANodeSet>

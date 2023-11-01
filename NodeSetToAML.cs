@@ -53,6 +53,8 @@ using System.Security.AccessControl;
 using System.IO.Packaging;
 using MarkdownProcessor.NodeSet;
 using System.Xml;
+using static MarkdownProcessor.ModelManager;
+using System.Reflection.Metadata;
 
 namespace MarkdownProcessor
 {
@@ -693,7 +695,7 @@ namespace MarkdownProcessor
                                 Variant elementVariant = new Variant( valueAsList[ index ] );
                                 bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
                                 AddModifyAttribute( a.Attribute, index.ToString(), refDataType, 
-                                    elementVariant, elementListOf );
+                                    elementVariant, elementListOf, sURI );
                             }
                         }
                     }
@@ -946,7 +948,6 @@ namespace MarkdownProcessor
 
             if( valueType.FullName.StartsWith( "Opc.Ua." ) )
             {
-
                 PropertyInfo[] properties = value.GetType().GetProperties();
 
                 HashSet<string> exclusions = GetExclusions( extensionObject );
@@ -969,101 +970,87 @@ namespace MarkdownProcessor
             }
             else
             {
-                string elementName = "";
-                XmlElement xmlElement= value as XmlElement;
-                if ( xmlElement != null )
+                XmlElement xmlElement = value as XmlElement;
+                if ( xmlElement != null && attribute.RefAttributeType != null )
                 {
-                    elementName = xmlElement.Name;
+                    Debug.WriteLine( "AddModifyAttributeObject for " + xmlElement.Name );
 
-                    if( attribute.RefAttributeType != null )
+                    AttributeFamilyType definition = m_atl_temp.FindReferencedClass<AttributeFamilyType>( attribute.RefAttributeType );
+
+                    if( definition != null )
                     {
-                        AttributeFamilyType definition = m_atl_temp.FindReferencedClass<AttributeFamilyType>( attribute.RefAttributeType );
-
-                        if( definition != null && definition.Name.Equals( "FxVersion", StringComparison.OrdinalIgnoreCase ) )
+                        foreach( AttributeType attributeField in definition.Attribute )
                         {
-                            StructureDefinition structureDefinition = new StructureDefinition();
-                            //                            structureDefinition.Fields.Add()
+                            string refAttributeType = attributeField.RefAttributeType;
 
-                            foreach( AttributeType attributeField in definition.Attribute )
+                            // Now find this...
+                            AttributeFamilyType fieldDefinition = m_atl_temp.FindReferencedClass<AttributeFamilyType>( refAttributeType );
+                            if( fieldDefinition != null )
                             {
-                                StructureField structureField = new StructureField();
-                                structureField.Name = attributeField.Name;
-                                //structureField.DataType
-
+                                UANode fieldDefinitionNode = m_modelManager.FindNodeByName( fieldDefinition.Name );
                                 XmlElement attributeNode = xmlElement[ attributeField.Name ];
-                                if( attributeNode != null )
+
+                                if( attributeNode != null && attributeNode.FirstChild != null && 
+                                    fieldDefinitionNode != null && fieldDefinitionNode.DecodedNodeId != null )
                                 {
+                                    XmlDocument document = new XmlDocument();
+                                    XmlElement elementToDecode = document.CreateElement( fieldDefinition.Name );
+                                    elementToDecode.InnerText = attributeNode.FirstChild.InnerText;
 
-                                    AttributeFamilyType attributeDefinition = m_atl_temp.FindReferencedClass<AttributeFamilyType>( attributeField.RefAttributeType );
-                                    if( attributeDefinition != null )
+                                    XmlDecoder xmlDecoder = CreateDecoder( elementToDecode );
+                                    try
                                     {
-                                        XmlNode aValueQuestion = attributeNode.FirstChild;
-                                        if( aValueQuestion != null )
+                                        Opc.Ua.TypeInfo typeInfo = null;
+                                        var decodedValue = xmlDecoder.ReadVariantContents( out typeInfo );
+                                        if( decodedValue != null )
                                         {
-                                            structureField.DataType = Opc.Ua.DataTypeIds.UInt16;
-                                            structureField.ValueRank = ValueRanks.Scalar;
-                                            structureDefinition.Fields.Add( structureField );
+                                            NodeId propertyNodeId = Opc.Ua.TypeInfo.GetDataTypeId( decodedValue );
+                                            if( propertyNodeId != null )
+                                            {
+                                                Variant variantValue = new Variant( decodedValue );
 
-                                            Debug.WriteLine( "Building Complex - " + definition.Name + " attribute " + attributeField.Name + " DataType " +
-                                                attributeDefinition.Name + " value " + aValueQuestion.Value );
+                                                bool isList = variantValue.TypeInfo.ValueRank > ValueRanks.Scalar;
+
+                                                AddModifyAttribute( attribute.Attribute,
+                                                    attributeField.Name,
+                                                    fieldDefinitionNode.DecodedNodeId,
+                                                    variantValue,
+                                                    isList );
+                                            }
+                                            else
+                                            {
+                                                Debug.WriteLine( "Unknown property Node Id " + propertyNodeId.ToString() + " for value " +
+                                                    decodedValue.ToString() + " Property name " + fieldDefinition.Name );
+                                            }
                                         }
                                     }
-                                    //IServiceMessageContext messageContext = new ServiceMessageContext()
-                                    //{
-                                    //    NamespaceUris = m_modelManager.NamespaceUris,
-                                    //    ServerUris = m_modelManager.ServerUris,
-                                    //};
-
-                                    //XmlDecoder decoder = new XmlDecoder( attributeNode, messageContext );
-                                    //Opc.Ua.TypeInfo typeInfo = null;
-
-                                    //object something = decoder.ReadVariantContents( out typeInfo );
-                                    //Variant aVarariant = new Variant( something );
-
-                                    //decoder.Close();
-                                    // Can I decode this? I hope so.
-                                }
-
-                                if( definition != null && definition.CAEXParent != null && definition.CAEXParent.Name().StartsWith( ATLPrefix ) )
-                                {
-                                    string definitionUri = definition.CAEXParent.Name().Replace( ATLPrefix, "" );
-
-                                    int namespaceIndex = -1;
-
-                                    foreach( ModelInfo modelInfo in m_modelManager.ModelNamespaceIndexes )
+                                    catch(Exception ex)
                                     {
-                                        if( modelInfo.NamespaceUri.Equals( definitionUri, StringComparison.OrdinalIgnoreCase ) )
-                                        {
-                                            namespaceIndex = modelInfo.NamespaceIndex;
-                                            break;
-                                        }
+                                        Debug.WriteLine( "Unable to decode Property name " + fieldDefinition.Name  + 
+                                            " for " + xmlElement.Name + "[" + ex.Message + "]" );
                                     }
-
-                                    if( namespaceIndex >= 0 )
-                                    {
-                                        Opc.Ua.Client.ComplexTypes.IComplexTypeFactory factory = new Opc.Ua.Client.ComplexTypes.ComplexTypeBuilderFactory();
-
-                                        Opc.Ua.Client.ComplexTypes.IComplexTypeBuilder builder = factory.Create( definitionUri, namespaceIndex );
-
-                                        Opc.Ua.Client.ComplexTypes.IComplexTypeFieldBuilder result = builder.AddStructuredType( "FxVersion", structureDefinition );
-
-                                        bool nowWhat = true;
-                                    }
+                                    xmlDecoder.Close();
                                 }
-
                             }
                         }
-
                     }
                 }
-                // Archie - When the defined element in the body has an attribute, it crashes the system
-                // This still needs to be addressed and fixed
-                // for example
-                // <uax:Body><FxVersion xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
-                // <uax:Body><RelatedEndpointDataType xmlns="http://opcfoundation.org/UA/FX/Data/Types.xsd">
-                Debug.WriteLine( "AddModifyAttributeObject Unhandled Type " + valueType.FullName + "[" + elementName + "]" );
             }
         }
+
+        private XmlDecoder CreateDecoder( XmlElement source )
+        {
+            ServiceMessageContext messageContext = new ServiceMessageContext();
+            messageContext.NamespaceUris = m_modelManager.NamespaceUris;
+            messageContext.ServerUris = m_modelManager.ServerUris;
+
+            XmlDecoder decoder = new XmlDecoder( source, messageContext );
+
+            decoder.SetMappingTables( m_modelManager.NamespaceUris, m_modelManager.ServerUris );
+
+            return decoder;
+        }
+
 
         private HashSet<string> GetExclusions( bool extensionObject )
         {

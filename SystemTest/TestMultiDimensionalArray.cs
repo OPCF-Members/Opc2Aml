@@ -23,7 +23,7 @@ namespace SystemTest
             {
                 foreach (FileInfo fileInfo in TestHelper.RetrieveFiles())
                 {
-                    if (fileInfo.Name.Equals("TestEnums.xml.amlx"))
+                    if (fileInfo.Name.Equals("TestAml.xml.amlx"))
                     {
                         m_container = new AutomationMLContainer(fileInfo.FullName,
                             System.IO.FileMode.Open, FileAccess.Read);
