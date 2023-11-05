@@ -529,23 +529,13 @@ namespace MarkdownProcessor
 
             var nodeId = seq["NodeId"];
 
-            // convert numeric ids
-            if (uanode.NodeId.Contains(";i=") && uanode.NodeId != null)
+            if (uanode.DecodedNodeId.IsNullNodeId == false)
             {
-                uint.TryParse(uanode.NodeId.Split(";i=")[1], out uint convertedNodeId);
-                if (convertedNodeId != 0)
-                {
-                    ExpandedNodeId expandedNodeId = new ExpandedNodeId(convertedNodeId, myuri);
-                    Variant variant = new Variant(expandedNodeId);
-                    nodeId = AddModifyAttribute(seq, "NodeId", "NodeId", variant);
-                }
-            }
-            //convert string ids
-            else if (uanode.NodeId.Contains(";s=") && uanode.NodeId != null)
-            {
-                ExpandedNodeId expandedNodeId = new ExpandedNodeId(uanode.NodeId.Split(";s=")[1], myuri);
+
+                ExpandedNodeId expandedNodeId = new ExpandedNodeId(uanode.DecodedNodeId, myuri);
                 Variant variant = new Variant(expandedNodeId);
                 nodeId = AddModifyAttribute(seq, "NodeId", "NodeId", variant);
+
             }
 
             var browse = seq["BrowseName"];
