@@ -527,6 +527,17 @@ namespace MarkdownProcessor
               baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
             string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
 
+            var nodeId = seq["NodeId"];
+
+            if (uanode.DecodedNodeId.IsNullNodeId == false)
+            {
+
+                ExpandedNodeId expandedNodeId = new ExpandedNodeId(uanode.DecodedNodeId, myuri);
+                Variant variant = new Variant(expandedNodeId);
+                nodeId = AddModifyAttribute(seq, "NodeId", "NodeId", variant);
+
+            }
+
             var browse = seq["BrowseName"];
             if (browse == null)
             {

@@ -144,7 +144,7 @@ namespace SystemTest
             int counter = 0;
             while( !opc2amlProcess.HasExited && counter < 30 )
             {
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(5000);
                 counter++;
                 if ( counter >= 30 )
                 {
