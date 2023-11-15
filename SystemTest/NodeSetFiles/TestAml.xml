@@ -2334,6 +2334,18 @@
             </uax:NodeId>
         </Value>
     </UAVariable>
+	<UAVariable DataType="NodeId" NodeId="ns=1;b=T3BhcXVlTm9kZUlk" BrowseName="1:OpaqueNodeIdWithActualOpaqueId" ParentNodeId="ns=1;i=5019" UserAccessLevel="3" AccessLevel="3">
+		<DisplayName>OpaqueNodeIdWithActualOpaqueId</DisplayName>
+		<References>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5019</Reference>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+		</References>
+		<Value>
+			<uax:NodeId>
+				<uax:Identifier>ns=1;b=T3BhcXVlTm9kZUlk</uax:Identifier>
+			</uax:NodeId>
+		</Value>
+	</UAVariable>
     <UAVariable DataType="NodeId" NodeId="ns=1;i=6180" BrowseName="1:GuidNodeId" ParentNodeId="ns=1;i=5019" UserAccessLevel="3" AccessLevel="3">
         <DisplayName>GuidNodeId</DisplayName>
         <References>
@@ -2359,6 +2371,19 @@
             </uax:ExpandedNodeId>
         </Value>
     </UAVariable>
+	<UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=12345" BrowseName="1:NumericNodeIdWithActualNumericId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
+		<DisplayName>NumericNodeIdWithActualNumericId</DisplayName>
+		<References>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+		</References>
+		<Value>
+			<uax:ExpandedNodeId>
+				<uax:Identifier>ns=1;i=12345</uax:Identifier>
+				<!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;i=12345</uax:Identifier>-->
+			</uax:ExpandedNodeId>
+		</Value>
+	</UAVariable>
     <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6182" BrowseName="1:StringNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
         <DisplayName>StringNodeId</DisplayName>
         <References>
@@ -2372,6 +2397,19 @@
             </uax:ExpandedNodeId>
         </Value>
     </UAVariable>
+	<UAVariable DataType="ExpandedNodeId" NodeId="ns=1;s=StringNodeId" BrowseName="1:StringNodeIdWithActualStringId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
+		<DisplayName>StringNodeIdWithActualStringId</DisplayName>
+		<References>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+		</References>
+		<Value>
+			<uax:ExpandedNodeId>
+				<uax:Identifier>ns=1;s=StringNodeId</uax:Identifier>
+				<!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;s=StringNodeId</uax:Identifier>-->
+			</uax:ExpandedNodeId>
+		</Value>
+	</UAVariable>
     <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6183" BrowseName="1:GuidNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
         <DisplayName>GuidNodeId</DisplayName>
         <References>
@@ -2385,6 +2423,19 @@
             </uax:ExpandedNodeId>
         </Value>
     </UAVariable>
+	<UAVariable DataType="ExpandedNodeId" NodeId="ns=1;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B" BrowseName="1:GuidNodeIdWithAcutalGuidId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
+		<DisplayName>GuidNodeIdWithAcutalGuidId</DisplayName>
+		<References>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5020</Reference>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+		</References>
+		<Value>
+			<uax:ExpandedNodeId>
+				<uax:Identifier>ns=1;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B</uax:Identifier>
+				<!--<uax:Identifier>svr=1;nsu=http://opcfoundation.org/UA/FX/AML/TESTING/;g=0EB66E95-DCED-415F-B8EC-43ED3F0C759B</uax:Identifier>-->
+			</uax:ExpandedNodeId>
+		</Value>
+	</UAVariable>
     <UAVariable DataType="ExpandedNodeId" NodeId="ns=1;i=6184" BrowseName="1:OpaqueNodeId" ParentNodeId="ns=1;i=5020" UserAccessLevel="3" AccessLevel="3">
         <DisplayName>OpaqueNodeId</DisplayName>
         <References>
