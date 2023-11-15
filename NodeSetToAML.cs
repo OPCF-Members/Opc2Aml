@@ -109,7 +109,6 @@ namespace MarkdownProcessor
         private readonly List<string> ExcludedDataTypeList = new List<string>() { "InstanceNode", "TypeNode" };
         private Dictionary<string, Dictionary<string,string>> LookupNames = new Dictionary<string, Dictionary<string, string>>();
         private HashSet<string> ExtensionObjectExclusions = null;
-        private HashSet<string> EmptyExclusions = null;
 
         private List<string> PreventInfiniteRecursionList = new List<string>();
         private const int ua2xslookup_count = 18;
@@ -280,8 +279,6 @@ namespace MarkdownProcessor
                     }
 
                 }
-
-
 
                 foreach (var obType in SortedObjectTypes)
                 {
@@ -874,7 +871,7 @@ namespace MarkdownProcessor
                                 ExtensionObject extensionObject = val.Value as ExtensionObject;
                                 if ( extensionObject != null && extensionObject.Body != null )
                                 {
-                                    AddModifyAttributeObject( a, extensionObject.Body, extensionObject: true );
+                                    AddModifyExtensionObject( a, extensionObject );
                                 }
 
                                 break;
@@ -925,7 +922,7 @@ namespace MarkdownProcessor
 
                         case BuiltInType.DiagnosticInfo:
                             {
-                                AddModifyAttributeIterateObject( a, val );
+                                AddModifyAttributeObject( a, val.Value );
                                 break;
                             }
                         
@@ -936,13 +933,71 @@ namespace MarkdownProcessor
             return a;
         }
 
-        private void AddModifyAttributeIterateObject( AttributeType attribute, 
-            Variant value )
+        private Dictionary<string, Dictionary<string, UANode>> ReferenceAttributeMap = new Dictionary<string, Dictionary<string, UANode>>();
+
+        private Dictionary<string, UANode> CreateFieldReferenceTypes( AttributeType attribute, NodeId typeNodeId )
         {
-            AddModifyAttributeObject( attribute, value.Value, extensionObject: false );
+            string typeNodeIdString = typeNodeId.ToString();
+
+            if( !ReferenceAttributeMap.ContainsKey( typeNodeIdString ) )
+            {
+                UANode typeUaNode = m_modelManager.FindNode<UANode>( typeNodeId );
+
+                if( typeUaNode != null )
+                {
+                    Debug.WriteLine( "CreateFieldReferenceTypes Exploration " + typeUaNode.BrowseName + " is Type " + typeUaNode.GetType().FullName );
+
+                    UADataType typeDataType = typeUaNode as UADataType;
+                    if( typeDataType != null && typeDataType.Definition != null && typeDataType.Definition.Field != null )
+                    {
+                        Dictionary<string, UANode> fields = new Dictionary<string, UANode>();
+
+                        foreach( DataTypeField dataTypeField in typeDataType.Definition.Field )
+                        {
+                            Debug.WriteLine( "CreateFieldReferenceTypes Exploration " +
+                                dataTypeField.Name + ": [" + dataTypeField.DataType + "] [" +
+                                dataTypeField.DecodedDataType.ToString() + "]" );
+
+                            UANode fieldType = m_modelManager.FindNode<UANode>( dataTypeField.DecodedDataType );
+                            if( fieldType != null )
+                            {
+                                fields.Add( dataTypeField.Name, fieldType );
+                            }
+                        }
+
+                        ReferenceAttributeMap.Add( typeNodeIdString, fields );
+                    }
+                }
+            }
+
+            Dictionary<string, UANode> attributeMap = new Dictionary<string, UANode>();
+            ReferenceAttributeMap.TryGetValue( typeNodeIdString, out attributeMap );
+            return attributeMap;
         }
 
-        private void AddModifyAttributeObject( AttributeType attribute, object value, bool extensionObject )
+        private UANode GetFieldReferenceType( string type, string field )
+        {
+            UANode nodeId = null;
+
+            Dictionary<string, UANode> typeMap;
+
+            if( ReferenceAttributeMap.TryGetValue( type, out typeMap ) )
+            {
+                string lookFor = field;
+
+                string findMe = field;
+                if( field.StartsWith( "ListOf" ) )
+                {
+                    findMe = field.Replace( "ListOf", "" );
+                }
+
+                typeMap.TryGetValue( findMe, out nodeId );
+            }
+
+            return nodeId;
+        }
+
+        private void AddModifyAttributeObject( AttributeType attribute, object value )
         {
             Type valueType = value.GetType();
 
@@ -950,134 +1005,107 @@ namespace MarkdownProcessor
             {
                 PropertyInfo[] properties = value.GetType().GetProperties();
 
-                HashSet<string> exclusions = GetExclusions( extensionObject );
-
                 foreach( PropertyInfo property in properties )
                 {
                     NodeId propertyNodeId = Opc.Ua.TypeInfo.GetDataTypeId( property.PropertyType );
                     var propertyValue = property.GetValue( value );
                     if( propertyValue != null )
                     {
-                        if( !exclusions.Contains( property.Name ) )
-                        {
-                            AddModifyAttribute( attribute.Attribute,
-                                property.Name, propertyNodeId,
-                                new Variant( propertyValue ),
-                                property.PropertyType.IsArray );
-                        }
+                        AddModifyAttribute( attribute.Attribute,
+                            property.Name, propertyNodeId,
+                            new Variant( propertyValue ),
+                            property.PropertyType.IsArray );
                     }
                 }
             }
-            else
+        }
+
+        private void AddModifyExtensionObject( AttributeType attribute, ExtensionObject extensionObject )
+        {
+            NodeId typeNodeId = ExpandedNodeId.ToNodeId( extensionObject.TypeId, m_modelManager.NamespaceUris );
+            string typeNodeIdString = typeNodeId.ToString();
+
+            object value = extensionObject.Body;
+
+            Type valueType = value.GetType();
+
+            if( valueType.FullName.StartsWith( "Opc.Ua." ) )
             {
-                XmlElement xmlElement = value as XmlElement;
-                if ( xmlElement != null && attribute.RefAttributeType != null )
+                // This should be up a level, but it crashes in the other case for now.
+                Dictionary<string, UANode> fieldReferenceTypes = CreateFieldReferenceTypes( 
+                    attribute, typeNodeId );
+
+                PropertyInfo[] properties = value.GetType().GetProperties();
+
+                HashSet<string> exclusions = GetExclusions( true );
+
+                foreach( PropertyInfo property in properties )
                 {
-                    Debug.WriteLine( "AddModifyAttributeObject for " + xmlElement.Name );
+                    UANode fieldDefinitionNode = GetFieldReferenceType(
+                        typeNodeIdString, property.Name );
 
-                    AttributeFamilyType definition = m_atl_temp.FindReferencedClass<AttributeFamilyType>( attribute.RefAttributeType );
-
-                    if( definition != null )
+                    if ( fieldDefinitionNode != null )
                     {
-                        foreach( AttributeType attributeField in definition.Attribute )
+                        NodeId fieldDefinitionNodeId = fieldDefinitionNode.DecodedNodeId;
+
+                        if( fieldDefinitionNodeId != null )
                         {
-                            string refAttributeType = attributeField.RefAttributeType;
-
-                            // Now find this...
-                            AttributeFamilyType fieldDefinition = m_atl_temp.FindReferencedClass<AttributeFamilyType>( refAttributeType );
-                            if( fieldDefinition != null )
+                            var propertyValue = property.GetValue( value );
+                            if( propertyValue != null )
                             {
-                                UANode fieldDefinitionNode = m_modelManager.FindNodeByName( fieldDefinition.Name );
-                                XmlElement attributeNode = xmlElement[ attributeField.Name ];
-
-                                if( attributeNode != null && attributeNode.FirstChild != null && 
-                                    fieldDefinitionNode != null && fieldDefinitionNode.DecodedNodeId != null )
+                                Variant fieldVariant = new Variant( propertyValue );
+                                if( fieldVariant.TypeInfo.BuiltInType == BuiltInType.ExtensionObject )
                                 {
-                                    XmlDocument document = new XmlDocument();
-                                    XmlElement elementToDecode = document.CreateElement( fieldDefinition.Name );
-                                    elementToDecode.InnerText = attributeNode.FirstChild.InnerText;
-
-                                    XmlDecoder xmlDecoder = CreateDecoder( elementToDecode );
-                                    try
+                                    ExtensionObject[] arrayValues = fieldVariant.Value as ExtensionObject[];
+                                    if( arrayValues != null )
                                     {
-                                        Opc.Ua.TypeInfo typeInfo = null;
-                                        var decodedValue = xmlDecoder.ReadVariantContents( out typeInfo );
-                                        if( decodedValue != null )
+                                        foreach( ExtensionObject arrayValue in arrayValues )
                                         {
-                                            NodeId propertyNodeId = Opc.Ua.TypeInfo.GetDataTypeId( decodedValue );
-                                            if( propertyNodeId != null )
-                                            {
-                                                Variant variantValue = new Variant( decodedValue );
-
-                                                bool isList = variantValue.TypeInfo.ValueRank > ValueRanks.Scalar;
-
-                                                AddModifyAttribute( attribute.Attribute,
-                                                    attributeField.Name,
-                                                    fieldDefinitionNode.DecodedNodeId,
-                                                    variantValue,
-                                                    isList );
-                                            }
-                                            else
-                                            {
-                                                Debug.WriteLine( "Unknown property Node Id " + propertyNodeId.ToString() + " for value " +
-                                                    decodedValue.ToString() + " Property name " + fieldDefinition.Name );
-                                            }
+                                            arrayValue.TypeId = new ExpandedNodeId( fieldDefinitionNodeId );
                                         }
                                     }
-                                    catch(Exception ex)
+                                    else
                                     {
-                                        Debug.WriteLine( "Unable to decode Property name " + fieldDefinition.Name  + 
-                                            " for " + xmlElement.Name + "[" + ex.Message + "]" );
+                                        ExtensionObject notAnArray = fieldVariant.Value as ExtensionObject;
+                                        if( notAnArray != null )
+                                        {
+                                            notAnArray.TypeId = new ExpandedNodeId( fieldDefinitionNodeId );
+                                        }
                                     }
-                                    xmlDecoder.Close();
+                                }
+
+                                if( !exclusions.Contains( property.Name ) )
+                                {
+                                    Debug.WriteLine( "AddModifyAttributeObject2 recursing " + property.Name +
+                                        " PropertyType [" + property.PropertyType.Name + "] " +
+                                        " [" + fieldDefinitionNodeId.ToString() + "]" );
+
+                                    bool isList = fieldVariant.TypeInfo.ValueRank > ValueRanks.Scalar;
+
+                                    AddModifyAttribute( attribute.Attribute,
+                                        property.Name, fieldDefinitionNodeId, fieldVariant,
+                                        isList );
                                 }
                             }
                         }
+
                     }
                 }
             }
         }
 
-        private XmlDecoder CreateDecoder( XmlElement source )
-        {
-            ServiceMessageContext messageContext = new ServiceMessageContext();
-            messageContext.NamespaceUris = m_modelManager.NamespaceUris;
-            messageContext.ServerUris = m_modelManager.ServerUris;
-
-            XmlDecoder decoder = new XmlDecoder( source, messageContext );
-
-            decoder.SetMappingTables( m_modelManager.NamespaceUris, m_modelManager.ServerUris );
-
-            return decoder;
-        }
-
-
         private HashSet<string> GetExclusions( bool extensionObject )
         {
-            HashSet<string> exclusions = null;
-            if ( extensionObject )
+            if ( ExtensionObjectExclusions == null )
             {
-                if ( ExtensionObjectExclusions == null )
-                {
-                    ExtensionObjectExclusions = new HashSet<string>();
-                    ExtensionObjectExclusions.Add( "BinaryEncodingId" );
-                    ExtensionObjectExclusions.Add( "JsonEncodingId" );
-                    ExtensionObjectExclusions.Add( "XmlEncodingId" );
-                    ExtensionObjectExclusions.Add( "TypeId" );
-                }
-                exclusions = ExtensionObjectExclusions;
+                ExtensionObjectExclusions = new HashSet<string>();
+                ExtensionObjectExclusions.Add( "BinaryEncodingId" );
+                ExtensionObjectExclusions.Add( "JsonEncodingId" );
+                ExtensionObjectExclusions.Add( "XmlEncodingId" );
+                ExtensionObjectExclusions.Add( "TypeId" );
             }
-            else
-            {
-                if ( EmptyExclusions == null )
-                {
-                    EmptyExclusions = new HashSet<string>();
-                }
-                exclusions = EmptyExclusions;
-            }
-
-            return exclusions;
-    }
+            return ExtensionObjectExclusions;
+        }
 
         private void UpdateDerived(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
         { 
