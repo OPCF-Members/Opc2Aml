@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UANodeSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:s1="http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel/Types.xsd" xmlns:s2="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd" xmlns:s3="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd" xmlns:ua="http://unifiedautomation.com/Configuration/NodeSet.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <NamespaceUris>
+        <Uri>http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</Uri>
+        <Uri>http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/</Uri>
+        <Uri>http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/</Uri>
+    </NamespaceUris>
+    <Models>
+        <Model ModelUri="http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel" PublicationDate="2023-12-05T17:41:21Z" Version="1.0.0">
+            <RequiredModel ModelUri="http://opcfoundation.org/UA/" PublicationDate="2022-11-01T00:00:00Z" Version="1.05.02"/>
+            <RequiredModel ModelUri="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/" PublicationDate="2023-12-05T17:57:26Z" Version="1.0.0"/>
+            <RequiredModel ModelUri="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/" PublicationDate="2023-12-05T17:57:32Z" Version="1.0.0"/>
+        </Model>
+    </Models>
+    <Aliases>
+        <Alias Alias="Boolean">i=1</Alias>
+        <Alias Alias="String">i=12</Alias>
+        <Alias Alias="DateTime">i=13</Alias>
+        <Alias Alias="Organizes">i=35</Alias>
+        <Alias Alias="HasEncoding">i=38</Alias>
+        <Alias Alias="HasTypeDefinition">i=40</Alias>
+        <Alias Alias="HasSubtype">i=45</Alias>
+        <Alias Alias="HasProperty">i=46</Alias>
+        <Alias Alias="HasComponent">i=47</Alias>
+        <Alias Alias="IdType">i=256</Alias>
+        <Alias Alias="NumericRange">i=291</Alias>
+        <Alias Alias="ComprehensiveScalarType">ns=2;i=3003</Alias>
+        <Alias Alias="ComprehensiveArrayType">ns=3;i=3004</Alias>
+        <Alias Alias="ComplexComprehensiveType">ns=1;i=3003</Alias>
+    </Aliases>
+    <Extensions>
+        <Extension>
+            <ua:ModelInfo Tool="UaModeler" Hash="0A1zroiIbaj6FcBCtxqp5g==" Version="1.6.8"/>
+        </Extension>
+    </Extensions>
+    <UADataType NodeId="ns=1;i=3003" BrowseName="1:ComplexComprehensiveType">
+        <DisplayName>ComplexComprehensiveType</DisplayName>
+        <References>
+            <Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
+            <Reference ReferenceType="HasEncoding">ns=1;i=5001</Reference>
+            <Reference ReferenceType="HasEncoding">ns=1;i=5003</Reference>
+            <Reference ReferenceType="HasEncoding">ns=1;i=5002</Reference>
+        </References>
+        <Definition Name="1:ComplexComprehensiveType">
+            <Field DataType="ComprehensiveArrayType" Name="ArrayAsScalar"/>
+            <Field DataType="ComprehensiveScalarType" ValueRank="1" ArrayDimensions="2" Name="ScalarAsArray"/>
+        </Definition>
+    </UADataType>
+    <UAVariable DataType="ComprehensiveScalarType" NodeId="ns=1;i=6009" BrowseName="1:LevelOne" AccessLevel="3">
+        <DisplayName>LevelOne</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+        </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>ns=2;i=5002</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                        <DataSet>
+                            <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <String>http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</String>
+                            </Namespaces>
+                            <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                            <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                            <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                            <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">My Dataset Name</Name>
+                            <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">A Description</Description>
+                            <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                            <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <String>11111111-1111-1111-1111-111111111111</String>
+                            </DataSetClassId>
+                            <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <MajorVersion>1234</MajorVersion>
+                                <MinorVersion>5678</MinorVersion>
+                            </ConfigurationVersion>
+                        </DataSet>
+                        <PublishedData>
+                            <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Identifier>i=99990</Identifier>
+                            </PublishedVariable>
+                            <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">13</AttributeId>
+                            <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">222</SamplingIntervalHint>
+                            <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                            <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">333</DeadbandValue>
+                            <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                            <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Value>
+                                    <String>A Substitute</String>
+                                </Value>
+                            </SubstituteValue>
+                            <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                        </PublishedData>
+                        <Bool>1</Bool>
+                        <SByte>2</SByte>
+                        <Int16>3</Int16>
+                        <UInt16>4</UInt16>
+                        <Int32>5</Int32>
+                        <UInt32>6</UInt32>
+                        <Int64>7</Int64>
+                        <UInt64>8</UInt64>
+                        <Float>9.1</Float>
+                        <Double>10.2</Double>
+                        <String>Eleven Point Three</String>
+                        <DateTime>2012-12-12T12:12:12Z</DateTime>
+                        <Guid>
+                            <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">13131313-1313-1313-1313-131313131313</String>
+                        </Guid>
+                        <ByteString>MTQxNDE0MTQ=</ByteString>
+                        <!-- <XmlElement>&lt;TheFifteenthElement&gt;Fifteen&lt;/TheFifteenthElement&gt;</XmlElement> -->
+                        <XmlElement><TheFifteenthElement/></XmlElement>
+                        <NodeId>
+                            <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">ns=2;i=16</Identifier>
+                        </NodeId>
+                        <ExpandedNodeId>
+                            <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">ns=0;i=17;namespaceUri:http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</Identifier>
+                        </ExpandedNodeId>
+                        <StatusCode>
+                            <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2149056512</Code>
+                        </StatusCode>
+                        <QualifiedName>
+                            <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">1</NamespaceIndex>
+                            <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Nineteen</Name>
+                        </QualifiedName>
+                        <LocalizedText>
+                            <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Twenty</Text>
+                        </LocalizedText>
+                        <DataValue>
+                            <Value>
+                                <Value>
+                                    <Int32>12345</Int32>
+                                </Value>
+                            </Value>
+                            <StatusCode>
+                                <Code>2165637120</Code>
+                            </StatusCode>
+                            <SourceTimestamp>2023-09-13T14:39:08.791Z</SourceTimestamp>
+                            <ServerTimestamp>2023-09-13T14:39:08.791Z</ServerTimestamp>
+                        </DataValue>
+                        <DiagnosticInfo>
+                            <SymbolicId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">11</SymbolicId>
+                            <NamespaceUri xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">22</NamespaceUri>
+                            <Locale xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">33</Locale>
+                            <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">44</LocalizedText>
+                            <AdditionalInfo xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Diagnostic Information</AdditionalInfo>
+                        </DiagnosticInfo>
+                    </ComprehensiveScalarType>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="ComprehensiveArrayType" NodeId="ns=1;i=6003" BrowseName="1:LevelTwo" AccessLevel="3">
+        <DisplayName>LevelTwo</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+        </References>
+    </UAVariable>
+    <UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING_InstanceLevel" NodeId="ns=1;i=5004" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel">
+        <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">i=11715</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6001</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6002</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6004</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6005</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6006</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6007</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6008</Reference>
+        </References>
+    </UAObject>
+    <UAVariable DataType="Boolean" ParentNodeId="ns=1;i=5004" NodeId="ns=1;i=6001" BrowseName="IsNamespaceSubset">
+        <DisplayName>IsNamespaceSubset</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="DateTime" ParentNodeId="ns=1;i=5004" NodeId="ns=1;i=6002" BrowseName="NamespacePublicationDate">
+        <DisplayName>NamespacePublicationDate</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+        <Value>
+            <uax:DateTime>2023-12-05T17:41:21Z</uax:DateTime>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="String" ParentNodeId="ns=1;i=5004" NodeId="ns=1;i=6004" BrowseName="NamespaceUri">
+        <DisplayName>NamespaceUri</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+        <Value>
+            <uax:String>http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</uax:String>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="String" ParentNodeId="ns=1;i=5004" NodeId="ns=1;i=6005" BrowseName="NamespaceVersion">
+        <DisplayName>NamespaceVersion</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+        <Value>
+            <uax:String>1.0.0</uax:String>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="IdType" ParentNodeId="ns=1;i=5004" ValueRank="1" NodeId="ns=1;i=6006" ArrayDimensions="0" BrowseName="StaticNodeIdTypes">
+        <DisplayName>StaticNodeIdTypes</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="NumericRange" ParentNodeId="ns=1;i=5004" ValueRank="1" NodeId="ns=1;i=6007" ArrayDimensions="0" BrowseName="StaticNumericNodeIdRange">
+        <DisplayName>StaticNumericNodeIdRange</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="String" ParentNodeId="ns=1;i=5004" NodeId="ns=1;i=6008" BrowseName="StaticStringNodeIdPattern">
+        <DisplayName>StaticStringNodeIdPattern</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable DataType="ComplexComprehensiveType" NodeId="ns=1;i=6013" BrowseName="1:TopLevel" AccessLevel="3">
+        <DisplayName>TopLevel</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+        </References>
+    </UAVariable>
+    <UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5001" BrowseName="Default Binary">
+        <DisplayName>Default Binary</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3003</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5002" BrowseName="Default XML">
+        <DisplayName>Default XML</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3003</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5003" BrowseName="Default JSON">
+        <DisplayName>Default JSON</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3003</Reference>
+        </References>
+    </UAObject>
+</UANodeSet>
