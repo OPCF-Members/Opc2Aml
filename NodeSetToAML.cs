@@ -976,6 +976,24 @@ namespace MarkdownProcessor
                             }
                         }
 
+                        // Recurse base object types
+                        NodeId baseNodeId = m_modelManager.FindFirstTarget( typeNodeId, HasSubTypeNodeId, false );
+                        if( baseNodeId != null )
+                        {
+                            Dictionary<string, UANode> baseFields = CreateFieldReferenceTypes( attribute, baseNodeId );
+
+                            if ( baseFields != null )
+                            {
+                                foreach( KeyValuePair<string, UANode> pair in baseFields )
+                                {
+                                    if( !fields.ContainsKey( pair.Key ) )
+                                    {
+                                        fields.Add( pair.Key, pair.Value );
+                                    }
+                                }
+                            }
+                        }
+
                         ReferenceAttributeMap.Add( typeNodeIdString, fields );
                     }
                 }
@@ -1110,7 +1128,6 @@ namespace MarkdownProcessor
                     if( uaObject != null )
                     {
                         // Look for encoding
-                        NodeId encodingDefinition = null;
                         List<ReferenceInfo> referenceList = m_modelManager.FindReferences( typeNodeId );
                         foreach( ReferenceInfo referenceInfo in referenceList )
                         {
