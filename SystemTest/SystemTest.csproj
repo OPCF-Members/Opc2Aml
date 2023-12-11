@@ -22,6 +22,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="NodeSetFiles\InstanceLevel.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NodeSetFiles\LevelOne.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NodeSetFiles\LevelTwo.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="NodeSetFiles\Opc.Ua.NodeSet2.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

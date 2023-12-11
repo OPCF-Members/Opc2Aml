@@ -40,6 +40,7 @@ using UANode = MarkdownProcessor.NodeSet.UANode;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
 using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
+using DataTypeField = MarkdownProcessor.NodeSet.DataTypeField;
 using Aml.Engine.Adapter;
 using System.Xml.Linq;
 using System.Linq;
@@ -950,14 +951,18 @@ namespace MarkdownProcessor
             return a;
         }
 
-        private Dictionary<string, Dictionary<string, UANode>> ReferenceAttributeMap = new Dictionary<string, Dictionary<string, UANode>>();
+        private Dictionary<string, Dictionary<string, DataTypeField>> ReferenceAttributeMap = new Dictionary<string, Dictionary<string, DataTypeField>>();
 
-        private Dictionary<string, UANode> CreateFieldReferenceTypes( AttributeType attribute, NodeId typeNodeId )
+        private Dictionary<string, DataTypeField> CreateFieldReferenceTypes( AttributeType attribute, NodeId typeNodeId )
         {
             string typeNodeIdString = typeNodeId.ToString();
 
             if( !ReferenceAttributeMap.ContainsKey( typeNodeIdString ) )
             {
+                if ( typeNodeIdString.EndsWith("15534") )
+                {
+                    bool wait  = true;
+                }
                 UANode typeUaNode = m_modelManager.FindNode<UANode>( typeNodeId );
 
                 if( typeUaNode != null )
@@ -965,26 +970,22 @@ namespace MarkdownProcessor
                     UADataType typeDataType = typeUaNode as UADataType;
                     if( typeDataType != null && typeDataType.Definition != null && typeDataType.Definition.Field != null )
                     {
-                        Dictionary<string, UANode> fields = new Dictionary<string, UANode>();
+                        Dictionary<string, DataTypeField> fields = new Dictionary<string, DataTypeField>();
 
                         foreach( DataTypeField dataTypeField in typeDataType.Definition.Field )
                         {
-                            UANode fieldType = m_modelManager.FindNode<UANode>( dataTypeField.DecodedDataType );
-                            if( fieldType != null )
-                            {
-                                fields.Add( dataTypeField.Name, fieldType );
-                            }
+                            fields.Add( dataTypeField.Name, dataTypeField );
                         }
 
                         // Recurse base object types
                         NodeId baseNodeId = m_modelManager.FindFirstTarget( typeNodeId, HasSubTypeNodeId, false );
                         if( baseNodeId != null )
                         {
-                            Dictionary<string, UANode> baseFields = CreateFieldReferenceTypes( attribute, baseNodeId );
+                            Dictionary<string, DataTypeField> baseFields = CreateFieldReferenceTypes( attribute, baseNodeId );
 
                             if ( baseFields != null )
                             {
-                                foreach( KeyValuePair<string, UANode> pair in baseFields )
+                                foreach( KeyValuePair<string, DataTypeField> pair in baseFields )
                                 {
                                     if( !fields.ContainsKey( pair.Key ) )
                                     {
@@ -999,16 +1000,16 @@ namespace MarkdownProcessor
                 }
             }
 
-            Dictionary<string, UANode> attributeMap = new Dictionary<string, UANode>();
+            Dictionary<string, DataTypeField> attributeMap = new Dictionary<string, DataTypeField>();
             ReferenceAttributeMap.TryGetValue( typeNodeIdString, out attributeMap );
             return attributeMap;
         }
 
-        private UANode GetFieldReferenceType( string type, string field )
+        private DataTypeField GetFieldReferenceType( string type, string field )
         {
-            UANode nodeId = null;
+            DataTypeField dataTypeField = null;
 
-            Dictionary<string, UANode> typeMap;
+            Dictionary<string, DataTypeField> typeMap;
 
             if( ReferenceAttributeMap.TryGetValue( type, out typeMap ) )
             {
@@ -1020,10 +1021,10 @@ namespace MarkdownProcessor
                     findMe = field.Replace( "ListOf", "" );
                 }
 
-                typeMap.TryGetValue( findMe, out nodeId );
+                typeMap.TryGetValue( findMe, out dataTypeField );
             }
 
-            return nodeId;
+            return dataTypeField;
         }
 
         private void AddModifyAttributeObject( AttributeType attribute, object value )
@@ -1061,7 +1062,7 @@ namespace MarkdownProcessor
             if( valueType.FullName.StartsWith( "Opc.Ua." ) )
             {
                 // This should be up a level, but it crashes in the other case for now.
-                Dictionary<string, UANode> fieldReferenceTypes = CreateFieldReferenceTypes( 
+                Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes( 
                     attribute, typeNodeId );
 
                 PropertyInfo[] properties = value.GetType().GetProperties();
@@ -1070,12 +1071,12 @@ namespace MarkdownProcessor
 
                 foreach( PropertyInfo property in properties )
                 {
-                    UANode fieldDefinitionNode = GetFieldReferenceType(
+                    DataTypeField fieldDefinitionNode = GetFieldReferenceType(
                         typeNodeIdString, property.Name );
 
                     if ( fieldDefinitionNode != null )
                     {
-                        NodeId fieldDefinitionNodeId = fieldDefinitionNode.DecodedNodeId;
+                        NodeId fieldDefinitionNodeId = fieldDefinitionNode.DecodedDataType;
 
                         if( fieldDefinitionNodeId != null )
                         {
@@ -1140,19 +1141,19 @@ namespace MarkdownProcessor
                     }
 
                     // This should be up a level, but it crashes in the other case for now.
-                    Dictionary<string, UANode> fieldReferenceTypes = CreateFieldReferenceTypes(
+                    Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
                         attribute, typeDefinition );
 
                     if( fieldReferenceTypes != null )
                     {
-                        foreach( KeyValuePair<string, UANode> fieldReferenceType in fieldReferenceTypes )
+                        foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
                         {
                             Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
 
                             AddModifyAttribute( 
                                 attribute.Attribute, 
                                 fieldReferenceType.Key, 
-                                fieldReferenceType.Value.DecodedNodeId, 
+                                fieldReferenceType.Value.DecodedDataType, 
                                 fieldVariant, bListOf: false /*    isList */);
                         }
                     }
@@ -1235,13 +1236,28 @@ namespace MarkdownProcessor
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType, Variant val, bool bListOf = false)
         {
+            if( name.Equals( "BuiltInType", StringComparison.OrdinalIgnoreCase ) )
+            {
+                bool hitIt = true;
+            }
+
             var DataTypeNode = FindNode<UANode>(refDataType);
             var sUADataType = DataTypeNode.DecodedBrowseName.Name;
             var sURI = m_modelManager.FindModelUri(DataTypeNode.DecodedNodeId);
 
+            bool builtInTypeException = false;
+            if ( DataTypeNode.DecodedNodeId.Equals( Opc.Ua.DataTypeIds.Byte ) &&
+                name.Equals( "BuiltInType", StringComparison.OrdinalIgnoreCase ) )
+            {
+                // Special Case, Part 83 A.3.6
+                // create another function for this
+                builtInTypeException = false;
+            }
+
             AttributeType returnAttributeType = null;
 
-            if( m_modelManager.IsTypeOf( DataTypeNode.DecodedNodeId, EnumerationNodeId ) == true )
+            if( m_modelManager.IsTypeOf( DataTypeNode.DecodedNodeId, EnumerationNodeId ) == true ||
+                builtInTypeException )
             {
                 if( val.TypeInfo != null )
                 {
@@ -2852,7 +2868,7 @@ namespace MarkdownProcessor
             return decoder;
         }
 
-        private Variant CreateComplexVariant( string name, UANode typeDefinition, XmlElement source )
+        private Variant CreateComplexVariant( string name, DataTypeField typeDefinition, XmlElement source )
         {
             Variant variant = new Variant();
 
@@ -2862,7 +2878,7 @@ namespace MarkdownProcessor
             {
                 BuiltInType baseBuiltInType = BuiltInType.Null;
 
-                NodeId baseBuiltInTypeNodeId = ComplexGetBuiltInTypeEx( typeDefinition.DecodedNodeId );
+                NodeId baseBuiltInTypeNodeId = ComplexGetBuiltInTypeEx( typeDefinition.DecodedDataType );
                 if( baseBuiltInTypeNodeId != null )
                 {
                     baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
@@ -2920,7 +2936,7 @@ namespace MarkdownProcessor
                     case BuiltInType.ExtensionObject:
                         {
                             ExpandedNodeId absoluteId = NodeId.ToExpandedNodeId( 
-                                typeDefinition.DecodedNodeId, m_modelManager.NamespaceUris );
+                                typeDefinition.DecodedDataType, m_modelManager.NamespaceUris );
                             
                             ExtensionObject extensionObject = new ExtensionObject( absoluteId, complexElement );
 
@@ -2947,7 +2963,7 @@ namespace MarkdownProcessor
             return variant;
         }
 
-        private XmlElement CreateComplexElement( string name, UANode typeDefinition, XmlElement source )
+        private XmlElement CreateComplexElement( string name, DataTypeField typeDefinition, XmlElement source )
         {
             XmlElement complexElement = null;
 
@@ -2963,7 +2979,7 @@ namespace MarkdownProcessor
 
                 BuiltInType baseBuiltInType = BuiltInType.Null;
 
-                NodeId baseBuiltInTypeNodeId = ComplexGetBuiltInTypeEx( typeDefinition.DecodedNodeId );
+                NodeId baseBuiltInTypeNodeId = ComplexGetBuiltInTypeEx( typeDefinition.DecodedDataType );
                 if (  baseBuiltInTypeNodeId != null )
                 {
                     baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
@@ -2971,7 +2987,7 @@ namespace MarkdownProcessor
 
                 if ( baseBuiltInType == BuiltInType.Null )
                 {
-                    Debug.WriteLine( "CreateComplexElement Unable to get builtInType for " + name + " [" + typeDefinition.NodeId + "]" );
+                    Debug.WriteLine( "CreateComplexElement Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
                     // Need to handle this somehow.
                     /*
                       Check out SubstituteValue - this is uncommon, but still happens.
@@ -3026,15 +3042,17 @@ namespace MarkdownProcessor
 
                         case BuiltInType.Guid:
                             {
-                                XmlElement element = document.CreateElement( "uax:" + baseBuiltInTypeNode.BrowseName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
-                                UANode stringUaNode = m_modelManager.FindNode<UANode>( Opc.Ua.DataTypeIds.String );
-                                XmlElement stringElement = CreateComplexElement( "String", stringUaNode, xmlElement );
-                                if( stringElement != null )
-                                {
-                                    XmlNode import = document.ImportNode( stringElement, deep: true );
-                                    element.AppendChild( import );
-                                    complexElement = element;
-                                }
+                                // Archie TODO
+
+                                //XmlElement element = document.CreateElement( "uax:" + baseBuiltInTypeNode.BrowseName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                //UANode stringUaNode = m_modelManager.FindNode<UANode>( Opc.Ua.DataTypeIds.String );
+                                //XmlElement stringElement = CreateComplexElement( "String", stringUaNode, xmlElement );
+                                //if( stringElement != null )
+                                //{
+                                //    XmlNode import = document.ImportNode( stringElement, deep: true );
+                                //    element.AppendChild( import );
+                                //    complexElement = element;
+                                //}
                                 break;
                             }
 
@@ -3048,6 +3066,14 @@ namespace MarkdownProcessor
 
                         case BuiltInType.NodeId:
                         case BuiltInType.ExpandedNodeId:
+                            {
+                                complexElement = document.CreateElement( "uax:" + baseBuiltInTypeNode.BrowseName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                complexElement.InnerXml = xmlElement.InnerXml;
+
+                                break;
+                            }
+
+
                         case BuiltInType.StatusCode:
                         case BuiltInType.QualifiedName:
                         case BuiltInType.LocalizedText:
