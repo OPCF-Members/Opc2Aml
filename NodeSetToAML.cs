@@ -31,7 +31,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Opc.Ua;
 using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
@@ -47,17 +46,9 @@ using System.Linq;
 using System.Diagnostics;
 using System.Net;
 using NodeSetToAmlUtils;
-using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Reflection;
-using System.Security.AccessControl;
-using System.IO.Packaging;
 using MarkdownProcessor.NodeSet;
-using System.Xml;
-using static MarkdownProcessor.ModelManager;
-using System.Reflection.Metadata;
-using Aml.Engine.Services.Interfaces;
-using System.Diagnostics.SymbolStore;
 
 namespace MarkdownProcessor
 {
@@ -1194,74 +1185,21 @@ namespace MarkdownProcessor
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType, Variant val, bool bListOf = false)
         {
-            if( name.Equals( "BuiltInType", StringComparison.OrdinalIgnoreCase ) )
-            {
-                bool hitIt = true;
-            }
-
-            var DataTypeNode = FindNode<UANode>(refDataType);
-            var sUADataType = DataTypeNode.DecodedBrowseName.Name;
-            var sURI = m_modelManager.FindModelUri(DataTypeNode.DecodedNodeId);
-
-            bool builtInTypeException = false;
-            if ( DataTypeNode.DecodedNodeId.Equals( Opc.Ua.DataTypeIds.Byte ) &&
-                name.Equals( "BuiltInType", StringComparison.OrdinalIgnoreCase ) )
-            {
-                // Special Case, Part 83 A.3.6
-                // create another function for this
-                builtInTypeException = false;
-            }
+            var dataTypeNode = FindNode<UANode>(refDataType);
+            var sUADataType = dataTypeNode.DecodedBrowseName.Name;
+            var sURI = m_modelManager.FindModelUri(dataTypeNode.DecodedNodeId);
 
             AttributeType returnAttributeType = null;
 
-            if( m_modelManager.IsTypeOf( DataTypeNode.DecodedNodeId, EnumerationNodeId ) == true ||
-                builtInTypeException )
+            if( dataTypeNode.DecodedNodeId.Equals( Opc.Ua.DataTypeIds.Byte ) &&
+                name.Equals( "BuiltInType", StringComparison.OrdinalIgnoreCase ) )
             {
-                if( val.TypeInfo != null )
-                {
-                    int enumerationValue = -1;
-                    if( val.TypeInfo.ValueRank == ValueRanks.Scalar )
-                    {
-                        enumerationValue = (int)val.Value;
-                    }
-                    else if( val.TypeInfo.ValueRank == ValueRanks.OneDimension )
-                    {
-                        int[] enumerationValues = (int[])val.Value;
-                        if( enumerationValues.Length == 1 )
-                        {
-                            enumerationValue = enumerationValues[ 0 ];
-                        }
-                    }
-
-                    if( enumerationValue >= 0 )
-                    {
-                        UADataType enumerationNode = FindNode<UADataType>( DataTypeNode.DecodedNodeId );
-                        if( enumerationNode != null )
-                        {
-                            if( enumerationNode.Definition != null &&
-                                enumerationNode.Definition.Field != null &&
-                                enumerationNode.Definition.Field.Length > 0 )
-                            {
-                                foreach( DataTypeField field in enumerationNode.Definition.Field )
-                                {
-                                    if( field.Value == enumerationValue )
-                                    {
-                                        Variant enumerationAsString = new Variant( field.Name );
-
-                                        returnAttributeType = AddModifyAttribute( seq,
-                                            name,
-                                            sUADataType,
-                                            enumerationAsString,
-                                            bListOf: false,
-                                            sURI: sURI );
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                // Special Case, Part 83 A.3.6
+                returnAttributeType = AddModifyAttributeBuiltInType( seq, refDataType, val ); 
+            }
+            else if( m_modelManager.IsTypeOf( dataTypeNode.DecodedNodeId, EnumerationNodeId ) == true )
+            {
+                returnAttributeType = AddModifyAttributeEnum( seq, name, refDataType, val );
             }
 
             if ( returnAttributeType == null )
@@ -1270,6 +1208,96 @@ namespace MarkdownProcessor
             }
 
             return returnAttributeType;
+        }
+
+        private AttributeType AddModifyAttributeBuiltInType( AttributeSequence seq,
+            NodeId refDataType,
+            Variant val )
+        {
+            byte builtInTypeByte = (byte)val.Value;
+            string builtInTypeName = Enum.GetName( typeof( BuiltInType ), builtInTypeByte );
+
+            string path = BuildLibraryReference( ATLPrefix, MetaModelName, "BuiltInType" );
+            CAEXObject builtInTypeObject = m_cAEXDocument.FindByPath( path );
+            AttributeFamilyType attributeDefinition = builtInTypeObject as AttributeFamilyType;
+
+            AttributeType createAttribute = null;
+
+            if ( attributeDefinition != null )
+            {
+                createAttribute = seq[ "BuiltInType" ];
+                if( createAttribute == null )
+                {
+                    createAttribute = seq.Append( "BuiltInType" );
+                }
+
+                createAttribute.RecreateAttributeInstance( attributeDefinition );
+                createAttribute.Name = "BuiltInType";
+                createAttribute.Value = builtInTypeName;
+                createAttribute.AttributeDataType = "xs:string";
+            }
+
+            return createAttribute;
+        }
+
+        private AttributeType AddModifyAttributeEnum( AttributeSequence seq, 
+            string name, 
+            NodeId refDataType, 
+            Variant val )
+        {
+            AttributeType attributeType = null;
+
+            if( val.TypeInfo != null )
+            {
+                int enumerationValue = -1;
+                if( val.TypeInfo.ValueRank == ValueRanks.Scalar )
+                {
+                    enumerationValue = (int)val.Value;
+                }
+                else if( val.TypeInfo.ValueRank == ValueRanks.OneDimension )
+                {
+                    int[] enumerationValues = (int[])val.Value;
+                    if( enumerationValues.Length == 1 )
+                    {
+                        enumerationValue = enumerationValues[ 0 ];
+                    }
+                }
+
+                if( enumerationValue >= 0 )
+                {
+                    var dataTypeNode = FindNode<UANode>( refDataType );
+                    var dataTypeName = dataTypeNode.DecodedBrowseName.Name;
+                    var uri = m_modelManager.FindModelUri( dataTypeNode.DecodedNodeId );
+
+                    UADataType enumerationNode = FindNode<UADataType>( dataTypeNode.DecodedNodeId );
+                    if( enumerationNode != null )
+                    {
+                        if( enumerationNode.Definition != null &&
+                            enumerationNode.Definition.Field != null &&
+                            enumerationNode.Definition.Field.Length > 0 )
+                        {
+                            foreach( DataTypeField field in enumerationNode.Definition.Field )
+                            {
+                                if( field.Value == enumerationValue )
+                                {
+                                    Variant enumerationAsString = new Variant( field.Name );
+
+                                    attributeType = AddModifyAttribute( seq,
+                                        name,
+                                        dataTypeName,
+                                        enumerationAsString,
+                                        bListOf: false,
+                                        sURI: uri );
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return attributeType;
         }
 
 

@@ -445,12 +445,10 @@
                         </uax:Description>
                         <uax:Fields>
                             <uax:FieldMetaData>
-                                <uax:Name>Wow lots of data</uax:Name>
+                                <uax:Name>lotsofdata</uax:Name>
                                 <uax:Description>
                                     <uax:Text>FieldMetaData Description</uax:Text>
                                 </uax:Description>
-
-
                                 <uax:FieldFlags>0</uax:FieldFlags>
                                 <uax:BuiltInType>0</uax:BuiltInType>
                                 <uax:DataType>

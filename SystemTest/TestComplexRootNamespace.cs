@@ -142,13 +142,8 @@ namespace SystemTest
             Assert.AreEqual( "5", arrayDimension.Value );
 
             AttributeType builtIntype = GetAttribute( field, "BuiltInType", validateSubAttributes: false );
-            // Of course, this is wrong
-            Assert.AreEqual( "10", builtIntype.Value );
-            Assert.AreEqual( "xs:unsignedByte", builtIntype.AttributeDataType );
-            // it should be 
-            //Assert.AreEqual( "Float", builtIntype.Value );
-            //Assert.AreEqual( "xs:string", builtIntype.AttributeDataType );
-
+            Assert.AreEqual( "Float", builtIntype.Value );
+            Assert.AreEqual( "xs:string", builtIntype.AttributeDataType );
 
             #endregion
         }
