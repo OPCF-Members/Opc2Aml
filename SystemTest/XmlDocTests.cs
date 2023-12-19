@@ -20,7 +20,7 @@ namespace SystemTest
         public void TestInitialize()
         {
             TestHelper.RetrieveFiles();
-            string testFileName = "TestEnums.xml";
+            string testFileName = "TestAml.xml";
             DirectoryInfo directory = TestHelper.GetExtractDirectory(testFileName + ".amlx");
             string path = Path.Combine(directory.FullName, testFileName + ".aml");
             FileInfo amlFileInfo = new FileInfo(path);

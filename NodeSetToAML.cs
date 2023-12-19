@@ -31,7 +31,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using Opc.Ua;
 using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
@@ -40,19 +39,16 @@ using UANode = MarkdownProcessor.NodeSet.UANode;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
 using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
+using DataTypeField = MarkdownProcessor.NodeSet.DataTypeField;
 using Aml.Engine.Adapter;
 using System.Xml.Linq;
 using System.Linq;
 using System.Diagnostics;
 using System.Net;
 using NodeSetToAmlUtils;
-using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Reflection;
-using System.Security.AccessControl;
-using System.IO.Packaging;
 using MarkdownProcessor.NodeSet;
-using System.Xml;
 
 namespace MarkdownProcessor
 {
@@ -100,6 +96,9 @@ namespace MarkdownProcessor
         private readonly NodeId MultiStateDiscreteNodeId = new NodeId(2376, 0);
         private readonly NodeId MultiStateValueDiscreteNodeId = new NodeId(11238, 0);
         private readonly NodeId EnumerationNodeId = Opc.Ua.DataTypeIds.Enumeration;
+
+        private readonly NodeId IntegerNodeId = Opc.Ua.DataTypeIds.Integer;
+
         private readonly System.Xml.Linq.XNamespace defaultNS = "http://www.dke.de/CAEX";
         private const string uaNamespaceURI = "http://opcfoundation.org/UA/";
         private const string OpcLibInfoNamespace = "http://opcfoundation.org/UA/FX/2021/08/OpcUaLibInfo.xsd";
@@ -107,7 +106,6 @@ namespace MarkdownProcessor
         private readonly List<string> ExcludedDataTypeList = new List<string>() { "InstanceNode", "TypeNode" };
         private Dictionary<string, Dictionary<string,string>> LookupNames = new Dictionary<string, Dictionary<string, string>>();
         private HashSet<string> ExtensionObjectExclusions = null;
-        private HashSet<string> EmptyExclusions = null;
 
         private List<string> PreventInfiniteRecursionList = new List<string>();
         private const int ua2xslookup_count = 18;
@@ -278,8 +276,6 @@ namespace MarkdownProcessor
                     }
 
                 }
-
-
 
                 foreach (var obType in SortedObjectTypes)
                 {
@@ -704,7 +700,7 @@ namespace MarkdownProcessor
                                 Variant elementVariant = new Variant( valueAsList[ index ] );
                                 bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
                                 AddModifyAttribute( a.Attribute, index.ToString(), refDataType, 
-                                    elementVariant, elementListOf );
+                                    elementVariant, elementListOf, sURI );
                             }
                         }
                     }
@@ -883,7 +879,7 @@ namespace MarkdownProcessor
                                 ExtensionObject extensionObject = val.Value as ExtensionObject;
                                 if ( extensionObject != null && extensionObject.Body != null )
                                 {
-                                    AddModifyAttributeObject( a, extensionObject.Body, extensionObject: true );
+                                    AddModifyExtensionObject( a, extensionObject );
                                 }
 
                                 break;
@@ -934,7 +930,7 @@ namespace MarkdownProcessor
 
                         case BuiltInType.DiagnosticInfo:
                             {
-                                AddModifyAttributeIterateObject( a, val );
+                                AddModifyAttributeObject( a, val.Value );
                                 break;
                             }
                         
@@ -945,22 +941,89 @@ namespace MarkdownProcessor
             return a;
         }
 
-        private void AddModifyAttributeIterateObject( AttributeType attribute, 
-            Variant value )
+        private Dictionary<string, Dictionary<string, DataTypeField>> ReferenceAttributeMap = new Dictionary<string, Dictionary<string, DataTypeField>>();
+
+        private Dictionary<string, DataTypeField> CreateFieldReferenceTypes( AttributeType attribute, NodeId typeNodeId )
         {
-            AddModifyAttributeObject( attribute, value.Value, extensionObject: false );
+            string typeNodeIdString = typeNodeId.ToString();
+
+            if( !ReferenceAttributeMap.ContainsKey( typeNodeIdString ) )
+            {
+                if ( typeNodeIdString.EndsWith("15534") )
+                {
+                    bool wait  = true;
+                }
+                UANode typeUaNode = m_modelManager.FindNode<UANode>( typeNodeId );
+
+                if( typeUaNode != null )
+                {
+                    UADataType typeDataType = typeUaNode as UADataType;
+                    if( typeDataType != null && typeDataType.Definition != null && typeDataType.Definition.Field != null )
+                    {
+                        Dictionary<string, DataTypeField> fields = new Dictionary<string, DataTypeField>();
+
+                        foreach( DataTypeField dataTypeField in typeDataType.Definition.Field )
+                        {
+                            fields.Add( dataTypeField.Name, dataTypeField );
+                        }
+
+                        // Recurse base object types
+                        NodeId baseNodeId = m_modelManager.FindFirstTarget( typeNodeId, HasSubTypeNodeId, false );
+                        if( baseNodeId != null )
+                        {
+                            Dictionary<string, DataTypeField> baseFields = CreateFieldReferenceTypes( attribute, baseNodeId );
+
+                            if ( baseFields != null )
+                            {
+                                foreach( KeyValuePair<string, DataTypeField> pair in baseFields )
+                                {
+                                    if( !fields.ContainsKey( pair.Key ) )
+                                    {
+                                        fields.Add( pair.Key, pair.Value );
+                                    }
+                                }
+                            }
+                        }
+
+                        ReferenceAttributeMap.Add( typeNodeIdString, fields );
+                    }
+                }
+            }
+
+            Dictionary<string, DataTypeField> attributeMap = new Dictionary<string, DataTypeField>();
+            ReferenceAttributeMap.TryGetValue( typeNodeIdString, out attributeMap );
+            return attributeMap;
         }
 
-        private void AddModifyAttributeObject( AttributeType attribute, object value, bool extensionObject )
+        private DataTypeField GetFieldReferenceType( string type, string field )
+        {
+            DataTypeField dataTypeField = null;
+
+            Dictionary<string, DataTypeField> typeMap;
+
+            if( ReferenceAttributeMap.TryGetValue( type, out typeMap ) )
+            {
+                string lookFor = field;
+
+                string findMe = field;
+                if( field.StartsWith( "ListOf" ) )
+                {
+                    findMe = field.Replace( "ListOf", "" );
+                }
+
+                typeMap.TryGetValue( findMe, out dataTypeField );
+            }
+
+            return dataTypeField;
+        }
+
+        private void AddModifyAttributeObject( AttributeType attribute, object value )
         {
             Type valueType = value.GetType();
 
             if( valueType.FullName.StartsWith( "Opc.Ua." ) )
             {
-
                 PropertyInfo[] properties = value.GetType().GetProperties();
-
-                HashSet<string> exclusions = GetExclusions( extensionObject );
 
                 foreach( PropertyInfo property in properties )
                 {
@@ -968,59 +1031,97 @@ namespace MarkdownProcessor
                     var propertyValue = property.GetValue( value );
                     if( propertyValue != null )
                     {
-                        if( !exclusions.Contains( property.Name ) )
-                        {
-                            AddModifyAttribute( attribute.Attribute,
-                                property.Name, propertyNodeId,
-                                new Variant( propertyValue ),
-                                property.PropertyType.IsArray );
-                        }
+                        AddModifyAttribute( attribute.Attribute,
+                            property.Name, propertyNodeId,
+                            new Variant( propertyValue ),
+                            property.PropertyType.IsArray );
                     }
                 }
             }
-            else
+        }
+
+        private void AddModifyExtensionObject( AttributeType attribute, ExtensionObject extensionObject )
+        {
+            NodeId typeNodeId = ExpandedNodeId.ToNodeId( extensionObject.TypeId, m_modelManager.NamespaceUris );
+            string typeNodeIdString = typeNodeId.ToString();
+
+            object value = extensionObject.Body;
+
+            Type valueType = value.GetType();
+
+            if( valueType.FullName.StartsWith( "Opc.Ua." ) )
             {
-                string elementName = "";
-                XmlElement xmlElement= value as XmlElement;
-                if ( xmlElement != null )
+                // This should be up a level, but it crashes in the other case for now.
+                Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes( 
+                    attribute, typeNodeId );
+
+                PropertyInfo[] properties = value.GetType().GetProperties();
+
+                HashSet<string> exclusions = GetExclusions( true );
+
+                foreach( PropertyInfo property in properties )
                 {
-                    elementName = xmlElement.Name;
+                    DataTypeField fieldDefinitionNode = GetFieldReferenceType(
+                        typeNodeIdString, property.Name );
+
+                    if ( fieldDefinitionNode != null )
+                    {
+                        NodeId fieldDefinitionNodeId = fieldDefinitionNode.DecodedDataType;
+
+                        if( fieldDefinitionNodeId != null )
+                        {
+                            var propertyValue = property.GetValue( value );
+                            if( propertyValue != null )
+                            {
+                                Variant fieldVariant = new Variant( propertyValue );
+                                if( fieldVariant.TypeInfo.BuiltInType == BuiltInType.ExtensionObject )
+                                {
+                                    ExtensionObject[] arrayValues = fieldVariant.Value as ExtensionObject[];
+                                    if( arrayValues != null )
+                                    {
+                                        foreach( ExtensionObject arrayValue in arrayValues )
+                                        {
+                                            arrayValue.TypeId = new ExpandedNodeId( fieldDefinitionNodeId );
+                                        }
+                                    }
+                                    else
+                                    {
+                                        ExtensionObject notAnArray = fieldVariant.Value as ExtensionObject;
+                                        if( notAnArray != null )
+                                        {
+                                            notAnArray.TypeId = new ExpandedNodeId( fieldDefinitionNodeId );
+                                        }
+                                    }
+                                }
+
+                                if( !exclusions.Contains( property.Name ) )
+                                {
+                                    bool isList = fieldVariant.TypeInfo.ValueRank > ValueRanks.Scalar;
+
+                                    AddModifyAttribute( attribute.Attribute,
+                                        property.Name, fieldDefinitionNodeId, fieldVariant,
+                                        isList );
+                                }
+                            }
+                        }
+
+                    }
                 }
-                // Archie - When the defined element in the body has an attribute, it crashes the system
-                // This still needs to be addressed and fixed
-                // for example
-                // <uax:Body><FxVersion xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
-                // <uax:Body><RelatedEndpointDataType xmlns="http://opcfoundation.org/UA/FX/Data/Types.xsd">
-                Debug.WriteLine( "AddModifyAttributeObject Unhandled Type " + valueType.FullName + "[" + elementName + "]" );
             }
         }
 
         private HashSet<string> GetExclusions( bool extensionObject )
         {
-            HashSet<string> exclusions = null;
-            if ( extensionObject )
+            if ( ExtensionObjectExclusions == null )
             {
-                if ( ExtensionObjectExclusions == null )
-                {
-                    ExtensionObjectExclusions = new HashSet<string>();
-                    ExtensionObjectExclusions.Add( "BinaryEncodingId" );
-                    ExtensionObjectExclusions.Add( "JsonEncodingId" );
-                    ExtensionObjectExclusions.Add( "XmlEncodingId" );
-                    ExtensionObjectExclusions.Add( "TypeId" );
-                }
-                exclusions = ExtensionObjectExclusions;
+                ExtensionObjectExclusions = new HashSet<string>();
+                ExtensionObjectExclusions.Add( "BinaryEncodingId" );
+                ExtensionObjectExclusions.Add( "JsonEncodingId" );
+                ExtensionObjectExclusions.Add( "XmlEncodingId" );
+                ExtensionObjectExclusions.Add( "TypeId" );
             }
-            else
-            {
-                if ( EmptyExclusions == null )
-                {
-                    EmptyExclusions = new HashSet<string>();
-                }
-                exclusions = EmptyExclusions;
-            }
-
-            return exclusions;
-    }
+            return ExtensionObjectExclusions;
+        }
 
         private void UpdateDerived(ref InternalElementType internalElement, NodeId utilized, NodeId actual)
         { 
@@ -1084,59 +1185,21 @@ namespace MarkdownProcessor
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, NodeId refDataType, Variant val, bool bListOf = false)
         {
-            var DataTypeNode = FindNode<UANode>(refDataType);
-            var sUADataType = DataTypeNode.DecodedBrowseName.Name;
-            var sURI = m_modelManager.FindModelUri(DataTypeNode.DecodedNodeId);
+            var dataTypeNode = FindNode<UANode>(refDataType);
+            var sUADataType = dataTypeNode.DecodedBrowseName.Name;
+            var sURI = m_modelManager.FindModelUri(dataTypeNode.DecodedNodeId);
 
             AttributeType returnAttributeType = null;
 
-            if( m_modelManager.IsTypeOf( DataTypeNode.DecodedNodeId, EnumerationNodeId ) == true )
+            if( dataTypeNode.DecodedNodeId.Equals( Opc.Ua.DataTypeIds.Byte ) &&
+                name.Equals( "BuiltInType", StringComparison.OrdinalIgnoreCase ) )
             {
-                if( val.TypeInfo != null )
-                {
-                    int enumerationValue = -1;
-                    if( val.TypeInfo.ValueRank == ValueRanks.Scalar )
-                    {
-                        enumerationValue = (int)val.Value;
-                    }
-                    else if( val.TypeInfo.ValueRank == ValueRanks.OneDimension )
-                    {
-                        int[] enumerationValues = (int[])val.Value;
-                        if( enumerationValues.Length == 1 )
-                        {
-                            enumerationValue = enumerationValues[ 0 ];
-                        }
-                    }
-
-                    if( enumerationValue >= 0 )
-                    {
-                        UADataType enumerationNode = FindNode<UADataType>( DataTypeNode.DecodedNodeId );
-                        if( enumerationNode != null )
-                        {
-                            if( enumerationNode.Definition != null &&
-                                enumerationNode.Definition.Field != null &&
-                                enumerationNode.Definition.Field.Length > 0 )
-                            {
-                                foreach( DataTypeField field in enumerationNode.Definition.Field )
-                                {
-                                    if( field.Value == enumerationValue )
-                                    {
-                                        Variant enumerationAsString = new Variant( field.Name );
-
-                                        returnAttributeType = AddModifyAttribute( seq,
-                                            name,
-                                            sUADataType,
-                                            enumerationAsString,
-                                            bListOf: false,
-                                            sURI: sURI );
-
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                // Special Case, Part 83 A.3.6
+                returnAttributeType = AddModifyAttributeBuiltInType( seq, refDataType, val ); 
+            }
+            else if( m_modelManager.IsTypeOf( dataTypeNode.DecodedNodeId, EnumerationNodeId ) == true )
+            {
+                returnAttributeType = AddModifyAttributeEnum( seq, name, refDataType, val );
             }
 
             if ( returnAttributeType == null )
@@ -1145,6 +1208,96 @@ namespace MarkdownProcessor
             }
 
             return returnAttributeType;
+        }
+
+        private AttributeType AddModifyAttributeBuiltInType( AttributeSequence seq,
+            NodeId refDataType,
+            Variant val )
+        {
+            byte builtInTypeByte = (byte)val.Value;
+            string builtInTypeName = Enum.GetName( typeof( BuiltInType ), builtInTypeByte );
+
+            string path = BuildLibraryReference( ATLPrefix, MetaModelName, "BuiltInType" );
+            CAEXObject builtInTypeObject = m_cAEXDocument.FindByPath( path );
+            AttributeFamilyType attributeDefinition = builtInTypeObject as AttributeFamilyType;
+
+            AttributeType createAttribute = null;
+
+            if ( attributeDefinition != null )
+            {
+                createAttribute = seq[ "BuiltInType" ];
+                if( createAttribute == null )
+                {
+                    createAttribute = seq.Append( "BuiltInType" );
+                }
+
+                createAttribute.RecreateAttributeInstance( attributeDefinition );
+                createAttribute.Name = "BuiltInType";
+                createAttribute.Value = builtInTypeName;
+                createAttribute.AttributeDataType = "xs:string";
+            }
+
+            return createAttribute;
+        }
+
+        private AttributeType AddModifyAttributeEnum( AttributeSequence seq, 
+            string name, 
+            NodeId refDataType, 
+            Variant val )
+        {
+            AttributeType attributeType = null;
+
+            if( val.TypeInfo != null )
+            {
+                int enumerationValue = -1;
+                if( val.TypeInfo.ValueRank == ValueRanks.Scalar )
+                {
+                    enumerationValue = (int)val.Value;
+                }
+                else if( val.TypeInfo.ValueRank == ValueRanks.OneDimension )
+                {
+                    int[] enumerationValues = (int[])val.Value;
+                    if( enumerationValues.Length == 1 )
+                    {
+                        enumerationValue = enumerationValues[ 0 ];
+                    }
+                }
+
+                if( enumerationValue >= 0 )
+                {
+                    var dataTypeNode = FindNode<UANode>( refDataType );
+                    var dataTypeName = dataTypeNode.DecodedBrowseName.Name;
+                    var uri = m_modelManager.FindModelUri( dataTypeNode.DecodedNodeId );
+
+                    UADataType enumerationNode = FindNode<UADataType>( dataTypeNode.DecodedNodeId );
+                    if( enumerationNode != null )
+                    {
+                        if( enumerationNode.Definition != null &&
+                            enumerationNode.Definition.Field != null &&
+                            enumerationNode.Definition.Field.Length > 0 )
+                        {
+                            foreach( DataTypeField field in enumerationNode.Definition.Field )
+                            {
+                                if( field.Value == enumerationValue )
+                                {
+                                    Variant enumerationAsString = new Variant( field.Name );
+
+                                    attributeType = AddModifyAttribute( seq,
+                                        name,
+                                        dataTypeName,
+                                        enumerationAsString,
+                                        bListOf: false,
+                                        sURI: uri );
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return attributeType;
         }
 
 
