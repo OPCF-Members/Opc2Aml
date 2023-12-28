@@ -49,6 +49,8 @@ using NodeSetToAmlUtils;
 using System.Collections;
 using System.Reflection;
 using MarkdownProcessor.NodeSet;
+using System.Xml;
+using Microsoft.AspNetCore.Identity;
 
 namespace MarkdownProcessor
 {
@@ -707,6 +709,7 @@ namespace MarkdownProcessor
                 }
                 else
                 {
+                    bool handled = true;
                     switch (val.TypeInfo.BuiltInType)  // TODO -- consider supporting setting values for more complicated types (enums, structures, Qualified Names ...) and arrays
                     {
                         case BuiltInType.Boolean:
@@ -729,6 +732,10 @@ namespace MarkdownProcessor
                         case BuiltInType.UInteger:
                         case BuiltInType.Enumeration:
                             {
+                                if ( refDataType.Equals( "BaseDataType" ) )
+                                {
+                                    bool howMany = true;
+                                }
                                 a.DefaultAttributeValue = a.AttributeValue = val;
                                 break;
                             }
@@ -933,7 +940,19 @@ namespace MarkdownProcessor
                                 AddModifyAttributeObject( a, val.Value );
                                 break;
                             }
+
+                        default:
+                            handled = false;
+                            break;
                         
+                    }
+
+                    if ( handled && refDataType.Equals( "BaseDataType" ) )
+                    {
+                        // this is specifically the variant case
+                        NodeId dataTypeFromBase = new NodeId( (uint)val.TypeInfo.BuiltInType );
+                        string sdfsd = GetAttributeDataType( dataTypeFromBase );
+                        a.AttributeDataType = sdfsd;
                     }
                 }
             }
@@ -1098,13 +1117,71 @@ namespace MarkdownProcessor
                                 {
                                     bool isList = fieldVariant.TypeInfo.ValueRank > ValueRanks.Scalar;
 
+                                    bool yup = false;
+                                    if ( property.Name.Equals("SubstituteValue", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        if ( fieldVariant.TypeInfo.BuiltInType.Equals( BuiltInType.Double ) )
+                                        {
+                                            yup = true;
+                                        }
+                                    }
                                     AddModifyAttribute( attribute.Attribute,
                                         property.Name, fieldDefinitionNodeId, fieldVariant,
                                         isList );
+
+                                    if ( yup )
+                                    {
+                                        AttributeType lookForMe = attribute.Attribute[ "SubstituteValue" ];
+                                        bool setABreakPoint = true;
+                                    }
                                 }
                             }
                         }
 
+                    }
+                }
+            }
+            else
+            {
+                //return;
+                XmlElement xmlElement = value as XmlElement;
+                if( xmlElement != null )
+                {
+                    NodeId typeDefinition = typeNodeId;
+                    UANode uANode = m_modelManager.FindNode<UANode>( typeNodeId );
+                    UAObject uaObject = uANode as UAObject;
+                    if( uaObject != null )
+                    {
+                        // Look for encoding
+                        List<ReferenceInfo> referenceList = m_modelManager.FindReferences( typeNodeId );
+                        foreach( ReferenceInfo referenceInfo in referenceList )
+                        {
+                            if( !referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.HasEncoding ) )
+                            {
+                                typeDefinition = referenceInfo.TargetId;
+                                break;
+                            }
+                        }
+                    }
+
+                    // This should be up a level, but it crashes in the other case for now.
+                    Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
+                        attribute, typeDefinition );
+
+                    if( fieldReferenceTypes != null )
+                    {
+                        foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
+                        {
+                            Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
+
+                            bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
+
+                            AddModifyAttribute(
+                                attribute.Attribute,
+                                fieldReferenceType.Key,
+                                fieldReferenceType.Value.DecodedDataType,
+                                fieldVariant, bListOf: listOf );
+                        }
                     }
                 }
             }
@@ -1315,13 +1392,24 @@ namespace MarkdownProcessor
 
         private string GetAttributeDataType(NodeId nodeId)
         {
+
+            string nodeIdString = nodeId.ToString();
+//            Debug.WriteLine( "GetAttributeDataType [" + nodeIdString + "]" );
+
+            if ( nodeIdString.Equals( "i=24" ) )
+            {
+                bool wait = true;
+            }
+
             UANode baseNode;
 
             for (int i = 0; i < ua2xslookup_count; i++)
             {
                 baseNode = m_modelManager.FindNodeByName(ua2xsLookup[i, ua2xslookup_uaname]);
-                if (m_modelManager.IsTypeOf(nodeId, baseNode.DecodedNodeId))
-                    return ua2xsLookup[i, ua2xslookup_xsname];
+                if( m_modelManager.IsTypeOf( nodeId, baseNode.DecodedNodeId ) )
+                {
+                    return ua2xsLookup[ i, ua2xslookup_xsname ];
+                }
             }
             return "";
         }
@@ -2575,6 +2663,7 @@ namespace MarkdownProcessor
                             {
                                 a.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, 
                                     MyNode.Definition.Field[i].ValueRank >= ValueRanks.OneDimension );
+
                                 a.AttributeDataType = GetAttributeDataType(MyNode.Definition.Field[i].DecodedDataType);
                                 if (nodeId.NamespaceIndex == 0)
                                 {
@@ -2840,6 +2929,336 @@ namespace MarkdownProcessor
         }
 
         #endregion
+
+        #region Complex
+
+        private XmlDecoder CreateDecoder( XmlElement source )
+        {
+            ServiceMessageContext messageContext = new ServiceMessageContext();
+            messageContext.NamespaceUris = m_modelManager.NamespaceUris;
+            messageContext.ServerUris = m_modelManager.ServerUris;
+
+            XmlDecoder decoder = new XmlDecoder( source, messageContext );
+
+            return decoder;
+        }
+
+        private Variant CreateComplexVariant( string name, DataTypeField typeDefinition, XmlElement source )
+        {
+            if ( name.Equals("Namespaces",StringComparison.OrdinalIgnoreCase) )
+            {
+                bool wait = true;
+            }
+
+            Variant variant = new Variant();
+
+            XmlElement complexElement = CreateComplexElement( name, typeDefinition, source );
+
+            if( complexElement != null )
+            {
+                BuiltInType baseBuiltInType = BuiltInType.Null;
+
+                NodeId baseBuiltInTypeNodeId = ComplexGetBuiltInTypeEx( typeDefinition.DecodedDataType );
+                if( baseBuiltInTypeNodeId != null )
+                {
+                    baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
+                }
+
+                if ( typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) ) 
+                {
+                    // variant or unable to determine
+                    baseBuiltInType = BuiltInType.Variant;
+                    baseBuiltInTypeNodeId = typeDefinition.DecodedDataType;
+                }
+
+                switch( baseBuiltInType )
+                {
+                    case BuiltInType.Boolean:
+                    case BuiltInType.SByte:
+                    case BuiltInType.Byte:
+                    case BuiltInType.Int16:
+                    case BuiltInType.UInt16:
+                    case BuiltInType.Int32:
+                    case BuiltInType.UInt32:
+                    case BuiltInType.Int64:
+                    case BuiltInType.UInt64:
+                    case BuiltInType.Float:
+                    case BuiltInType.Double:
+                    case BuiltInType.String:
+                    case BuiltInType.DateTime:
+                    case BuiltInType.Guid:
+                    case BuiltInType.ByteString:
+                    case BuiltInType.XmlElement:
+                    case BuiltInType.NodeId:
+                    case BuiltInType.ExpandedNodeId:
+                    case BuiltInType.StatusCode:
+                    case BuiltInType.QualifiedName:
+                    case BuiltInType.LocalizedText:
+                        {
+                            XmlDecoder decoder = CreateDecoder( complexElement );
+                            Opc.Ua.TypeInfo typeInfo = null;
+                            variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                            decoder.Close();
+
+                            break;
+                        }
+
+                    case BuiltInType.DataValue:
+                        {
+                            XmlDecoder decoder = CreateDecoder( complexElement );
+                            Opc.Ua.TypeInfo typeInfo = null;
+                            variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                            decoder.Close();
+
+                            break;
+                        }
+
+
+                    case BuiltInType.Variant:
+                        {
+                            string variantName = complexElement.Name;
+                            XmlDecoder decoder = CreateDecoder( complexElement );
+
+                            object decoded = decoder.ReadVariant( variantName );
+                            if ( decoded != null )
+                            {
+                                variant = new Variant( decoded );
+                            }
+
+                            //Opc.Ua.TypeInfo typeInfo = null;
+                            //variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                            decoder.Close();
+
+                            break;
+                        }
+
+                    case BuiltInType.DiagnosticInfo:
+                        {
+                            bool handleThis = true;
+                            break;
+                        }
+
+                    case BuiltInType.ExtensionObject:
+                        {
+                            ExpandedNodeId absoluteId = NodeId.ToExpandedNodeId(
+                                typeDefinition.DecodedDataType, m_modelManager.NamespaceUris );
+
+                            ExtensionObject extensionObject = new ExtensionObject( absoluteId, complexElement );
+
+                            variant = new Variant( extensionObject );
+
+                            break;
+                        }
+
+                    case BuiltInType.Enumeration:
+                        {
+                            bool unsure = true;
+                            break;
+                        }
+
+                    default:
+                        {
+                            // Lots more work to do
+                            break;
+                        }
+
+                }
+            }
+
+            return variant;
+        }
+
+        private XmlElement SearchForElement( string name, XmlElement source )
+        {
+            XmlElement element = source[ name ];
+            if ( element == null )
+            {
+                string uaxId = "uax:";
+                if ( !name.StartsWith(uaxId, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    element = source[ uaxId + name ];
+                }
+            }
+
+            return element;
+        }
+
+
+        private XmlElement CreateComplexElement( string name, DataTypeField typeDefinition, XmlElement source )
+        {
+            XmlElement complexElement = null;
+
+            XmlElement xmlElement = SearchForElement( name, source );
+            if( xmlElement != null )
+            {
+                BuiltInType baseBuiltInType = BuiltInType.Null;
+
+                NodeId baseBuiltInTypeNodeId = ComplexGetBuiltInTypeEx( typeDefinition.DecodedDataType );
+                if( baseBuiltInTypeNodeId != null )
+                {
+                    baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
+                }
+
+                if (  typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
+                {
+                    baseBuiltInTypeNodeId = typeDefinition.DecodedDataType;
+                    baseBuiltInType = BuiltInType.Variant;
+                    // Defined as variant, or nothing at all
+                }
+
+                if( baseBuiltInType == BuiltInType.Null )
+                {
+                    Debug.WriteLine( "CreateComplexElement Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
+                }
+                else
+                {
+                    UANode baseBuiltInTypeNode = m_modelManager.FindNode<UANode>( baseBuiltInTypeNodeId );
+
+                    string baseBuiltInTypeName = baseBuiltInTypeNode.BrowseName;
+                    if ( typeDefinition.ValueRank >= ValueRanks.OneDimension )
+                    {
+                        baseBuiltInTypeName = "ListOf" + baseBuiltInTypeNode.BrowseName;
+                    }
+
+                    XmlDocument document = new XmlDocument();
+
+                    switch( baseBuiltInType )
+                    {
+                        case BuiltInType.Boolean:
+                        case BuiltInType.SByte:
+                        case BuiltInType.Byte:
+                        case BuiltInType.Int16:
+                        case BuiltInType.UInt16:
+                        case BuiltInType.Int32:
+                        case BuiltInType.UInt32:
+                        case BuiltInType.Int64:
+                        case BuiltInType.UInt64:
+                        case BuiltInType.Float:
+                        case BuiltInType.Double:
+                        case BuiltInType.String:
+                        case BuiltInType.DateTime:
+                        case BuiltInType.ByteString:
+                        case BuiltInType.Guid:
+                        case BuiltInType.XmlElement:
+                        case BuiltInType.NodeId:
+                        case BuiltInType.ExpandedNodeId:
+                        case BuiltInType.StatusCode:
+                        case BuiltInType.QualifiedName:
+                        case BuiltInType.LocalizedText:
+                            {
+                                complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                complexElement.InnerXml = xmlElement.InnerXml;
+                                break;
+                            }
+
+                        case BuiltInType.DataValue:
+                            {
+                                MarkdownProcessor.NodeSet.DataTypeField variantDefinition =
+                                    new MarkdownProcessor.NodeSet.DataTypeField();
+                                variantDefinition.DecodedDataType = Opc.Ua.DataTypeIds.BaseDataType;
+                                variantDefinition.ValueRank = ValueRanks.Scalar; // I don't know this
+                                XmlElement theValue = CreateComplexElement( "Value", variantDefinition, xmlElement );
+                                complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                complexElement.InnerXml = xmlElement.InnerXml;
+
+                                break;
+                            }
+
+                        case BuiltInType.Variant: // BaseDataType
+                            {
+                                //                                complexElement = source;
+
+
+                                complexElement = document.CreateElement( "Value", "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                complexElement.InnerXml = xmlElement.InnerXml;
+
+                                break;
+                            }
+                        case BuiltInType.DiagnosticInfo:
+                            {
+                                complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                complexElement.InnerXml = xmlElement.InnerXml;
+
+                                break;
+                            }
+
+                        case BuiltInType.ExtensionObject:
+                            {
+                                complexElement = xmlElement;
+                                break;
+                            }
+
+                        case BuiltInType.Enumeration:
+                            {
+                                bool unsure = true;
+                                break;
+                            }
+
+                        default:
+                            {
+                                break;
+                            }
+                    }
+                }
+            }
+
+            return complexElement;
+        }
+
+        private BuiltInType ComplexGetBuiltInType( NodeId source )
+        {
+            BuiltInType builtInType = BuiltInType.Null;
+
+            NodeId builtInNodeId = ComplexGetBuiltInTypeEx( source );
+
+            if( builtInNodeId != null )
+            {
+                if( builtInNodeId.IdType == IdType.Numeric && builtInNodeId.NamespaceIndex == 0 )
+                {
+                    uint identifier = (UInt32)builtInNodeId.Identifier;
+                    builtInType = (BuiltInType)identifier;
+                }
+            }
+
+            return builtInType;
+        }
+
+        public NodeId ComplexGetBuiltInTypeEx( NodeId sourceId )
+        {
+            // Not happy with Model Manager GetBuiltInType
+            List<ReferenceInfo> references = m_modelManager.FindReferences( sourceId );
+
+            if( references != null )
+            {
+                foreach( var ii in references )
+                {
+                    if( !ii.IsForward )
+                    {
+                        if( HasSubTypeNodeId != ii.ReferenceTypeId )
+                        {
+                            continue;
+                        }
+
+                        if( ii.TargetId.Equals( Opc.Ua.DataTypeIds.Integer ) ||
+                            ii.TargetId.Equals( Opc.Ua.DataTypeIds.UInteger ) ||
+                            ii.TargetId.Equals( Opc.Ua.DataTypeIds.Number ) ||
+                            ii.TargetId.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
+                        {
+                            return sourceId;
+                        }
+                        else
+                        {
+                            return ComplexGetBuiltInTypeEx( ii.TargetId );
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        #endregion
+
 
     }
 }
