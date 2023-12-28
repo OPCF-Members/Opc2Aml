@@ -732,10 +732,6 @@ namespace MarkdownProcessor
                         case BuiltInType.UInteger:
                         case BuiltInType.Enumeration:
                             {
-                                if ( refDataType.Equals( "BaseDataType" ) )
-                                {
-                                    bool howMany = true;
-                                }
                                 a.DefaultAttributeValue = a.AttributeValue = val;
                                 break;
                             }
@@ -968,10 +964,6 @@ namespace MarkdownProcessor
 
             if( !ReferenceAttributeMap.ContainsKey( typeNodeIdString ) )
             {
-                if ( typeNodeIdString.EndsWith("15534") )
-                {
-                    bool wait  = true;
-                }
                 UANode typeUaNode = m_modelManager.FindNode<UANode>( typeNodeId );
 
                 if( typeUaNode != null )
@@ -1070,7 +1062,6 @@ namespace MarkdownProcessor
 
             if( valueType.FullName.StartsWith( "Opc.Ua." ) )
             {
-                // This should be up a level, but it crashes in the other case for now.
                 Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes( 
                     attribute, typeNodeId );
 
@@ -1117,23 +1108,9 @@ namespace MarkdownProcessor
                                 {
                                     bool isList = fieldVariant.TypeInfo.ValueRank > ValueRanks.Scalar;
 
-                                    bool yup = false;
-                                    if ( property.Name.Equals("SubstituteValue", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        if ( fieldVariant.TypeInfo.BuiltInType.Equals( BuiltInType.Double ) )
-                                        {
-                                            yup = true;
-                                        }
-                                    }
                                     AddModifyAttribute( attribute.Attribute,
                                         property.Name, fieldDefinitionNodeId, fieldVariant,
                                         isList );
-
-                                    if ( yup )
-                                    {
-                                        AttributeType lookForMe = attribute.Attribute[ "SubstituteValue" ];
-                                        bool setABreakPoint = true;
-                                    }
                                 }
                             }
                         }
@@ -1143,7 +1120,6 @@ namespace MarkdownProcessor
             }
             else
             {
-                //return;
                 XmlElement xmlElement = value as XmlElement;
                 if( xmlElement != null )
                 {
@@ -1164,7 +1140,6 @@ namespace MarkdownProcessor
                         }
                     }
 
-                    // This should be up a level, but it crashes in the other case for now.
                     Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
                         attribute, typeDefinition );
 
@@ -1173,7 +1148,7 @@ namespace MarkdownProcessor
                         foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
                         {
                             Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
-
+                           
                             bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
 
                             AddModifyAttribute(
@@ -1392,15 +1367,6 @@ namespace MarkdownProcessor
 
         private string GetAttributeDataType(NodeId nodeId)
         {
-
-            string nodeIdString = nodeId.ToString();
-//            Debug.WriteLine( "GetAttributeDataType [" + nodeIdString + "]" );
-
-            if ( nodeIdString.Equals( "i=24" ) )
-            {
-                bool wait = true;
-            }
-
             UANode baseNode;
 
             for (int i = 0; i < ua2xslookup_count; i++)
@@ -2945,11 +2911,6 @@ namespace MarkdownProcessor
 
         private Variant CreateComplexVariant( string name, DataTypeField typeDefinition, XmlElement source )
         {
-            if ( name.Equals("Namespaces",StringComparison.OrdinalIgnoreCase) )
-            {
-                bool wait = true;
-            }
-
             Variant variant = new Variant();
 
             XmlElement complexElement = CreateComplexElement( name, typeDefinition, source );
@@ -3016,17 +2977,10 @@ namespace MarkdownProcessor
 
                     case BuiltInType.Variant:
                         {
-                            string variantName = complexElement.Name;
+                            throw new Exception( "Should not get here" );
                             XmlDecoder decoder = CreateDecoder( complexElement );
-
-                            object decoded = decoder.ReadVariant( variantName );
-                            if ( decoded != null )
-                            {
-                                variant = new Variant( decoded );
-                            }
-
-                            //Opc.Ua.TypeInfo typeInfo = null;
-                            //variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                            Opc.Ua.TypeInfo typeInfo = null;
+                            variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
                             decoder.Close();
 
                             break;
@@ -3043,9 +2997,22 @@ namespace MarkdownProcessor
                             ExpandedNodeId absoluteId = NodeId.ToExpandedNodeId(
                                 typeDefinition.DecodedDataType, m_modelManager.NamespaceUris );
 
-                            ExtensionObject extensionObject = new ExtensionObject( absoluteId, complexElement );
+                            if ( typeDefinition.ValueRank >= ValueRanks.OneDimension )
+                            {
+                                List<ExtensionObject> extensions = new List<ExtensionObject>();
+                                foreach(XmlElement arrayElement in complexElement.ChildNodes)
+                                {
+                                    extensions.Add( new ExtensionObject( absoluteId, arrayElement ) );
+                                }
+                                
+                                variant = new Variant( extensions );
+                            }
+                            else
+                            {
+                                ExtensionObject extensionObject = new ExtensionObject( absoluteId, complexElement );
+                                variant = new Variant( extensionObject );
+                            }
 
-                            variant = new Variant( extensionObject );
 
                             break;
                         }
@@ -3146,38 +3113,42 @@ namespace MarkdownProcessor
                         case BuiltInType.QualifiedName:
                         case BuiltInType.LocalizedText:
                             {
-                                complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                complexElement = document.CreateElement( baseBuiltInTypeName, xmlElement.NamespaceURI );
                                 complexElement.InnerXml = xmlElement.InnerXml;
+
                                 break;
                             }
 
                         case BuiltInType.DataValue:
                             {
-                                MarkdownProcessor.NodeSet.DataTypeField variantDefinition =
-                                    new MarkdownProcessor.NodeSet.DataTypeField();
-                                variantDefinition.DecodedDataType = Opc.Ua.DataTypeIds.BaseDataType;
-                                variantDefinition.ValueRank = ValueRanks.Scalar; // I don't know this
-                                XmlElement theValue = CreateComplexElement( "Value", variantDefinition, xmlElement );
-                                complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
-                                complexElement.InnerXml = xmlElement.InnerXml;
+                                //MarkdownProcessor.NodeSet.DataTypeField variantDefinition =
+                                //    new MarkdownProcessor.NodeSet.DataTypeField();
+                                //variantDefinition.DecodedDataType = Opc.Ua.DataTypeIds.BaseDataType;
+                                //variantDefinition.ValueRank = ValueRanks.Scalar; // I don't know this
+                                //XmlElement theValue = CreateComplexElement( "Value", variantDefinition, xmlElement );
+                                //complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                //complexElement.InnerXml = xmlElement.InnerXml;
 
                                 break;
                             }
 
                         case BuiltInType.Variant: // BaseDataType
                             {
-                                //                                complexElement = source;
+                                XmlElement valueElement = xmlElement[ "Value" ];
+                                if ( valueElement != null )
+                                {
+                                    XmlDocument variantDocument = new XmlDocument();
+                                    variantDocument.LoadXml( valueElement.InnerXml );
 
-
-                                complexElement = document.CreateElement( "Value", "http://opcfoundation.org/UA/2008/02/Types.xsd" );
-                                complexElement.InnerXml = xmlElement.InnerXml;
+                                    complexElement = variantDocument.DocumentElement;
+                                }
 
                                 break;
                             }
                         case BuiltInType.DiagnosticInfo:
                             {
-                                complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
-                                complexElement.InnerXml = xmlElement.InnerXml;
+                                //complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
+                                //complexElement.InnerXml = xmlElement.InnerXml;
 
                                 break;
                             }
