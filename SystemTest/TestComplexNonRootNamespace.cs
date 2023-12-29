@@ -11,51 +11,18 @@ using System;
 namespace SystemTest
 {
     [TestClass]
-    public class TestComplexRootNamespace
+    public class TestComplexNonRootNamespace
     {
-        CAEXDocument m_document = null;
-        AutomationMLContainer m_container = null;
 
         #region Initialize
 
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            if (m_document == null)
-            {
-                foreach (FileInfo fileInfo in TestHelper.RetrieveFiles())
-                {
-                    if (fileInfo.Name.Equals("InstanceLevel.xml.amlx"))
-                    {
-                        m_container = new AutomationMLContainer(fileInfo.FullName,
-                            System.IO.FileMode.Open, FileAccess.Read);
-                        Assert.IsNotNull(m_container, "Unable to find container");
-                        CAEXDocument document = CAEXDocument.LoadFromStream(m_container.RootDocumentStream());
-                        Assert.IsNotNull(document, "Unable to find document");
-                        m_document = document;
-                    }
-                }
-            }
-
-            Assert.IsNotNull(m_document, "Unable to retrieve Document");
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            if (m_document != null)
-            {
-                m_document.Unload();
-            }
-            m_container.Dispose();
-
-        }
 
         #endregion
 
 
         #region Tests
 
+        private CAEXDocument m_document = null;
 
         private const string InstanceLevel = "http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel/";
         private const string LevelOne = "http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/";
@@ -63,14 +30,78 @@ namespace SystemTest
         private const string RootLevel = "http://opcfoundation.org/UA/";
 
         [TestMethod]
-        public void TestDataSetMetaData()
+        public void TestLevelOne()
         {
-            SystemUnitClassType objectToTest = GetObjectFolder();
+            AttributeType value = InitialGetValueAttribute( "LevelOne" );
 
-            SystemUnitClassType variable = objectToTest.InternalElement[ "DataSetMetaData" ];
-            Assert.IsNotNull( variable );
+            #region Test Basics
 
-            AttributeType value = GetAttribute( variable, "Value", validateSubAttributes: true );
+            TestValue( value, "Bool", "true", "xs:boolean" );
+            TestValue( value, "SByte", "2", "xs:Byte" );
+            TestValue( value, "Int16", "3", "xs:short" );
+            TestValue( value, "UInt16", "4", "xs:unsignedShort" );
+            TestValue( value, "Int32", "5", "xs:int" );
+            TestValue( value, "UInt32", "6", "xs:unsignedInt" );
+            TestValue( value, "Int64", "7", "xs:long" );
+            TestValue( value, "UInt64", "8", "xs:unsignedLong" );
+            TestValue( value, "Float", "9.1", "xs:float" );
+            TestValue( value, "Double", "10.2", "xs:double" );
+            TestValue( value, "String", "Eleven point three", "xs:string" );
+            TestValue( value, "DateTime", "2011-12-12T00:12:12-07:00", "xs:dateTime" );
+            TestValue( value, "Guid", "13131313-1313-1313-1313-131313131313", "xs:string" );
+            TestValue( value, "ByteString", "MTQxNDE0MTQ=", "xs:base64Binary" );
+            
+            string unknownDataType = "";
+            TestValue( value, "XmlElement", 
+                "<TheFifteenthElement xmlns=\"http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd\">Fifteen</TheFifteenthElement>",
+                unknownDataType );
+
+            ValidateNodeId( value, "NodeId", LevelOne, new NodeId( 16 ) );
+            ValidateNodeId( value, "ExpandedNodeId", LevelOne, new NodeId( 17 ) );
+
+            TestValue( value, "StatusCode", "2149056512", "xs:unsignedInt" );
+            ValidateQualifiedName( value, "QualifiedName", InstanceLevel, "Nineteen" );
+            ValidateLocalizedText( value, "LocalizedText", "Twenty" );
+
+            AttributeType dataValueAttribute = GetAttribute( value, "DataValue", validateSubAttributes: true );
+            TestValue( dataValueAttribute, "Value", "12345", "xs:int" );
+            TestValue( dataValueAttribute, "StatusCode", "2165637120", "xs:unsignedInt" );
+            TestValue( dataValueAttribute, "SourceTimestamp", "2023-09-13T14:39:08-06:00", "xs:dateTime" );
+            TestValue( dataValueAttribute, "ServerTimestamp", "2023-09-13T14:39:08-06:00", "xs:dateTime" );
+
+            AttributeType diagnosticAttribute = GetAttribute( value, "DiagnosticInfo", validateSubAttributes: true );
+            TestValue( diagnosticAttribute, "SymbolicId", "11", "xs:int" );
+            TestValue( diagnosticAttribute, "NamespaceUri", "22", "xs:int" );
+            TestValue( diagnosticAttribute, "Locale", "33", "xs:int" );
+            TestValue( diagnosticAttribute, "LocalizedText", "44", "xs:int" );
+            TestValue( diagnosticAttribute, "AdditionalInfo", "Diagnostic Information", "xs:string" );
+            TestValue( diagnosticAttribute, "InnerStatusCode", "2165637121", "xs:unsignedInt" );
+
+            AttributeType innerDiagnosticAttribute = GetAttribute( diagnosticAttribute, "InnerDiagnosticInfo", validateSubAttributes: true );
+            TestValue( innerDiagnosticAttribute, "SymbolicId", "12", "xs:int" );
+            TestValue( innerDiagnosticAttribute, "NamespaceUri", "23", "xs:int" );
+            TestValue( innerDiagnosticAttribute, "Locale", "34", "xs:int" );
+            TestValue( innerDiagnosticAttribute, "LocalizedText", "45", "xs:int" );
+            TestValue( innerDiagnosticAttribute, "AdditionalInfo", "Even More Diagnostic Information", "xs:string" );
+            TestValue( innerDiagnosticAttribute, "InnerStatusCode", "2165637122", "xs:unsignedInt" );
+
+
+
+            return;
+
+            //ValidateNodeId( structureDataType, "DataTypeId", InstanceLevel, new NodeId( 99 ) );
+
+
+            #endregion
+
+
+            #region DataSet Extension
+
+            #endregion
+
+            #region PublishedData Extension
+
+            #endregion
 
             #region Namespaces Variable
 
@@ -148,6 +179,13 @@ namespace SystemTest
             #endregion
         }
 
+        public void TestValue( AttributeType source, string target, string value, string type )
+        {
+            AttributeType attribute = GetAttribute( source, target, validateSubAttributes: false );
+            Assert.IsNotNull( attribute );
+            Assert.AreEqual( value, attribute.Value, ignoreCase: true );
+            Assert.AreEqual( type, attribute.AttributeDataType );
+        }
 
         [TestMethod]
         public void TestFieldTargetData()
@@ -247,6 +285,10 @@ namespace SystemTest
 
         private CAEXDocument GetDocument()
         {
+            if ( m_document == null )
+            {
+                m_document = TestHelper.GetReadOnlyDocument( "InstanceLevel.xml.amlx" );
+            }
             Assert.IsNotNull(m_document, "Unable to retrieve Document");
             return m_document;
         }
@@ -260,6 +302,19 @@ namespace SystemTest
             SystemUnitClassType theObject = initialObject as SystemUnitClassType;
             Assert.IsNotNull(theObject, "Unable to Cast Initial Object");
             return theObject;
+        }
+
+        public AttributeType InitialGetValueAttribute(string rootVariableName)
+        {
+            SystemUnitClassType objectToTest = GetObjectFolder();
+
+            SystemUnitClassType variable = objectToTest.InternalElement[ rootVariableName ];
+            Assert.IsNotNull( variable );
+
+            AttributeType value = GetAttribute( variable, "Value", validateSubAttributes: true );
+            Assert.IsNotNull( value );
+
+            return value;
         }
 
         public AttributeType GetAttribute( SystemUnitClassType variable, 

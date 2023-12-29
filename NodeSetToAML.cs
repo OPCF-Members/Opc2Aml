@@ -905,14 +905,14 @@ namespace MarkdownProcessor
                                         dataValue.SourceTimestamp );
                                     if( dataValue.SourcePicoseconds > 0 )
                                     {
-                                        AddModifyAttribute( a.Attribute, "SourcePicoseconds", "UInt32",
+                                        AddModifyAttribute( a.Attribute, "SourcePicoseconds", "UInt16",
                                             dataValue.SourcePicoseconds );
                                     }
                                     AddModifyAttribute( a.Attribute, "ServerTimestamp", "DateTime",
                                         dataValue.ServerTimestamp );
                                     if ( dataValue.ServerPicoseconds > 0 )
                                     {
-                                        AddModifyAttribute( a.Attribute, "ServerPicoseconds", "UInt32",
+                                        AddModifyAttribute( a.Attribute, "ServerPicoseconds", "UInt16",
                                             dataValue.ServerPicoseconds );
                                     }
                                 }
@@ -1147,6 +1147,10 @@ namespace MarkdownProcessor
                     {
                         foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
                         {
+                            if ( xmlElement.Name.Equals( "ComprehensiveScalarType" ) && fieldReferenceType.Key.Equals( "Bool" ) )
+                            {
+                                bool wait = true;
+                            }
                             Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
                            
                             bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
@@ -2955,40 +2959,15 @@ namespace MarkdownProcessor
                     case BuiltInType.StatusCode:
                     case BuiltInType.QualifiedName:
                     case BuiltInType.LocalizedText:
-                        {
-                            XmlDecoder decoder = CreateDecoder( complexElement );
-                            Opc.Ua.TypeInfo typeInfo = null;
-                            variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
-                            decoder.Close();
-
-                            break;
-                        }
-
                     case BuiltInType.DataValue:
-                        {
-                            XmlDecoder decoder = CreateDecoder( complexElement );
-                            Opc.Ua.TypeInfo typeInfo = null;
-                            variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
-                            decoder.Close();
-
-                            break;
-                        }
-
-
                     case BuiltInType.Variant:
-                        {
-                            throw new Exception( "Should not get here" );
-                            XmlDecoder decoder = CreateDecoder( complexElement );
-                            Opc.Ua.TypeInfo typeInfo = null;
-                            variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
-                            decoder.Close();
-
-                            break;
-                        }
-
                     case BuiltInType.DiagnosticInfo:
                         {
-                            bool handleThis = true;
+                            XmlDecoder decoder = CreateDecoder( complexElement );
+                            Opc.Ua.TypeInfo typeInfo = null;
+                            variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                            decoder.Close();
+
                             break;
                         }
 
@@ -3112,22 +3091,11 @@ namespace MarkdownProcessor
                         case BuiltInType.StatusCode:
                         case BuiltInType.QualifiedName:
                         case BuiltInType.LocalizedText:
-                            {
-                                complexElement = document.CreateElement( baseBuiltInTypeName, xmlElement.NamespaceURI );
-                                complexElement.InnerXml = xmlElement.InnerXml;
-
-                                break;
-                            }
-
                         case BuiltInType.DataValue:
+                        case BuiltInType.DiagnosticInfo:
                             {
-                                //MarkdownProcessor.NodeSet.DataTypeField variantDefinition =
-                                //    new MarkdownProcessor.NodeSet.DataTypeField();
-                                //variantDefinition.DecodedDataType = Opc.Ua.DataTypeIds.BaseDataType;
-                                //variantDefinition.ValueRank = ValueRanks.Scalar; // I don't know this
-                                //XmlElement theValue = CreateComplexElement( "Value", variantDefinition, xmlElement );
-                                //complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
-                                //complexElement.InnerXml = xmlElement.InnerXml;
+                                complexElement = document.CreateElement( baseBuiltInTypeName, Namespaces.OpcUaXsd );
+                                complexElement.InnerXml = xmlElement.InnerXml;
 
                                 break;
                             }
@@ -3142,13 +3110,6 @@ namespace MarkdownProcessor
 
                                     complexElement = variantDocument.DocumentElement;
                                 }
-
-                                break;
-                            }
-                        case BuiltInType.DiagnosticInfo:
-                            {
-                                //complexElement = document.CreateElement( "uax:" + baseBuiltInTypeName, "http://opcfoundation.org/UA/2008/02/Types.xsd" );
-                                //complexElement.InnerXml = xmlElement.InnerXml;
 
                                 break;
                             }
