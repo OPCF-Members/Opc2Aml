@@ -1,6 +1,7 @@
 ﻿using Aml.Engine.AmlObjects;
+using Aml.Engine.CAEX;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,6 +18,8 @@ namespace SystemTest
 
         static bool Executed = false;
 
+        static Dictionary<string, CAEXDocument> ReadOnlyDocuments = new Dictionary<string, CAEXDocument>();
+        
         public static List<FileInfo> RetrieveFiles()
         {
             if (!Executed)
@@ -37,6 +40,30 @@ namespace SystemTest
             List<FileInfo> amlxFiles = GetAmlxFiles();
             Assert.AreNotEqual(0, amlxFiles.Count, "Unable to get Converted Amlx files");
             return amlxFiles;
+        }
+
+        public static CAEXDocument GetReadOnlyDocument( string filename )
+        {
+            CAEXDocument document = null;
+
+            if ( !ReadOnlyDocuments.TryGetValue( filename, out document ) )
+            {
+                foreach( FileInfo fileInfo in RetrieveFiles() )
+                {
+                    if( fileInfo.Name.Equals( filename ) )
+                    {
+                        AutomationMLContainer container = new AutomationMLContainer( fileInfo.FullName,
+                            System.IO.FileMode.Open, FileAccess.Read );
+                        Assert.IsNotNull( container, "Unable to find container" );
+                        document = CAEXDocument.LoadFromStream( container.RootDocumentStream() );
+                        Assert.IsNotNull( document, "Unable to find document" );
+
+                        ReadOnlyDocuments.Add( filename, document );
+                    }
+                }
+            }
+
+            return document;
         }
 
         static public string GetRootName()
