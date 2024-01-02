@@ -626,6 +626,298 @@
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
             <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
         </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>ns=3;i=5002</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <ComprehensiveArrayType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+                        <LevelOne>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/0/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/1/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/2/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>12345678-9012-3456-7890-123456789012</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>1</MajorVersion>
+                                        <MinorVersion>2</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element One Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>987.6543</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element One</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element One</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/3/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/4/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/5/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>24682468-2468-2468-2468-246824682468</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>3</MajorVersion>
+                                        <MinorVersion>4</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element Two Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>0</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Two</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Two</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/6/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/7/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/8/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>12345678-1234-1234-1234-123456789012</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>5</MajorVersion>
+                                        <MinorVersion>6</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element Three Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>987.6543</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Three</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Three</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+                        </LevelOne>
+                        <Int16>
+                            <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Int16>
+                            <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">1</Int16>
+                            <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2</Int16>
+                        </Int16>
+                        <UInt16>
+                            <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">4</UInt16>
+                            <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">5</UInt16>
+                            <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">6</UInt16>
+                        </UInt16>
+                        <DateTime>
+                            <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2007-01-01T00:00:00Z</DateTime>
+                            <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2008-01-01T00:00:00Z</DateTime>
+                            <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2009-01-01T00:00:00Z</DateTime>
+                        </DateTime>
+                        <Guid>
+                            <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <String>10101010-1010-1010-1010-101010101010</String>
+                            </Guid>
+                            <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <String>11001100-1100-1100-1100-110011001100</String>
+                            </Guid>
+                            <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <String>12001200-1200-1200-1200-120012001200</String>
+                            </Guid>
+                        </Guid>
+                        <ByteString>
+                            <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTM=</ByteString>
+                            <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTQ=</ByteString>
+                            <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTU=</ByteString>
+                        </ByteString>
+                        <NodeId>
+                            <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Identifier>ns=1;i=1</Identifier>
+                            </NodeId>
+                            <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Identifier>ns=2;i=2</Identifier>
+                            </NodeId>
+                            <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Identifier>ns=3;i=3</Identifier>
+                            </NodeId>
+                        </NodeId>
+                        <StatusCode>
+                            <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Code>2147549184</Code>
+                            </StatusCode>
+                            <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Code>2147614720</Code>
+                            </StatusCode>
+                            <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Code>2147680256</Code>
+                            </StatusCode>
+                        </StatusCode>
+                        <QualifiedName>
+                            <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <NamespaceIndex>1</NamespaceIndex>
+                                <Name>One</Name>
+                            </QualifiedName>
+                            <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <NamespaceIndex>2</NamespaceIndex>
+                                <Name>Two</Name>
+                            </QualifiedName>
+                            <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <NamespaceIndex>3</NamespaceIndex>
+                                <Name>Three</Name>
+                            </QualifiedName>
+                        </QualifiedName>
+                        <LocalizedText>
+                            <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Text>One</Text>
+                            </LocalizedText>
+                            <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Text>Two</Text>
+                            </LocalizedText>
+                            <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Text>Three</Text>
+                            </LocalizedText>
+                        </LocalizedText>
+                    </ComprehensiveArrayType>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
     </UAVariable>
     <UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING_InstanceLevel" NodeId="ns=1;i=5004" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</DisplayName>
