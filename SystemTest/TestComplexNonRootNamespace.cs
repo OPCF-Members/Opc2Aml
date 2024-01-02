@@ -85,17 +85,51 @@ namespace SystemTest
             TestValue( innerDiagnosticAttribute, "AdditionalInfo", "Even More Diagnostic Information", "xs:string" );
             TestValue( innerDiagnosticAttribute, "InnerStatusCode", "2165637122", "xs:unsignedInt" );
 
+            #endregion
 
+            #region DataSet Extension
 
-            return;
+            AttributeType dataSetAttribute = GetAttribute( value, "DataSet", validateSubAttributes: true );
 
-            //ValidateNodeId( structureDataType, "DataTypeId", InstanceLevel, new NodeId( 99 ) );
+            #region Simple
+
+            TestValue( dataSetAttribute, "Name", "Data Set Name", "xs:string" );
+            ValidateLocalizedText( dataSetAttribute, "Description", "Data Set Description" );
+            TestValue( dataSetAttribute, "DataSetClassId", "98769876-9876-9876-9876-987698769876", "xs:string" );
+            AttributeType configurationVersionAttribute = GetAttribute( dataSetAttribute, "ConfigurationVersion", validateSubAttributes: true );
+            TestValue( configurationVersionAttribute, "MajorVersion", "54", "xs:unsignedInt" );
+            TestValue( configurationVersionAttribute, "MinorVersion", "32", "xs:unsignedInt" );
+
+            #region Namespaces Variable
+
+            AttributeType namespaces = GetAttribute( dataSetAttribute, "Namespaces", validateSubAttributes: true );
+            Assert.AreEqual( 3, namespaces.Attribute.Count, "Invalid namespace count" );
+            TestValue( namespaces, "1", LevelTwo, "xs:string" );
+
+            #endregion
+
+            #endregion
+
+            #region Complex
+
+            #region StructureDataTypes
+
+            AttributeType structureDataTypes = GetAttribute( dataSetAttribute, "StructureDataTypes", validateSubAttributes: true );
+            Assert.AreEqual( 3, structureDataTypes.Attribute.Count, "Invalid Structure count" );
+            AttributeType structureDescriptionType = GetAttribute( structureDataTypes, "1", validateSubAttributes: true );
+
+            ValidateNodeId( structureDescriptionType, "DataTypeId", GetUri( 2 ), new NodeId( 2223 ) );
+            ValidateQualifiedName( structureDescriptionType, "Name", GetUri( 2 ), "Structure Description Two" );
+
+            AttributeType structureDefinitionType = GetAttribute( structureDescriptionType, "StructureDefinition", validateSubAttributes: true );
+            ValidateNodeId( structureDefinitionType, "DefaultEncodingId", RootLevel, new NodeId( 8 ) );
+            ValidateNodeId( structureDefinitionType, "BaseDataType", RootLevel, new NodeId( 9 ) );
+            TestValue( structureDefinitionType, "StructureType", "UnionWithSubtypedValues", "xs:string" );
 
 
             #endregion
 
-
-            #region DataSet Extension
+            #endregion
 
             #endregion
 
@@ -103,80 +137,74 @@ namespace SystemTest
 
             #endregion
 
-            #region Namespaces Variable
+            //#region Namespaces Variable
 
-            AttributeType namespaces = GetAttribute( value, "Namespaces", validateSubAttributes: true );
-            Assert.AreEqual( 3, namespaces.Attribute.Count, "Invalid namespace count" );
-            AttributeType namespaceAttribute = GetAttribute( namespaces, "0", validateSubAttributes: false );
-            Assert.AreEqual( LevelOne, namespaceAttribute.Value );
-            Assert.AreEqual( "xs:string", namespaceAttribute.AttributeDataType );
-            namespaceAttribute = GetAttribute( namespaces, "1", validateSubAttributes: false );
-            Assert.AreEqual( LevelTwo, namespaceAttribute.Value );
-            Assert.AreEqual( "xs:string", namespaceAttribute.AttributeDataType );
-            namespaceAttribute = GetAttribute( namespaces, "2", validateSubAttributes: false );
-            Assert.AreEqual( InstanceLevel, namespaceAttribute.Value );
-            Assert.AreEqual( "xs:string", namespaceAttribute.AttributeDataType );
+            //AttributeType namespaces = GetAttribute( value, "Namespaces", validateSubAttributes: true );
+            //Assert.AreEqual( 3, namespaces.Attribute.Count, "Invalid namespace count" );
+            //AttributeType namespaceAttribute = GetAttribute( namespaces, "1", validateSubAttributes: false );
+            //Assert.AreEqual( LevelTwo, namespaceAttribute.Value );
+            //Assert.AreEqual( "xs:string", namespaceAttribute.AttributeDataType );
 
-            #endregion
+            //#endregion
 
-            #region Structure Data Type
+            //#region Structure Data Type
 
-            AttributeType structureDataTypes = GetAttribute( value, "StructureDataTypes", validateSubAttributes: true );
-            Assert.AreEqual( 1, structureDataTypes.Attribute.Count, "Invalid namespace count" );
-            AttributeType structureDataType = GetAttribute( structureDataTypes, "0", validateSubAttributes: true );
+            //AttributeType structureDataTypes = GetAttribute( value, "StructureDataTypes", validateSubAttributes: true );
+            //Assert.AreEqual( 1, structureDataTypes.Attribute.Count, "Invalid namespace count" );
+            //AttributeType structureDataType = GetAttribute( structureDataTypes, "0", validateSubAttributes: true );
 
-            ValidateNodeId( structureDataType, "DataTypeId", InstanceLevel, new NodeId( 99 ) );
-            ValidateQualifiedName( structureDataType, "Name", RootLevel, "Structure Description One" );
+            //ValidateNodeId( structureDataType, "DataTypeId", InstanceLevel, new NodeId( 99 ) );
+            //ValidateQualifiedName( structureDataType, "Name", RootLevel, "Structure Description One" );
 
-            AttributeType structureDefinition = GetAttribute( structureDataType, "StructureDefinition", validateSubAttributes: true );
-            ValidateNodeId( structureDefinition, "DefaultEncodingId", LevelOne, new NodeId( "EncodingOne" ) );
-            ValidateNodeId( structureDefinition, "BaseDataType", LevelOne, new NodeId( "BaseDataTypeOne" ) );
+            //AttributeType structureDefinition = GetAttribute( structureDataType, "StructureDefinition", validateSubAttributes: true );
+            //ValidateNodeId( structureDefinition, "DefaultEncodingId", LevelOne, new NodeId( "EncodingOne" ) );
+            //ValidateNodeId( structureDefinition, "BaseDataType", LevelOne, new NodeId( "BaseDataTypeOne" ) );
 
-            AttributeType structureType = GetAttribute( structureDefinition, "StructureType", validateSubAttributes: false );
-            Assert.AreEqual( "Structure", structureType.Value );
-            Assert.AreEqual( "xs:string", structureType.AttributeDataType );
+            //AttributeType structureType = GetAttribute( structureDefinition, "StructureType", validateSubAttributes: false );
+            //Assert.AreEqual( "Structure", structureType.Value );
+            //Assert.AreEqual( "xs:string", structureType.AttributeDataType );
 
-            AttributeType structureFields = GetAttribute( structureDefinition, "Fields", validateSubAttributes: true );
-            Assert.AreEqual( 2, structureFields.Attribute.Count, "Invalid namespace count" );
+            //AttributeType structureFields = GetAttribute( structureDefinition, "Fields", validateSubAttributes: true );
+            //Assert.AreEqual( 2, structureFields.Attribute.Count, "Invalid namespace count" );
 
-            AttributeType testOneStructureField = GetAttribute( structureFields, "1", validateSubAttributes: true );
-            AttributeType structureFieldName = GetAttribute( testOneStructureField, "Name", validateSubAttributes: false );
-            Assert.AreEqual( "StructureFieldTwo", structureFieldName.Value );
+            //AttributeType testOneStructureField = GetAttribute( structureFields, "1", validateSubAttributes: true );
+            //AttributeType structureFieldName = GetAttribute( testOneStructureField, "Name", validateSubAttributes: false );
+            //Assert.AreEqual( "StructureFieldTwo", structureFieldName.Value );
 
-            AttributeType structureFieldDescription = GetAttribute( testOneStructureField, "Description", validateSubAttributes: false );
-            Assert.AreEqual( "Structure Field Two Description", structureFieldDescription.Value );
+            //AttributeType structureFieldDescription = GetAttribute( testOneStructureField, "Description", validateSubAttributes: false );
+            //Assert.AreEqual( "Structure Field Two Description", structureFieldDescription.Value );
 
-            ValidateNodeId( testOneStructureField, "DataType", RootLevel, Opc.Ua.DataTypeIds.String );
+            //ValidateNodeId( testOneStructureField, "DataType", RootLevel, Opc.Ua.DataTypeIds.String );
 
-            #endregion
+            //#endregion
 
-            #region Fields
+            //#region Fields
 
-            AttributeType fields = GetAttribute( value, "Fields", validateSubAttributes: true );
-            Assert.AreEqual( 4, fields.Attribute.Count, "Invalid Fields count" );
+            //AttributeType fields = GetAttribute( value, "Fields", validateSubAttributes: true );
+            //Assert.AreEqual( 4, fields.Attribute.Count, "Invalid Fields count" );
 
-            AttributeType field = GetAttribute( fields, "2", validateSubAttributes: true );
+            //AttributeType field = GetAttribute( fields, "2", validateSubAttributes: true );
 
-            AttributeType fieldName = GetAttribute( field, "Name", validateSubAttributes: false );
-            Assert.AreEqual( "FloatArray", fieldName.Value );
+            //AttributeType fieldName = GetAttribute( field, "Name", validateSubAttributes: false );
+            //Assert.AreEqual( "FloatArray", fieldName.Value );
 
-            AttributeType fieldDescription = GetAttribute( field, "Description", validateSubAttributes: false );
-            Assert.AreEqual( "FieldMetaData Description for FloatArray", fieldDescription.Value );
+            //AttributeType fieldDescription = GetAttribute( field, "Description", validateSubAttributes: false );
+            //Assert.AreEqual( "FieldMetaData Description for FloatArray", fieldDescription.Value );
 
-            ValidateNodeId( field, "DataType", RootLevel, Opc.Ua.DataTypeIds.Float );
+            //ValidateNodeId( field, "DataType", RootLevel, Opc.Ua.DataTypeIds.Float );
 
-            AttributeType valueRank = GetAttribute( field, "ValueRank", validateSubAttributes: false );
-            Assert.AreEqual( "1", valueRank.Value );
+            //AttributeType valueRank = GetAttribute( field, "ValueRank", validateSubAttributes: false );
+            //Assert.AreEqual( "1", valueRank.Value );
 
-            AttributeType arrayDimensions = GetAttribute( field, "ArrayDimensions", validateSubAttributes: true );
-            AttributeType arrayDimension = GetAttribute( arrayDimensions, "0", validateSubAttributes: false );
-            Assert.AreEqual( "5", arrayDimension.Value );
+            //AttributeType arrayDimensions = GetAttribute( field, "ArrayDimensions", validateSubAttributes: true );
+            //AttributeType arrayDimension = GetAttribute( arrayDimensions, "0", validateSubAttributes: false );
+            //Assert.AreEqual( "5", arrayDimension.Value );
 
-            AttributeType builtIntype = GetAttribute( field, "BuiltInType", validateSubAttributes: false );
-            Assert.AreEqual( "Float", builtIntype.Value );
-            Assert.AreEqual( "xs:string", builtIntype.AttributeDataType );
+            //AttributeType builtIntype = GetAttribute( field, "BuiltInType", validateSubAttributes: false );
+            //Assert.AreEqual( "Float", builtIntype.Value );
+            //Assert.AreEqual( "xs:string", builtIntype.AttributeDataType );
 
-            #endregion
+            //#endregion
         }
 
         public void TestValue( AttributeType source, string target, string value, string type )
@@ -346,6 +374,32 @@ namespace SystemTest
             }
 
             return attribute;
+        }
+
+        public string GetUri( int namespaceIndex )
+        {
+            string uri = "";
+
+            switch(  namespaceIndex )
+            {
+                case 0:
+                    uri = RootLevel;
+                    break;
+
+                case 1:
+                    uri = InstanceLevel;
+                    break;
+
+                case 2:
+                    uri = LevelOne;
+                    break;
+
+                case 3:
+                    uri = LevelTwo;
+                    break;
+            }
+
+            return uri;
         }
 
         public void ValidateNodeId( AttributeType attribute, string name, string uri, NodeId nodeId )

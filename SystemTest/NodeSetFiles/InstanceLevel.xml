@@ -75,7 +75,121 @@
                                     </DataTypeId>
                                     <Name>
                                         <NamespaceIndex>1</NamespaceIndex>
-                                        <Name>Structure Description</Name>
+                                        <Name>Structure Description One</Name>
+                                    </Name>
+                                    <StructureDefinition>
+                                        <DefaultEncodingId>
+                                            <Identifier>i=7</Identifier>
+                                        </DefaultEncodingId>
+                                        <BaseDataType>
+                                            <Identifier>i=8</Identifier>
+                                        </BaseDataType>
+                                        <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                        <Fields>
+                                            <StructureField>
+                                                <Name>One</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Two</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=9</Identifier>
+                                                </DataType>
+                                                <ValueRank>-1</ValueRank>
+                                                <ArrayDimensions/>
+                                                <MaxStringLength>567</MaxStringLength>
+                                                <IsOptional>false</IsOptional>
+                                            </StructureField>
+                                            <StructureField>
+                                                <Name>Two</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Two</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=5</Identifier>
+                                                </DataType>
+                                                <ValueRank>1</ValueRank>
+                                                <ArrayDimensions>
+                                                    <UInt32>2</UInt32>
+                                                </ArrayDimensions>
+                                                <MaxStringLength>765</MaxStringLength>
+                                                <IsOptional>true</IsOptional>
+                                            </StructureField>
+                                        </Fields>
+                                    </StructureDefinition>
+                                </StructureDescription>
+                                <StructureDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=2;i=2223</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>2</NamespaceIndex>
+                                        <Name>Structure Description Two</Name>
+                                    </Name>
+                                    <StructureDefinition>
+                                        <DefaultEncodingId>
+                                            <Identifier>i=8</Identifier>
+                                        </DefaultEncodingId>
+                                        <BaseDataType>
+                                            <Identifier>i=9</Identifier>
+                                        </BaseDataType>
+                                        <StructureType>UnionWithSubtypedValues_4</StructureType>
+                                        <Fields>
+                                            <StructureField>
+                                                <Name>Middle One</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>One</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=11</Identifier>
+                                                </DataType>
+                                                <ValueRank>-1</ValueRank>
+                                                <ArrayDimensions/>
+                                                <MaxStringLength>678</MaxStringLength>
+                                                <IsOptional>false</IsOptional>
+                                            </StructureField>
+                                            <StructureField>
+                                                <Name>Middle Two</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Test Me</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=6</Identifier>
+                                                </DataType>
+                                                <ValueRank>1</ValueRank>
+                                                <ArrayDimensions>
+                                                    <UInt32>3</UInt32>
+                                                </ArrayDimensions>
+                                                <MaxStringLength>876</MaxStringLength>
+                                                <IsOptional>true</IsOptional>
+                                            </StructureField>
+                                            <StructureField>
+                                                <Name>Middle Three</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Three</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=11</Identifier>
+                                                </DataType>
+                                                <ValueRank>-1</ValueRank>
+                                                <ArrayDimensions/>
+                                                <MaxStringLength>678</MaxStringLength>
+                                                <IsOptional>false</IsOptional>
+                                            </StructureField>
+                                        </Fields>
+                                    </StructureDefinition>
+                                </StructureDescription>
+                                <StructureDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=1;i=2224</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>1</NamespaceIndex>
+                                        <Name>Structure Description Three</Name>
                                     </Name>
                                     <StructureDefinition>
                                         <DefaultEncodingId>

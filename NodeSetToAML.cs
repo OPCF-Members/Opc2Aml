@@ -2998,7 +2998,53 @@ namespace MarkdownProcessor
 
                     case BuiltInType.Enumeration:
                         {
-                            bool unsure = true;
+                            string value = complexElement.InnerText;
+
+                            UADataType enumDefinition = m_modelManager.FindNode<UADataType>( typeDefinition.DecodedDataType );
+
+                            if ( enumDefinition != null && 
+                                enumDefinition.Definition != null && 
+                                enumDefinition.Definition.Field != null )
+                            {
+                              
+                                int parsedValue = -1;
+                                bool useInt = int.TryParse( value, out parsedValue );
+                                if ( !useInt )
+                                {
+                                    if ( value.Contains( '_' ) )
+                                    {
+                                        string[] parts = value.Split( '_' );
+                                        // This only works if there are three parts
+                                        if ( parts.Length == 2 )
+                                        {
+                                            useInt = int.TryParse( parts[ 1 ], out parsedValue );
+                                        }
+                                    }
+                                }
+
+                                foreach( DataTypeField dataTypeField in enumDefinition.Definition.Field )
+                                {
+                                    int createEnumValue = -1;
+                                    if( useInt )
+                                    {
+                                        if( dataTypeField.Value == parsedValue )
+                                        {
+                                            createEnumValue = dataTypeField.Value;
+                                        }
+                                    }
+                                    else if( dataTypeField.Name.Equals( value, StringComparison.OrdinalIgnoreCase ) )
+                                    {
+                                        createEnumValue = dataTypeField.Value;
+                                    }
+
+                                    if ( createEnumValue >= 0 )
+                                    {
+                                        variant = new Variant( createEnumValue );
+                                        break;
+                                    }
+                                }
+                            }
+
                             break;
                         }
 
@@ -3007,7 +3053,6 @@ namespace MarkdownProcessor
                             // Lots more work to do
                             break;
                         }
-
                 }
             }
 
@@ -3114,15 +3159,10 @@ namespace MarkdownProcessor
                                 break;
                             }
 
+                        case BuiltInType.Enumeration:
                         case BuiltInType.ExtensionObject:
                             {
                                 complexElement = xmlElement;
-                                break;
-                            }
-
-                        case BuiltInType.Enumeration:
-                            {
-                                bool unsure = true;
                                 break;
                             }
 
