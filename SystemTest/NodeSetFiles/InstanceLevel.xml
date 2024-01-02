@@ -271,6 +271,89 @@
                                     </EnumDefinition>
                                     <BuiltInType>3</BuiltInType>
                                 </EnumDescription>
+                                <EnumDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=2346</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>3</NamespaceIndex>
+                                        <Name>Another Enum Description</Name>
+                                    </Name>
+                                    <EnumDefinition>
+                                        <Fields>
+                                            <EnumField>
+                                                <Value>55</Value>
+                                                <DisplayName>
+                                                    <Text>Fifty Five</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fifty Five</Text>
+                                                </Description>
+                                                <Name>Fifty Five</Name>
+                                            </EnumField>
+                                            <EnumField>
+                                                <Value>56</Value>
+                                                <DisplayName>
+                                                    <Text>Fifty Six</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fifty Six</Text>
+                                                </Description>
+                                                <Name>Fifty Six</Name>
+                                            </EnumField>
+                                            <EnumField>
+                                                <Value>57</Value>
+                                                <DisplayName>
+                                                    <Text>Fifty Seven</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fifty Seven</Text>
+                                                </Description>
+                                                <Name>Fifty Seven</Name>
+                                            </EnumField>
+                                        </Fields>
+                                    </EnumDefinition>
+                                    <BuiltInType>4</BuiltInType>
+                                </EnumDescription>
+                                <EnumDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=2347</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>2</NamespaceIndex>
+                                        <Name>A Third Enum Description</Name>
+                                    </Name>
+                                    <EnumDefinition>
+                                        <Fields>
+                                            <EnumField>
+                                                <Value>45</Value>
+                                                <DisplayName>
+                                                    <Text>Fourty Five</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fourty Five</Text>
+                                                </Description>
+                                                <Name>Fourty Five</Name>
+                                            </EnumField>
+                                            <EnumField>
+                                                <Value>46</Value>
+                                                <DisplayName>
+                                                    <Text>Fourty Six</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fourty Six</Text>
+                                                </Description>
+                                                <Name>Fourty Six</Name>
+                                            </EnumField>
+                                        </Fields>
+                                    </EnumDefinition>
+                                    <BuiltInType>5</BuiltInType>
+                                </EnumDescription>
                             </EnumDataTypes>
                             <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
                                 <SimpleTypeDescription>
@@ -284,20 +367,33 @@
                                     <BaseDataType>
                                         <Identifier>i=7</Identifier>
                                     </BaseDataType>
-                                    <BuiltInType>8</BuiltInType>
+                                    <BuiltInType>7</BuiltInType>
                                 </SimpleTypeDescription>
                                 <SimpleTypeDescription>
                                     <DataTypeId>
                                         <Identifier>ns=3;i=891</Identifier>
                                     </DataTypeId>
                                     <Name>
-                                        <NamespaceIndex>0</NamespaceIndex>
+                                        <NamespaceIndex>1</NamespaceIndex>
                                         <Name>EvenMoreSimple</Name>
+                                    </Name>
+                                    <BaseDataType>
+                                        <Identifier>i=8</Identifier>
+                                    </BaseDataType>
+                                    <BuiltInType>8</BuiltInType>
+                                </SimpleTypeDescription>
+                                <SimpleTypeDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=892</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>0</NamespaceIndex>
+                                        <Name>LastSimple</Name>
                                     </Name>
                                     <BaseDataType>
                                         <Identifier>i=9</Identifier>
                                     </BaseDataType>
-                                    <BuiltInType>11</BuiltInType>
+                                    <BuiltInType>9</BuiltInType>
                                 </SimpleTypeDescription>
                             </SimpleDataTypes>
                             <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Data Set Name</Name>
@@ -310,7 +406,7 @@
                                     <Description>
                                         <Text>Field One</Text>
                                     </Description>
-                                    <FieldFlags>1</FieldFlags>
+                                    <FieldFlags>0</FieldFlags>
                                     <BuiltInType>5</BuiltInType>
                                     <DataType>
                                         <Identifier>i=5</Identifier>
@@ -351,7 +447,7 @@
                                     <Description>
                                         <Text>Field Two</Text>
                                     </Description>
-                                    <FieldFlags>0</FieldFlags>
+                                    <FieldFlags>1</FieldFlags>
                                     <BuiltInType>10</BuiltInType>
                                     <DataType>
                                         <Identifier>i=10</Identifier>
@@ -363,6 +459,50 @@
                                     <MaxStringLength>333</MaxStringLength>
                                     <DataSetFieldId>
                                         <String>12341234-1234-1234-1234-123412341234</String>
+                                    </DataSetFieldId>
+                                    <Properties>
+                                        <KeyValuePair>
+                                            <Key>
+                                                <NamespaceIndex>0</NamespaceIndex>
+                                                <Name>PropertyOne</Name>
+                                            </Key>
+                                            <Value>
+                                                <Value>
+                                                    <String>PropertyOne</String>
+                                                </Value>
+                                            </Value>
+                                        </KeyValuePair>
+                                        <KeyValuePair>
+                                            <Key>
+                                                <NamespaceIndex>2</NamespaceIndex>
+                                                <Name>PropertyTwo</Name>
+                                            </Key>
+                                            <Value>
+                                                <Value>
+                                                    <Int32>2</Int32>
+                                                </Value>
+                                            </Value>
+                                        </KeyValuePair>
+                                    </Properties>
+
+                                </FieldMetaData>
+                                <FieldMetaData>
+                                    <Name>Field Three</Name>
+                                    <Description>
+                                        <Text>Field Three</Text>
+                                    </Description>
+                                    <FieldFlags>0</FieldFlags>
+                                    <BuiltInType>11</BuiltInType>
+                                    <DataType>
+                                        <Identifier>i=11</Identifier>
+                                    </DataType>
+                                    <ValueRank>1</ValueRank>
+                                    <ArrayDimensions>
+                                        <UInt32>4</UInt32>
+                                    </ArrayDimensions>
+                                    <MaxStringLength>333</MaxStringLength>
+                                    <DataSetFieldId>
+                                        <String>23412341-2341-2341-2341-234123412341</String>
                                     </DataSetFieldId>
                                     <Properties/>
                                 </FieldMetaData>
