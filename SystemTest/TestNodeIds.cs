@@ -18,44 +18,6 @@ namespace SystemTest
     public class TestNodeIds
     {
         CAEXDocument m_document = null;
-        AutomationMLContainer m_container = null;
-
-        #region Initialize
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            if (m_document == null)
-            {
-                foreach (FileInfo fileInfo in TestHelper.RetrieveFiles())
-                {
-                    if (fileInfo.Name.Equals("TestAml.xml.amlx"))
-                    {
-                        m_container = new AutomationMLContainer(fileInfo.FullName,
-                            System.IO.FileMode.Open, FileAccess.Read);
-                        Assert.IsNotNull(m_container, "Unable to find container");
-                        CAEXDocument document = CAEXDocument.LoadFromStream(m_container.RootDocumentStream());
-                        Assert.IsNotNull(document, "Unable to find document");
-                        m_document = document;
-                    }
-                }
-            }
-
-            Assert.IsNotNull(m_document, "Unable to retrieve Document");
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            if (m_document != null)
-            {
-                m_document.Unload();
-            }
-            m_container.Dispose();
-
-        }
-
-        #endregion
 
 
         #region Tests
@@ -105,7 +67,7 @@ namespace SystemTest
 
         public InternalElementType? findInternalElementByName(string internelElemantName)
         {
-            foreach (var instanceHierarchy in m_document.CAEXFile.InstanceHierarchy)
+            foreach (var instanceHierarchy in GetDocument().CAEXFile.InstanceHierarchy)
             {
                 // browse all InternalElements deep and find element with name "FxRoot"
                 foreach (var internalElement in instanceHierarchy.Descendants<InternalElementType>())
@@ -117,6 +79,17 @@ namespace SystemTest
             return null;
 
         }
+
+        private CAEXDocument GetDocument()
+        {
+            if( m_document == null )
+            {
+                m_document = TestHelper.GetReadOnlyDocument( "TestAml.xml.amlx" );
+            }
+            Assert.IsNotNull( m_document, "Unable to retrieve Document" );
+            return m_document;
+        }
+
 
         #endregion
     }

@@ -16,13 +16,6 @@ namespace SystemTest
     [TestClass]
     public class TestComplexNonRootNamespace
     {
-
-        #region Initialize
-
-
-        #endregion
-
-
         #region Tests
 
         private CAEXDocument m_document = null;
