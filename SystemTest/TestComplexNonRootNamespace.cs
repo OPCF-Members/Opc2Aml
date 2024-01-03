@@ -10,6 +10,7 @@ using Opc.Ua.Gds;
 using System;
 using System.Xml.Linq;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace SystemTest
 {
@@ -211,6 +212,72 @@ namespace SystemTest
             ValidateQualifiedName( metaDataAttributes, "1", GetUri( 3 ), "Two" );
 
             #endregion
+        }
+
+        [TestMethod]
+        public void TestLevelTwo()
+        {
+            AttributeType value = InitialGetValueAttribute( "LevelTwo" );
+
+            #region ComprehensiveScalarType
+
+            AttributeType complexType = GetMiddleArrayElement( value, "LevelOne" );
+
+            ValidateQualifiedName( complexType, "QualifiedName", GetUri( 0 ), "Array Element Two" );
+            ValidateLocalizedText( complexType, "LocalizedText", "Array Element Two" );
+
+            AttributeType dataSetType = GetAttribute( complexType, "DataSet", validateSubAttributes: true );
+
+            AttributeType namespacesType = GetAttribute( dataSetType, "Namespaces", validateSubAttributes: true );
+            TestValue( namespacesType, "1", "http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/4/", "xs:string" );
+            TestValue( dataSetType, "DataSetClassId", "24682468-2468-2468-2468-246824682468", "xs:string" );
+            AttributeType configurationVersionType = GetAttribute( dataSetType, "ConfigurationVersion", validateSubAttributes: true );
+            TestValue( configurationVersionType, "MajorVersion", "3", "xs:unsignedInt" );
+            TestValue( configurationVersionType, "MinorVersion", "4", "xs:unsignedInt" );
+
+            AttributeType publishedDataType = GetAttribute( complexType, "PublishedData", validateSubAttributes: true );
+            TestValue( publishedDataType, "SubstituteValue", "Array Element Two Substitute", "xs:string" );
+
+            #endregion
+
+            #region Other Array Values
+
+            TestValueMidArray( value, "Int16", "1", "xs:short" );
+            TestValueMidArray( value, "UInt16", "5", "xs:unsignedShort" );
+            TestValueMidArray( value, "DateTime", "2008-01-01T00:00:00-07:00", "xs:dateTime" );
+            TestValueMidArray( value, "Guid", "11001100-1100-1100-1100-110011001100", "xs:string" );
+            TestValueMidArray( value, "ByteString", "MTQ=", "xs:base64Binary" );
+
+            AttributeType nodeIds = GetAttribute( value, "NodeId", validateSubAttributes: true );
+            ValidateNodeId( nodeIds, "1", GetUri( 2 ), new NodeId( 2 ) );
+
+            AttributeType qualifiedNames = GetAttribute( value, "QualifiedName", validateSubAttributes: true );
+            ValidateQualifiedName( qualifiedNames, "1", GetUri( 2 ), "Two" );
+            AttributeType localizedTexts = GetAttribute( value, "LocalizedText", validateSubAttributes: true );
+            ValidateLocalizedText( localizedTexts, "1", "Two" );
+
+            #endregion
+        }
+
+        [TestMethod]
+        public void TestTopLevel()
+        {
+
+        }
+
+        public AttributeType GetMiddleArrayElement( AttributeType attribute, string target )
+        {
+            AttributeType elements = GetAttribute( attribute, target, validateSubAttributes: true );
+            Assert.AreEqual( 3, elements.Attribute.Count );
+            return GetAttribute( elements, "1", validateSubAttributes: true );
+        }
+
+        public void TestValueMidArray( AttributeType source, string target, string value, string type )
+        {
+            AttributeType attribute = GetAttribute( source, target, validateSubAttributes: false );
+            Assert.IsNotNull( attribute );
+            Assert.AreEqual( 3, attribute.Attribute.Count );
+            TestValue( attribute, "1", value, type );
         }
 
         public void TestValue( AttributeType source, string target, string value, string type )
