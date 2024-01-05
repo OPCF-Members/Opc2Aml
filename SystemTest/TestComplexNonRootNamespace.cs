@@ -109,6 +109,190 @@ namespace SystemTest
 
             #region Complex
 
+            TestDataSetComplex( value );
+
+            //#region StructureDataTypes
+
+            //AttributeType structureDataTypes = GetAttribute( dataSetAttribute, "StructureDataTypes", validateSubAttributes: true );
+            //Assert.AreEqual( 3, structureDataTypes.Attribute.Count, "Invalid Structure count" );
+            //AttributeType structureDescriptionType = GetAttribute( structureDataTypes, "1", validateSubAttributes: true );
+
+            //ValidateNodeId( structureDescriptionType, "DataTypeId", GetUri( 2 ), new NodeId( 2223 ) );
+            //ValidateQualifiedName( structureDescriptionType, "Name", GetUri( 2 ), "Structure Description Two" );
+
+            //AttributeType structureDefinitionType = GetAttribute( structureDescriptionType, "StructureDefinition", validateSubAttributes: true );
+            //ValidateNodeId( structureDefinitionType, "DefaultEncodingId", RootLevel, new NodeId( 8 ) );
+            //ValidateNodeId( structureDefinitionType, "BaseDataType", RootLevel, new NodeId( 9 ) );
+            //TestValue( structureDefinitionType, "StructureType", "UnionWithSubtypedValues", "xs:string" );
+
+            //#endregion
+
+            //#region EnumDataTypes
+
+            //AttributeType enumDataTypes = GetAttribute( dataSetAttribute, "EnumDataTypes", validateSubAttributes: true );
+            //Assert.AreEqual( 3, enumDataTypes.Attribute.Count, "Invalid Enum Structure count" );
+            //AttributeType enumDataType = GetAttribute( enumDataTypes, "1", validateSubAttributes: true );
+
+            //ValidateNodeId( enumDataType, "DataTypeId", GetUri( 3 ), new NodeId( 2346 ) );
+            //ValidateQualifiedName( enumDataType, "Name", GetUri( 3 ), "Another Enum Description" );
+            //TestValue( enumDataType, "BuiltInType", "Int16", "xs:string" );
+
+            //AttributeType enumDefinitions = GetAttribute( enumDataType, "EnumDefinition", validateSubAttributes: true );
+            //AttributeType enumFields = GetAttribute( enumDefinitions, "Fields", validateSubAttributes: true );
+            //Assert.AreEqual( 3, enumFields.Attribute.Count, "Invalid Enum Fields count" );
+
+            //AttributeType enumField = GetAttribute( enumFields, "1", validateSubAttributes: true );
+            //TestValue( enumField, "Value", "56", "xs:long" );
+            //TestValue( enumField, "Name", "Fifty Six", "xs:string" );
+            //ValidateLocalizedText( enumField, "DisplayName", "Fifty Six" );
+            //ValidateLocalizedText( enumField, "Description", "Fifty Six" );
+
+            //#endregion
+
+            //#region SimpleDataTypes
+
+            //AttributeType simpleDataTypes = GetAttribute( dataSetAttribute, "SimpleDataTypes", validateSubAttributes: true );
+            //Assert.AreEqual( 3, simpleDataTypes.Attribute.Count, "Invalid Simple Data Type count" );
+            //AttributeType simpleDataType = GetAttribute( simpleDataTypes, "1", validateSubAttributes: true );
+
+            //ValidateNodeId( simpleDataType, "DataTypeId", GetUri( 3 ), new NodeId( 891 ) );
+            //ValidateQualifiedName( simpleDataType, "Name", GetUri( 1 ), "EvenMoreSimple" );
+            //ValidateNodeId( simpleDataType, "BaseDataType", GetUri( 0 ), new NodeId( 8 ) );
+            //TestValue( simpleDataType, "BuiltInType", "Int64", "xs:string" );
+
+            //#endregion
+
+            //#region Fields
+
+            //AttributeType fields = GetAttribute( dataSetAttribute, "Fields", validateSubAttributes: true );
+            //Assert.AreEqual( 3, fields.Attribute.Count, "Invalid Field count" );
+            //AttributeType field = GetAttribute( fields, "1", validateSubAttributes: true );
+
+            //TestValue( field, "Name", "Field Two", "xs:string" );
+            //ValidateLocalizedText( field, "Description", "Field Two" );
+            //// Unsure on what type this should actually be.  Boolean does not make sense, as there could be multiple fields
+            //// This doesn't work at all.  FieldFlags is UInt16
+            ////TestValue( field, "FieldFlags", "1", "xs:unsignedShort" );
+            //TestValue( field, "BuiltInType", "Float", "xs:string" );
+            //ValidateNodeId( field, "DataType", GetUri( 0 ), new NodeId( 10 ) );
+            //TestValue( field, "ValueRank", "1", "xs:int" );
+            //ValidateArrayDimensions( field, new string[] { "3" } );
+            //TestValue( field, "MaxStringLength", "333", "xs:unsignedInt" );
+            //TestValue( field, "DataSetFieldId", "12341234-1234-1234-1234-123412341234", "xs:string" );
+
+            //AttributeType properties = GetAttribute( field, "Properties", validateSubAttributes: true );
+            //Assert.AreEqual( 2, properties.Attribute.Count, "Invalid Properties count" );
+            //AttributeType stringProperty = GetAttribute( properties, "0", validateSubAttributes: true );
+            //ValidateQualifiedName( stringProperty, "Key", GetUri( 0 ), "PropertyOne" );
+            //TestValue( stringProperty, "Value", "PropertyOne", "xs:string" );
+
+            //AttributeType intProperty = GetAttribute( properties, "1", validateSubAttributes: true );
+            //ValidateQualifiedName( intProperty, "Key", GetUri( 2 ), "PropertyTwo" );
+            //TestValue( intProperty, "Value", "2", "xs:int" );
+
+            //#endregion
+
+            #endregion
+
+            #endregion
+
+            #region PublishedData Extension
+
+            AttributeType publishedDataAttribute = GetAttribute( value, "PublishedData", validateSubAttributes: true );
+
+            ValidateNodeId( publishedDataAttribute, "PublishedVariable", GetUri(1 ), new NodeId( 987 ) );
+            TestValue( publishedDataAttribute, "AttributeId", "13", "xs:unsignedInt" );
+            TestValue( publishedDataAttribute, "SamplingIntervalHint", "666", "xs:double" );
+            TestValue( publishedDataAttribute, "DeadbandType", "5", "xs:unsignedInt" );
+            TestValue( publishedDataAttribute, "DeadbandValue", "4", "xs:double" );
+            TestValue( publishedDataAttribute, "IndexRange", "4:5", "xs:string" );
+            TestValue( publishedDataAttribute, "SubstituteValue", "123456789", "xs:unsignedLong" );
+
+            AttributeType metaDataAttributes = GetAttribute( publishedDataAttribute, "MetaDataProperties", validateSubAttributes: true );
+
+            Assert.AreEqual( 3, metaDataAttributes.Attribute.Count, "Invalid Structure count" );
+            ValidateQualifiedName( metaDataAttributes, "1", GetUri( 3 ), "Two" );
+
+            #endregion
+        }
+
+        [TestMethod]
+        public void TestLevelTwo()
+        {
+            AttributeType value = InitialGetValueAttribute( "LevelTwo" );
+
+            TestComprehensiveArray( value );
+
+            return;
+        }
+
+        [TestMethod]
+        public void TestTopLevel()
+        {
+            AttributeType topLevel = InitialGetValueAttribute( "TopLevel" );
+            AttributeType arrayAsScalar = GetAttribute( topLevel, "ArrayAsScalar", validateSubAttributes : true );
+
+            TestComprehensiveArray( arrayAsScalar );
+
+            AttributeType scalarAsArray = GetMiddleArrayElement( topLevel, "ScalarAsArray" );
+
+            TestComprehensiveScalar( scalarAsArray );
+        }
+
+        private void TestComprehensiveArray( AttributeType value )
+        {
+            #region ComprehensiveScalarType
+
+            AttributeType complexType = GetMiddleArrayElement( value, "LevelOne" );
+
+            TestComprehensiveScalar( complexType );
+
+            #endregion
+
+            #region Other Array Values
+
+            TestValueMidArray( value, "Int16", "1", "xs:short" );
+            TestValueMidArray( value, "UInt16", "5", "xs:unsignedShort" );
+            TestValueMidArray( value, "DateTime", "2008-01-01T00:00:00-07:00", "xs:dateTime" );
+            TestValueMidArray( value, "Guid", "11001100-1100-1100-1100-110011001100", "xs:string" );
+            TestValueMidArray( value, "ByteString", "MTQ=", "xs:base64Binary" );
+
+            AttributeType nodeIds = GetAttribute( value, "NodeId", validateSubAttributes: true );
+            ValidateNodeId( nodeIds, "1", GetUri( 2 ), new NodeId( 2 ) );
+
+            AttributeType qualifiedNames = GetAttribute( value, "QualifiedName", validateSubAttributes: true );
+            ValidateQualifiedName( qualifiedNames, "1", GetUri( 2 ), "Two" );
+            AttributeType localizedTexts = GetAttribute( value, "LocalizedText", validateSubAttributes: true );
+            ValidateLocalizedText( localizedTexts, "1", "Two" );
+
+            #endregion
+
+        }
+
+        private void TestComprehensiveScalar( AttributeType value )
+        {
+            ValidateQualifiedName( value, "QualifiedName", GetUri( 0 ), "Array Element Two" );
+            ValidateLocalizedText( value, "LocalizedText", "Array Element Two" );
+
+            AttributeType dataSetType = GetAttribute( value, "DataSet", validateSubAttributes: true );
+
+            AttributeType namespacesType = GetAttribute( dataSetType, "Namespaces", validateSubAttributes: true );
+            TestValue( namespacesType, "1", "http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/4/", "xs:string" );
+            TestValue( dataSetType, "DataSetClassId", "24682468-2468-2468-2468-246824682468", "xs:string" );
+            AttributeType configurationVersionType = GetAttribute( dataSetType, "ConfigurationVersion", validateSubAttributes: true );
+            TestValue( configurationVersionType, "MajorVersion", "3", "xs:unsignedInt" );
+            TestValue( configurationVersionType, "MinorVersion", "4", "xs:unsignedInt" );
+
+            AttributeType publishedDataType = GetAttribute( value, "PublishedData", validateSubAttributes: true );
+            TestValue( publishedDataType, "SubstituteValue", "Array Element Two Substitute", "xs:string" );
+
+            TestDataSetComplex( value );
+        }
+
+        private void TestDataSetComplex( AttributeType value )
+        {
+            AttributeType dataSetAttribute = GetAttribute( value, "DataSet", validateSubAttributes: true );
+
             #region StructureDataTypes
 
             AttributeType structureDataTypes = GetAttribute( dataSetAttribute, "StructureDataTypes", validateSubAttributes: true );
@@ -189,79 +373,6 @@ namespace SystemTest
             TestValue( intProperty, "Value", "2", "xs:int" );
 
             #endregion
-
-            #endregion
-
-            #endregion
-
-            #region PublishedData Extension
-
-            AttributeType publishedDataAttribute = GetAttribute( value, "PublishedData", validateSubAttributes: true );
-
-            ValidateNodeId( publishedDataAttribute, "PublishedVariable", GetUri(1 ), new NodeId( 987 ) );
-            TestValue( publishedDataAttribute, "AttributeId", "13", "xs:unsignedInt" );
-            TestValue( publishedDataAttribute, "SamplingIntervalHint", "666", "xs:double" );
-            TestValue( publishedDataAttribute, "DeadbandType", "5", "xs:unsignedInt" );
-            TestValue( publishedDataAttribute, "DeadbandValue", "4", "xs:double" );
-            TestValue( publishedDataAttribute, "IndexRange", "4:5", "xs:string" );
-            TestValue( publishedDataAttribute, "SubstituteValue", "123456789", "xs:unsignedLong" );
-
-            AttributeType metaDataAttributes = GetAttribute( publishedDataAttribute, "MetaDataProperties", validateSubAttributes: true );
-
-            Assert.AreEqual( 3, metaDataAttributes.Attribute.Count, "Invalid Structure count" );
-            ValidateQualifiedName( metaDataAttributes, "1", GetUri( 3 ), "Two" );
-
-            #endregion
-        }
-
-        [TestMethod]
-        public void TestLevelTwo()
-        {
-            AttributeType value = InitialGetValueAttribute( "LevelTwo" );
-
-            #region ComprehensiveScalarType
-
-            AttributeType complexType = GetMiddleArrayElement( value, "LevelOne" );
-
-            ValidateQualifiedName( complexType, "QualifiedName", GetUri( 0 ), "Array Element Two" );
-            ValidateLocalizedText( complexType, "LocalizedText", "Array Element Two" );
-
-            AttributeType dataSetType = GetAttribute( complexType, "DataSet", validateSubAttributes: true );
-
-            AttributeType namespacesType = GetAttribute( dataSetType, "Namespaces", validateSubAttributes: true );
-            TestValue( namespacesType, "1", "http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/4/", "xs:string" );
-            TestValue( dataSetType, "DataSetClassId", "24682468-2468-2468-2468-246824682468", "xs:string" );
-            AttributeType configurationVersionType = GetAttribute( dataSetType, "ConfigurationVersion", validateSubAttributes: true );
-            TestValue( configurationVersionType, "MajorVersion", "3", "xs:unsignedInt" );
-            TestValue( configurationVersionType, "MinorVersion", "4", "xs:unsignedInt" );
-
-            AttributeType publishedDataType = GetAttribute( complexType, "PublishedData", validateSubAttributes: true );
-            TestValue( publishedDataType, "SubstituteValue", "Array Element Two Substitute", "xs:string" );
-
-            #endregion
-
-            #region Other Array Values
-
-            TestValueMidArray( value, "Int16", "1", "xs:short" );
-            TestValueMidArray( value, "UInt16", "5", "xs:unsignedShort" );
-            TestValueMidArray( value, "DateTime", "2008-01-01T00:00:00-07:00", "xs:dateTime" );
-            TestValueMidArray( value, "Guid", "11001100-1100-1100-1100-110011001100", "xs:string" );
-            TestValueMidArray( value, "ByteString", "MTQ=", "xs:base64Binary" );
-
-            AttributeType nodeIds = GetAttribute( value, "NodeId", validateSubAttributes: true );
-            ValidateNodeId( nodeIds, "1", GetUri( 2 ), new NodeId( 2 ) );
-
-            AttributeType qualifiedNames = GetAttribute( value, "QualifiedName", validateSubAttributes: true );
-            ValidateQualifiedName( qualifiedNames, "1", GetUri( 2 ), "Two" );
-            AttributeType localizedTexts = GetAttribute( value, "LocalizedText", validateSubAttributes: true );
-            ValidateLocalizedText( localizedTexts, "1", "Two" );
-
-            #endregion
-        }
-
-        [TestMethod]
-        public void TestTopLevel()
-        {
 
         }
 
@@ -378,6 +489,8 @@ namespace SystemTest
             AttributeType metaDataProperty = GetAttribute( metaDataProperties, "1", validateSubAttributes: true );
             ValidateQualifiedName( metaDataProperties, "1", RootLevel, "anothername" );
         }
+
+
 
 
         #endregion
