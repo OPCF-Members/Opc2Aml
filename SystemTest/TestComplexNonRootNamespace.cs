@@ -53,8 +53,8 @@ namespace SystemTest
                 "<TheFifteenthElement xmlns=\"http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd\">Fifteen</TheFifteenthElement>",
                 unknownDataType );
 
-            ValidateNodeId( value, "NodeId", LevelOne, new NodeId( 16 ) );
-            ValidateNodeId( value, "ExpandedNodeId", LevelOne, new NodeId( 17 ) );
+            ValidateNodeId( value, "NodeId", GetUri( 2 ), new NodeId( 16 ) );
+            ValidateNodeId( value, "ExpandedNodeId", GetUri( 2 ), new NodeId( 17 ) );
 
             TestValue( value, "StatusCode", "2149056512", "xs:unsignedInt" );
             ValidateQualifiedName( value, "QualifiedName", InstanceLevel, "Nineteen" );
@@ -101,7 +101,7 @@ namespace SystemTest
 
             AttributeType namespaces = GetAttribute( dataSetAttribute, "Namespaces", validateSubAttributes: true );
             Assert.AreEqual( 3, namespaces.Attribute.Count, "Invalid namespace count" );
-            TestValue( namespaces, "1", LevelTwo, "xs:string" );
+            TestValue( namespaces, "1", GetUri( 3 ), "xs:string" );
 
             #endregion
 
@@ -420,7 +420,7 @@ namespace SystemTest
             Assert.AreEqual( "3:5", receiveRange.Value);
             Assert.AreEqual( "xs:string", receiveRange.AttributeDataType );
 
-            ValidateNodeId( middleArrayValue, "TargetNodeId", LevelOne, new NodeId( 6080 ) );
+            ValidateNodeId( middleArrayValue, "TargetNodeId", GetUri( 2 ), new NodeId( 6080 ) );
 
             AttributeType attributeId = GetAttribute( middleArrayValue, "AttributeId", validateSubAttributes: false );
             Assert.AreEqual( "13", attributeId.Value );
@@ -455,7 +455,7 @@ namespace SystemTest
             Assert.AreEqual( 5, value.Attribute.Count, "Invalid PublishedVariableData Array count" );
 
             AttributeType middleArrayValue = GetAttribute( value, "2", validateSubAttributes: false );
-            ValidateNodeId( middleArrayValue, "PublishedVariable", LevelOne, new NodeId( 6077 ) );
+            ValidateNodeId( middleArrayValue, "PublishedVariable", GetUri( 2 ), new NodeId( 6077 ) );
 
             AttributeType attributeId = GetAttribute( middleArrayValue, "AttributeId", validateSubAttributes: false );
             Assert.AreEqual( "13", attributeId.Value );
