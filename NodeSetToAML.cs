@@ -3050,7 +3050,7 @@ namespace MarkdownProcessor
 
                     default:
                         {
-                            // Lots more work to do
+                            Debug.WriteLine( "Unhandled CreateComplexVariant " + source.Name );
                             break;
                         }
                 }
