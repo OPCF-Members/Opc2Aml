@@ -1377,9 +1377,7 @@ namespace MarkdownProcessor
             {
                 baseNode = m_modelManager.FindNodeByName(ua2xsLookup[i, ua2xslookup_uaname]);
                 if( m_modelManager.IsTypeOf( nodeId, baseNode.DecodedNodeId ) )
-                {
                     return ua2xsLookup[ i, ua2xslookup_xsname ];
-                }
             }
             return "";
         }
