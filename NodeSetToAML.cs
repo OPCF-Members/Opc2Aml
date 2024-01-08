@@ -2913,159 +2913,13 @@ namespace MarkdownProcessor
             return decoder;
         }
 
-        private Variant CreateComplexVariant( string name, DataTypeField typeDefinition, XmlElement source )
-        {
-            Variant variant = new Variant();
-
-            XmlElement complexElement = CreateComplexElement( name, typeDefinition, source );
-
-            if( complexElement != null )
-            {
-                BuiltInType baseBuiltInType = BuiltInType.Null;
-
-                NodeId baseBuiltInTypeNodeId = ComplexGetBuiltInTypeEx( typeDefinition.DecodedDataType );
-                if( baseBuiltInTypeNodeId != null )
-                {
-                    baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
-                }
-
-                if ( typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) ) 
-                {
-                    // variant or unable to determine
-                    baseBuiltInType = BuiltInType.Variant;
-                    baseBuiltInTypeNodeId = typeDefinition.DecodedDataType;
-                }
-
-                switch( baseBuiltInType )
-                {
-                    case BuiltInType.Boolean:
-                    case BuiltInType.SByte:
-                    case BuiltInType.Byte:
-                    case BuiltInType.Int16:
-                    case BuiltInType.UInt16:
-                    case BuiltInType.Int32:
-                    case BuiltInType.UInt32:
-                    case BuiltInType.Int64:
-                    case BuiltInType.UInt64:
-                    case BuiltInType.Float:
-                    case BuiltInType.Double:
-                    case BuiltInType.String:
-                    case BuiltInType.DateTime:
-                    case BuiltInType.Guid:
-                    case BuiltInType.ByteString:
-                    case BuiltInType.XmlElement:
-                    case BuiltInType.NodeId:
-                    case BuiltInType.ExpandedNodeId:
-                    case BuiltInType.StatusCode:
-                    case BuiltInType.QualifiedName:
-                    case BuiltInType.LocalizedText:
-                    case BuiltInType.DataValue:
-                    case BuiltInType.Variant:
-                    case BuiltInType.DiagnosticInfo:
-                        {
-                            XmlDecoder decoder = CreateDecoder( complexElement );
-                            Opc.Ua.TypeInfo typeInfo = null;
-                            variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
-                            decoder.Close();
-
-                            break;
-                        }
-
-                    case BuiltInType.ExtensionObject:
-                        {
-                            ExpandedNodeId absoluteId = NodeId.ToExpandedNodeId(
-                                typeDefinition.DecodedDataType, m_modelManager.NamespaceUris );
-
-                            if ( typeDefinition.ValueRank >= ValueRanks.OneDimension )
-                            {
-                                List<ExtensionObject> extensions = new List<ExtensionObject>();
-                                foreach(XmlElement arrayElement in complexElement.ChildNodes)
-                                {
-                                    extensions.Add( new ExtensionObject( absoluteId, arrayElement ) );
-                                }
-                                
-                                variant = new Variant( extensions );
-                            }
-                            else
-                            {
-                                ExtensionObject extensionObject = new ExtensionObject( absoluteId, complexElement );
-                                variant = new Variant( extensionObject );
-                            }
-
-
-                            break;
-                        }
-
-                    case BuiltInType.Enumeration:
-                        {
-                            string value = complexElement.InnerText;
-
-                            UADataType enumDefinition = m_modelManager.FindNode<UADataType>( typeDefinition.DecodedDataType );
-
-                            if ( enumDefinition != null && 
-                                enumDefinition.Definition != null && 
-                                enumDefinition.Definition.Field != null )
-                            {
-                              
-                                int parsedValue = -1;
-                                bool useInt = int.TryParse( value, out parsedValue );
-                                if ( !useInt )
-                                {
-                                    if ( value.Contains( '_' ) )
-                                    {
-                                        string[] parts = value.Split( '_' );
-                                        // This only works if there are three parts
-                                        if ( parts.Length == 2 )
-                                        {
-                                            useInt = int.TryParse( parts[ 1 ], out parsedValue );
-                                        }
-                                    }
-                                }
-
-                                foreach( DataTypeField dataTypeField in enumDefinition.Definition.Field )
-                                {
-                                    int createEnumValue = -1;
-                                    if( useInt )
-                                    {
-                                        if( dataTypeField.Value == parsedValue )
-                                        {
-                                            createEnumValue = dataTypeField.Value;
-                                        }
-                                    }
-                                    else if( dataTypeField.Name.Equals( value, StringComparison.OrdinalIgnoreCase ) )
-                                    {
-                                        createEnumValue = dataTypeField.Value;
-                                    }
-
-                                    if ( createEnumValue >= 0 )
-                                    {
-                                        variant = new Variant( createEnumValue );
-                                        break;
-                                    }
-                                }
-                            }
-
-                            break;
-                        }
-
-                    default:
-                        {
-                            Debug.WriteLine( "Unhandled CreateComplexVariant " + source.Name );
-                            break;
-                        }
-                }
-            }
-
-            return variant;
-        }
-
         private XmlElement SearchForElement( string name, XmlElement source )
         {
             XmlElement element = source[ name ];
-            if ( element == null )
+            if( element == null )
             {
                 string uaxId = "uax:";
-                if ( !name.StartsWith(uaxId, StringComparison.OrdinalIgnoreCase ) )
+                if( !name.StartsWith( uaxId, StringComparison.OrdinalIgnoreCase ) )
                 {
                     element = source[ uaxId + name ];
                 }
@@ -3074,10 +2928,9 @@ namespace MarkdownProcessor
             return element;
         }
 
-
-        private XmlElement CreateComplexElement( string name, DataTypeField typeDefinition, XmlElement source )
+        private Variant CreateComplexVariant( string name, DataTypeField typeDefinition, XmlElement source )
         {
-            XmlElement complexElement = null;
+            Variant variant = new Variant();
 
             XmlElement xmlElement = SearchForElement( name, source );
             if( xmlElement != null )
@@ -3090,23 +2943,23 @@ namespace MarkdownProcessor
                     baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
                 }
 
-                if (  typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
+                if( typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
                 {
-                    baseBuiltInTypeNodeId = typeDefinition.DecodedDataType;
-                    baseBuiltInType = BuiltInType.Variant;
                     // Defined as variant, or nothing at all
+                    baseBuiltInType = BuiltInType.Variant;
+                    baseBuiltInTypeNodeId = typeDefinition.DecodedDataType;
                 }
 
                 if( baseBuiltInType == BuiltInType.Null )
                 {
-                    Debug.WriteLine( "CreateComplexElement Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
+                    Debug.WriteLine( "CreateComplexVariant Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
                 }
                 else
                 {
                     UANode baseBuiltInTypeNode = m_modelManager.FindNode<UANode>( baseBuiltInTypeNodeId );
 
                     string baseBuiltInTypeName = baseBuiltInTypeNode.BrowseName;
-                    if ( typeDefinition.ValueRank >= ValueRanks.OneDimension )
+                    if( typeDefinition.ValueRank >= ValueRanks.OneDimension )
                     {
                         baseBuiltInTypeName = "ListOf" + baseBuiltInTypeNode.BrowseName;
                     }
@@ -3139,8 +2992,13 @@ namespace MarkdownProcessor
                         case BuiltInType.DataValue:
                         case BuiltInType.DiagnosticInfo:
                             {
-                                complexElement = document.CreateElement( baseBuiltInTypeName, Namespaces.OpcUaXsd );
+                                XmlElement complexElement = document.CreateElement( baseBuiltInTypeName, Namespaces.OpcUaXsd );
                                 complexElement.InnerXml = xmlElement.InnerXml;
+
+                                XmlDecoder decoder = CreateDecoder( complexElement );
+                                Opc.Ua.TypeInfo typeInfo = null;
+                                variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                                decoder.Close();
 
                                 break;
                             }
@@ -3148,33 +3006,110 @@ namespace MarkdownProcessor
                         case BuiltInType.Variant: // BaseDataType
                             {
                                 XmlElement valueElement = xmlElement[ "Value" ];
-                                if ( valueElement != null )
+                                if( valueElement != null )
                                 {
                                     XmlDocument variantDocument = new XmlDocument();
                                     variantDocument.LoadXml( valueElement.InnerXml );
 
-                                    complexElement = variantDocument.DocumentElement;
+                                    XmlElement complexElement = variantDocument.DocumentElement;
+
+                                    XmlDecoder decoder = CreateDecoder( complexElement );
+                                    Opc.Ua.TypeInfo typeInfo = null;
+                                    variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                                    decoder.Close();
                                 }
+
+
+                                break;
+                            }
+
+                        case BuiltInType.ExtensionObject:
+                            {
+                                ExpandedNodeId absoluteId = NodeId.ToExpandedNodeId(
+                                    typeDefinition.DecodedDataType, m_modelManager.NamespaceUris );
+
+                                if( typeDefinition.ValueRank >= ValueRanks.OneDimension )
+                                {
+                                    List<ExtensionObject> extensions = new List<ExtensionObject>();
+                                    foreach( XmlElement arrayElement in xmlElement.ChildNodes )
+                                    {
+                                        extensions.Add( new ExtensionObject( absoluteId, arrayElement ) );
+                                    }
+
+                                    variant = new Variant( extensions );
+                                }
+                                else
+                                {
+                                    ExtensionObject extensionObject = new ExtensionObject( absoluteId, xmlElement );
+                                    variant = new Variant( extensionObject );
+                                }
+
 
                                 break;
                             }
 
                         case BuiltInType.Enumeration:
-                        case BuiltInType.ExtensionObject:
                             {
-                                complexElement = xmlElement;
+                                string value = xmlElement.InnerText;
+
+                                UADataType enumDefinition = m_modelManager.FindNode<UADataType>( typeDefinition.DecodedDataType );
+
+                                if( enumDefinition != null &&
+                                    enumDefinition.Definition != null &&
+                                    enumDefinition.Definition.Field != null )
+                                {
+
+                                    int parsedValue = -1;
+                                    bool useInt = int.TryParse( value, out parsedValue );
+                                    if( !useInt )
+                                    {
+                                        if( value.Contains( '_' ) )
+                                        {
+                                            string[] parts = value.Split( '_' );
+                                            // This only works if there are three parts
+                                            if( parts.Length == 2 )
+                                            {
+                                                useInt = int.TryParse( parts[ 1 ], out parsedValue );
+                                            }
+                                        }
+                                    }
+
+                                    foreach( DataTypeField dataTypeField in enumDefinition.Definition.Field )
+                                    {
+                                        int createEnumValue = -1;
+                                        if( useInt )
+                                        {
+                                            if( dataTypeField.Value == parsedValue )
+                                            {
+                                                createEnumValue = dataTypeField.Value;
+                                            }
+                                        }
+                                        else if( dataTypeField.Name.Equals( value, StringComparison.OrdinalIgnoreCase ) )
+                                        {
+                                            createEnumValue = dataTypeField.Value;
+                                        }
+
+                                        if( createEnumValue >= 0 )
+                                        {
+                                            variant = new Variant( createEnumValue );
+                                            break;
+                                        }
+                                    }
+                                }
+
                                 break;
                             }
 
                         default:
                             {
+                                Debug.WriteLine( "Unhandled CreateComplexVariant " + source.Name );
                                 break;
                             }
                     }
                 }
             }
 
-            return complexElement;
+            return variant;
         }
 
         private BuiltInType ComplexGetBuiltInType( NodeId source )
@@ -3230,7 +3165,5 @@ namespace MarkdownProcessor
         }
 
         #endregion
-
-
     }
 }
