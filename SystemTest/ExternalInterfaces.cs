@@ -15,51 +15,14 @@ namespace SystemTest
     public class ExternalInterfaces
     {
         CAEXDocument m_document = null;
-        AutomationMLContainer m_container = null;
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            if (m_document == null)
-            {
-                foreach (FileInfo fileInfo in TestHelper.RetrieveFiles())
-                {
-                    if (fileInfo.Name.Equals("TestAml.xml.amlx"))
-                    {
-                        m_container = new AutomationMLContainer(fileInfo.FullName,
-                        System.IO.FileMode.Open, FileAccess.Read);
-                        Assert.IsNotNull(m_container, "Unable to find container");
-                        CAEXDocument document = CAEXDocument.LoadFromStream(m_container.RootDocumentStream());
-                        Assert.IsNotNull(document, "Unable to find document");
-                        m_document = document;
-                    }
-                }
-            }
-
-            Assert.IsNotNull(m_document, "Unable to retrieve Document");
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            if (m_document != null)
-            {
-                m_document.Unload();
-            }
-            m_container.Dispose();
-
-        }
-
         #region Tests
-
-
-        
 
         // This test is more about studying the file output, but has validity as a real test        
         private int LinkInternalElementDifferentCount;
         [TestMethod]
         public void DifferencesBetweenLinksAndInternalElements()
         {
+            GetDocument();
             LinkInternalElementDifferentCount = 0;
             // Walk the Instances, compare InternalElements agains the number of InternalLinks
             var instanceHierarchy = m_document.CAEXFile.InstanceHierarchy;
@@ -111,6 +74,16 @@ namespace SystemTest
         #endregion
 
         #region Helpers
+
+        private CAEXDocument GetDocument()
+        {
+            if( m_document == null )
+            {
+                m_document = TestHelper.GetReadOnlyDocument( "TestAml.xml.amlx" );
+            }
+            Assert.IsNotNull( m_document, "Unable to retrieve Document" );
+            return m_document;
+        }
 
         #endregion
 

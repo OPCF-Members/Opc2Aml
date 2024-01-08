@@ -57,7 +57,7 @@
         <Definition Name="1:ComprehensiveScalarType">
             <Field DataType="DataSetMetaDataType" Name="DataSet"/>
             <Field DataType="PublishedVariableDataType" Name="PublishedData"/>
-            <Field DataType="Double" Name="Bool"/>
+            <Field DataType="Boolean" Name="Bool"/>
             <Field DataType="SByte" Name="SByte"/>
             <Field DataType="Int16" Name="Int16"/>
             <Field DataType="UInt16" Name="UInt16"/>

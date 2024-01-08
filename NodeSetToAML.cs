@@ -49,6 +49,8 @@ using NodeSetToAmlUtils;
 using System.Collections;
 using System.Reflection;
 using MarkdownProcessor.NodeSet;
+using System.Xml;
+using Microsoft.AspNetCore.Identity;
 
 namespace MarkdownProcessor
 {
@@ -707,6 +709,7 @@ namespace MarkdownProcessor
                 }
                 else
                 {
+                    bool handled = true;
                     switch (val.TypeInfo.BuiltInType)  // TODO -- consider supporting setting values for more complicated types (enums, structures, Qualified Names ...) and arrays
                     {
                         case BuiltInType.Boolean:
@@ -902,14 +905,14 @@ namespace MarkdownProcessor
                                         dataValue.SourceTimestamp );
                                     if( dataValue.SourcePicoseconds > 0 )
                                     {
-                                        AddModifyAttribute( a.Attribute, "SourcePicoseconds", "UInt32",
+                                        AddModifyAttribute( a.Attribute, "SourcePicoseconds", "UInt16",
                                             dataValue.SourcePicoseconds );
                                     }
                                     AddModifyAttribute( a.Attribute, "ServerTimestamp", "DateTime",
                                         dataValue.ServerTimestamp );
                                     if ( dataValue.ServerPicoseconds > 0 )
                                     {
-                                        AddModifyAttribute( a.Attribute, "ServerPicoseconds", "UInt32",
+                                        AddModifyAttribute( a.Attribute, "ServerPicoseconds", "UInt16",
                                             dataValue.ServerPicoseconds );
                                     }
                                 }
@@ -933,7 +936,19 @@ namespace MarkdownProcessor
                                 AddModifyAttributeObject( a, val.Value );
                                 break;
                             }
+
+                        default:
+                            handled = false;
+                            break;
                         
+                    }
+
+                    if ( handled && refDataType.Equals( "BaseDataType" ) )
+                    {
+                        // this is specifically the variant case
+                        NodeId dataTypeFromBase = new NodeId( (uint)val.TypeInfo.BuiltInType );
+                        string sdfsd = GetAttributeDataType( dataTypeFromBase );
+                        a.AttributeDataType = sdfsd;
                     }
                 }
             }
@@ -949,10 +964,6 @@ namespace MarkdownProcessor
 
             if( !ReferenceAttributeMap.ContainsKey( typeNodeIdString ) )
             {
-                if ( typeNodeIdString.EndsWith("15534") )
-                {
-                    bool wait  = true;
-                }
                 UANode typeUaNode = m_modelManager.FindNode<UANode>( typeNodeId );
 
                 if( typeUaNode != null )
@@ -1051,7 +1062,6 @@ namespace MarkdownProcessor
 
             if( valueType.FullName.StartsWith( "Opc.Ua." ) )
             {
-                // This should be up a level, but it crashes in the other case for now.
                 Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes( 
                     attribute, typeNodeId );
 
@@ -1105,6 +1115,52 @@ namespace MarkdownProcessor
                             }
                         }
 
+                    }
+                }
+            }
+            else
+            {
+                XmlElement xmlElement = value as XmlElement;
+                if( xmlElement != null )
+                {
+                    NodeId typeDefinition = typeNodeId;
+                    UANode uANode = m_modelManager.FindNode<UANode>( typeNodeId );
+                    UAObject uaObject = uANode as UAObject;
+                    if( uaObject != null )
+                    {
+                        // Look for encoding
+                        List<ReferenceInfo> referenceList = m_modelManager.FindReferences( typeNodeId );
+                        foreach( ReferenceInfo referenceInfo in referenceList )
+                        {
+                            if( !referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.HasEncoding ) )
+                            {
+                                typeDefinition = referenceInfo.TargetId;
+                                break;
+                            }
+                        }
+                    }
+
+                    Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
+                        attribute, typeDefinition );
+
+                    if( fieldReferenceTypes != null )
+                    {
+                        foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
+                        {
+                            if ( xmlElement.Name.Equals( "ComprehensiveScalarType" ) && fieldReferenceType.Key.Equals( "Bool" ) )
+                            {
+                                bool wait = true;
+                            }
+                            Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
+                           
+                            bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
+
+                            AddModifyAttribute(
+                                attribute.Attribute,
+                                fieldReferenceType.Key,
+                                fieldReferenceType.Value.DecodedDataType,
+                                fieldVariant, bListOf: listOf );
+                        }
                     }
                 }
             }
@@ -1320,8 +1376,8 @@ namespace MarkdownProcessor
             for (int i = 0; i < ua2xslookup_count; i++)
             {
                 baseNode = m_modelManager.FindNodeByName(ua2xsLookup[i, ua2xslookup_uaname]);
-                if (m_modelManager.IsTypeOf(nodeId, baseNode.DecodedNodeId))
-                    return ua2xsLookup[i, ua2xslookup_xsname];
+                if( m_modelManager.IsTypeOf( nodeId, baseNode.DecodedNodeId ) )
+                    return ua2xsLookup[ i, ua2xslookup_xsname ];
             }
             return "";
         }
@@ -2575,6 +2631,7 @@ namespace MarkdownProcessor
                             {
                                 a.RefAttributeType = BaseRefFromNodeId(MyNode.Definition.Field[i].DecodedDataType, ATLPrefix, false, 
                                     MyNode.Definition.Field[i].ValueRank >= ValueRanks.OneDimension );
+
                                 a.AttributeDataType = GetAttributeDataType(MyNode.Definition.Field[i].DecodedDataType);
                                 if (nodeId.NamespaceIndex == 0)
                                 {
@@ -2841,5 +2898,270 @@ namespace MarkdownProcessor
 
         #endregion
 
+        #region Complex
+
+        private XmlDecoder CreateDecoder( XmlElement source )
+        {
+            ServiceMessageContext messageContext = new ServiceMessageContext();
+            messageContext.NamespaceUris = m_modelManager.NamespaceUris;
+            messageContext.ServerUris = m_modelManager.ServerUris;
+
+            XmlDecoder decoder = new XmlDecoder( source, messageContext );
+
+            return decoder;
+        }
+
+        private XmlElement SearchForElement( string name, XmlElement source )
+        {
+            XmlElement element = source[ name ];
+            if( element == null )
+            {
+                string uaxId = "uax:";
+                if( !name.StartsWith( uaxId, StringComparison.OrdinalIgnoreCase ) )
+                {
+                    element = source[ uaxId + name ];
+                }
+            }
+
+            return element;
+        }
+
+        private Variant CreateComplexVariant( string name, DataTypeField typeDefinition, XmlElement source )
+        {
+            Variant variant = new Variant();
+
+            XmlElement xmlElement = SearchForElement( name, source );
+            if( xmlElement != null )
+            {
+                BuiltInType baseBuiltInType = BuiltInType.Null;
+
+                NodeId baseBuiltInTypeNodeId = ComplexGetBuiltInTypeEx( typeDefinition.DecodedDataType );
+                if( baseBuiltInTypeNodeId != null )
+                {
+                    baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
+                }
+
+                if( typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
+                {
+                    // Defined as variant, or nothing at all
+                    baseBuiltInType = BuiltInType.Variant;
+                    baseBuiltInTypeNodeId = typeDefinition.DecodedDataType;
+                }
+
+                if( baseBuiltInType == BuiltInType.Null )
+                {
+                    Debug.WriteLine( "CreateComplexVariant Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
+                }
+                else
+                {
+                    UANode baseBuiltInTypeNode = m_modelManager.FindNode<UANode>( baseBuiltInTypeNodeId );
+
+                    string baseBuiltInTypeName = baseBuiltInTypeNode.BrowseName;
+                    if( typeDefinition.ValueRank >= ValueRanks.OneDimension )
+                    {
+                        baseBuiltInTypeName = "ListOf" + baseBuiltInTypeNode.BrowseName;
+                    }
+
+                    XmlDocument document = new XmlDocument();
+
+                    switch( baseBuiltInType )
+                    {
+                        case BuiltInType.Boolean:
+                        case BuiltInType.SByte:
+                        case BuiltInType.Byte:
+                        case BuiltInType.Int16:
+                        case BuiltInType.UInt16:
+                        case BuiltInType.Int32:
+                        case BuiltInType.UInt32:
+                        case BuiltInType.Int64:
+                        case BuiltInType.UInt64:
+                        case BuiltInType.Float:
+                        case BuiltInType.Double:
+                        case BuiltInType.String:
+                        case BuiltInType.DateTime:
+                        case BuiltInType.ByteString:
+                        case BuiltInType.Guid:
+                        case BuiltInType.XmlElement:
+                        case BuiltInType.NodeId:
+                        case BuiltInType.ExpandedNodeId:
+                        case BuiltInType.StatusCode:
+                        case BuiltInType.QualifiedName:
+                        case BuiltInType.LocalizedText:
+                        case BuiltInType.DataValue:
+                        case BuiltInType.DiagnosticInfo:
+                            {
+                                XmlElement complexElement = document.CreateElement( baseBuiltInTypeName, Namespaces.OpcUaXsd );
+                                complexElement.InnerXml = xmlElement.InnerXml;
+
+                                XmlDecoder decoder = CreateDecoder( complexElement );
+                                Opc.Ua.TypeInfo typeInfo = null;
+                                variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                                decoder.Close();
+
+                                break;
+                            }
+
+                        case BuiltInType.Variant: // BaseDataType
+                            {
+                                XmlElement valueElement = xmlElement[ "Value" ];
+                                if( valueElement != null )
+                                {
+                                    XmlDocument variantDocument = new XmlDocument();
+                                    variantDocument.LoadXml( valueElement.InnerXml );
+
+                                    XmlElement complexElement = variantDocument.DocumentElement;
+
+                                    XmlDecoder decoder = CreateDecoder( complexElement );
+                                    Opc.Ua.TypeInfo typeInfo = null;
+                                    variant = new Variant( decoder.ReadVariantContents( out typeInfo ) );
+                                    decoder.Close();
+                                }
+
+
+                                break;
+                            }
+
+                        case BuiltInType.ExtensionObject:
+                            {
+                                ExpandedNodeId absoluteId = NodeId.ToExpandedNodeId(
+                                    typeDefinition.DecodedDataType, m_modelManager.NamespaceUris );
+
+                                if( typeDefinition.ValueRank >= ValueRanks.OneDimension )
+                                {
+                                    List<ExtensionObject> extensions = new List<ExtensionObject>();
+                                    foreach( XmlElement arrayElement in xmlElement.ChildNodes )
+                                    {
+                                        extensions.Add( new ExtensionObject( absoluteId, arrayElement ) );
+                                    }
+
+                                    variant = new Variant( extensions );
+                                }
+                                else
+                                {
+                                    ExtensionObject extensionObject = new ExtensionObject( absoluteId, xmlElement );
+                                    variant = new Variant( extensionObject );
+                                }
+
+
+                                break;
+                            }
+
+                        case BuiltInType.Enumeration:
+                            {
+                                string value = xmlElement.InnerText;
+
+                                UADataType enumDefinition = m_modelManager.FindNode<UADataType>( typeDefinition.DecodedDataType );
+
+                                if( enumDefinition != null &&
+                                    enumDefinition.Definition != null &&
+                                    enumDefinition.Definition.Field != null )
+                                {
+
+                                    int parsedValue = -1;
+                                    bool useInt = int.TryParse( value, out parsedValue );
+                                    if( !useInt )
+                                    {
+                                        if( value.Contains( '_' ) )
+                                        {
+                                            string[] parts = value.Split( '_' );
+                                            // This only works if there are three parts
+                                            if( parts.Length == 2 )
+                                            {
+                                                useInt = int.TryParse( parts[ 1 ], out parsedValue );
+                                            }
+                                        }
+                                    }
+
+                                    foreach( DataTypeField dataTypeField in enumDefinition.Definition.Field )
+                                    {
+                                        int createEnumValue = -1;
+                                        if( useInt )
+                                        {
+                                            if( dataTypeField.Value == parsedValue )
+                                            {
+                                                createEnumValue = dataTypeField.Value;
+                                            }
+                                        }
+                                        else if( dataTypeField.Name.Equals( value, StringComparison.OrdinalIgnoreCase ) )
+                                        {
+                                            createEnumValue = dataTypeField.Value;
+                                        }
+
+                                        if( createEnumValue >= 0 )
+                                        {
+                                            variant = new Variant( createEnumValue );
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                break;
+                            }
+
+                        default:
+                            {
+                                Debug.WriteLine( "Unhandled CreateComplexVariant " + source.Name );
+                                break;
+                            }
+                    }
+                }
+            }
+
+            return variant;
+        }
+
+        private BuiltInType ComplexGetBuiltInType( NodeId source )
+        {
+            BuiltInType builtInType = BuiltInType.Null;
+
+            NodeId builtInNodeId = ComplexGetBuiltInTypeEx( source );
+
+            if( builtInNodeId != null )
+            {
+                if( builtInNodeId.IdType == IdType.Numeric && builtInNodeId.NamespaceIndex == 0 )
+                {
+                    uint identifier = (UInt32)builtInNodeId.Identifier;
+                    builtInType = (BuiltInType)identifier;
+                }
+            }
+
+            return builtInType;
+        }
+
+        public NodeId ComplexGetBuiltInTypeEx( NodeId sourceId )
+        {
+            // Not happy with Model Manager GetBuiltInType
+            List<ReferenceInfo> references = m_modelManager.FindReferences( sourceId );
+
+            if( references != null )
+            {
+                foreach( var ii in references )
+                {
+                    if( !ii.IsForward )
+                    {
+                        if( HasSubTypeNodeId != ii.ReferenceTypeId )
+                        {
+                            continue;
+                        }
+
+                        if( ii.TargetId.Equals( Opc.Ua.DataTypeIds.Integer ) ||
+                            ii.TargetId.Equals( Opc.Ua.DataTypeIds.UInteger ) ||
+                            ii.TargetId.Equals( Opc.Ua.DataTypeIds.Number ) ||
+                            ii.TargetId.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
+                        {
+                            return sourceId;
+                        }
+                        else
+                        {
+                            return ComplexGetBuiltInTypeEx( ii.TargetId );
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        #endregion
     }
 }

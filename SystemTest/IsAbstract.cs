@@ -18,46 +18,8 @@ namespace SystemTest
         // Test reads the nodeset file, finds everything that should be abstract,
         // Then walks the Amlx, and verifies both that the attribute is properly set, and properly not set
         const string NodeSetFile = "Opc.Ua.NodeSet2.xml";
-
+        
         CAEXDocument m_document = null;
-        AutomationMLContainer m_container = null;
-
-        #region Initialize
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            if( m_document == null )
-            {
-                foreach( FileInfo fileInfo in TestHelper.RetrieveFiles() )
-                {
-                    if( fileInfo.Name.Equals( NodeSetFile + ".amlx" ) )
-                    {
-                        m_container = new AutomationMLContainer( fileInfo.FullName,
-                            System.IO.FileMode.Open, FileAccess.Read );
-                        Assert.IsNotNull( m_container, "Unable to find container" );
-                        CAEXDocument document = CAEXDocument.LoadFromStream( m_container.RootDocumentStream() );
-                        Assert.IsNotNull( document, "Unable to find document" );
-                        m_document = document;
-                    }
-                }
-            }
-
-            Assert.IsNotNull( m_document, "Unable to retrieve Document" );
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            if( m_document != null )
-            {
-                m_document.Unload();
-            }
-            m_container.Dispose();
-
-        }
-
-        #endregion
 
         Dictionary<int, string> AbstractNodeIds = new Dictionary<int, string>();
         Dictionary<int, bool> Confirm = new Dictionary<int, bool>();
@@ -76,10 +38,8 @@ namespace SystemTest
         [TestMethod]
         public void TestAllIsAbstract()
         {
-            string nodeSetFile = "Opc.Ua.NodeSet2.xml";
-
             DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();
-            FileInfo nodeSetFileInfo = new FileInfo( Path.Combine( outputDirectoryInfo.FullName, nodeSetFile ) );
+            FileInfo nodeSetFileInfo = new FileInfo( Path.Combine( outputDirectoryInfo.FullName, NodeSetFile ) );
             Assert.IsTrue( nodeSetFileInfo.Exists );
 
             #region Read nodeset
@@ -111,7 +71,7 @@ namespace SystemTest
 
             #region Walk Everything
 
-            foreach( InstanceHierarchyType type in m_document.CAEXFile.InstanceHierarchy )
+            foreach( InstanceHierarchyType type in GetDocument().CAEXFile.InstanceHierarchy )
             {
                 foreach( InternalElementType internalElement in type.InternalElement )
                 {
@@ -123,7 +83,7 @@ namespace SystemTest
                 }
             }
 
-            foreach( SystemUnitClassLibType type in m_document.CAEXFile.SystemUnitClassLib )
+            foreach( SystemUnitClassLibType type in GetDocument().CAEXFile.SystemUnitClassLib )
             {
                 CAEXEnumerable<CAEXBasicObject> descendants = type.Descendants() as CAEXEnumerable<CAEXBasicObject>;
                 if( descendants != null )
@@ -143,7 +103,7 @@ namespace SystemTest
                 }
             }
 
-            foreach( InterfaceClassLibType type in m_document.CAEXFile.InterfaceClassLib )
+            foreach( InterfaceClassLibType type in GetDocument().CAEXFile.InterfaceClassLib )
             {
                 CAEXEnumerable<CAEXBasicObject> descendants = type.Descendants() as CAEXEnumerable<CAEXBasicObject>;
                 if( descendants != null )
@@ -375,5 +335,16 @@ namespace SystemTest
 
             return numeric;
         }
+
+        private CAEXDocument GetDocument()
+        {
+            if( m_document == null )
+            {
+                m_document = TestHelper.GetReadOnlyDocument( NodeSetFile + ".amlx" );
+            }
+            Assert.IsNotNull( m_document, "Unable to retrieve Document" );
+            return m_document;
+        }
+
     }
 }

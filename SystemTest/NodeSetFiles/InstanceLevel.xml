@@ -49,7 +49,7 @@
             <Field DataType="ComprehensiveScalarType" ValueRank="1" ArrayDimensions="2" Name="ScalarAsArray"/>
         </Definition>
     </UADataType>
-    <!--<UAVariable DataType="ComprehensiveScalarType" NodeId="ns=1;i=6009" BrowseName="1:LevelOne" AccessLevel="3">
+    <UAVariable DataType="ComprehensiveScalarType" NodeId="ns=1;i=6009" BrowseName="1:LevelOne" AccessLevel="3">
         <DisplayName>LevelOne</DisplayName>
         <References>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -64,39 +64,487 @@
                     <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
                         <DataSet>
                             <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
-                                <String>http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</String>
+                                <String>http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/</String>
+                                <String>http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/</String>
+                                <String>http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel/</String>
                             </Namespaces>
-                            <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
-                            <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
-                            <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
-                            <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">My Dataset Name</Name>
-                            <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">A Description</Description>
-                            <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                            <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <StructureDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=1;i=2222</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>1</NamespaceIndex>
+                                        <Name>Structure Description One</Name>
+                                    </Name>
+                                    <StructureDefinition>
+                                        <DefaultEncodingId>
+                                            <Identifier>i=7</Identifier>
+                                        </DefaultEncodingId>
+                                        <BaseDataType>
+                                            <Identifier>i=8</Identifier>
+                                        </BaseDataType>
+                                        <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                        <Fields>
+                                            <StructureField>
+                                                <Name>One</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Two</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=9</Identifier>
+                                                </DataType>
+                                                <ValueRank>-1</ValueRank>
+                                                <ArrayDimensions/>
+                                                <MaxStringLength>567</MaxStringLength>
+                                                <IsOptional>false</IsOptional>
+                                            </StructureField>
+                                            <StructureField>
+                                                <Name>Two</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Two</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=5</Identifier>
+                                                </DataType>
+                                                <ValueRank>1</ValueRank>
+                                                <ArrayDimensions>
+                                                    <UInt32>2</UInt32>
+                                                </ArrayDimensions>
+                                                <MaxStringLength>765</MaxStringLength>
+                                                <IsOptional>true</IsOptional>
+                                            </StructureField>
+                                        </Fields>
+                                    </StructureDefinition>
+                                </StructureDescription>
+                                <StructureDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=2;i=2223</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>2</NamespaceIndex>
+                                        <Name>Structure Description Two</Name>
+                                    </Name>
+                                    <StructureDefinition>
+                                        <DefaultEncodingId>
+                                            <Identifier>i=8</Identifier>
+                                        </DefaultEncodingId>
+                                        <BaseDataType>
+                                            <Identifier>i=9</Identifier>
+                                        </BaseDataType>
+                                        <StructureType>UnionWithSubtypedValues_4</StructureType>
+                                        <Fields>
+                                            <StructureField>
+                                                <Name>Middle One</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>One</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=11</Identifier>
+                                                </DataType>
+                                                <ValueRank>-1</ValueRank>
+                                                <ArrayDimensions/>
+                                                <MaxStringLength>678</MaxStringLength>
+                                                <IsOptional>false</IsOptional>
+                                            </StructureField>
+                                            <StructureField>
+                                                <Name>Middle Two</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Test Me</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=6</Identifier>
+                                                </DataType>
+                                                <ValueRank>1</ValueRank>
+                                                <ArrayDimensions>
+                                                    <UInt32>3</UInt32>
+                                                </ArrayDimensions>
+                                                <MaxStringLength>876</MaxStringLength>
+                                                <IsOptional>true</IsOptional>
+                                            </StructureField>
+                                            <StructureField>
+                                                <Name>Middle Three</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Three</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=11</Identifier>
+                                                </DataType>
+                                                <ValueRank>-1</ValueRank>
+                                                <ArrayDimensions/>
+                                                <MaxStringLength>678</MaxStringLength>
+                                                <IsOptional>false</IsOptional>
+                                            </StructureField>
+                                        </Fields>
+                                    </StructureDefinition>
+                                </StructureDescription>
+                                <StructureDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=1;i=2224</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>1</NamespaceIndex>
+                                        <Name>Structure Description Three</Name>
+                                    </Name>
+                                    <StructureDefinition>
+                                        <DefaultEncodingId>
+                                            <Identifier>i=7</Identifier>
+                                        </DefaultEncodingId>
+                                        <BaseDataType>
+                                            <Identifier>i=8</Identifier>
+                                        </BaseDataType>
+                                        <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                        <Fields>
+                                            <StructureField>
+                                                <Name>One</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Two</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=9</Identifier>
+                                                </DataType>
+                                                <ValueRank>-1</ValueRank>
+                                                <ArrayDimensions/>
+                                                <MaxStringLength>567</MaxStringLength>
+                                                <IsOptional>false</IsOptional>
+                                            </StructureField>
+                                            <StructureField>
+                                                <Name>Two</Name>
+                                                <Description>
+                                                    <Locale>en-ca</Locale>
+                                                    <Text>Two</Text>
+                                                </Description>
+                                                <DataType>
+                                                    <Identifier>i=5</Identifier>
+                                                </DataType>
+                                                <ValueRank>1</ValueRank>
+                                                <ArrayDimensions>
+                                                    <UInt32>2</UInt32>
+                                                </ArrayDimensions>
+                                                <MaxStringLength>765</MaxStringLength>
+                                                <IsOptional>true</IsOptional>
+                                            </StructureField>
+                                        </Fields>
+                                    </StructureDefinition>
+                                </StructureDescription>
+                            </StructureDataTypes>
+                            <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <EnumDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=2345</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>0</NamespaceIndex>
+                                        <Name>An Enum Description</Name>
+                                    </Name>
+                                    <EnumDefinition>
+                                        <Fields>
+                                            <EnumField>
+                                                <Value>45</Value>
+                                                <DisplayName>
+                                                    <Text>Fourty Five</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fourty Five</Text>
+                                                </Description>
+                                                <Name>Fourty Five</Name>
+                                            </EnumField>
+                                            <EnumField>
+                                                <Value>46</Value>
+                                                <DisplayName>
+                                                    <Text>Fourty Six</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fourty Six</Text>
+                                                </Description>
+                                                <Name>Fourty Six</Name>
+                                            </EnumField>
+                                        </Fields>
+                                    </EnumDefinition>
+                                    <BuiltInType>3</BuiltInType>
+                                </EnumDescription>
+                                <EnumDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=2346</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>3</NamespaceIndex>
+                                        <Name>Another Enum Description</Name>
+                                    </Name>
+                                    <EnumDefinition>
+                                        <Fields>
+                                            <EnumField>
+                                                <Value>55</Value>
+                                                <DisplayName>
+                                                    <Text>Fifty Five</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fifty Five</Text>
+                                                </Description>
+                                                <Name>Fifty Five</Name>
+                                            </EnumField>
+                                            <EnumField>
+                                                <Value>56</Value>
+                                                <DisplayName>
+                                                    <Text>Fifty Six</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fifty Six</Text>
+                                                </Description>
+                                                <Name>Fifty Six</Name>
+                                            </EnumField>
+                                            <EnumField>
+                                                <Value>57</Value>
+                                                <DisplayName>
+                                                    <Text>Fifty Seven</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fifty Seven</Text>
+                                                </Description>
+                                                <Name>Fifty Seven</Name>
+                                            </EnumField>
+                                        </Fields>
+                                    </EnumDefinition>
+                                    <BuiltInType>4</BuiltInType>
+                                </EnumDescription>
+                                <EnumDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=2347</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>2</NamespaceIndex>
+                                        <Name>A Third Enum Description</Name>
+                                    </Name>
+                                    <EnumDefinition>
+                                        <Fields>
+                                            <EnumField>
+                                                <Value>45</Value>
+                                                <DisplayName>
+                                                    <Text>Fourty Five</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fourty Five</Text>
+                                                </Description>
+                                                <Name>Fourty Five</Name>
+                                            </EnumField>
+                                            <EnumField>
+                                                <Value>46</Value>
+                                                <DisplayName>
+                                                    <Text>Fourty Six</Text>
+                                                </DisplayName>
+                                                <Description>
+                                                    <Locale>en</Locale>
+                                                    <Text>Fourty Six</Text>
+                                                </Description>
+                                                <Name>Fourty Six</Name>
+                                            </EnumField>
+                                        </Fields>
+                                    </EnumDefinition>
+                                    <BuiltInType>5</BuiltInType>
+                                </EnumDescription>
+                            </EnumDataTypes>
+                            <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <SimpleTypeDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=890</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>0</NamespaceIndex>
+                                        <Name>Simple</Name>
+                                    </Name>
+                                    <BaseDataType>
+                                        <Identifier>i=7</Identifier>
+                                    </BaseDataType>
+                                    <BuiltInType>7</BuiltInType>
+                                </SimpleTypeDescription>
+                                <SimpleTypeDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=891</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>1</NamespaceIndex>
+                                        <Name>EvenMoreSimple</Name>
+                                    </Name>
+                                    <BaseDataType>
+                                        <Identifier>i=8</Identifier>
+                                    </BaseDataType>
+                                    <BuiltInType>8</BuiltInType>
+                                </SimpleTypeDescription>
+                                <SimpleTypeDescription>
+                                    <DataTypeId>
+                                        <Identifier>ns=3;i=892</Identifier>
+                                    </DataTypeId>
+                                    <Name>
+                                        <NamespaceIndex>0</NamespaceIndex>
+                                        <Name>LastSimple</Name>
+                                    </Name>
+                                    <BaseDataType>
+                                        <Identifier>i=9</Identifier>
+                                    </BaseDataType>
+                                    <BuiltInType>9</BuiltInType>
+                                </SimpleTypeDescription>
+                            </SimpleDataTypes>
+                            <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Data Set Name</Name>
+                            <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Text>Data Set Description</Text>
+                            </Description>
+                            <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <FieldMetaData>
+                                    <Name>Field One</Name>
+                                    <Description>
+                                        <Text>Field One</Text>
+                                    </Description>
+                                    <FieldFlags>0</FieldFlags>
+                                    <BuiltInType>5</BuiltInType>
+                                    <DataType>
+                                        <Identifier>i=5</Identifier>
+                                    </DataType>
+                                    <ValueRank>-1</ValueRank>
+                                    <ArrayDimensions/>
+                                    <MaxStringLength>67</MaxStringLength>
+                                    <DataSetFieldId>
+                                        <String>54325432-5432-5432-5432-543254325432</String>
+                                    </DataSetFieldId>
+                                    <Properties>
+                                        <KeyValuePair>
+                                            <Key>
+                                                <NamespaceIndex>2</NamespaceIndex>
+                                                <Name>PropertyOne</Name>
+                                            </Key>
+                                            <Value>
+                                                <Value>
+                                                    <String>PropertyOne</String>
+                                                </Value>
+                                            </Value>
+                                        </KeyValuePair>
+                                        <KeyValuePair>
+                                            <Key>
+                                                <NamespaceIndex>2</NamespaceIndex>
+                                                <Name>PropertyTwo</Name>
+                                            </Key>
+                                            <Value>
+                                                <Value>
+                                                    <Int32>2</Int32>
+                                                </Value>
+                                            </Value>
+                                        </KeyValuePair>
+                                    </Properties>
+                                </FieldMetaData>
+                                <FieldMetaData>
+                                    <Name>Field Two</Name>
+                                    <Description>
+                                        <Text>Field Two</Text>
+                                    </Description>
+                                    <FieldFlags>1</FieldFlags>
+                                    <BuiltInType>10</BuiltInType>
+                                    <DataType>
+                                        <Identifier>i=10</Identifier>
+                                    </DataType>
+                                    <ValueRank>1</ValueRank>
+                                    <ArrayDimensions>
+                                        <UInt32>3</UInt32>
+                                    </ArrayDimensions>
+                                    <MaxStringLength>333</MaxStringLength>
+                                    <DataSetFieldId>
+                                        <String>12341234-1234-1234-1234-123412341234</String>
+                                    </DataSetFieldId>
+                                    <Properties>
+                                        <KeyValuePair>
+                                            <Key>
+                                                <NamespaceIndex>0</NamespaceIndex>
+                                                <Name>PropertyOne</Name>
+                                            </Key>
+                                            <Value>
+                                                <Value>
+                                                    <String>PropertyOne</String>
+                                                </Value>
+                                            </Value>
+                                        </KeyValuePair>
+                                        <KeyValuePair>
+                                            <Key>
+                                                <NamespaceIndex>2</NamespaceIndex>
+                                                <Name>PropertyTwo</Name>
+                                            </Key>
+                                            <Value>
+                                                <Value>
+                                                    <Int32>2</Int32>
+                                                </Value>
+                                            </Value>
+                                        </KeyValuePair>
+                                    </Properties>
+
+                                </FieldMetaData>
+                                <FieldMetaData>
+                                    <Name>Field Three</Name>
+                                    <Description>
+                                        <Text>Field Three</Text>
+                                    </Description>
+                                    <FieldFlags>0</FieldFlags>
+                                    <BuiltInType>11</BuiltInType>
+                                    <DataType>
+                                        <Identifier>i=11</Identifier>
+                                    </DataType>
+                                    <ValueRank>1</ValueRank>
+                                    <ArrayDimensions>
+                                        <UInt32>4</UInt32>
+                                    </ArrayDimensions>
+                                    <MaxStringLength>333</MaxStringLength>
+                                    <DataSetFieldId>
+                                        <String>23412341-2341-2341-2341-234123412341</String>
+                                    </DataSetFieldId>
+                                    <Properties/>
+                                </FieldMetaData>
+                            </Fields>
                             <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
-                                <String>11111111-1111-1111-1111-111111111111</String>
+                                <String>98769876-9876-9876-9876-987698769876</String>
                             </DataSetClassId>
                             <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
-                                <MajorVersion>1234</MajorVersion>
-                                <MinorVersion>5678</MinorVersion>
+                                <MajorVersion>54</MajorVersion>
+                                <MinorVersion>32</MinorVersion>
                             </ConfigurationVersion>
                         </DataSet>
                         <PublishedData>
                             <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
-                                <Identifier>i=99990</Identifier>
+                                <Identifier>ns=1;i=987</Identifier>
                             </PublishedVariable>
                             <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">13</AttributeId>
-                            <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">222</SamplingIntervalHint>
-                            <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
-                            <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">333</DeadbandValue>
-                            <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                            <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">666</SamplingIntervalHint>
+                            <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">5</DeadbandType>
+                            <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">4</DeadbandValue>
+                            <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">4:5</IndexRange>
                             <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
                                 <Value>
-                                    <String>A Substitute</String>
+                                    <UInt64>123456789</UInt64>
                                 </Value>
                             </SubstituteValue>
-                            <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                            <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <QualifiedName>
+                                    <NamespaceIndex>2</NamespaceIndex>
+                                    <Name>One</Name>
+                                </QualifiedName>
+                                <QualifiedName>
+                                    <NamespaceIndex>3</NamespaceIndex>
+                                    <Name>Two</Name>
+                                </QualifiedName>
+                                <QualifiedName>
+                                    <NamespaceIndex>1</NamespaceIndex>
+                                    <Name>Three</Name>
+                                </QualifiedName>
+                            </MetaDataProperties>
                         </PublishedData>
-                        <Bool>1</Bool>
+                        <Bool>true</Bool>
                         <SByte>2</SByte>
                         <Int16>3</Int16>
                         <UInt16>4</UInt16>
@@ -106,19 +554,21 @@
                         <UInt64>8</UInt64>
                         <Float>9.1</Float>
                         <Double>10.2</Double>
-                        <String>Eleven Point Three</String>
-                        <DateTime>2012-12-12T12:12:12Z</DateTime>
+                        <String>Eleven point three</String>
+                        <DateTime>2011-12-12T00:12:12Z</DateTime>
                         <Guid>
                             <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">13131313-1313-1313-1313-131313131313</String>
                         </Guid>
                         <ByteString>MTQxNDE0MTQ=</ByteString>
-                        <XmlElement><TheFifteenthElement>Fifteen</TheFifteenthElement></XmlElement>
-                        <XmlElement><TheFifteenthElement/></XmlElement>
+                        <XmlElement>
+                            <TheFifteenthElement>Fifteen</TheFifteenthElement>
+                        </XmlElement>
                         <NodeId>
                             <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">ns=2;i=16</Identifier>
                         </NodeId>
                         <ExpandedNodeId>
-                            <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">ns=0;i=17;namespaceUri:http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</Identifier>
+                            <!--<Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">ns=0;i=17;namespaceUri:http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</Identifier>-->
+                            <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">ns=2;i=17</Identifier>
                         </ExpandedNodeId>
                         <StatusCode>
                             <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2149056512</Code>
@@ -131,24 +581,40 @@
                             <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Twenty</Text>
                         </LocalizedText>
                         <DataValue>
-                            <Value>
+                            <Value xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
                                 <Value>
                                     <Int32>12345</Int32>
                                 </Value>
                             </Value>
-                            <StatusCode>
+                            <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
                                 <Code>2165637120</Code>
                             </StatusCode>
-                            <SourceTimestamp>2023-09-13T14:39:08.791Z</SourceTimestamp>
-                            <ServerTimestamp>2023-09-13T14:39:08.791Z</ServerTimestamp>
+                            <SourceTimestamp xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2023-09-13T14:39:08.791Z</SourceTimestamp>
+                            <ServerTimestamp xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2023-09-13T14:39:08.791Z</ServerTimestamp>
                         </DataValue>
+
                         <DiagnosticInfo>
                             <SymbolicId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">11</SymbolicId>
                             <NamespaceUri xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">22</NamespaceUri>
                             <Locale xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">33</Locale>
                             <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">44</LocalizedText>
                             <AdditionalInfo xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Diagnostic Information</AdditionalInfo>
+                            <InnerStatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Code>2165637121</Code>
+                            </InnerStatusCode>
+                            <InnerDiagnosticInfo xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <SymbolicId>12</SymbolicId>
+                                <NamespaceUri>23</NamespaceUri>
+                                <Locale>34</Locale>
+                                <LocalizedText>45</LocalizedText>
+                                <AdditionalInfo>Even More Diagnostic Information</AdditionalInfo>
+                                <InnerStatusCode>
+                                    <Code>2165637122</Code>
+                                </InnerStatusCode>
+                            </InnerDiagnosticInfo>
+
                         </DiagnosticInfo>
+
                     </ComprehensiveScalarType>
                 </uax:Body>
             </uax:ExtensionObject>
@@ -160,7 +626,730 @@
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
             <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
         </References>
-    </UAVariable>-->
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>ns=3;i=5002</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <ComprehensiveArrayType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+                        <LevelOne>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/0/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/1/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/2/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>12345678-9012-3456-7890-123456789012</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>1</MajorVersion>
+                                        <MinorVersion>2</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element One Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>987.6543</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element One</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element One</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/3/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/4/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/5/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <StructureDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=1;i=2222</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>1</NamespaceIndex>
+                                                <Name>Structure Description One</Name>
+                                            </Name>
+                                            <StructureDefinition>
+                                                <DefaultEncodingId>
+                                                    <Identifier>i=7</Identifier>
+                                                </DefaultEncodingId>
+                                                <BaseDataType>
+                                                    <Identifier>i=8</Identifier>
+                                                </BaseDataType>
+                                                <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                                <Fields>
+                                                    <StructureField>
+                                                        <Name>One</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Two</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=9</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>-1</ValueRank>
+                                                        <ArrayDimensions/>
+                                                        <MaxStringLength>567</MaxStringLength>
+                                                        <IsOptional>false</IsOptional>
+                                                    </StructureField>
+                                                    <StructureField>
+                                                        <Name>Two</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Two</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=5</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>1</ValueRank>
+                                                        <ArrayDimensions>
+                                                            <UInt32>2</UInt32>
+                                                        </ArrayDimensions>
+                                                        <MaxStringLength>765</MaxStringLength>
+                                                        <IsOptional>true</IsOptional>
+                                                    </StructureField>
+                                                </Fields>
+                                            </StructureDefinition>
+                                        </StructureDescription>
+                                        <StructureDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=2;i=2223</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>2</NamespaceIndex>
+                                                <Name>Structure Description Two</Name>
+                                            </Name>
+                                            <StructureDefinition>
+                                                <DefaultEncodingId>
+                                                    <Identifier>i=8</Identifier>
+                                                </DefaultEncodingId>
+                                                <BaseDataType>
+                                                    <Identifier>i=9</Identifier>
+                                                </BaseDataType>
+                                                <StructureType>UnionWithSubtypedValues_4</StructureType>
+                                                <Fields>
+                                                    <StructureField>
+                                                        <Name>Middle One</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>One</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=11</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>-1</ValueRank>
+                                                        <ArrayDimensions/>
+                                                        <MaxStringLength>678</MaxStringLength>
+                                                        <IsOptional>false</IsOptional>
+                                                    </StructureField>
+                                                    <StructureField>
+                                                        <Name>Middle Two</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Test Me</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=6</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>1</ValueRank>
+                                                        <ArrayDimensions>
+                                                            <UInt32>3</UInt32>
+                                                        </ArrayDimensions>
+                                                        <MaxStringLength>876</MaxStringLength>
+                                                        <IsOptional>true</IsOptional>
+                                                    </StructureField>
+                                                    <StructureField>
+                                                        <Name>Middle Three</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Three</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=11</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>-1</ValueRank>
+                                                        <ArrayDimensions/>
+                                                        <MaxStringLength>678</MaxStringLength>
+                                                        <IsOptional>false</IsOptional>
+                                                    </StructureField>
+                                                </Fields>
+                                            </StructureDefinition>
+                                        </StructureDescription>
+                                        <StructureDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=1;i=2224</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>1</NamespaceIndex>
+                                                <Name>Structure Description Three</Name>
+                                            </Name>
+                                            <StructureDefinition>
+                                                <DefaultEncodingId>
+                                                    <Identifier>i=7</Identifier>
+                                                </DefaultEncodingId>
+                                                <BaseDataType>
+                                                    <Identifier>i=8</Identifier>
+                                                </BaseDataType>
+                                                <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                                <Fields>
+                                                    <StructureField>
+                                                        <Name>One</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Two</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=9</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>-1</ValueRank>
+                                                        <ArrayDimensions/>
+                                                        <MaxStringLength>567</MaxStringLength>
+                                                        <IsOptional>false</IsOptional>
+                                                    </StructureField>
+                                                    <StructureField>
+                                                        <Name>Two</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Two</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=5</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>1</ValueRank>
+                                                        <ArrayDimensions>
+                                                            <UInt32>2</UInt32>
+                                                        </ArrayDimensions>
+                                                        <MaxStringLength>765</MaxStringLength>
+                                                        <IsOptional>true</IsOptional>
+                                                    </StructureField>
+                                                </Fields>
+                                            </StructureDefinition>
+                                        </StructureDescription>
+                                    </StructureDataTypes>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <EnumDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=2345</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>0</NamespaceIndex>
+                                                <Name>An Enum Description</Name>
+                                            </Name>
+                                            <EnumDefinition>
+                                                <Fields>
+                                                    <EnumField>
+                                                        <Value>45</Value>
+                                                        <DisplayName>
+                                                            <Text>Fourty Five</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fourty Five</Text>
+                                                        </Description>
+                                                        <Name>Fourty Five</Name>
+                                                    </EnumField>
+                                                    <EnumField>
+                                                        <Value>46</Value>
+                                                        <DisplayName>
+                                                            <Text>Fourty Six</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fourty Six</Text>
+                                                        </Description>
+                                                        <Name>Fourty Six</Name>
+                                                    </EnumField>
+                                                </Fields>
+                                            </EnumDefinition>
+                                            <BuiltInType>3</BuiltInType>
+                                        </EnumDescription>
+                                        <EnumDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=2346</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>3</NamespaceIndex>
+                                                <Name>Another Enum Description</Name>
+                                            </Name>
+                                            <EnumDefinition>
+                                                <Fields>
+                                                    <EnumField>
+                                                        <Value>55</Value>
+                                                        <DisplayName>
+                                                            <Text>Fifty Five</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fifty Five</Text>
+                                                        </Description>
+                                                        <Name>Fifty Five</Name>
+                                                    </EnumField>
+                                                    <EnumField>
+                                                        <Value>56</Value>
+                                                        <DisplayName>
+                                                            <Text>Fifty Six</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fifty Six</Text>
+                                                        </Description>
+                                                        <Name>Fifty Six</Name>
+                                                    </EnumField>
+                                                    <EnumField>
+                                                        <Value>57</Value>
+                                                        <DisplayName>
+                                                            <Text>Fifty Seven</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fifty Seven</Text>
+                                                        </Description>
+                                                        <Name>Fifty Seven</Name>
+                                                    </EnumField>
+                                                </Fields>
+                                            </EnumDefinition>
+                                            <BuiltInType>4</BuiltInType>
+                                        </EnumDescription>
+                                        <EnumDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=2347</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>2</NamespaceIndex>
+                                                <Name>A Third Enum Description</Name>
+                                            </Name>
+                                            <EnumDefinition>
+                                                <Fields>
+                                                    <EnumField>
+                                                        <Value>45</Value>
+                                                        <DisplayName>
+                                                            <Text>Fourty Five</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fourty Five</Text>
+                                                        </Description>
+                                                        <Name>Fourty Five</Name>
+                                                    </EnumField>
+                                                    <EnumField>
+                                                        <Value>46</Value>
+                                                        <DisplayName>
+                                                            <Text>Fourty Six</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fourty Six</Text>
+                                                        </Description>
+                                                        <Name>Fourty Six</Name>
+                                                    </EnumField>
+                                                </Fields>
+                                            </EnumDefinition>
+                                            <BuiltInType>5</BuiltInType>
+                                        </EnumDescription>
+                                    </EnumDataTypes>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <SimpleTypeDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=890</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>0</NamespaceIndex>
+                                                <Name>Simple</Name>
+                                            </Name>
+                                            <BaseDataType>
+                                                <Identifier>i=7</Identifier>
+                                            </BaseDataType>
+                                            <BuiltInType>7</BuiltInType>
+                                        </SimpleTypeDescription>
+                                        <SimpleTypeDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=891</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>1</NamespaceIndex>
+                                                <Name>EvenMoreSimple</Name>
+                                            </Name>
+                                            <BaseDataType>
+                                                <Identifier>i=8</Identifier>
+                                            </BaseDataType>
+                                            <BuiltInType>8</BuiltInType>
+                                        </SimpleTypeDescription>
+                                        <SimpleTypeDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=892</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>0</NamespaceIndex>
+                                                <Name>LastSimple</Name>
+                                            </Name>
+                                            <BaseDataType>
+                                                <Identifier>i=9</Identifier>
+                                            </BaseDataType>
+                                            <BuiltInType>9</BuiltInType>
+                                        </SimpleTypeDescription>
+                                    </SimpleDataTypes>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <FieldMetaData>
+                                            <Name>Field One</Name>
+                                            <Description>
+                                                <Text>Field One</Text>
+                                            </Description>
+                                            <FieldFlags>0</FieldFlags>
+                                            <BuiltInType>5</BuiltInType>
+                                            <DataType>
+                                                <Identifier>i=5</Identifier>
+                                            </DataType>
+                                            <ValueRank>-1</ValueRank>
+                                            <ArrayDimensions/>
+                                            <MaxStringLength>67</MaxStringLength>
+                                            <DataSetFieldId>
+                                                <String>54325432-5432-5432-5432-543254325432</String>
+                                            </DataSetFieldId>
+                                            <Properties>
+                                                <KeyValuePair>
+                                                    <Key>
+                                                        <NamespaceIndex>2</NamespaceIndex>
+                                                        <Name>PropertyOne</Name>
+                                                    </Key>
+                                                    <Value>
+                                                        <Value>
+                                                            <String>PropertyOne</String>
+                                                        </Value>
+                                                    </Value>
+                                                </KeyValuePair>
+                                                <KeyValuePair>
+                                                    <Key>
+                                                        <NamespaceIndex>2</NamespaceIndex>
+                                                        <Name>PropertyTwo</Name>
+                                                    </Key>
+                                                    <Value>
+                                                        <Value>
+                                                            <Int32>2</Int32>
+                                                        </Value>
+                                                    </Value>
+                                                </KeyValuePair>
+                                            </Properties>
+                                        </FieldMetaData>
+                                        <FieldMetaData>
+                                            <Name>Field Two</Name>
+                                            <Description>
+                                                <Text>Field Two</Text>
+                                            </Description>
+                                            <FieldFlags>1</FieldFlags>
+                                            <BuiltInType>10</BuiltInType>
+                                            <DataType>
+                                                <Identifier>i=10</Identifier>
+                                            </DataType>
+                                            <ValueRank>1</ValueRank>
+                                            <ArrayDimensions>
+                                                <UInt32>3</UInt32>
+                                            </ArrayDimensions>
+                                            <MaxStringLength>333</MaxStringLength>
+                                            <DataSetFieldId>
+                                                <String>12341234-1234-1234-1234-123412341234</String>
+                                            </DataSetFieldId>
+                                            <Properties>
+                                                <KeyValuePair>
+                                                    <Key>
+                                                        <NamespaceIndex>0</NamespaceIndex>
+                                                        <Name>PropertyOne</Name>
+                                                    </Key>
+                                                    <Value>
+                                                        <Value>
+                                                            <String>PropertyOne</String>
+                                                        </Value>
+                                                    </Value>
+                                                </KeyValuePair>
+                                                <KeyValuePair>
+                                                    <Key>
+                                                        <NamespaceIndex>2</NamespaceIndex>
+                                                        <Name>PropertyTwo</Name>
+                                                    </Key>
+                                                    <Value>
+                                                        <Value>
+                                                            <Int32>2</Int32>
+                                                        </Value>
+                                                    </Value>
+                                                </KeyValuePair>
+                                            </Properties>
+
+                                        </FieldMetaData>
+                                        <FieldMetaData>
+                                            <Name>Field Three</Name>
+                                            <Description>
+                                                <Text>Field Three</Text>
+                                            </Description>
+                                            <FieldFlags>0</FieldFlags>
+                                            <BuiltInType>11</BuiltInType>
+                                            <DataType>
+                                                <Identifier>i=11</Identifier>
+                                            </DataType>
+                                            <ValueRank>1</ValueRank>
+                                            <ArrayDimensions>
+                                                <UInt32>4</UInt32>
+                                            </ArrayDimensions>
+                                            <MaxStringLength>333</MaxStringLength>
+                                            <DataSetFieldId>
+                                                <String>23412341-2341-2341-2341-234123412341</String>
+                                            </DataSetFieldId>
+                                            <Properties/>
+                                        </FieldMetaData>
+                                    </Fields>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>24682468-2468-2468-2468-246824682468</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>3</MajorVersion>
+                                        <MinorVersion>4</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element Two Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>0</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Two</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Two</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/6/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/7/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/8/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>12345678-1234-1234-1234-123456789012</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>5</MajorVersion>
+                                        <MinorVersion>6</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element Three Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>987.6543</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Three</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Three</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+                        </LevelOne>
+                        <Int16>
+                            <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Int16>
+                            <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">1</Int16>
+                            <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2</Int16>
+                        </Int16>
+                        <UInt16>
+                            <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">4</UInt16>
+                            <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">5</UInt16>
+                            <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">6</UInt16>
+                        </UInt16>
+                        <DateTime>
+                            <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2007-01-01T00:00:00Z</DateTime>
+                            <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2008-01-01T00:00:00Z</DateTime>
+                            <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2009-01-01T00:00:00Z</DateTime>
+                        </DateTime>
+                        <Guid>
+                            <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <String>10101010-1010-1010-1010-101010101010</String>
+                            </Guid>
+                            <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <String>11001100-1100-1100-1100-110011001100</String>
+                            </Guid>
+                            <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <String>12001200-1200-1200-1200-120012001200</String>
+                            </Guid>
+                        </Guid>
+                        <ByteString>
+                            <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTM=</ByteString>
+                            <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTQ=</ByteString>
+                            <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTU=</ByteString>
+                        </ByteString>
+                        <NodeId>
+                            <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Identifier>ns=1;i=1</Identifier>
+                            </NodeId>
+                            <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Identifier>ns=2;i=2</Identifier>
+                            </NodeId>
+                            <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Identifier>ns=3;i=3</Identifier>
+                            </NodeId>
+                        </NodeId>
+                        <StatusCode>
+                            <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Code>2147549184</Code>
+                            </StatusCode>
+                            <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Code>2147614720</Code>
+                            </StatusCode>
+                            <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Code>2147680256</Code>
+                            </StatusCode>
+                        </StatusCode>
+                        <QualifiedName>
+                            <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <NamespaceIndex>1</NamespaceIndex>
+                                <Name>One</Name>
+                            </QualifiedName>
+                            <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <NamespaceIndex>2</NamespaceIndex>
+                                <Name>Two</Name>
+                            </QualifiedName>
+                            <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <NamespaceIndex>3</NamespaceIndex>
+                                <Name>Three</Name>
+                            </QualifiedName>
+                        </QualifiedName>
+                        <LocalizedText>
+                            <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Text>One</Text>
+                            </LocalizedText>
+                            <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Text>Two</Text>
+                            </LocalizedText>
+                            <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                <Text>Three</Text>
+                            </LocalizedText>
+                        </LocalizedText>
+                    </ComprehensiveArrayType>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
     <UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING_InstanceLevel" NodeId="ns=1;i=5004" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel</DisplayName>
         <References>
@@ -236,13 +1425,1379 @@
             <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
         </References>
     </UAVariable>
-    <!--<UAVariable DataType="ComplexComprehensiveType" NodeId="ns=1;i=6013" BrowseName="1:TopLevel" AccessLevel="3">
+
+    <UAVariable DataType="ComplexComprehensiveType" NodeId="ns=1;i=6013" BrowseName="1:TopLevel" AccessLevel="3">
         <DisplayName>TopLevel</DisplayName>
         <References>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
             <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
         </References>
-    </UAVariable>-->
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>ns=1;i=5002</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <ComplexComprehensiveType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel/Types.xsd">
+                        <ArrayAsScalar>
+                            <LevelOne>
+                                <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                    <DataSet>
+                                        <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/0/</String>
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/1/</String>
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/2/</String>
+                                        </Namespaces>
+                                        <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                        <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <String>12345678-9012-3456-7890-123456789012</String>
+                                        </DataSetClassId>
+                                        <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <MajorVersion>1</MajorVersion>
+                                            <MinorVersion>2</MinorVersion>
+                                        </ConfigurationVersion>
+                                    </DataSet>
+                                    <PublishedData>
+                                        <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <Identifier>i=0</Identifier>
+                                        </PublishedVariable>
+                                        <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                        <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                        <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                        <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                        <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                        <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <Value>
+                                                <String>Array Element One Substitute</String>
+                                            </Value>
+                                        </SubstituteValue>
+                                        <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    </PublishedData>
+                                    <Bool>false</Bool>
+                                    <SByte>0</SByte>
+                                    <Int16>0</Int16>
+                                    <UInt16>0</UInt16>
+                                    <Int32>0</Int32>
+                                    <UInt32>0</UInt32>
+                                    <Int64>0</Int64>
+                                    <UInt64>0</UInt64>
+                                    <Float>0</Float>
+                                    <Double>987.6543</Double>
+                                    <String></String>
+                                    <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                    <Guid>
+                                        <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                    </Guid>
+                                    <ByteString></ByteString>
+                                    <NodeId>
+                                        <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                    </NodeId>
+                                    <StatusCode>
+                                        <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                    </StatusCode>
+                                    <QualifiedName>
+                                        <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                        <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element One</Name>
+                                    </QualifiedName>
+                                    <LocalizedText>
+                                        <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element One</Text>
+                                    </LocalizedText>
+                                </ComprehensiveScalarType>
+                                <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                    <DataSet>
+                                        <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/3/</String>
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/4/</String>
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/5/</String>
+                                        </Namespaces>
+                                        <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <StructureDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=1;i=2222</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>1</NamespaceIndex>
+                                                    <Name>Structure Description One</Name>
+                                                </Name>
+                                                <StructureDefinition>
+                                                    <DefaultEncodingId>
+                                                        <Identifier>i=7</Identifier>
+                                                    </DefaultEncodingId>
+                                                    <BaseDataType>
+                                                        <Identifier>i=8</Identifier>
+                                                    </BaseDataType>
+                                                    <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                                    <Fields>
+                                                        <StructureField>
+                                                            <Name>One</Name>
+                                                            <Description>
+                                                                <Locale>en-ca</Locale>
+                                                                <Text>Two</Text>
+                                                            </Description>
+                                                            <DataType>
+                                                                <Identifier>i=9</Identifier>
+                                                            </DataType>
+                                                            <ValueRank>-1</ValueRank>
+                                                            <ArrayDimensions/>
+                                                            <MaxStringLength>567</MaxStringLength>
+                                                            <IsOptional>false</IsOptional>
+                                                        </StructureField>
+                                                        <StructureField>
+                                                            <Name>Two</Name>
+                                                            <Description>
+                                                                <Locale>en-ca</Locale>
+                                                                <Text>Two</Text>
+                                                            </Description>
+                                                            <DataType>
+                                                                <Identifier>i=5</Identifier>
+                                                            </DataType>
+                                                            <ValueRank>1</ValueRank>
+                                                            <ArrayDimensions>
+                                                                <UInt32>2</UInt32>
+                                                            </ArrayDimensions>
+                                                            <MaxStringLength>765</MaxStringLength>
+                                                            <IsOptional>true</IsOptional>
+                                                        </StructureField>
+                                                    </Fields>
+                                                </StructureDefinition>
+                                            </StructureDescription>
+                                            <StructureDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=2;i=2223</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>2</NamespaceIndex>
+                                                    <Name>Structure Description Two</Name>
+                                                </Name>
+                                                <StructureDefinition>
+                                                    <DefaultEncodingId>
+                                                        <Identifier>i=8</Identifier>
+                                                    </DefaultEncodingId>
+                                                    <BaseDataType>
+                                                        <Identifier>i=9</Identifier>
+                                                    </BaseDataType>
+                                                    <StructureType>UnionWithSubtypedValues_4</StructureType>
+                                                    <Fields>
+                                                        <StructureField>
+                                                            <Name>Middle One</Name>
+                                                            <Description>
+                                                                <Locale>en-ca</Locale>
+                                                                <Text>One</Text>
+                                                            </Description>
+                                                            <DataType>
+                                                                <Identifier>i=11</Identifier>
+                                                            </DataType>
+                                                            <ValueRank>-1</ValueRank>
+                                                            <ArrayDimensions/>
+                                                            <MaxStringLength>678</MaxStringLength>
+                                                            <IsOptional>false</IsOptional>
+                                                        </StructureField>
+                                                        <StructureField>
+                                                            <Name>Middle Two</Name>
+                                                            <Description>
+                                                                <Locale>en-ca</Locale>
+                                                                <Text>Test Me</Text>
+                                                            </Description>
+                                                            <DataType>
+                                                                <Identifier>i=6</Identifier>
+                                                            </DataType>
+                                                            <ValueRank>1</ValueRank>
+                                                            <ArrayDimensions>
+                                                                <UInt32>3</UInt32>
+                                                            </ArrayDimensions>
+                                                            <MaxStringLength>876</MaxStringLength>
+                                                            <IsOptional>true</IsOptional>
+                                                        </StructureField>
+                                                        <StructureField>
+                                                            <Name>Middle Three</Name>
+                                                            <Description>
+                                                                <Locale>en-ca</Locale>
+                                                                <Text>Three</Text>
+                                                            </Description>
+                                                            <DataType>
+                                                                <Identifier>i=11</Identifier>
+                                                            </DataType>
+                                                            <ValueRank>-1</ValueRank>
+                                                            <ArrayDimensions/>
+                                                            <MaxStringLength>678</MaxStringLength>
+                                                            <IsOptional>false</IsOptional>
+                                                        </StructureField>
+                                                    </Fields>
+                                                </StructureDefinition>
+                                            </StructureDescription>
+                                            <StructureDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=1;i=2224</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>1</NamespaceIndex>
+                                                    <Name>Structure Description Three</Name>
+                                                </Name>
+                                                <StructureDefinition>
+                                                    <DefaultEncodingId>
+                                                        <Identifier>i=7</Identifier>
+                                                    </DefaultEncodingId>
+                                                    <BaseDataType>
+                                                        <Identifier>i=8</Identifier>
+                                                    </BaseDataType>
+                                                    <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                                    <Fields>
+                                                        <StructureField>
+                                                            <Name>One</Name>
+                                                            <Description>
+                                                                <Locale>en-ca</Locale>
+                                                                <Text>Two</Text>
+                                                            </Description>
+                                                            <DataType>
+                                                                <Identifier>i=9</Identifier>
+                                                            </DataType>
+                                                            <ValueRank>-1</ValueRank>
+                                                            <ArrayDimensions/>
+                                                            <MaxStringLength>567</MaxStringLength>
+                                                            <IsOptional>false</IsOptional>
+                                                        </StructureField>
+                                                        <StructureField>
+                                                            <Name>Two</Name>
+                                                            <Description>
+                                                                <Locale>en-ca</Locale>
+                                                                <Text>Two</Text>
+                                                            </Description>
+                                                            <DataType>
+                                                                <Identifier>i=5</Identifier>
+                                                            </DataType>
+                                                            <ValueRank>1</ValueRank>
+                                                            <ArrayDimensions>
+                                                                <UInt32>2</UInt32>
+                                                            </ArrayDimensions>
+                                                            <MaxStringLength>765</MaxStringLength>
+                                                            <IsOptional>true</IsOptional>
+                                                        </StructureField>
+                                                    </Fields>
+                                                </StructureDefinition>
+                                            </StructureDescription>
+                                        </StructureDataTypes>
+                                        <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <EnumDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=3;i=2345</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>0</NamespaceIndex>
+                                                    <Name>An Enum Description</Name>
+                                                </Name>
+                                                <EnumDefinition>
+                                                    <Fields>
+                                                        <EnumField>
+                                                            <Value>45</Value>
+                                                            <DisplayName>
+                                                                <Text>Fourty Five</Text>
+                                                            </DisplayName>
+                                                            <Description>
+                                                                <Locale>en</Locale>
+                                                                <Text>Fourty Five</Text>
+                                                            </Description>
+                                                            <Name>Fourty Five</Name>
+                                                        </EnumField>
+                                                        <EnumField>
+                                                            <Value>46</Value>
+                                                            <DisplayName>
+                                                                <Text>Fourty Six</Text>
+                                                            </DisplayName>
+                                                            <Description>
+                                                                <Locale>en</Locale>
+                                                                <Text>Fourty Six</Text>
+                                                            </Description>
+                                                            <Name>Fourty Six</Name>
+                                                        </EnumField>
+                                                    </Fields>
+                                                </EnumDefinition>
+                                                <BuiltInType>3</BuiltInType>
+                                            </EnumDescription>
+                                            <EnumDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=3;i=2346</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>3</NamespaceIndex>
+                                                    <Name>Another Enum Description</Name>
+                                                </Name>
+                                                <EnumDefinition>
+                                                    <Fields>
+                                                        <EnumField>
+                                                            <Value>55</Value>
+                                                            <DisplayName>
+                                                                <Text>Fifty Five</Text>
+                                                            </DisplayName>
+                                                            <Description>
+                                                                <Locale>en</Locale>
+                                                                <Text>Fifty Five</Text>
+                                                            </Description>
+                                                            <Name>Fifty Five</Name>
+                                                        </EnumField>
+                                                        <EnumField>
+                                                            <Value>56</Value>
+                                                            <DisplayName>
+                                                                <Text>Fifty Six</Text>
+                                                            </DisplayName>
+                                                            <Description>
+                                                                <Locale>en</Locale>
+                                                                <Text>Fifty Six</Text>
+                                                            </Description>
+                                                            <Name>Fifty Six</Name>
+                                                        </EnumField>
+                                                        <EnumField>
+                                                            <Value>57</Value>
+                                                            <DisplayName>
+                                                                <Text>Fifty Seven</Text>
+                                                            </DisplayName>
+                                                            <Description>
+                                                                <Locale>en</Locale>
+                                                                <Text>Fifty Seven</Text>
+                                                            </Description>
+                                                            <Name>Fifty Seven</Name>
+                                                        </EnumField>
+                                                    </Fields>
+                                                </EnumDefinition>
+                                                <BuiltInType>4</BuiltInType>
+                                            </EnumDescription>
+                                            <EnumDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=3;i=2347</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>2</NamespaceIndex>
+                                                    <Name>A Third Enum Description</Name>
+                                                </Name>
+                                                <EnumDefinition>
+                                                    <Fields>
+                                                        <EnumField>
+                                                            <Value>45</Value>
+                                                            <DisplayName>
+                                                                <Text>Fourty Five</Text>
+                                                            </DisplayName>
+                                                            <Description>
+                                                                <Locale>en</Locale>
+                                                                <Text>Fourty Five</Text>
+                                                            </Description>
+                                                            <Name>Fourty Five</Name>
+                                                        </EnumField>
+                                                        <EnumField>
+                                                            <Value>46</Value>
+                                                            <DisplayName>
+                                                                <Text>Fourty Six</Text>
+                                                            </DisplayName>
+                                                            <Description>
+                                                                <Locale>en</Locale>
+                                                                <Text>Fourty Six</Text>
+                                                            </Description>
+                                                            <Name>Fourty Six</Name>
+                                                        </EnumField>
+                                                    </Fields>
+                                                </EnumDefinition>
+                                                <BuiltInType>5</BuiltInType>
+                                            </EnumDescription>
+                                        </EnumDataTypes>
+                                        <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <SimpleTypeDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=3;i=890</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>0</NamespaceIndex>
+                                                    <Name>Simple</Name>
+                                                </Name>
+                                                <BaseDataType>
+                                                    <Identifier>i=7</Identifier>
+                                                </BaseDataType>
+                                                <BuiltInType>7</BuiltInType>
+                                            </SimpleTypeDescription>
+                                            <SimpleTypeDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=3;i=891</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>1</NamespaceIndex>
+                                                    <Name>EvenMoreSimple</Name>
+                                                </Name>
+                                                <BaseDataType>
+                                                    <Identifier>i=8</Identifier>
+                                                </BaseDataType>
+                                                <BuiltInType>8</BuiltInType>
+                                            </SimpleTypeDescription>
+                                            <SimpleTypeDescription>
+                                                <DataTypeId>
+                                                    <Identifier>ns=3;i=892</Identifier>
+                                                </DataTypeId>
+                                                <Name>
+                                                    <NamespaceIndex>0</NamespaceIndex>
+                                                    <Name>LastSimple</Name>
+                                                </Name>
+                                                <BaseDataType>
+                                                    <Identifier>i=9</Identifier>
+                                                </BaseDataType>
+                                                <BuiltInType>9</BuiltInType>
+                                            </SimpleTypeDescription>
+                                        </SimpleDataTypes>
+                                        <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                        <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <FieldMetaData>
+                                                <Name>Field One</Name>
+                                                <Description>
+                                                    <Text>Field One</Text>
+                                                </Description>
+                                                <FieldFlags>0</FieldFlags>
+                                                <BuiltInType>5</BuiltInType>
+                                                <DataType>
+                                                    <Identifier>i=5</Identifier>
+                                                </DataType>
+                                                <ValueRank>-1</ValueRank>
+                                                <ArrayDimensions/>
+                                                <MaxStringLength>67</MaxStringLength>
+                                                <DataSetFieldId>
+                                                    <String>54325432-5432-5432-5432-543254325432</String>
+                                                </DataSetFieldId>
+                                                <Properties>
+                                                    <KeyValuePair>
+                                                        <Key>
+                                                            <NamespaceIndex>2</NamespaceIndex>
+                                                            <Name>PropertyOne</Name>
+                                                        </Key>
+                                                        <Value>
+                                                            <Value>
+                                                                <String>PropertyOne</String>
+                                                            </Value>
+                                                        </Value>
+                                                    </KeyValuePair>
+                                                    <KeyValuePair>
+                                                        <Key>
+                                                            <NamespaceIndex>2</NamespaceIndex>
+                                                            <Name>PropertyTwo</Name>
+                                                        </Key>
+                                                        <Value>
+                                                            <Value>
+                                                                <Int32>2</Int32>
+                                                            </Value>
+                                                        </Value>
+                                                    </KeyValuePair>
+                                                </Properties>
+                                            </FieldMetaData>
+                                            <FieldMetaData>
+                                                <Name>Field Two</Name>
+                                                <Description>
+                                                    <Text>Field Two</Text>
+                                                </Description>
+                                                <FieldFlags>1</FieldFlags>
+                                                <BuiltInType>10</BuiltInType>
+                                                <DataType>
+                                                    <Identifier>i=10</Identifier>
+                                                </DataType>
+                                                <ValueRank>1</ValueRank>
+                                                <ArrayDimensions>
+                                                    <UInt32>3</UInt32>
+                                                </ArrayDimensions>
+                                                <MaxStringLength>333</MaxStringLength>
+                                                <DataSetFieldId>
+                                                    <String>12341234-1234-1234-1234-123412341234</String>
+                                                </DataSetFieldId>
+                                                <Properties>
+                                                    <KeyValuePair>
+                                                        <Key>
+                                                            <NamespaceIndex>0</NamespaceIndex>
+                                                            <Name>PropertyOne</Name>
+                                                        </Key>
+                                                        <Value>
+                                                            <Value>
+                                                                <String>PropertyOne</String>
+                                                            </Value>
+                                                        </Value>
+                                                    </KeyValuePair>
+                                                    <KeyValuePair>
+                                                        <Key>
+                                                            <NamespaceIndex>2</NamespaceIndex>
+                                                            <Name>PropertyTwo</Name>
+                                                        </Key>
+                                                        <Value>
+                                                            <Value>
+                                                                <Int32>2</Int32>
+                                                            </Value>
+                                                        </Value>
+                                                    </KeyValuePair>
+                                                </Properties>
+
+                                            </FieldMetaData>
+                                            <FieldMetaData>
+                                                <Name>Field Three</Name>
+                                                <Description>
+                                                    <Text>Field Three</Text>
+                                                </Description>
+                                                <FieldFlags>0</FieldFlags>
+                                                <BuiltInType>11</BuiltInType>
+                                                <DataType>
+                                                    <Identifier>i=11</Identifier>
+                                                </DataType>
+                                                <ValueRank>1</ValueRank>
+                                                <ArrayDimensions>
+                                                    <UInt32>4</UInt32>
+                                                </ArrayDimensions>
+                                                <MaxStringLength>333</MaxStringLength>
+                                                <DataSetFieldId>
+                                                    <String>23412341-2341-2341-2341-234123412341</String>
+                                                </DataSetFieldId>
+                                                <Properties/>
+                                            </FieldMetaData>
+                                        </Fields>
+                                        <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <String>24682468-2468-2468-2468-246824682468</String>
+                                        </DataSetClassId>
+                                        <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <MajorVersion>3</MajorVersion>
+                                            <MinorVersion>4</MinorVersion>
+                                        </ConfigurationVersion>
+                                    </DataSet>
+                                    <PublishedData>
+                                        <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <Identifier>i=0</Identifier>
+                                        </PublishedVariable>
+                                        <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                        <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                        <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                        <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                        <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                        <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <Value>
+                                                <String>Array Element Two Substitute</String>
+                                            </Value>
+                                        </SubstituteValue>
+                                        <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    </PublishedData>
+                                    <Bool>false</Bool>
+                                    <SByte>0</SByte>
+                                    <Int16>0</Int16>
+                                    <UInt16>0</UInt16>
+                                    <Int32>0</Int32>
+                                    <UInt32>0</UInt32>
+                                    <Int64>0</Int64>
+                                    <UInt64>0</UInt64>
+                                    <Float>0</Float>
+                                    <Double>0</Double>
+                                    <String></String>
+                                    <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                    <Guid>
+                                        <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                    </Guid>
+                                    <ByteString></ByteString>
+                                    <NodeId>
+                                        <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                    </NodeId>
+                                    <StatusCode>
+                                        <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                    </StatusCode>
+                                    <QualifiedName>
+                                        <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                        <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Two</Name>
+                                    </QualifiedName>
+                                    <LocalizedText>
+                                        <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Two</Text>
+                                    </LocalizedText>
+                                </ComprehensiveScalarType>
+                                <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                    <DataSet>
+                                        <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/6/</String>
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/7/</String>
+                                            <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/8/</String>
+                                        </Namespaces>
+                                        <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                        <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                        <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <String>12345678-1234-1234-1234-123456789012</String>
+                                        </DataSetClassId>
+                                        <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <MajorVersion>5</MajorVersion>
+                                            <MinorVersion>6</MinorVersion>
+                                        </ConfigurationVersion>
+                                    </DataSet>
+                                    <PublishedData>
+                                        <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <Identifier>i=0</Identifier>
+                                        </PublishedVariable>
+                                        <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                        <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                        <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                        <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                        <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                        <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                            <Value>
+                                                <String>Array Element Three Substitute</String>
+                                            </Value>
+                                        </SubstituteValue>
+                                        <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    </PublishedData>
+                                    <Bool>false</Bool>
+                                    <SByte>0</SByte>
+                                    <Int16>0</Int16>
+                                    <UInt16>0</UInt16>
+                                    <Int32>0</Int32>
+                                    <UInt32>0</UInt32>
+                                    <Int64>0</Int64>
+                                    <UInt64>0</UInt64>
+                                    <Float>0</Float>
+                                    <Double>987.6543</Double>
+                                    <String></String>
+                                    <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                    <Guid>
+                                        <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                    </Guid>
+                                    <ByteString></ByteString>
+                                    <NodeId>
+                                        <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                    </NodeId>
+                                    <StatusCode>
+                                        <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                    </StatusCode>
+                                    <QualifiedName>
+                                        <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                        <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Three</Name>
+                                    </QualifiedName>
+                                    <LocalizedText>
+                                        <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Three</Text>
+                                    </LocalizedText>
+                                </ComprehensiveScalarType>
+                            </LevelOne>
+                            <Int16>
+                                <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Int16>
+                                <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">1</Int16>
+                                <Int16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2</Int16>
+                            </Int16>
+                            <UInt16>
+                                <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">4</UInt16>
+                                <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">5</UInt16>
+                                <UInt16 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">6</UInt16>
+                            </UInt16>
+                            <DateTime>
+                                <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2007-01-01T00:00:00Z</DateTime>
+                                <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2008-01-01T00:00:00Z</DateTime>
+                                <DateTime xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">2009-01-01T00:00:00Z</DateTime>
+                            </DateTime>
+                            <Guid>
+                                <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <String>10101010-1010-1010-1010-101010101010</String>
+                                </Guid>
+                                <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <String>11001100-1100-1100-1100-110011001100</String>
+                                </Guid>
+                                <Guid xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <String>12001200-1200-1200-1200-120012001200</String>
+                                </Guid>
+                            </Guid>
+                            <ByteString>
+                                <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTM=</ByteString>
+                                <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTQ=</ByteString>
+                                <ByteString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">MTU=</ByteString>
+                            </ByteString>
+                            <NodeId>
+                                <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Identifier>ns=1;i=1</Identifier>
+                                </NodeId>
+                                <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Identifier>ns=2;i=2</Identifier>
+                                </NodeId>
+                                <NodeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Identifier>ns=3;i=3</Identifier>
+                                </NodeId>
+                            </NodeId>
+                            <StatusCode>
+                                <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Code>2147549184</Code>
+                                </StatusCode>
+                                <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Code>2147614720</Code>
+                                </StatusCode>
+                                <StatusCode xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Code>2147680256</Code>
+                                </StatusCode>
+                            </StatusCode>
+                            <QualifiedName>
+                                <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <NamespaceIndex>1</NamespaceIndex>
+                                    <Name>One</Name>
+                                </QualifiedName>
+                                <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <NamespaceIndex>2</NamespaceIndex>
+                                    <Name>Two</Name>
+                                </QualifiedName>
+                                <QualifiedName xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <NamespaceIndex>3</NamespaceIndex>
+                                    <Name>Three</Name>
+                                </QualifiedName>
+                            </QualifiedName>
+                            <LocalizedText>
+                                <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Text>One</Text>
+                                </LocalizedText>
+                                <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Text>Two</Text>
+                                </LocalizedText>
+                                <LocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <Text>Three</Text>
+                                </LocalizedText>
+                            </LocalizedText>
+                        </ArrayAsScalar>
+                        <ScalarAsArray>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/0/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/1/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/2/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>12345678-9012-3456-7890-123456789012</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>1</MajorVersion>
+                                        <MinorVersion>2</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element One Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>987.6543</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element One</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element One</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/3/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/4/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/5/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <StructureDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=1;i=2222</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>1</NamespaceIndex>
+                                                <Name>Structure Description One</Name>
+                                            </Name>
+                                            <StructureDefinition>
+                                                <DefaultEncodingId>
+                                                    <Identifier>i=7</Identifier>
+                                                </DefaultEncodingId>
+                                                <BaseDataType>
+                                                    <Identifier>i=8</Identifier>
+                                                </BaseDataType>
+                                                <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                                <Fields>
+                                                    <StructureField>
+                                                        <Name>One</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Two</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=9</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>-1</ValueRank>
+                                                        <ArrayDimensions/>
+                                                        <MaxStringLength>567</MaxStringLength>
+                                                        <IsOptional>false</IsOptional>
+                                                    </StructureField>
+                                                    <StructureField>
+                                                        <Name>Two</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Two</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=5</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>1</ValueRank>
+                                                        <ArrayDimensions>
+                                                            <UInt32>2</UInt32>
+                                                        </ArrayDimensions>
+                                                        <MaxStringLength>765</MaxStringLength>
+                                                        <IsOptional>true</IsOptional>
+                                                    </StructureField>
+                                                </Fields>
+                                            </StructureDefinition>
+                                        </StructureDescription>
+                                        <StructureDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=2;i=2223</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>2</NamespaceIndex>
+                                                <Name>Structure Description Two</Name>
+                                            </Name>
+                                            <StructureDefinition>
+                                                <DefaultEncodingId>
+                                                    <Identifier>i=8</Identifier>
+                                                </DefaultEncodingId>
+                                                <BaseDataType>
+                                                    <Identifier>i=9</Identifier>
+                                                </BaseDataType>
+                                                <StructureType>UnionWithSubtypedValues_4</StructureType>
+                                                <Fields>
+                                                    <StructureField>
+                                                        <Name>Middle One</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>One</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=11</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>-1</ValueRank>
+                                                        <ArrayDimensions/>
+                                                        <MaxStringLength>678</MaxStringLength>
+                                                        <IsOptional>false</IsOptional>
+                                                    </StructureField>
+                                                    <StructureField>
+                                                        <Name>Middle Two</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Test Me</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=6</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>1</ValueRank>
+                                                        <ArrayDimensions>
+                                                            <UInt32>3</UInt32>
+                                                        </ArrayDimensions>
+                                                        <MaxStringLength>876</MaxStringLength>
+                                                        <IsOptional>true</IsOptional>
+                                                    </StructureField>
+                                                    <StructureField>
+                                                        <Name>Middle Three</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Three</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=11</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>-1</ValueRank>
+                                                        <ArrayDimensions/>
+                                                        <MaxStringLength>678</MaxStringLength>
+                                                        <IsOptional>false</IsOptional>
+                                                    </StructureField>
+                                                </Fields>
+                                            </StructureDefinition>
+                                        </StructureDescription>
+                                        <StructureDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=1;i=2224</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>1</NamespaceIndex>
+                                                <Name>Structure Description Three</Name>
+                                            </Name>
+                                            <StructureDefinition>
+                                                <DefaultEncodingId>
+                                                    <Identifier>i=7</Identifier>
+                                                </DefaultEncodingId>
+                                                <BaseDataType>
+                                                    <Identifier>i=8</Identifier>
+                                                </BaseDataType>
+                                                <StructureType>StructureWithSubtypedValues_3</StructureType>
+                                                <Fields>
+                                                    <StructureField>
+                                                        <Name>One</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Two</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=9</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>-1</ValueRank>
+                                                        <ArrayDimensions/>
+                                                        <MaxStringLength>567</MaxStringLength>
+                                                        <IsOptional>false</IsOptional>
+                                                    </StructureField>
+                                                    <StructureField>
+                                                        <Name>Two</Name>
+                                                        <Description>
+                                                            <Locale>en-ca</Locale>
+                                                            <Text>Two</Text>
+                                                        </Description>
+                                                        <DataType>
+                                                            <Identifier>i=5</Identifier>
+                                                        </DataType>
+                                                        <ValueRank>1</ValueRank>
+                                                        <ArrayDimensions>
+                                                            <UInt32>2</UInt32>
+                                                        </ArrayDimensions>
+                                                        <MaxStringLength>765</MaxStringLength>
+                                                        <IsOptional>true</IsOptional>
+                                                    </StructureField>
+                                                </Fields>
+                                            </StructureDefinition>
+                                        </StructureDescription>
+                                    </StructureDataTypes>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <EnumDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=2345</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>0</NamespaceIndex>
+                                                <Name>An Enum Description</Name>
+                                            </Name>
+                                            <EnumDefinition>
+                                                <Fields>
+                                                    <EnumField>
+                                                        <Value>45</Value>
+                                                        <DisplayName>
+                                                            <Text>Fourty Five</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fourty Five</Text>
+                                                        </Description>
+                                                        <Name>Fourty Five</Name>
+                                                    </EnumField>
+                                                    <EnumField>
+                                                        <Value>46</Value>
+                                                        <DisplayName>
+                                                            <Text>Fourty Six</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fourty Six</Text>
+                                                        </Description>
+                                                        <Name>Fourty Six</Name>
+                                                    </EnumField>
+                                                </Fields>
+                                            </EnumDefinition>
+                                            <BuiltInType>3</BuiltInType>
+                                        </EnumDescription>
+                                        <EnumDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=2346</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>3</NamespaceIndex>
+                                                <Name>Another Enum Description</Name>
+                                            </Name>
+                                            <EnumDefinition>
+                                                <Fields>
+                                                    <EnumField>
+                                                        <Value>55</Value>
+                                                        <DisplayName>
+                                                            <Text>Fifty Five</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fifty Five</Text>
+                                                        </Description>
+                                                        <Name>Fifty Five</Name>
+                                                    </EnumField>
+                                                    <EnumField>
+                                                        <Value>56</Value>
+                                                        <DisplayName>
+                                                            <Text>Fifty Six</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fifty Six</Text>
+                                                        </Description>
+                                                        <Name>Fifty Six</Name>
+                                                    </EnumField>
+                                                    <EnumField>
+                                                        <Value>57</Value>
+                                                        <DisplayName>
+                                                            <Text>Fifty Seven</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fifty Seven</Text>
+                                                        </Description>
+                                                        <Name>Fifty Seven</Name>
+                                                    </EnumField>
+                                                </Fields>
+                                            </EnumDefinition>
+                                            <BuiltInType>4</BuiltInType>
+                                        </EnumDescription>
+                                        <EnumDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=2347</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>2</NamespaceIndex>
+                                                <Name>A Third Enum Description</Name>
+                                            </Name>
+                                            <EnumDefinition>
+                                                <Fields>
+                                                    <EnumField>
+                                                        <Value>45</Value>
+                                                        <DisplayName>
+                                                            <Text>Fourty Five</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fourty Five</Text>
+                                                        </Description>
+                                                        <Name>Fourty Five</Name>
+                                                    </EnumField>
+                                                    <EnumField>
+                                                        <Value>46</Value>
+                                                        <DisplayName>
+                                                            <Text>Fourty Six</Text>
+                                                        </DisplayName>
+                                                        <Description>
+                                                            <Locale>en</Locale>
+                                                            <Text>Fourty Six</Text>
+                                                        </Description>
+                                                        <Name>Fourty Six</Name>
+                                                    </EnumField>
+                                                </Fields>
+                                            </EnumDefinition>
+                                            <BuiltInType>5</BuiltInType>
+                                        </EnumDescription>
+                                    </EnumDataTypes>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <SimpleTypeDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=890</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>0</NamespaceIndex>
+                                                <Name>Simple</Name>
+                                            </Name>
+                                            <BaseDataType>
+                                                <Identifier>i=7</Identifier>
+                                            </BaseDataType>
+                                            <BuiltInType>7</BuiltInType>
+                                        </SimpleTypeDescription>
+                                        <SimpleTypeDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=891</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>1</NamespaceIndex>
+                                                <Name>EvenMoreSimple</Name>
+                                            </Name>
+                                            <BaseDataType>
+                                                <Identifier>i=8</Identifier>
+                                            </BaseDataType>
+                                            <BuiltInType>8</BuiltInType>
+                                        </SimpleTypeDescription>
+                                        <SimpleTypeDescription>
+                                            <DataTypeId>
+                                                <Identifier>ns=3;i=892</Identifier>
+                                            </DataTypeId>
+                                            <Name>
+                                                <NamespaceIndex>0</NamespaceIndex>
+                                                <Name>LastSimple</Name>
+                                            </Name>
+                                            <BaseDataType>
+                                                <Identifier>i=9</Identifier>
+                                            </BaseDataType>
+                                            <BuiltInType>9</BuiltInType>
+                                        </SimpleTypeDescription>
+                                    </SimpleDataTypes>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <FieldMetaData>
+                                            <Name>Field One</Name>
+                                            <Description>
+                                                <Text>Field One</Text>
+                                            </Description>
+                                            <FieldFlags>0</FieldFlags>
+                                            <BuiltInType>5</BuiltInType>
+                                            <DataType>
+                                                <Identifier>i=5</Identifier>
+                                            </DataType>
+                                            <ValueRank>-1</ValueRank>
+                                            <ArrayDimensions/>
+                                            <MaxStringLength>67</MaxStringLength>
+                                            <DataSetFieldId>
+                                                <String>54325432-5432-5432-5432-543254325432</String>
+                                            </DataSetFieldId>
+                                            <Properties>
+                                                <KeyValuePair>
+                                                    <Key>
+                                                        <NamespaceIndex>2</NamespaceIndex>
+                                                        <Name>PropertyOne</Name>
+                                                    </Key>
+                                                    <Value>
+                                                        <Value>
+                                                            <String>PropertyOne</String>
+                                                        </Value>
+                                                    </Value>
+                                                </KeyValuePair>
+                                                <KeyValuePair>
+                                                    <Key>
+                                                        <NamespaceIndex>2</NamespaceIndex>
+                                                        <Name>PropertyTwo</Name>
+                                                    </Key>
+                                                    <Value>
+                                                        <Value>
+                                                            <Int32>2</Int32>
+                                                        </Value>
+                                                    </Value>
+                                                </KeyValuePair>
+                                            </Properties>
+                                        </FieldMetaData>
+                                        <FieldMetaData>
+                                            <Name>Field Two</Name>
+                                            <Description>
+                                                <Text>Field Two</Text>
+                                            </Description>
+                                            <FieldFlags>1</FieldFlags>
+                                            <BuiltInType>10</BuiltInType>
+                                            <DataType>
+                                                <Identifier>i=10</Identifier>
+                                            </DataType>
+                                            <ValueRank>1</ValueRank>
+                                            <ArrayDimensions>
+                                                <UInt32>3</UInt32>
+                                            </ArrayDimensions>
+                                            <MaxStringLength>333</MaxStringLength>
+                                            <DataSetFieldId>
+                                                <String>12341234-1234-1234-1234-123412341234</String>
+                                            </DataSetFieldId>
+                                            <Properties>
+                                                <KeyValuePair>
+                                                    <Key>
+                                                        <NamespaceIndex>0</NamespaceIndex>
+                                                        <Name>PropertyOne</Name>
+                                                    </Key>
+                                                    <Value>
+                                                        <Value>
+                                                            <String>PropertyOne</String>
+                                                        </Value>
+                                                    </Value>
+                                                </KeyValuePair>
+                                                <KeyValuePair>
+                                                    <Key>
+                                                        <NamespaceIndex>2</NamespaceIndex>
+                                                        <Name>PropertyTwo</Name>
+                                                    </Key>
+                                                    <Value>
+                                                        <Value>
+                                                            <Int32>2</Int32>
+                                                        </Value>
+                                                    </Value>
+                                                </KeyValuePair>
+                                            </Properties>
+
+                                        </FieldMetaData>
+                                        <FieldMetaData>
+                                            <Name>Field Three</Name>
+                                            <Description>
+                                                <Text>Field Three</Text>
+                                            </Description>
+                                            <FieldFlags>0</FieldFlags>
+                                            <BuiltInType>11</BuiltInType>
+                                            <DataType>
+                                                <Identifier>i=11</Identifier>
+                                            </DataType>
+                                            <ValueRank>1</ValueRank>
+                                            <ArrayDimensions>
+                                                <UInt32>4</UInt32>
+                                            </ArrayDimensions>
+                                            <MaxStringLength>333</MaxStringLength>
+                                            <DataSetFieldId>
+                                                <String>23412341-2341-2341-2341-234123412341</String>
+                                            </DataSetFieldId>
+                                            <Properties/>
+                                        </FieldMetaData>
+                                    </Fields>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>24682468-2468-2468-2468-246824682468</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>3</MajorVersion>
+                                        <MinorVersion>4</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element Two Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>0</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Two</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Two</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+                            <ComprehensiveScalarType xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                                <DataSet>
+                                    <Namespaces xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/6/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/7/</String>
+                                        <String>http://opcfoundation.org/UA/FX/AML/TESTING/Unavailable/8/</String>
+                                    </Namespaces>
+                                    <StructureDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <EnumDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <SimpleDataTypes xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></Name>
+                                    <Description xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <Fields xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                    <DataSetClassId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <String>12345678-1234-1234-1234-123456789012</String>
+                                    </DataSetClassId>
+                                    <ConfigurationVersion xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <MajorVersion>5</MajorVersion>
+                                        <MinorVersion>6</MinorVersion>
+                                    </ConfigurationVersion>
+                                </DataSet>
+                                <PublishedData>
+                                    <PublishedVariable xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Identifier>i=0</Identifier>
+                                    </PublishedVariable>
+                                    <AttributeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</AttributeId>
+                                    <SamplingIntervalHint xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</SamplingIntervalHint>
+                                    <DeadbandType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandType>
+                                    <DeadbandValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</DeadbandValue>
+                                    <IndexRange xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"></IndexRange>
+                                    <SubstituteValue xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                        <Value>
+                                            <String>Array Element Three Substitute</String>
+                                        </Value>
+                                    </SubstituteValue>
+                                    <MetaDataProperties xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd"/>
+                                </PublishedData>
+                                <Bool>false</Bool>
+                                <SByte>0</SByte>
+                                <Int16>0</Int16>
+                                <UInt16>0</UInt16>
+                                <Int32>0</Int32>
+                                <UInt32>0</UInt32>
+                                <Int64>0</Int64>
+                                <UInt64>0</UInt64>
+                                <Float>0</Float>
+                                <Double>987.6543</Double>
+                                <String></String>
+                                <DateTime>1900-01-01T00:00:00Z</DateTime>
+                                <Guid>
+                                    <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">00000000-0000-0000-0000-000000000000</String>
+                                </Guid>
+                                <ByteString></ByteString>
+                                <NodeId>
+                                    <Identifier xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">i=0</Identifier>
+                                </NodeId>
+                                <StatusCode>
+                                    <Code xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</Code>
+                                </StatusCode>
+                                <QualifiedName>
+                                    <NamespaceIndex xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</NamespaceIndex>
+                                    <Name xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Three</Name>
+                                </QualifiedName>
+                                <LocalizedText>
+                                    <Text xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Array Element Three</Text>
+                                </LocalizedText>
+                            </ComprehensiveScalarType>
+
+
+
+                        </ScalarAsArray>
+                    </ComplexComprehensiveType>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+
+
+
     <UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5001" BrowseName="Default Binary">
         <DisplayName>Default Binary</DisplayName>
         <References>
@@ -690,7 +3245,7 @@
                                     <uax:Name>anothername</uax:Name>
                                 </uax:QualifiedName>
                             </uax:MetaDataProperties>
-                    </uax:PublishedVariableDataType>
+                        </uax:PublishedVariableDataType>
                     </uax:Body>
                 </uax:ExtensionObject>
                 <uax:ExtensionObject>
