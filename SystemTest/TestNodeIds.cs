@@ -22,57 +22,128 @@ namespace SystemTest
 
         #region Tests
         [TestMethod]
-        [DataRow("GuidNodeIdWithAcutalGuidId", "0EB66E95-DCED-415F-B8EC-43ED3F0C759B", IdType.Guid)]
-        [DataRow("NumericNodeIdWithActualNumericId", "12345", IdType.Numeric)]
-        [DataRow("OpaqueNodeIdWithActualOpaqueId", "T3BhcXVlTm9kZUlk", IdType.Opaque)]
-        [DataRow("StringNodeIdWithActualStringId", "StringNodeId", IdType.String)]
-        public void TestNodeIdentifierTypes(string internelElemantName, string nodeId, IdType idType)
+        [DataRow( "GuidNodeIdWithActualGuidId", "0EB66E95-DCED-415F-B8EC-43ED3F0C759B", IdType.Guid )]
+        [DataRow( "NumericNodeIdWithActualNumericId", "12345", IdType.Numeric )]
+        [DataRow( "OpaqueNodeIdWithActualOpaqueId", "T3BhcXVlTm9kZUlk", IdType.Opaque )]
+        [DataRow( "StringNodeIdWithActualStringId", "StringNodeId", IdType.String )]
+        [DataRow( "ThereIsNoValue", "ThereIsNoValue", IdType.String, false )]
+        public void TestNodeIdentifierTypes( string internalElementName, string nodeId, IdType idType, bool hasValue = true )
         {
-            InternalElementType testInternalElement = findInternalElementByName(internelElemantName);
-            Assert.IsNotNull(testInternalElement, "Could not find test object");
-            var nodeIdAttribute = testInternalElement.Attribute.FirstOrDefault(childElement => childElement.Name == "NodeId");
-            Assert.IsNotNull(nodeIdAttribute, "Unable to find nodeId attribute");
-            var rootNodeIdAttribute = nodeIdAttribute.Attribute.FirstOrDefault(childElement => childElement.Name == "RootNodeId");
-            Assert.IsNotNull(rootNodeIdAttribute, "Unable to find rootNodeId attribute");
-            switch (idType)
+            InternalElementType testInternalElement = findInternalElementByName( internalElementName );
+            Assert.IsNotNull( testInternalElement, "Could not find test object" );
+
+            var nodeIdAttribute = testInternalElement.Attribute.FirstOrDefault( childElement => childElement.Name == "NodeId" );
+            Assert.IsNotNull( nodeIdAttribute, "Unable to find nodeId attribute" );
+            var rootNodeIdAttribute = nodeIdAttribute.Attribute.FirstOrDefault( childElement => childElement.Name == "RootNodeId" );
+            Assert.IsNotNull( rootNodeIdAttribute, "Unable to find rootNodeId attribute" );
+
+            string idName = Enum.GetName( typeof( IdType ), idType ) + "Id";
+
+            AttributeType specificAttribute = rootNodeIdAttribute.Attribute.FirstOrDefault( 
+                childElement => childElement.Name == idName );
+            Assert.IsNotNull( specificAttribute, "Unable to find " + idName + " attribute" );
+            Assert.AreEqual( nodeId, specificAttribute.Value.ToString(), true );
+            ValidateNodeId( rootNodeIdAttribute, idType );
+
+            AttributeType valueAttribute = testInternalElement.Attribute[ "Value" ];
+            Assert.IsNotNull( valueAttribute, "Could not find test value object" );
+            AttributeType valueRootNodeId = valueAttribute.Attribute[ "RootNodeId" ];
+            Assert.IsNotNull( valueRootNodeId, "Could not find test value object" );
+
+            AttributeType specificValueAttribute = valueRootNodeId.Attribute.FirstOrDefault( 
+                childElement => childElement.Name == idName );
+            Assert.IsNotNull( specificValueAttribute, "Unable to find " + idName + " value attribute" );
+            if( hasValue )
             {
-                case IdType.Opaque:
-                    var opaqueNodeIdAttribute = rootNodeIdAttribute.Attribute.FirstOrDefault(childElement => childElement.Name == "OpaqueId");
-                    Assert.IsNotNull(opaqueNodeIdAttribute, "Unable to find opaqueNodeId attribute");
-                    Assert.AreEqual(nodeId, opaqueNodeIdAttribute.Value.ToString(), true);
+                Assert.AreEqual( nodeId, specificValueAttribute.Value.ToString(), true );
+                ValidateNodeId( valueRootNodeId, idType );
+            }
+            else
+            {
+                ValidNoNode( valueRootNodeId );
+            }
+        }
+
+        private void ValidateNodeId( AttributeType rootNodeId, IdType idType )
+        {
+            AttributeType namespaceUri = rootNodeId.Attribute[ "NamespaceUri" ];
+            Assert.IsNotNull( namespaceUri );
+            Assert.IsNotNull( namespaceUri.Value );
+            Assert.AreNotEqual( 0, namespaceUri.Value.Length );
+
+            AttributeType numericId = rootNodeId.Attribute[ "NumericId" ];
+            AttributeType stringId = rootNodeId.Attribute[ "StringId" ];
+            AttributeType guidId = rootNodeId.Attribute[ "GuidId" ];
+            AttributeType opaqueId = rootNodeId.Attribute[ "OpaqueId" ];
+
+            switch( idType )
+            {
+                case IdType.Numeric:
+                    Assert.IsNotNull( numericId );
+                    Assert.IsNotNull( numericId.Value );
+                    Assert.AreNotEqual( 0, numericId.Value.Length );
+                    Assert.IsNull( stringId );
+                    Assert.IsNull( guidId );
+                    Assert.IsNull( opaqueId );
                     break;
 
                 case IdType.String:
-                    var stringNodeIdAttribute = rootNodeIdAttribute.Attribute.FirstOrDefault(childElement => childElement.Name == "StringId");
-                    Assert.IsNotNull(stringNodeIdAttribute, "Unable to find stringNodeId attribute");
-                    Assert.AreEqual(nodeId, stringNodeIdAttribute.Value.ToString());
+                    Assert.IsNull( numericId );
+                    Assert.IsNotNull( stringId );
+                    Assert.IsNotNull( stringId.Value );
+                    Assert.AreNotEqual( 0, stringId.Value.Length );
+                    Assert.IsNull( guidId );
+                    Assert.IsNull( opaqueId );
                     break;
 
                 case IdType.Guid:
-                    var guidNodeIdAttribute = rootNodeIdAttribute.Attribute.FirstOrDefault(childElement => childElement.Name == "GuidId");
-                    Assert.IsNotNull(guidNodeIdAttribute, "Unable to find guidNodeId attribute");
-                    Assert.AreEqual(nodeId, guidNodeIdAttribute.Value.ToString(), true);
+                    Assert.IsNull( numericId );
+                    Assert.IsNull( stringId );
+                    Assert.IsNotNull( guidId );
+                    Assert.IsNotNull( guidId.Value );
+                    Assert.AreNotEqual( 0, guidId.Value.Length );
+                    Assert.IsNull( opaqueId );
                     break;
 
-                case IdType.Numeric:
-                    var numericNodeIdAttribute = rootNodeIdAttribute.Attribute.FirstOrDefault(childElement => childElement.Name == "NumericId");
-                    Assert.IsNotNull(numericNodeIdAttribute, "Unable to find numericNodeId attribute");
-                    Assert.AreEqual(nodeId, numericNodeIdAttribute.Value.ToString());
+                case IdType.Opaque:
+                    Assert.IsNull( numericId );
+                    Assert.IsNull( stringId );
+                    Assert.IsNull( guidId );
+                    Assert.IsNotNull( opaqueId );
+                    Assert.IsNotNull( opaqueId.Value );
+                    Assert.AreNotEqual( 0, opaqueId.Value.Length );
                     break;
             }
         }
+
+        private void ValidNoNode( AttributeType rootNodeId )
+        {
+            ValidateAttributeEmpty( rootNodeId, "NamespaceUri" );
+            ValidateAttributeEmpty( rootNodeId, "NumericId" );
+            ValidateAttributeEmpty( rootNodeId, "StringId" );
+            ValidateAttributeEmpty( rootNodeId, "GuidId" );
+            ValidateAttributeEmpty( rootNodeId, "OpaqueId" );
+        }
+
+        private void ValidateAttributeEmpty( AttributeType source, string attributeName )
+        {
+            AttributeType attribute = source.Attribute[ attributeName ];
+            Assert.IsNotNull( attribute );
+            Assert.IsNull( attribute.Value );
+        }
+
         #endregion
 
         #region Helpers
 
-        public InternalElementType? findInternalElementByName(string internelElemantName)
+        public InternalElementType? findInternalElementByName( string internelElemantName )
         {
-            foreach (var instanceHierarchy in GetDocument().CAEXFile.InstanceHierarchy)
+            foreach( var instanceHierarchy in GetDocument().CAEXFile.InstanceHierarchy )
             {
                 // browse all InternalElements deep and find element with name "FxRoot"
-                foreach (var internalElement in instanceHierarchy.Descendants<InternalElementType>())
+                foreach( var internalElement in instanceHierarchy.Descendants<InternalElementType>() )
                 {
-                    if (internalElement.Name.Equals(internelElemantName)) return internalElement;
+                    if( internalElement.Name.Equals( internelElemantName ) ) return internalElement;
                 }
             }
 
@@ -89,7 +160,6 @@ namespace SystemTest
             Assert.IsNotNull( m_document, "Unable to retrieve Document" );
             return m_document;
         }
-
 
         #endregion
     }
