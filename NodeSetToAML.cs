@@ -109,6 +109,10 @@ namespace MarkdownProcessor
         private Dictionary<string, Dictionary<string,string>> LookupNames = new Dictionary<string, Dictionary<string, string>>();
         private HashSet<string> ExtensionObjectExclusions = null;
 
+        private Dictionary<string, Dictionary<string, DataTypeField>> ReferenceAttributeMap = 
+            new Dictionary<string, Dictionary<string, DataTypeField>>();
+        private readonly string[] NodeId_IdAttributeNames = { "NumericId", "StringId", "GuidId", "OpaqueId" };
+
         private List<string> PreventInfiniteRecursionList = new List<string>();
         private const int ua2xslookup_count = 18;
         private const int ua2xslookup_uaname = 0;
@@ -820,6 +824,8 @@ namespace MarkdownProcessor
                                     }
                                     a.DefaultValue = null;
                                     a.Value = null;
+
+                                    MinimizeExplicitNodeId( rootNodeId );
                                 }
 
                                 if ( expandedNodeId != null )
@@ -947,8 +953,8 @@ namespace MarkdownProcessor
                     {
                         // this is specifically the variant case
                         NodeId dataTypeFromBase = new NodeId( (uint)val.TypeInfo.BuiltInType );
-                        string sdfsd = GetAttributeDataType( dataTypeFromBase );
-                        a.AttributeDataType = sdfsd;
+                        string variantDataType = GetAttributeDataType( dataTypeFromBase );
+                        a.AttributeDataType = variantDataType;
                     }
                 }
             }
@@ -956,7 +962,54 @@ namespace MarkdownProcessor
             return a;
         }
 
-        private Dictionary<string, Dictionary<string, DataTypeField>> ReferenceAttributeMap = new Dictionary<string, Dictionary<string, DataTypeField>>();
+        private bool MinimizeExplicitNodeId( AttributeType explicitNodeIdAttribute )
+        {
+            bool minimized = false;
+
+            if( explicitNodeIdAttribute != null )
+            {
+                string path = ATLPrefix + MetaModelName + "/ExplicitNodeId";
+                if( explicitNodeIdAttribute.RefAttributeType.Equals( path ) )
+                {
+                    // If NamespaceUri is empty, don't do anything, for nothing is set, and cannot minimize
+                    AttributeType namespaceUri = explicitNodeIdAttribute.Attribute[ "NamespaceUri" ];
+                    if( namespaceUri != null && namespaceUri.Value.Length > 0 )
+                    {
+                        string keepAttributeName = string.Empty;
+                        foreach( string idAttributeName in NodeId_IdAttributeNames )
+                        {
+                            AttributeType nodeIdTypeAttribute = explicitNodeIdAttribute.Attribute[ idAttributeName ];
+                            if( nodeIdTypeAttribute != null &&
+                                nodeIdTypeAttribute.Value != null &&
+                                nodeIdTypeAttribute.Value.Length > 0 )
+                            {
+                                keepAttributeName = idAttributeName;
+                                minimized = true;
+                                break;
+                            }
+                        }
+
+                        if( keepAttributeName != string.Empty )
+                        {
+                            foreach( string idAttributeName in NodeId_IdAttributeNames )
+                            {
+                                if( !idAttributeName.Equals( keepAttributeName ) )
+                                {
+                                    AttributeType nodeIdTypeAttribute = explicitNodeIdAttribute.Attribute[ idAttributeName ];
+                                    if( nodeIdTypeAttribute != null )
+                                    {
+                                        explicitNodeIdAttribute.Attribute.RemoveElement( nodeIdTypeAttribute );
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return minimized;
+        }
+
 
         private Dictionary<string, DataTypeField> CreateFieldReferenceTypes( AttributeType attribute, NodeId typeNodeId )
         {
@@ -2757,11 +2810,6 @@ namespace MarkdownProcessor
                 ie.Name = toAdd.DecodedBrowseName.Name;
                 AddBaseNodeClassAttributes(ie.Attribute, toAdd);
                 
-                AttributeType a = ie.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
-                a.AttributeDataType = "xs:anyURI";
-                
-                ie.Attribute["UaNodeNamespaceUri"].Value = m_modelManager.FindModelUri(toAdd.DecodedNodeId);
-
                 parent.Insert(ie);
 
             }
