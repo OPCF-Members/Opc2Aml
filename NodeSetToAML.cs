@@ -2810,11 +2810,6 @@ namespace MarkdownProcessor
                 ie.Name = toAdd.DecodedBrowseName.Name;
                 AddBaseNodeClassAttributes(ie.Attribute, toAdd);
                 
-                AttributeType a = ie.Attribute.Append("UaNodeNamespaceUri");  //bucket for the namespace URI of the node when present on an instance node
-                a.AttributeDataType = "xs:anyURI";
-                
-                ie.Attribute["UaNodeNamespaceUri"].Value = m_modelManager.FindModelUri(toAdd.DecodedNodeId);
-
                 parent.Insert(ie);
 
             }
