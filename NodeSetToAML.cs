@@ -2539,10 +2539,13 @@ namespace MarkdownProcessor
                 Opc.Ua.LocalizedText[] OptionSetValues = OptionSets.DecodedValue.Value as Opc.Ua.LocalizedText[];
                 foreach (var OptionSetValue in OptionSetValues)
                 {
-                    AttributeType a = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
-                    a.Name = OptionSetValue.Text;
-                    a.AttributeDataType = "xs:boolean";
-                    att.Attribute.Insert(a, false);
+                    if( OptionSetValue.Text != null && OptionSetValue.Text.Length > 0 )
+                    {
+                        AttributeType a = new AttributeType( new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+                        a.Name = OptionSetValue.Text;
+                        a.AttributeDataType = "xs:boolean";
+                        att.Attribute.Insert( a, false );
+                    }
                 }
             }
             
