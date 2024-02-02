@@ -30,27 +30,34 @@
 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using Opc.Ua;
+using System.Diagnostics;
+using System.IO;
+using System.IO.Packaging;
+using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Xml;
+using System.Xml.Linq;
+
+using Aml.Engine.Adapter;
 using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
+
+using MarkdownProcessor.NodeSet;
 using UANode = MarkdownProcessor.NodeSet.UANode;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
 using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
 using DataTypeField = MarkdownProcessor.NodeSet.DataTypeField;
-using Aml.Engine.Adapter;
-using System.Xml.Linq;
-using System.Linq;
-using System.Diagnostics;
-using System.Net;
+
 using NodeSetToAmlUtils;
-using System.Collections;
-using System.Reflection;
-using MarkdownProcessor.NodeSet;
-using System.Xml;
-using Microsoft.AspNetCore.Identity;
+
+using Opc.Ua;
+using static Aml.Engine.AmlObjects.AutomationMLContainer;
+
 
 namespace MarkdownProcessor
 {
@@ -184,8 +191,10 @@ namespace MarkdownProcessor
             }
             MyModelInfoList.Add(m_modelManager.DefaultModel);
 
-            foreach (var modelInfo in MyModelInfoList)
+            foreach( ModelInfo modelInfo in MyModelInfoList)
             {
+                Debug.WriteLine(modelName + " Model " + modelInfo.ModelName + " index " + modelInfo.NamespaceIndex + " uri " + modelInfo.NamespaceUri );
+
                 AttributeTypeLibType atl = null;
                 InterfaceClassLibType icl = null;
                 RoleClassLibType rcl = null;
@@ -328,6 +337,8 @@ namespace MarkdownProcessor
             var container = new AutomationMLContainer(modelName + ".amlx", System.IO.FileMode.Create);
             container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + modelName + ".aml", UriKind.Relative));
             container.Close();
+
+            MultiFile( m_cAEXDocument, modelName, MyModelInfoList );
         }
 
         private void AddLibraryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
@@ -3214,5 +3225,253 @@ namespace MarkdownProcessor
         }
 
         #endregion
+
+        #region Multi File
+
+        private void MultiFile( CAEXDocument document, string modelName, List<ModelInfo> modelInfoList )
+        {
+            Dictionary<int, ModelInfo> keys = new Dictionary<int, ModelInfo>();
+            Dictionary<string, CAEXDocument> documents = new Dictionary<string, CAEXDocument>();
+            foreach( ModelInfo modelInfo in modelInfoList )
+            {
+                documents.Add( modelInfo.NamespaceUri, CAEXDocument.New_CAEXDocument() );
+                keys.Add( modelInfo.NamespaceIndex, modelInfo );
+            }
+
+            #region Split
+
+            foreach( SystemUnitClassLibType systemUnitClass in document.CAEXFile.SystemUnitClassLib )
+            {
+                Debug.WriteLine( modelName + " SUC " + systemUnitClass.Name );
+
+                string key = GetTypeKeyName( systemUnitClass.Name, SUCPrefix );
+
+                CAEXDocument targetDocument;
+                if( documents.TryGetValue( key, out targetDocument ) )
+                {
+                    targetDocument.CAEXFile.SystemUnitClassLib.Insert( systemUnitClass );
+                }
+                else
+                {
+                    throw new Exception( "SystemUnitClass should not happen" );
+                }
+            }
+
+            foreach( RoleClassLibType roleClass in document.CAEXFile.RoleClassLib )
+            {
+                string key = GetTypeKeyName( roleClass.Name, RCLPrefix );
+
+                CAEXDocument targetDocument;
+                if( documents.TryGetValue( key, out targetDocument ) )
+                {
+                    targetDocument.CAEXFile.RoleClassLib.Insert( roleClass );
+                }
+                else
+                {
+                    throw new Exception( "RoleClassLib should not happen" );
+                }
+            }
+
+            foreach( InterfaceClassLibType interfaceType in document.CAEXFile.InterfaceClassLib )
+            {
+                Debug.WriteLine( modelName + " Interface " + interfaceType.Name );
+                string key = GetTypeKeyName( interfaceType.Name, ICLPrefix );
+
+                CAEXDocument targetDocument;
+                if( documents.TryGetValue( key, out targetDocument ) )
+                {
+                    targetDocument.CAEXFile.InterfaceClassLib.Insert( interfaceType );
+                }
+                else
+                {
+                    throw new Exception( "InterfaceClassLib should not happen" );
+                }
+            }
+
+            foreach( AttributeTypeLibType attribute in document.CAEXFile.AttributeTypeLib )
+            {
+                Debug.WriteLine( modelName + " Attribute " + attribute.Name );
+
+                string key = GetTypeKeyName( attribute.Name, ATLPrefix );
+
+                CAEXDocument targetDocument;
+                if( documents.TryGetValue( key, out targetDocument ) )
+                {
+                    targetDocument.CAEXFile.AttributeTypeLib.Insert( attribute );
+                }
+                else
+                {
+                    throw new Exception( "AttributeLib should not happen" );
+                }
+
+            }
+
+            CAEXDocument instanceDocument;
+            ModelInfo instanceModelInfo;
+
+            if( !keys.TryGetValue( 1, out instanceModelInfo ) )
+            {
+                if ( keys.TryGetValue( 0, out instanceModelInfo ) )
+                {
+                    
+                }
+            }
+
+            if( documents.TryGetValue( instanceModelInfo.NamespaceUri, out instanceDocument ) )
+            {
+                foreach( InstanceHierarchyType instance in document.CAEXFile.InstanceHierarchy )
+                {
+                    instanceDocument.CAEXFile.InstanceHierarchy.Insert( instance );
+                }
+            }
+            else
+            {
+                throw new Exception( "Unable to get instance layer" );
+            }
+
+            #endregion
+
+            #region WorkingDirectory
+
+            string workingDirectoryName = "./" + modelName + "_Working";
+            DirectoryInfo workingDirectory = new DirectoryInfo( workingDirectoryName );
+            if( !workingDirectory.Exists )
+            {
+                Directory.CreateDirectory( workingDirectory.FullName );
+                workingDirectory = new DirectoryInfo( workingDirectory.FullName );
+            }
+
+            FileInfo[] amlxFiles = workingDirectory.GetFiles( "*.amlx" );
+            foreach( FileInfo amlxFile in amlxFiles )
+            {
+                if( amlxFile.Exists )
+                {
+                    try
+                    {
+                        File.Delete( amlxFile.FullName );
+                    }
+                    catch( Exception ex )
+                    {
+                        // Unable to delete file.  Probably unable to continue
+                        bool badStuff = true;
+                    }
+                }
+            }
+
+
+            #endregion
+
+            string previousName = ProcessContainer( keys, documents, workingDirectory, index: 0, String.Empty );
+
+            for( int index = 2; index < modelInfoList.Count; index++ )
+            {
+                // Add the previous container as a part
+                previousName = ProcessContainer( keys, documents, workingDirectory, index, previousName );
+            }
+
+            ProcessContainer( keys, documents, workingDirectory, 1, previousName );
+        }
+
+        private string GetTypeKeyName( string name, string prefix )
+        {
+            string key = name;
+
+            if ( name.StartsWith( prefix ) )
+            {
+                key = name.Replace(prefix, string.Empty);
+            }
+
+            if ( key.StartsWith( MetaModelName ) ||
+                key.StartsWith( "AutomationML" ) )
+            {
+                key = Opc.Ua.Namespaces.OpcUa;
+            }
+
+            return key;
+        }
+
+        private string ProcessContainer(
+            Dictionary<int, ModelInfo> keys,
+            Dictionary<string, CAEXDocument> documents, 
+            DirectoryInfo workingDirectory,
+            int index,
+            string previousName)
+        {
+            Debug.WriteLine( "ProcessSomething [" + index.ToString() + "] Previous " + previousName );
+            string lastProcessedName = string.Empty;
+
+            CAEXDocument document = null;
+            ModelInfo lastModelInfo;
+
+            if( keys.TryGetValue( index, out lastModelInfo ) )
+            {
+                documents.TryGetValue( lastModelInfo.NamespaceUri, out document );
+            }
+
+            if( document != null )
+            {
+                lastProcessedName = lastModelInfo.NodeSetPath;
+
+                string lastPath = Path.Combine( workingDirectory.FullName, lastModelInfo.NodeSetPath + ".amlx" );
+                Stream lastStream = document.SaveToStream( prettyPrint: true );
+                AutomationMLContainer lastContainer = new AutomationMLContainer( lastPath, FileMode.Create );
+                Uri rootDocumentUri = new Uri( "/" + lastModelInfo.NodeSetPath + ".aml", UriKind.Relative );
+                lastContainer.AddRoot( lastStream, rootDocumentUri );
+                lastStream.Seek( 0, SeekOrigin.Begin );
+                lastContainer.Close();
+
+                if( previousName != string.Empty )
+                {
+                    string embedPath = Path.Combine( workingDirectory.FullName, "Embed_" + lastModelInfo.NodeSetPath + ".amlx" );
+                    AutomationMLContainer embedLastContainer = new AutomationMLContainer( embedPath, FileMode.Create );
+                    Uri lastDocumentUri = new Uri( "/" + lastModelInfo.NodeSetPath + ".aml", UriKind.Relative );
+                    embedLastContainer.AddRoot( lastStream, lastDocumentUri );
+
+
+                    // Load last stream
+                    string documentPath = Path.Combine( workingDirectory.FullName, "Embed_" + previousName + ".amlx" );
+                    FileInfo existingDocument = new FileInfo( documentPath );
+                    if( !existingDocument.Exists )
+                    {
+                        documentPath = Path.Combine( workingDirectory.FullName, previousName + ".amlx" );
+                    }
+
+                    FileStream previousStream = new FileStream( documentPath, FileMode.Open, FileAccess.Read );
+                    Uri embeddedAmlxUri = new Uri( "/" + previousName + ".amlx", UriKind.Relative );
+
+                    AddPackagePart( embedLastContainer.Package, previousStream, embeddedAmlxUri );
+
+                    embedLastContainer.Close();
+                }
+
+                lastStream.Close();
+            }
+
+            return lastProcessedName;
+        }
+
+        private PackagePart AddPackagePart(Package package, Stream stream, Uri partUri)
+        {
+            PackagePart packagePart = package.CreatePart( partUri, 
+                AutomationMLContainer.RelationshipType.Library.MimeType, CompressionOption.Normal );
+            
+            if ( packagePart != null )
+            {
+                if( stream.CanSeek )
+                {
+                    stream.Seek( 0L, SeekOrigin.Begin );
+                }
+
+                using Stream destination = packagePart.GetStream();
+                stream.CopyTo( destination );
+
+                package.CreateRelationship( partUri, TargetMode.Internal, "http://schemas.opcfoundation.org/container/relationship/EmbeddedDescriptor" );
+            }
+
+            return packagePart;
+        }
+
+        #endregion
     }
+
 }
