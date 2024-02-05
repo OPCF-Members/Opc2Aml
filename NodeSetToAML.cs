@@ -1325,29 +1325,32 @@ namespace MarkdownProcessor
             NodeId refDataType,
             Variant val )
         {
-            byte builtInTypeByte = (byte)val.Value;
-            string builtInTypeName = Enum.GetName( typeof( BuiltInType ), builtInTypeByte );
-
-            string path = BuildLibraryReference( ATLPrefix, MetaModelName, "BuiltInType" );
-            CAEXObject builtInTypeObject = m_cAEXDocument.FindByPath( path );
-            AttributeFamilyType attributeDefinition = builtInTypeObject as AttributeFamilyType;
-
             AttributeType createAttribute = null;
 
-            if ( attributeDefinition != null )
+            if( val.TypeInfo.BuiltInType.Equals( BuiltInType.Byte ) )
             {
-                createAttribute = seq[ "BuiltInType" ];
-                if( createAttribute == null )
+                byte builtInTypeByte = (byte)val.Value;
+                string builtInTypeName = Enum.GetName( typeof( BuiltInType ), builtInTypeByte );
+
+                string path = BuildLibraryReference( ATLPrefix, MetaModelName, "BuiltInType" );
+                CAEXObject builtInTypeObject = m_cAEXDocument.FindByPath( path );
+                AttributeFamilyType attributeDefinition = builtInTypeObject as AttributeFamilyType;
+
+
+                if( attributeDefinition != null )
                 {
-                    createAttribute = seq.Append( "BuiltInType" );
+                    createAttribute = seq[ "BuiltInType" ];
+                    if( createAttribute == null )
+                    {
+                        createAttribute = seq.Append( "BuiltInType" );
+                    }
+
+                    createAttribute.RecreateAttributeInstance( attributeDefinition );
+                    createAttribute.Name = "BuiltInType";
+                    createAttribute.Value = builtInTypeName;
+                    createAttribute.AttributeDataType = "xs:string";
                 }
-
-                createAttribute.RecreateAttributeInstance( attributeDefinition );
-                createAttribute.Name = "BuiltInType";
-                createAttribute.Value = builtInTypeName;
-                createAttribute.AttributeDataType = "xs:string";
             }
-
             return createAttribute;
         }
 
