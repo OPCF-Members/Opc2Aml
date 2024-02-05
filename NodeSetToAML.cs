@@ -186,6 +186,8 @@ namespace MarkdownProcessor
 
             foreach (var modelInfo in MyModelInfoList)
             {
+                Debug.WriteLine( modelName + " Model Info [" + modelInfo.NamespaceUri + "]" );
+
                 AttributeTypeLibType atl = null;
                 InterfaceClassLibType icl = null;
                 RoleClassLibType rcl = null;
@@ -1356,9 +1358,10 @@ namespace MarkdownProcessor
         {
             AttributeType attributeType = null;
 
-            if( val.TypeInfo != null )
+            if( val.TypeInfo != null && val.TypeInfo.BuiltInType == BuiltInType.Int32 )
             {
                 int enumerationValue = -1;
+
                 if( val.TypeInfo.ValueRank == ValueRanks.Scalar )
                 {
                     enumerationValue = (int)val.Value;
@@ -2103,11 +2106,9 @@ namespace MarkdownProcessor
             return createdPathName;
         }
 
-        private string EqualizeParentNodeId(UAInstance node)
+        private string EqualizeParentNodeId(UAInstance node,  string parentNodeId)
         {
-            string parentNodeId = node.ParentNodeId;
-
-            string[] parentSplit = node.ParentNodeId.Split(";");
+            string[] parentSplit = parentNodeId.Split(";");
             if ( parentSplit.Length > 1)
             {
                 ModelInfo modelInfo = m_modelManager.FindModel(node.DecodedNodeId);
@@ -2125,11 +2126,38 @@ namespace MarkdownProcessor
             if (pathName.Length == 0)
             {
                 UAInstance uaInstance = node as UAInstance;
-                if (uaInstance != null)
+                if (uaInstance != null  )
                 {
-                    if (uaInstance.ParentNodeId.Length > 0)
+                    string parentNodeIdString = string.Empty;
+
+                    if ( uaInstance.ParentNodeId != null )
                     {
-                        string parentNodeId = EqualizeParentNodeId(uaInstance);
+                        parentNodeIdString = uaInstance.ParentNodeId;
+                    }
+                    else
+                    {
+                        var refList = m_modelManager.FindReferences( node.DecodedNodeId );
+                        int reversePropertyCount = 0;
+                        foreach( var reference in refList )
+                        {
+                            if( reference.IsForward == false && 
+                                ( reference.ReferenceTypeId.Equals(HasPropertyNodeId) ||
+                                reference.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.HasComponent ) ) )
+                            {
+                                UANode parentNodeId = m_modelManager.FindNode<UANode>( reference.TargetId );
+                                if ( parentNodeId != null )
+                                {
+                                    parentNodeIdString = parentNodeId.NodeId;
+                                }
+
+                                reversePropertyCount++;
+                            }
+                        }
+                    }
+
+                    if ( parentNodeIdString.Length > 0)
+                    {
+                        string parentNodeId = EqualizeParentNodeId(uaInstance, parentNodeIdString);
                         UANode parentNode = FindNode<NodeSet.UANode>(new NodeId(parentNodeId));
                         pathName = GetCreatedPathName(parentNode);
                     }

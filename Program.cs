@@ -27,10 +27,16 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
+
+// Disabling this define allows the program to bypass the try/catch
+// for better debugging error scenarios
+#define ENABLE_PROGRAM_EXCEPTION
+
 using System;
 using System.IO;
 using System.Collections.Generic;
 using MarkdownProcessor;
+
 
 namespace Opc2Aml
 {
@@ -111,7 +117,11 @@ namespace Opc2Aml
         static void Main(string[] args)
         {
             Console.WriteLine("Opc2Aml ...");
+
+
+#if (ENABLE_PROGRAM_EXCEPTION)
             try
+#endif
             {
                 Program program = new Program();
 
@@ -139,7 +149,8 @@ namespace Opc2Aml
                 } 
                 Console.WriteLine("... completed successfully.");
             }
-           
+
+#if ENABLE_PROGRAM_EXCEPTION
             catch (Exception ex)
             {
                 Console.WriteLine("** FATAL EXCEPTION **");
@@ -150,8 +161,8 @@ namespace Opc2Aml
                 Environment.Exit(1);
                 
             }
-    
- 
+#endif    
+
         }
     }
 }
