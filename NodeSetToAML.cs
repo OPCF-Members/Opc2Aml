@@ -528,18 +528,16 @@ namespace MarkdownProcessor
             // only set the value if different from the base node
             string baseuri = "";
             if (basenode != null )
-              baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
-            string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
+              baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedNodeId.NamespaceIndex].NamespaceUri;
+            string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedNodeId.NamespaceIndex].NamespaceUri;
 
             var nodeId = seq["NodeId"];
 
             if (uanode.DecodedNodeId.IsNullNodeId == false)
             {
-
                 ExpandedNodeId expandedNodeId = new ExpandedNodeId(uanode.DecodedNodeId, myuri);
                 Variant variant = new Variant(expandedNodeId);
                 nodeId = AddModifyAttribute(seq, "NodeId", "NodeId", variant);
-
             }
 
             var browse = seq["BrowseName"];
@@ -2840,9 +2838,6 @@ namespace MarkdownProcessor
                 }
 
                 ie = CreateClassInstanceWithIDReplacement(prefix + "_", suc);
-                ie.ID = amlId;
-                ie.Name = toAdd.DecodedBrowseName.Name;
-                AddBaseNodeClassAttributes(ie.Attribute, toAdd);
                 
                 parent.Insert(ie);
 
@@ -2852,6 +2847,8 @@ namespace MarkdownProcessor
             // Just because the ie (InternalElement) was found in the parent does not mean that the ID was correctly set.
             // Set/reset the Id even though it might already be done correctly.
             ie.ID = amlId;
+            ie.Name = toAdd.DecodedBrowseName.Name;
+            AddBaseNodeClassAttributes(ie.Attribute, toAdd);
 
             // set the values to match the values in the nodeset
             if (toAdd.NodeClass == NodeClass.Variable)
