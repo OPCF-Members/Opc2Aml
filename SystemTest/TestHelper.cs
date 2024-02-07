@@ -16,6 +16,8 @@ namespace SystemTest
         public const string Opc2AmlName = "Opc2Aml";
         public const string Opc2Aml = Opc2AmlName + ".exe";
 
+        public const string TestAmlUri = "http://opcfoundation.org/UA/FX/AML/TESTING";
+
         static bool Executed = false;
 
         static Dictionary<string, CAEXDocument> ReadOnlyDocuments = new Dictionary<string, CAEXDocument>();
