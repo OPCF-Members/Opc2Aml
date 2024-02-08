@@ -2335,9 +2335,10 @@ namespace MarkdownProcessor
                                     var varnode = targetNode as NodeSet.UAVariable;
                                     bool bListOf = (varnode.ValueRank >= ValueRanks.OneDimension);  // use ListOf when its a UA array
                                     AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
-                                    ie.SetAttributeValue("ValueRank", varnode.ValueRank);
-                                    ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
-                                    
+                                    ie.SetAttributeValue("ValueRank", varnode.ValueRank.ToString(), "", "xs:int" );
+                                    SetArrayDimensions( ie, varnode.ArrayDimensions );
+
+
                                     UpdateDerived( ref ie, TypeDefNodeId, reference.TargetId );
                                 }
                                 else if (targetNode.NodeClass == NodeClass.Method)
@@ -2378,6 +2379,26 @@ namespace MarkdownProcessor
             }
 
             return rtn;
+        }
+
+        private void SetArrayDimensions( SystemUnitClassType element, string arrayDimensions )
+        {
+            string[] parts = arrayDimensions.Split( ',' );
+            List<uint> arrayValues = new List<uint>();
+            foreach( string part in parts )
+            {
+                UInt32 value;
+                if ( UInt32.TryParse( part, out value ) )
+                {
+                    arrayValues.Add( value );
+                }
+            }
+
+            AddModifyAttribute( element.Attribute, 
+                "ArrayDimensions", 
+                Opc.Ua.DataTypeIds.UInt32, 
+                new Variant( arrayValues.ToArray() ),
+                bListOf: true );
         }
 
         #endregion
@@ -2860,9 +2881,8 @@ namespace MarkdownProcessor
                 var DataTypeNode = FindNode<UANode>( varnode.DecodedDataType );
                 var sUADataType = DataTypeNode.DecodedBrowseName.Name;
 
-                ie.SetAttributeValue("ValueRank", varnode.ValueRank);
-                ie.SetAttributeValue("ArrayDimensions", varnode.ArrayDimensions);
-
+                ie.SetAttributeValue( "ValueRank", varnode.ValueRank.ToString(), "", "xs:int" );
+                SetArrayDimensions( ie, varnode.ArrayDimensions );
             }
 
             // TODO set the values of the other attributes to match the instance ??
