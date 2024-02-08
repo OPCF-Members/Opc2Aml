@@ -34,11 +34,7 @@ namespace SystemTest
 
             AttributeType arrayDimensionsAttribute = objectToTest.Attribute[ "ArrayDimensions" ];
             Assert.IsNotNull( arrayDimensionsAttribute, "Unable to find ArrayDimensions" );
-            if( arrayDimensions.Length > 0 )
-            {
-                Assert.AreEqual( arrayDimensions, arrayDimensionsAttribute.Value );
-            }
-            else
+            if( arrayDimensions.Length == 0 )
             {
                 Assert.IsNull( arrayDimensionsAttribute.Value );
             }
@@ -77,6 +73,106 @@ namespace SystemTest
             else
             {
                 Assert.AreEqual( 0, valueAttribute.Attribute.Count );
+            }
+        }
+
+
+        [TestMethod]
+        public void TestMethodClassAttributes()
+        {
+            CAEXDocument document = GetDocument();
+            CAEXObject initialObject = document.FindByID( "686619c7-0101-4869-b398-aa0f98bc5f54" );
+            Assert.IsNotNull( initialObject );
+            SystemUnitClassType objectToTest = initialObject as SystemUnitClassType;
+            Assert.IsNotNull( objectToTest );
+
+            AttributeType browseNameAttribute = objectToTest.Attribute[ "BrowseName" ];
+            Assert.IsNotNull( browseNameAttribute );
+
+            AttributeType namespaceUriAttribute = browseNameAttribute.Attribute[ "NamespaceURI" ];
+            Assert.IsNotNull( namespaceUriAttribute );
+            Assert.AreEqual( "xs:anyURI", namespaceUriAttribute.AttributeDataType );
+
+            AttributeType nameAttribute = browseNameAttribute.Attribute[ "Name" ];
+            Assert.IsNotNull( nameAttribute );
+            Assert.AreEqual( "xs:string", nameAttribute.AttributeDataType );
+        }
+
+        [TestMethod]
+        [DataRow( "2330", "", false, true, DisplayName = "SUC HistoryServerCapabilitiesType should not have ArrayDimensions" )]
+        [DataRow( "24186", "", true, true, DisplayName = "SUC FailureCode should have empty ArrayDimensions" )]
+        [DataRow( "24187", "0,8", true, true, DisplayName = "SUC FailureSystemIdentifier ArrayDimensions" )]
+        [DataRow( "5013", "", false, false, DisplayName = "Folder should not have ArrayDimensions" )]
+        [DataRow( "6190", "", true, false, DisplayName = "Scalar Value should not have ArrayDimension elements" )]
+        [DataRow( "6126", "10", true, false, DisplayName = "Single ArrayDimension element" )]
+        [DataRow( "6129", "3,3,3", true, false, DisplayName = "Three ArrayDimension elements" )]
+        [DataRow( "6128", "2,2,2,2,2", true, false, DisplayName = "Five ArrayDimension elements" )]
+
+        public void TestArrayDimensions( string nodeId, string expected,
+            bool expectedToBeFound, bool foundationRoot )
+        {
+            SystemUnitClassType objectToTest = GetTestObject( nodeId, foundationRoot );
+
+            AttributeType attributeType = objectToTest.Attribute[ "ArrayDimensions" ];
+
+            if( expectedToBeFound )
+            {
+                Assert.IsNotNull( attributeType, "ArrayDimensions not found" );
+                Assert.AreEqual( "[ATL_http://opcfoundation.org/UA/]/[ListOfUInt32]", attributeType.RefAttributeType );
+                if( attributeType.Value != null )
+                {
+                    Assert.AreEqual( 0, attributeType.Value.Length );
+                }
+
+                if( expected.Length > 0 )
+                {
+                    string[] parts = expected.Split( ',' );
+                    for( int index = 0; index < parts.Length; index++ )
+                    {
+                        AttributeType indexedAttribute = attributeType.Attribute[ index.ToString() ];
+                        Assert.IsNotNull( indexedAttribute, "ArrayDimensions index " + index.ToString() + " not found" );
+                        Assert.AreEqual( parts[ index ], indexedAttribute.Value );
+                        Assert.AreEqual( "xs:unsignedInt", indexedAttribute.AttributeDataType );
+                    }
+                }
+                else
+                {
+                    Assert.AreEqual( 0, attributeType.Attribute.Count );
+                }
+            }
+            else
+            {
+                Assert.IsNull( attributeType, "Unexpected ArrayDimensions found" );
+            }
+        }
+
+        [TestMethod]
+        [DataRow( "2330", "", false, true, DisplayName = "SUC HistoryServerCapabilitiesType should not have ValueRank" )]
+        [DataRow( "24186", "-1", true, true, DisplayName = "SUC FailureCode should have Scalar ValueRank" )]
+        [DataRow( "24187", "2", true, true, DisplayName = "SUC FailureSystemIdentifier" )]
+        [DataRow( "5013", "", false, false, DisplayName = "Folder should not have ValueRank" )]
+        [DataRow( "6190", "-1", true, false, DisplayName = "Scalar Value" )]
+        [DataRow( "6126", "1", true, false, DisplayName = "Single ArrayDimension element" )]
+        [DataRow( "6129", "3", true, false, DisplayName = "Three ArrayDimension elements" )]
+        [DataRow( "6128", "5", true, false, DisplayName = "Five ArrayDimension elements" )]
+
+        public void TestValueRank( string nodeId, string expected,
+            bool expectedToBeFound, bool foundationRoot )
+        {
+            SystemUnitClassType objectToTest = GetTestObject( nodeId, foundationRoot );
+
+            AttributeType attributeType = objectToTest.Attribute[ "ValueRank" ];
+
+            if( expectedToBeFound )
+            {
+                Assert.IsNotNull( attributeType, "ValueRank not found" );
+                Assert.IsNotNull( attributeType.Value, "ValueRank not found" );
+                Assert.AreEqual( "xs:int", attributeType.AttributeDataType );
+                Assert.AreEqual( expected, attributeType.Value );
+            }
+            else
+            {
+                Assert.IsNull( attributeType, "Unexpected ValueRank found" );
             }
         }
 
