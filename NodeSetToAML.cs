@@ -3359,7 +3359,7 @@ namespace MarkdownProcessor
 
             #region WorkingDirectory
 
-            string workingDirectoryName = "./" + modelName + "_Working";
+            string workingDirectoryName = "./Working_" + modelName;
             DirectoryInfo workingDirectory = new DirectoryInfo( workingDirectoryName );
             if( !workingDirectory.Exists )
             {
@@ -3391,6 +3391,11 @@ namespace MarkdownProcessor
 
             for( int index = 2; index < modelInfoList.Count; index++ )
             {
+                int lastIndex = modelInfoList.Count - 1;
+                if ( index == lastIndex && modelName.Equals( "Exported_NS2andNS11.xml" ) )
+                {
+                    bool wait = true;
+                }
                 // Add the previous container as a part
                 previousName = ProcessContainer( keys, documents, workingDirectory, index, previousName );
             }
@@ -3425,6 +3430,8 @@ namespace MarkdownProcessor
         {
             Debug.WriteLine( "ProcessSomething [" + index.ToString() + "] Previous " + previousName );
             string lastProcessedName = string.Empty;
+
+            System.Threading.Thread.Sleep( 5000 );
 
             CAEXDocument document = null;
             ModelInfo lastModelInfo;
