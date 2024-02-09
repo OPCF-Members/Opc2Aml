@@ -3451,8 +3451,6 @@ namespace MarkdownProcessor
             Debug.WriteLine( "ProcessSomething [" + index.ToString() + "] Previous " + previousName );
             string lastProcessedName = string.Empty;
 
-            System.Threading.Thread.Sleep( 5000 );
-
             CAEXDocument document = null;
             ModelInfo lastModelInfo;
 
@@ -3471,6 +3469,14 @@ namespace MarkdownProcessor
                 Uri rootDocumentUri = new Uri( "/" + lastModelInfo.NodeSetPath + ".aml", UriKind.Relative );
                 lastContainer.AddRoot( lastStream, rootDocumentUri );
                 lastStream.Seek( 0, SeekOrigin.Begin );
+
+                string nodeSetFile = Path.Combine( Directory.GetCurrentDirectory(), lastModelInfo.NodeSetPath );
+                FileStream fileStream = new FileStream( nodeSetFile, FileMode.Open );
+                Uri nodeSetUri = new Uri( "/" + lastModelInfo.NodeSetPath, UriKind.Relative );
+                AddPackagePart( lastContainer.Package, fileStream, nodeSetUri, "text/xml",
+                    "http://schemas.automationml.org/container/relationship/AnyContent" );
+                fileStream.Close();
+
                 lastContainer.Close();
 
                 if( previousName != string.Empty )
@@ -3479,7 +3485,6 @@ namespace MarkdownProcessor
                     AutomationMLContainer embedLastContainer = new AutomationMLContainer( embedPath, FileMode.Create );
                     Uri lastDocumentUri = new Uri( "/" + lastModelInfo.NodeSetPath + ".aml", UriKind.Relative );
                     embedLastContainer.AddRoot( lastStream, lastDocumentUri );
-
 
                     // Load last stream
                     string documentPath = Path.Combine( workingDirectory.FullName, "Embed_" + previousName + ".amlx" );
@@ -3492,7 +3497,15 @@ namespace MarkdownProcessor
                     FileStream previousStream = new FileStream( documentPath, FileMode.Open, FileAccess.Read );
                     Uri embeddedAmlxUri = new Uri( "/" + previousName + ".amlx", UriKind.Relative );
 
-                    AddPackagePart( embedLastContainer.Package, previousStream, embeddedAmlxUri );
+                    AddPackagePart( embedLastContainer.Package, previousStream, embeddedAmlxUri,
+                        AutomationMLContainer.RelationshipType.Library.MimeType,
+                        "http://schemas.opcfoundation.org/container/relationship/EmbeddedDescriptor" );
+
+
+                    FileStream fileStreamAgain = new FileStream( nodeSetFile, FileMode.Open );
+                    AddPackagePart( embedLastContainer.Package, fileStreamAgain, nodeSetUri, "text/xml",
+                        "http://schemas.automationml.org/container/relationship/AnyContent" );
+                    fileStreamAgain.Close();
 
                     embedLastContainer.Close();
                 }
@@ -3503,12 +3516,16 @@ namespace MarkdownProcessor
             return lastProcessedName;
         }
 
-        private PackagePart AddPackagePart(Package package, Stream stream, Uri partUri)
+        private PackagePart AddPackagePart( Package package, 
+            Stream stream, 
+            Uri partUri,
+            string mimeType,
+            string relationshipType)
         {
-            PackagePart packagePart = package.CreatePart( partUri, 
-                AutomationMLContainer.RelationshipType.Library.MimeType, CompressionOption.Normal );
-            
-            if ( packagePart != null )
+            PackagePart packagePart = package.CreatePart( partUri,
+                mimeType, CompressionOption.Normal );
+
+            if( packagePart != null )
             {
                 if( stream.CanSeek )
                 {
@@ -3518,7 +3535,7 @@ namespace MarkdownProcessor
                 using Stream destination = packagePart.GetStream();
                 stream.CopyTo( destination );
 
-                package.CreateRelationship( partUri, TargetMode.Internal, "http://schemas.opcfoundation.org/container/relationship/EmbeddedDescriptor" );
+                package.CreateRelationship( partUri, TargetMode.Internal, relationshipType );
             }
 
             return packagePart;
