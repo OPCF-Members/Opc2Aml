@@ -169,6 +169,7 @@ namespace SystemTest
                 Assert.IsNotNull( attributeType.Value, "ValueRank not found" );
                 Assert.AreEqual( "xs:int", attributeType.AttributeDataType );
                 Assert.AreEqual( expected, attributeType.Value );
+                Assert.AreEqual( "[ATL_http://opcfoundation.org/UA/]/[Int32]", attributeType.RefAttributeType );
             }
             else
             {
