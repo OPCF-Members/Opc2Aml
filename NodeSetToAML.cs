@@ -2335,7 +2335,7 @@ namespace MarkdownProcessor
                                     var varnode = targetNode as NodeSet.UAVariable;
                                     bool bListOf = (varnode.ValueRank >= ValueRanks.OneDimension);  // use ListOf when its a UA array
                                     AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
-                                    ie.SetAttributeValue("ValueRank", varnode.ValueRank.ToString(), "", "xs:int" );
+                                    AddModifyAttribute( ie.Attribute, "ValueRank", "Int32", varnode.ValueRank );
                                     SetArrayDimensions( ie, varnode.ArrayDimensions );
 
 
@@ -2881,7 +2881,7 @@ namespace MarkdownProcessor
                 var DataTypeNode = FindNode<UANode>( varnode.DecodedDataType );
                 var sUADataType = DataTypeNode.DecodedBrowseName.Name;
 
-                ie.SetAttributeValue( "ValueRank", varnode.ValueRank.ToString(), "", "xs:int" );
+                AddModifyAttribute( ie.Attribute, "ValueRank", "Int32", varnode.ValueRank );
                 SetArrayDimensions( ie, varnode.ArrayDimensions );
             }
 
