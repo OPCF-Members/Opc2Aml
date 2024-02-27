@@ -1200,10 +1200,6 @@ namespace MarkdownProcessor
                     {
                         foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
                         {
-                            if ( xmlElement.Name.Equals( "ComprehensiveScalarType" ) && fieldReferenceType.Key.Equals( "Bool" ) )
-                            {
-                                bool wait = true;
-                            }
                             Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
                            
                             bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
@@ -2149,6 +2145,7 @@ namespace MarkdownProcessor
                                 if ( parentNodeId != null )
                                 {
                                     parentNodeIdString = parentNodeId.NodeId;
+                                    break;
                                 }
 
                                 reversePropertyCount++;
@@ -2819,11 +2816,11 @@ namespace MarkdownProcessor
             AddLibraryHeaderInfo(myIH);
 
             var RootNode = FindNode<UANode>(RootNodeId);
-            RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode);
+            RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode, false);
 
         }
 
-        InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd) where T : IInternalElementContainer
+        InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd, bool serverDiagnostics) where T : IInternalElementContainer
         {
             string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
             string prefix = toAdd.DecodedBrowseName.Name;
@@ -2873,16 +2870,32 @@ namespace MarkdownProcessor
 
             // set the values to match the values in the nodeset
             if (toAdd.NodeClass == NodeClass.Variable)
-            {  //  Set the datatype for Value
+            {
+                //  Set the datatype for Value
                 var varnode = toAdd as NodeSet.UAVariable;
                 bool bListOf = ( varnode.ValueRank >= ValueRanks.OneDimension ); // use ListOf when its a UA array
 
-                AddModifyAttribute( ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
+                Variant variant = varnode.DecodedValue;
+
+                if( serverDiagnostics && 
+                    !toAdd.DecodedNodeId.Equals( Opc.Ua.VariableIds.Server_ServerDiagnostics_EnabledFlag ) )
+                {
+                    // Don't set this value
+                    variant = new Variant();
+                    Debug.WriteLine( "Server Diagnostics and " + toAdd.BrowseName + " [" + toAdd.NodeId + "]" );
+                }
+
+                AddModifyAttribute( ie.Attribute, "Value", varnode.DecodedDataType, variant, bListOf);
                 var DataTypeNode = FindNode<UANode>( varnode.DecodedDataType );
                 var sUADataType = DataTypeNode.DecodedBrowseName.Name;
 
                 AddModifyAttribute( ie.Attribute, "ValueRank", "Int32", varnode.ValueRank );
                 SetArrayDimensions( ie, varnode.ArrayDimensions );
+            }
+
+            if( toAdd.DecodedNodeId.Equals( Opc.Ua.ObjectIds.Server_ServerDiagnostics ) )
+            {
+                serverDiagnostics = true;
             }
 
             // TODO set the values of the other attributes to match the instance ??
@@ -2908,7 +2921,9 @@ namespace MarkdownProcessor
                            
                             if (reference.TargetId != TypesFolderNodeId)
                             {
-                                var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode);
+
+                                var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode, 
+                                    serverDiagnostics);
                                 foundInternalElements.Add(childIE.Name);
                                 var destInterface = FindOrAddInterface(ref childIE, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, targetNode.DecodedNodeId);
                                 FindOrAddInternalLink(ref ie, sourceInterface.ID, destInterface.ID, targetNode.DecodedBrowseName.Name);
