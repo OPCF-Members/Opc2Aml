@@ -10,11 +10,13 @@
     </Models>
 	<Aliases>
         <Alias Alias="Boolean">i=1</Alias>
+        <Alias Alias="Byte">i=3</Alias>
         <Alias Alias="UInt16">i=5</Alias>
         <Alias Alias="Int32">i=6</Alias>
+        <Alias Alias="Float">i=10</Alias>
         <Alias Alias="Double">i=11</Alias>
-        <Alias Alias="DateTime">i=13</Alias>
         <Alias Alias="String">i=12</Alias>
+        <Alias Alias="DateTime">i=13</Alias>
         <Alias Alias="Guid">i=14</Alias>
         <Alias Alias="ByteString">i=15</Alias>
         <Alias Alias="NodeId">i=17</Alias>
@@ -25,19 +27,19 @@
         <Alias Alias="DataValue">i=23</Alias>
         <Alias Alias="DiagnosticInfo">i=25</Alias>
         <Alias Alias="Enumeration">i=29</Alias>
-        <Alias Alias="HasComponent">i=47</Alias>
-        <Alias Alias="HasProperty">i=46</Alias>
         <Alias Alias="Organizes">i=35</Alias>
-        <Alias Alias="HasSubtype">i=45</Alias>
-        <Alias Alias="HasTypeDefinition">i=40</Alias>
         <Alias Alias="HasModellingRule">i=37</Alias>
-        <Alias Alias="HasTrueSubState">i=9004</Alias>
         <Alias Alias="HasEncoding">i=38</Alias>
         <Alias Alias="HasDescription">i=39</Alias>
+        <Alias Alias="HasTypeDefinition">i=40</Alias>
+        <Alias Alias="HasSubtype">i=45</Alias>
+        <Alias Alias="HasProperty">i=46</Alias>
+        <Alias Alias="HasComponent">i=47</Alias>
+        <Alias Alias="HasHistoricalConfiguration">i=56</Alias>
         <Alias Alias="IdType">i=256</Alias>
         <Alias Alias="NumericRange">i=291</Alias>
+        <Alias Alias="HasTrueSubState">i=9004</Alias>
         <Alias Alias="LowLevelStructure">ns=1;i=3003</Alias>
-
     </Aliases>
 
     <UADataType NodeId="ns=1;i=3003" BrowseName="1:LowLevelStructure">
@@ -2830,6 +2832,160 @@
             <uax:String>This is the High Level Name</uax:String>
         </Value>
     </UAVariable>
+
+    <UAObject NodeId="ns=1;s=Aggregates" BrowseName="1:Aggregates">
+        <DisplayName Locale="en">Aggregates</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes">ns=1;s=Aggregates.Configurations</Reference>
+            <Reference ReferenceType="Organizes">ns=1;s=Aggregates.Child</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;s=Aggregates.Child" BrowseName="1:Aggregates.Child">
+        <DisplayName Locale="en">Child</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes">ns=1;s=Aggregates.Child_Boolean_First</Reference>
+            <Reference ReferenceType="Organizes">ns=1;s=Aggregates.Child_Integer_First</Reference>
+            <Reference ReferenceType="Organizes">ns=1;s=Aggregates.Child_Float_First</Reference>
+            <Reference ReferenceType="Organizes">ns=1;s=Aggregates.Child_Double_First</Reference>
+            <Reference ReferenceType="Organizes">ns=1;s=Aggregates.Child_String_First</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Aggregates</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;s=Aggregates.Configurations" BrowseName="1:Aggregates.Configurations">
+        <DisplayName Locale="en">Configurations</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes">ns=1;s=Aggregates.Configurations.Original</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Aggregates</Reference>
+        </References>
+    </UAObject>
+    <UAVariable NodeId="ns=1;s=Aggregates.Child_Float_First" BrowseName="1:Aggregates.Child_Float_First" WriteMask="96" DataType="Float" AccessLevel="4">
+        <DisplayName Locale="en">Float_First</DisplayName>
+        <References>
+            <Reference ReferenceType="HasHistoricalConfiguration">ns=1;s=Aggregates.Configurations.Original_HA Configuration</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Aggregates.Child</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;s=Aggregates.Child_Double_First" BrowseName="1:Aggregates.Child_Double_First" WriteMask="96" DataType="Double" AccessLevel="4">
+        <DisplayName Locale="en">Double_First</DisplayName>
+        <References>
+            <Reference ReferenceType="HasHistoricalConfiguration">ns=1;s=Aggregates.Configurations.Original_HA Configuration</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Aggregates.Child</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;s=Aggregates.Child_String_First" BrowseName="1:Aggregates.Child_String_First" WriteMask="96" DataType="String" AccessLevel="4">
+        <DisplayName Locale="en">String_First</DisplayName>
+        <References>
+            <Reference ReferenceType="HasHistoricalConfiguration">ns=1;s=Aggregates.Configurations.Original_HA Configuration</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Aggregates.Child</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;s=Aggregates.Child_Boolean_First" BrowseName="1:Aggregates.Child_Boolean_First" WriteMask="96" DataType="Boolean" AccessLevel="4">
+        <DisplayName Locale="en">Boolean_First</DisplayName>
+        <References>
+            <Reference ReferenceType="HasHistoricalConfiguration">ns=1;s=Aggregates.Configurations.Original_HA Configuration</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Aggregates.Child</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;s=Aggregates.Child_Integer_First" BrowseName="1:Aggregates.Child_Integer_First" WriteMask="96" DataType="Int32" AccessLevel="4">
+        <DisplayName Locale="en">Integer_First</DisplayName>
+        <References>
+            <Reference ReferenceType="HasHistoricalConfiguration">ns=1;s=Aggregates.Configurations.Original_HA Configuration</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Aggregates.Child</Reference>
+        </References>
+    </UAVariable>
+    <UAObject NodeId="ns=1;s=Aggregates.Configurations.Original" BrowseName="1:Aggregates.Configurations.Original">
+        <DisplayName Locale="en">Original</DisplayName>
+        <References>
+            <Reference ReferenceType="HasHistoricalConfiguration">ns=1;s=Aggregates.Configurations.Original_HA Configuration</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Aggregates.Configurations</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;s=Aggregates.Configurations.Original_HA Configuration" BrowseName="1:HA Configuration">
+        <DisplayName>HA Configuration</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;s=Aggregates.Configurations.Original_HA Configuration_Stepped</Reference>
+            <Reference ReferenceType="HasHistoricalConfiguration" IsForward="false">ns=1;s=Aggregates.Child_Boolean_First</Reference>
+            <Reference ReferenceType="HasHistoricalConfiguration" IsForward="false">ns=1;s=Aggregates.Child_Integer_First</Reference>
+            <Reference ReferenceType="HasHistoricalConfiguration" IsForward="false">ns=1;s=Aggregates.Child_Float_First</Reference>
+            <Reference ReferenceType="HasHistoricalConfiguration" IsForward="false">ns=1;s=Aggregates.Child_Double_First</Reference>
+            <Reference ReferenceType="HasHistoricalConfiguration" IsForward="false">ns=1;s=Aggregates.Child_String_First</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=2318</Reference>
+            <Reference ReferenceType="HasHistoricalConfiguration" IsForward="false">ns=1;s=Aggregates.Configurations.Original</Reference>
+        </References>
+    </UAObject>
+    <UAVariable NodeId="ns=1;s=Aggregates.Configurations.Original_HA Configuration_Stepped" BrowseName="Stepped" DataType="Boolean">
+        <DisplayName>Stepped</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=Aggregates.Configurations.Original_HA Configuration</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>true</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAObject NodeId="ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration" BrowseName="AggregateConfiguration">
+        <DisplayName>AggregateConfiguration</DisplayName>
+        <References>
+            <Reference ReferenceType="HasProperty">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration_TreatUncertainAsBad</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration_PercentDataBad</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration_PercentDataGood</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration_UseSlopedExtrapolation</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=11187</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=Aggregates.Configurations.Original_HA Configuration</Reference>
+        </References>
+    </UAObject>
+    <UAVariable NodeId="ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration_PercentDataBad" BrowseName="PercentDataBad" DataType="Byte">
+        <DisplayName>PercentDataBad</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration</Reference>
+        </References>
+        <Value>
+            <uax:Byte>100</uax:Byte>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration_PercentDataGood" BrowseName="PercentDataGood" DataType="Byte">
+        <DisplayName>PercentDataGood</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration</Reference>
+        </References>
+        <Value>
+            <uax:Byte>100</uax:Byte>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration_TreatUncertainAsBad" BrowseName="TreatUncertainAsBad" DataType="Boolean">
+        <DisplayName>TreatUncertainAsBad</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration_UseSlopedExtrapolation" BrowseName="UseSlopedExtrapolation" DataType="Boolean">
+        <DisplayName>UseSlopedExtrapolation</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=Aggregates.Configurations.Original_HA Configuration_AggregateConfiguration</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+
 
 
     <!-- Next Numbers
