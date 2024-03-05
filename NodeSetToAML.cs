@@ -1835,10 +1835,6 @@ namespace MarkdownProcessor
                     foreach (ExternalInterfaceType externalInterface in checkIt.ExternalInterface)
                     {
                         bool found = externalInterfaces[externalInterface.ID];
-                        // Debugging
-                        //Debug.WriteLine("CompareLinksToExternaInterfaces " + checkIt.Name + " - " + externalInterface.Name +
-                        //    " ID " + externalInterface.ID +
-                        //    " [" + found.ToString() + "]");
 
                         if (!found)
                         {
@@ -3074,7 +3070,7 @@ namespace MarkdownProcessor
 
                 if( baseBuiltInType == BuiltInType.Null )
                 {
-                    Debug.WriteLine( "CreateComplexVariant Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
+                    Utils.LogError( "CreateComplexVariant Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
                 }
                 else
                 {
@@ -3224,7 +3220,7 @@ namespace MarkdownProcessor
 
                         default:
                             {
-                                Debug.WriteLine( "Unhandled CreateComplexVariant " + source.Name );
+                                Utils.LogError( "Unhandled CreateComplexVariant " + source.Name );
                                 break;
                             }
                     }
