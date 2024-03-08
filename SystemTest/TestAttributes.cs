@@ -40,8 +40,8 @@ namespace SystemTest
             true, DisplayName = "Object Method Expect Description")]
         [DataRow("Description", "7001", "", false, DisplayName = "Object Method No Description")]
         [DataRow("IsAbstract", "2782", "true", true, true, DisplayName = "ConditionType should be Abstract")]
-        [DataRow("IsAbstract", "2881", "", 
-            false, true, DisplayName = "AcknowledgeableConditionType should not be Abstract")]
+        [DataRow("IsAbstract", "2881", "false", 
+            true, true, DisplayName = "AcknowledgeableConditionType should not be Abstract")]
 
         public void TestAttribute(string attribute, string nodeId, 
             string expected, bool expectedToBeFound, bool foundationRoot = false)

@@ -600,8 +600,6 @@ namespace MarkdownProcessor
                 {
                     if (name == "ValueRank" && val == -2 )
                         return null;
-                    if (name == "IsAbstract" && val == false)
-                        return null;
                     if (name == "IsSource" && val == false)
                         return null;
                     if (name == "Symmetric" && val == false)
