@@ -36,7 +36,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using MarkdownProcessor;
-
+using Microsoft.Extensions.Configuration;
+using Opc.Ua;
 
 namespace Opc2Aml
 {
@@ -46,6 +47,8 @@ namespace Opc2Aml
         private static Dictionary<string, string> Models;  // dictionary of model URIs (key) with Nodeset filenames (value) for nodeset files in the CWD
         private Program()
         {
+            Initialize();
+
             Models = new Dictionary<string, string>();
             // load the dictionary with the UA models available in the Current Working Directory (CWD)
             string[] fileEntries = Directory.GetFiles("./", "*.xml");
@@ -54,18 +57,27 @@ namespace Opc2Aml
                 ModelManager manager = new ModelManager();
                 string uri;
                 Console.WriteLine("Loading nodeset: " + fileEntry + "  ...");
+                Utils.LogInfo( "Loading nodeset: " + fileEntry + "  ..." );
                 try
                 {
                     uri = manager.LoadModel(fileEntry, null, null);
                 }
-                catch (Exception )
+                catch (Exception ex )
                 {
                     Console.WriteLine("Unable to load nodeset: " + fileEntry + "  Are you missing a <Uri> element or is the file not a proper nodeset?");
+                    Utils.LogError( "Unable to load nodeset: " + fileEntry + " [{0}]", ex.Message );
                     throw;
                 }
                 if( uri != null)
                     Models.Add(uri, fileEntry.Substring(2));
             }
+        }
+
+        private void Initialize()
+        {
+            _configuration = new Configuration();
+            _configuration.Load();
+            _configuration.TraceConfiguration.ApplySettings();
         }
 
         static void ModelImporter_ModelRequired(object sender, ModelRequiredEventArgs e)
@@ -74,7 +86,7 @@ namespace Opc2Aml
             {
                 e.ModelFilePath = Models[e.ModelUri];
             }
-            catch (Exception )
+            catch (Exception ex)
             {
                  throw new ArgumentException("Cannot locate Nodeset file for Model URI: " + e.ModelUri + " in the CWD: " + Directory.GetCurrentDirectory());
             }
@@ -93,6 +105,7 @@ namespace Opc2Aml
             if (FileIsGood(NodesetFile))
             {
                 Console.WriteLine("Processing " + NodesetFile + " ...");
+                Utils.LogInfo( "Processing " + NodesetFile + " ..." );
                 ModelManager manager = new ModelManager();
                 manager.ModelRequired += ModelImporter_ModelRequired;
                 NodeSetToAML convertor = new NodeSetToAML(manager);
@@ -117,7 +130,6 @@ namespace Opc2Aml
         static void Main(string[] args)
         {
             Console.WriteLine("Opc2Aml ...");
-
 
 #if (ENABLE_PROGRAM_EXCEPTION)
             try
@@ -148,11 +160,15 @@ namespace Opc2Aml
                         
                 } 
                 Console.WriteLine("... completed successfully.");
+                Utils.LogInfo( "Opc2Aml completed successfully." );
             }
 
 #if ENABLE_PROGRAM_EXCEPTION
             catch (Exception ex)
             {
+                Utils.LogError( "** FATAL EXCEPTION ** [{0}]", ex.Message );
+                Utils.LogError( "Call Stack " + ex.StackTrace );
+
                 Console.WriteLine("** FATAL EXCEPTION **");
                 Console.WriteLine(ex.Message);
                 ShowSyntax();           
@@ -164,5 +180,7 @@ namespace Opc2Aml
 #endif    
 
         }
+
+        private Configuration _configuration = null;
     }
 }

@@ -160,6 +160,8 @@ namespace MarkdownProcessor
             if (modelName == null)
                 modelName = modelPath;
 
+            Utils.LogInfo( "CreateAML for model {0}", modelName );
+
             m_cAEXDocument = CAEXDocument.New_CAEXDocument();
             var cAEXDocumentTemp = CAEXDocument.New_CAEXDocument();
 
@@ -184,15 +186,21 @@ namespace MarkdownProcessor
             }
             MyModelInfoList.Add(m_modelManager.DefaultModel);
 
-            foreach (var modelInfo in MyModelInfoList)
+            foreach( var modelInfo in MyModelInfoList )
             {
-                Debug.WriteLine( modelName + " Model Info [" + modelInfo.NamespaceUri + "]" );
+                Utils.LogInfo( "Model Uri {0} NamespaceIndex {1}",
+                    modelInfo.NamespaceUri, modelInfo.NamespaceIndex );
+            }
+
+            foreach( var modelInfo in MyModelInfoList)
+            {
+                Utils.LogInfo( "{0} processing model {1} NamespaceIndex {2}", 
+                    modelName, modelInfo.NamespaceUri, modelInfo.NamespaceIndex );
 
                 AttributeTypeLibType atl = null;
                 InterfaceClassLibType icl = null;
                 RoleClassLibType rcl = null;
                 SystemUnitClassLibType scl = null;
-
 
                 m_atl_temp = cAEXDocumentTemp.CAEXFile.AttributeTypeLib.Append(ATLPrefix + modelInfo.NamespaceUri);
 
@@ -219,8 +227,6 @@ namespace MarkdownProcessor
 
                 foreach (var node in modelInfo.Types)
                 {
-
-
                     switch (node.Value.NodeClass)
                     {
                         case NodeClass.DataType:
@@ -242,9 +248,7 @@ namespace MarkdownProcessor
                     }
                 }
 
-
-
-                foreach (var dicEntry in SortedDataTypes)
+                foreach( var dicEntry in SortedDataTypes)
                 {
                     if (atl == null)
                     {
@@ -254,19 +258,19 @@ namespace MarkdownProcessor
                     atl.AttributeType.Insert(dicEntry.Value, false);  // insert into the AML document in alpha order
                 }
 
-                foreach (var dicEntry in SortedDataTypes)  // cteate the ListOf versions
+                foreach( var dicEntry in SortedDataTypes)  // cteate the ListOf versions
                 {
                     atl.AttributeType.Insert(CreateListOf(dicEntry.Value), false);  // insert into the AML document in alpha order
                 }
 
-                foreach (var refType in SortedReferenceTypes)
+                foreach( var refType in SortedReferenceTypes)
                 {
                     ProcessReferenceType(ref icl_temp, refType.Value);
                 }
 
                 // reorder icl_temp an put in the real icl in alpha order
 
-                foreach (var refType in SortedReferenceTypes)
+                foreach( var refType in SortedReferenceTypes)
                 {
                     string iclpath = BuildLibraryReference(ICLPrefix, modelInfo.NamespaceUri, refType.Key);
                     InterfaceClassType ict = icl_temp.CAEXDocument.FindByPath(iclpath) as InterfaceClassType;
@@ -285,15 +289,16 @@ namespace MarkdownProcessor
 
                 }
 
-                foreach (var obType in SortedObjectTypes)
+                Utils.LogInfo( "Processing SystemUnitClass Types" );
+
+                foreach( var obType in SortedObjectTypes)
                 {
                     FindOrAddSUC(ref scl_temp, ref rcl_temp, obType.Value);
                 }
 
                 // re-order the rcl_temp and scl_temp in alpha order into the real rcl and scl
 
-
-                foreach (var obType in SortedObjectTypes)
+                foreach( var obType in SortedObjectTypes)
                 {
                     string sucpath = BuildLibraryReference(SUCPrefix, modelInfo.NamespaceUri, obType.Key);
                     SystemUnitFamilyType sft = scl_temp.CAEXDocument.FindByPath(sucpath) as SystemUnitFamilyType;
@@ -321,8 +326,11 @@ namespace MarkdownProcessor
                 }
             }
 
+            Utils.LogInfo( "Creating Instances" );
+
             CreateInstances(); //  add the instances for each model
 
+            Utils.LogInfo( "Creating Instances Complete" );
 
             // write out the AML file
             // var OutFilename = modelName + ".aml";
@@ -330,6 +338,9 @@ namespace MarkdownProcessor
             var container = new AutomationMLContainer(modelName + ".amlx", System.IO.FileMode.Create);
             container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + modelName + ".aml", UriKind.Relative));
             container.Close();
+
+            Utils.LogInfo( "Amlx Container Created for model " + modelName );
+
         }
 
         private void AddLibraryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
@@ -1818,10 +1829,6 @@ namespace MarkdownProcessor
                     foreach (ExternalInterfaceType externalInterface in checkIt.ExternalInterface)
                     {
                         bool found = externalInterfaces[externalInterface.ID];
-                        // Debugging
-                        //Debug.WriteLine("CompareLinksToExternaInterfaces " + checkIt.Name + " - " + externalInterface.Name +
-                        //    " ID " + externalInterface.ID +
-                        //    " [" + found.ToString() + "]");
 
                         if (!found)
                         {
@@ -2192,6 +2199,7 @@ namespace MarkdownProcessor
         {
             var refnode = FindNode<NodeSet.UANode>(nodeId);
             string path = "";
+            string createdPathName = GetCreatedPathName( refnode );
             if (refnode.NodeClass != NodeClass.Method)
                 path = BuildLibraryReference(SUCPrefix, 
                     m_modelManager.FindModelUri(refnode.DecodedNodeId), 
@@ -2200,6 +2208,8 @@ namespace MarkdownProcessor
 
             if (rtn == null)
             {
+                Utils.LogTrace( "FindOrAddSuc - {0}:{1} {2} Begin", refnode.BrowseName, refnode.NodeId, createdPathName );
+
                 if (m_modelManager.IsTypeOf(nodeId, BaseInterfaceNodeId) == true)
                 {
                     var rc = rcl.New_RoleClass(refnode.DecodedBrowseName.Name);  // create a RoleClass for UA interfaces
@@ -2371,6 +2381,8 @@ namespace MarkdownProcessor
                     }
                 }
                 rtn.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);  // all UA SUCs support the UaBaseRole
+
+                Utils.LogTrace( "FindOrAddSuc - {0}:{1} {2} Complete", refnode.BrowseName, refnode.NodeId, createdPathName );
             }
 
             return rtn;
@@ -2823,6 +2835,10 @@ namespace MarkdownProcessor
             string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
             string prefix = toAdd.DecodedBrowseName.Name;
 
+            string decodedNodeId = toAdd.DecodedNodeId.ToString();
+
+            Utils.LogTrace( "Add Instance {0} [{1}] Start", prefix, decodedNodeId );
+
             //first see if node already exists
             var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
             if (ie == null)
@@ -2845,8 +2861,11 @@ namespace MarkdownProcessor
 
                 // check if instance already exists before adding a new one  #11
                 ie = (InternalElementType)m_cAEXDocument.FindByID(amlId);
-                if (ie != null)
+                if( ie != null )
+                {
+                    Utils.LogTrace( "Add Instance {0} [{1}] Already Added", prefix, decodedNodeId );
                     return ie;
+                }
 
                 if ( prefix.StartsWith("http://"))
                 {
@@ -2986,6 +3005,8 @@ namespace MarkdownProcessor
 
             CompareLinksToExternaInterfaces(ie, ie);
 
+            Utils.LogTrace( "Add Instance {0} [{1}] Complete", prefix, decodedNodeId );
+
             return ie;
         }
 
@@ -3062,7 +3083,7 @@ namespace MarkdownProcessor
 
                 if( baseBuiltInType == BuiltInType.Null )
                 {
-                    Debug.WriteLine( "CreateComplexVariant Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
+                    Utils.LogError( "CreateComplexVariant Unable to get builtInType for " + name + " [" + typeDefinition.DecodedDataType + "]" );
                 }
                 else
                 {
@@ -3212,7 +3233,7 @@ namespace MarkdownProcessor
 
                         default:
                             {
-                                Debug.WriteLine( "Unhandled CreateComplexVariant " + source.Name );
+                                Utils.LogError( "Unhandled CreateComplexVariant " + source.Name );
                                 break;
                             }
                     }
