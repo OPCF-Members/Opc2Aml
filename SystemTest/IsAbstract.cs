@@ -17,7 +17,7 @@ namespace SystemTest
         // Test only works on Base Nodeset, Expects ns=0;
         // Test reads the nodeset file, finds everything that should be abstract,
         // Then walks the Amlx, and verifies both that the attribute is properly set, and properly not set
-        const string NodeSetFile = "Opc.Ua.NodeSet2.xml";
+        const string NodeSetFile = "Modified.Opc.Ua.NodeSet2.xml";
         
         CAEXDocument m_document = null;
 

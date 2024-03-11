@@ -36,6 +36,9 @@
         <Alias Alias="HasDescription">i=39</Alias>
         <Alias Alias="IdType">i=256</Alias>
         <Alias Alias="NumericRange">i=291</Alias>
+        <Alias Alias="SessionDiagnosticsDataType">i=865</Alias>
+        <Alias Alias="SessionSecurityDiagnosticsDataType">i=868</Alias>
+        <Alias Alias="SubscriptionDiagnosticsDataType">i=874</Alias>
         <Alias Alias="LowLevelStructure">ns=1;i=3003</Alias>
 
     </Aliases>
@@ -2831,12 +2834,266 @@
         </Value>
     </UAVariable>
 
+        <UAVariable DataType="SessionSecurityDiagnosticsDataType" NodeId="ns=1;i=6225" BrowseName="1:TestSessionSecurityDiagnostics" AccessLevel="3">
+        <DisplayName>TestSessionSecurityDiagnostics</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5023</Reference>
+        </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>i=869</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <SessionSecurityDiagnosticsDataType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                        <SessionId>
+                            <Identifier>ns=1;i=8765</Identifier>
+                        </SessionId>
+                        <ClientUserIdOfSession>userId</ClientUserIdOfSession>
+                        <ClientUserIdHistory>
+                            <String>history</String>
+                        </ClientUserIdHistory>
+                        <AuthenticationMechanism>me</AuthenticationMechanism>
+                        <Encoding></Encoding>
+                        <TransportProtocol></TransportProtocol>
+                        <SecurityMode>SignAndEncrypt_3</SecurityMode>
+                        <SecurityPolicyUri></SecurityPolicyUri>
+                        <ClientCertificate></ClientCertificate>
+                    </SessionSecurityDiagnosticsDataType>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAVariable DataType="SessionDiagnosticsDataType" NodeId="ns=1;i=6224" BrowseName="1:TestSessionDiagnostics" AccessLevel="3">
+        <DisplayName>TestSessionDiagnostics</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5023</Reference>
+        </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>i=866</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <SessionDiagnosticsDataType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                        <SessionId>
+                            <Identifier>ns=1;i=9876</Identifier>
+                        </SessionId>
+                        <SessionName>SessionDiagnosticsArray</SessionName>
+                        <ClientDescription>
+                            <ApplicationUri>urn:SomeCompany:SomeClient</ApplicationUri>
+                            <ProductUri>urn:SomeCompany:SomeProduct</ProductUri>
+                            <ApplicationName>
+                                <Text>SomeProduct</Text>
+                            </ApplicationName>
+                            <ApplicationType>Client_1</ApplicationType>
+                            <GatewayServerUri></GatewayServerUri>
+                            <DiscoveryProfileUri></DiscoveryProfileUri>
+                            <DiscoveryUrls>
+                                <String></String>
+                            </DiscoveryUrls>
+                        </ClientDescription>
+                        <ServerUri></ServerUri>
+                        <EndpointUrl></EndpointUrl>
+                        <LocaleIds>
+                            <String></String>
+                        </LocaleIds>
+                        <ActualSessionTimeout>0</ActualSessionTimeout>
+                        <MaxResponseMessageSize>0</MaxResponseMessageSize>
+                        <ClientConnectionTime>1900-01-01T00:00:00Z</ClientConnectionTime>
+                        <ClientLastContactTime>1900-01-01T00:00:00Z</ClientLastContactTime>
+                        <CurrentSubscriptionsCount>0</CurrentSubscriptionsCount>
+                        <CurrentMonitoredItemsCount>0</CurrentMonitoredItemsCount>
+                        <CurrentPublishRequestsInQueue>0</CurrentPublishRequestsInQueue>
+                        <TotalRequestCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </TotalRequestCount>
+                        <UnauthorizedRequestCount>0</UnauthorizedRequestCount>
+                        <ReadCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </ReadCount>
+                        <HistoryReadCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </HistoryReadCount>
+                        <WriteCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </WriteCount>
+                        <HistoryUpdateCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </HistoryUpdateCount>
+                        <CallCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </CallCount>
+                        <CreateMonitoredItemsCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </CreateMonitoredItemsCount>
+                        <ModifyMonitoredItemsCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </ModifyMonitoredItemsCount>
+                        <SetMonitoringModeCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </SetMonitoringModeCount>
+                        <SetTriggeringCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </SetTriggeringCount>
+                        <DeleteMonitoredItemsCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </DeleteMonitoredItemsCount>
+                        <CreateSubscriptionCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </CreateSubscriptionCount>
+                        <ModifySubscriptionCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </ModifySubscriptionCount>
+                        <SetPublishingModeCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </SetPublishingModeCount>
+                        <PublishCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </PublishCount>
+                        <RepublishCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </RepublishCount>
+                        <TransferSubscriptionsCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </TransferSubscriptionsCount>
+                        <DeleteSubscriptionsCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </DeleteSubscriptionsCount>
+                        <AddNodesCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </AddNodesCount>
+                        <AddReferencesCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </AddReferencesCount>
+                        <DeleteNodesCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </DeleteNodesCount>
+                        <DeleteReferencesCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </DeleteReferencesCount>
+                        <BrowseCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </BrowseCount>
+                        <BrowseNextCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </BrowseNextCount>
+                        <TranslateBrowsePathsToNodeIdsCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </TranslateBrowsePathsToNodeIdsCount>
+                        <QueryFirstCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </QueryFirstCount>
+                        <QueryNextCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </QueryNextCount>
+                        <RegisterNodesCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </RegisterNodesCount>
+                        <UnregisterNodesCount>
+                            <TotalCount>0</TotalCount>
+                            <ErrorCount>0</ErrorCount>
+                        </UnregisterNodesCount>
+                    </SessionDiagnosticsDataType>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5023" BrowseName="1:TestDiagnosticsObject">
+        <DisplayName>TestDiagnosticsObject</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">i=2274</Reference>
+        </References>
+    </UAObject>
+    <UAVariable DataType="SubscriptionDiagnosticsDataType" NodeId="ns=1;i=6226" BrowseName="1:TestSubscriptionDiagnostics" AccessLevel="3">
+        <DisplayName>TestSubscriptionDiagnostics</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5023</Reference>
+        </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>i=875</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <SubscriptionDiagnosticsDataType xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                        <SessionId>
+                            <Identifier>ns=1;i=7654</Identifier>
+                        </SessionId>
+                        <SubscriptionId>555</SubscriptionId>
+                        <Priority>2</Priority>
+                        <PublishingInterval>100</PublishingInterval>
+                        <MaxKeepAliveCount>0</MaxKeepAliveCount>
+                        <MaxLifetimeCount>0</MaxLifetimeCount>
+                        <MaxNotificationsPerPublish>0</MaxNotificationsPerPublish>
+                        <PublishingEnabled>true</PublishingEnabled>
+                        <ModifyCount>0</ModifyCount>
+                        <EnableCount>0</EnableCount>
+                        <DisableCount>0</DisableCount>
+                        <RepublishRequestCount>0</RepublishRequestCount>
+                        <RepublishMessageRequestCount>0</RepublishMessageRequestCount>
+                        <RepublishMessageCount>0</RepublishMessageCount>
+                        <TransferRequestCount>0</TransferRequestCount>
+                        <TransferredToAltClientCount>0</TransferredToAltClientCount>
+                        <TransferredToSameClientCount>0</TransferredToSameClientCount>
+                        <PublishRequestCount>0</PublishRequestCount>
+                        <DataChangeNotificationsCount>0</DataChangeNotificationsCount>
+                        <EventNotificationsCount>0</EventNotificationsCount>
+                        <NotificationsCount>0</NotificationsCount>
+                        <LatePublishRequestCount>0</LatePublishRequestCount>
+                        <CurrentKeepAliveCount>0</CurrentKeepAliveCount>
+                        <CurrentLifetimeCount>0</CurrentLifetimeCount>
+                        <UnacknowledgedMessageCount>0</UnacknowledgedMessageCount>
+                        <DiscardedMessageCount>0</DiscardedMessageCount>
+                        <MonitoredItemCount>0</MonitoredItemCount>
+                        <DisabledMonitoredItemCount>0</DisabledMonitoredItemCount>
+                        <MonitoringQueueOverflowCount>0</MonitoringQueueOverflowCount>
+                        <NextSequenceNumber>0</NextSequenceNumber>
+                        <EventQueueOverFlowCount>0</EventQueueOverFlowCount>
+                    </SubscriptionDiagnosticsDataType>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+
 
     <!-- Next Numbers
     ObjectType 1009
     VariableType 2001
     DataType 3004
-    Object 5023
-    Variable 6224
+    Object 5024
+    Variable 6227
     -->
 </UANodeSet>

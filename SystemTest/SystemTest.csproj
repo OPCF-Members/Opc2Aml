@@ -43,7 +43,10 @@
     <None Update="NodeSetFiles\opc.ua.fx.data.nodeset2.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="NodeSetFiles\Opc.Ua.NodeSet2.xml">
+    <None Update="NodeSetFiles\ModifiedRoot.NodeSet2.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NodeSetFiles\Modified.Opc.Ua.NodeSet2.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="NodeSetFiles\TestAml.xml">
