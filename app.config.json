@@ -4,5 +4,20 @@
         "DeleteOnLoad": true,
         // None, Error, Information, Debug
         "LogLevel": "Information"
-    }
+    },
+    "Signing": {
+        "Certificate": "",
+        "Password": ""
+    },
+    "Specifics": [
+        {
+            "Source": "",
+            "Manifests": [
+                {
+                    "Uri": "",
+                    "File": ""
+                }
+            ]
+        }
+    ]
 }

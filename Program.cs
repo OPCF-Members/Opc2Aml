@@ -100,7 +100,8 @@ namespace Opc2Aml
             throw new ArgumentException("Nodeset file '" + filename + "' does not exist in the CWD: " + Directory.GetCurrentDirectory());
         }
 
-        static void ConvertModel( string NodesetFile, string outputFile = null)
+        static void ConvertModel( Configuration configuration, 
+            string NodesetFile, string outputFile = null)
         {
             if (FileIsGood(NodesetFile))
             {
@@ -108,7 +109,7 @@ namespace Opc2Aml
                 Utils.LogInfo( "Processing " + NodesetFile + " ..." );
                 ModelManager manager = new ModelManager();
                 manager.ModelRequired += ModelImporter_ModelRequired;
-                NodeSetToAML convertor = new NodeSetToAML(manager);
+                NodeSetToAML convertor = new NodeSetToAML(manager, configuration );
                 convertor.CreateAML(NodesetFile, outputFile);
             }
         }
@@ -146,14 +147,14 @@ namespace Opc2Aml
                         }
                         foreach (var model in Models)
                         {
-                            ConvertModel(model.Value);
+                            ConvertModel(program._configuration, model.Value);
                         }
                         break;
                     case 1:
-                        ConvertModel(args[0]);
+                        ConvertModel( program._configuration, args[0]);
                         break;
                     case 2:
-                        ConvertModel(args[0], args[1]);
+                        ConvertModel( program._configuration, args[0], args[1]);
                         break;
                     default:
                         throw new ArgumentException("wrong number of arguments.");
@@ -181,6 +182,6 @@ namespace Opc2Aml
 
         }
 
-        private Configuration _configuration = null;
+        public Configuration _configuration = null;
     }
 }

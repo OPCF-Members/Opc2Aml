@@ -50,7 +50,8 @@ using System.Collections;
 using System.Reflection;
 using MarkdownProcessor.NodeSet;
 using System.Xml;
-using Microsoft.AspNetCore.Identity;
+using Opc2Aml;
+using System.IO;
 
 namespace MarkdownProcessor
 {
@@ -138,9 +139,12 @@ namespace MarkdownProcessor
             { Enumeration , "xs:int"  }
         };
 
-        public NodeSetToAML(ModelManager modelManager)
+        private Configuration m_configuration = null;
+
+        public NodeSetToAML(ModelManager modelManager, Configuration configuration)
         {
             m_modelManager = modelManager;
+            m_configuration = configuration;
         }
 
         public T FindNode<T>(NodeId sourceId) where T : UANode 
@@ -335,12 +339,27 @@ namespace MarkdownProcessor
             // write out the AML file
             // var OutFilename = modelName + ".aml";
             // m_cAEXDocument.SaveToFile(OutFilename, true);
-            var container = new AutomationMLContainer(modelName + ".amlx", System.IO.FileMode.Create);
+            FileInfo amlxContainer = new FileInfo( modelName + ".amlx" );
+
+            var container = new AutomationMLContainer( amlxContainer.Name, System.IO.FileMode.Create);
             container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + modelName + ".aml", UriKind.Relative));
             container.Close();
 
             Utils.LogInfo( "Amlx Container Created for model " + modelName );
 
+            AddManifest addManifest = new AddManifest( modelName, 
+                new FileInfo( modelName + ".amlx" ), m_configuration );
+            
+            addManifest.Run();
+
+            FileInfo signFile = amlxContainer; 
+
+            if ( addManifest.Destination != null )
+            {
+                signFile = addManifest.Destination;
+            }
+
+            new SignContainer( modelName, signFile, m_configuration ).Run();
         }
 
         private void AddLibraryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)

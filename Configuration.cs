@@ -82,11 +82,85 @@ namespace Opc2Aml
                         }
                     }
                 }
+
+                IConfigurationSection signing = configuration.GetSection( "Signing" );
+                if ( signing != null )
+                {
+                    string certificate = signing.GetValue<string>( "Certificate" );
+                    try
+                    {
+                        FileInfo certificateFile = new FileInfo( certificate );
+                        if ( certificateFile.Exists )
+                        {
+                            _certificateFile = certificateFile.FullName;
+                        }
+                    }
+                    catch( Exception ex )
+                    {
+                        // Unable to parse fileName
+                    }
+
+                    string password = signing.GetValue<string>( "Password" );
+                    if ( !String.IsNullOrEmpty( password ) ) { 
+                        _password = password;
+                    }
+                }
+
+                IConfigurationSection specifics = configuration.GetSection( "Specifics" );
+                if( specifics != null )
+                {
+                    foreach( IConfigurationSection specific in specifics.GetChildren() )
+                    {
+                        string source = specific.GetValue<string>( "Source" );
+                        if ( source != null )
+                        {
+                            FileInfo sourceFile = new FileInfo( source );
+                            if ( sourceFile.Exists )
+                            {
+                                string sourceFileName = sourceFile.Name.ToLower();
+                                IConfigurationSection manifests = specific.GetSection( "Manifests" );
+
+                                foreach( IConfigurationSection manifest in manifests.GetChildren() )
+                                {
+                                    string type = manifest.GetValue<string>( "Type" );
+                                    string file = manifest.GetValue<string>( "File" );
+
+                                    if ( type != null && file != null )
+                                    {
+                                        FileInfo fileInfo = new FileInfo( file );
+                                        if( fileInfo.Exists )
+                                        {
+                                            if( !_manifests.ContainsKey( sourceFileName ) )
+                                            {
+                                                _manifests.Add( sourceFileName, new Dictionary<string, string>() );
+                                            }
+
+                                            Dictionary<string, string> manifestMap = _manifests[ sourceFileName ];
+                                            if ( !manifestMap.ContainsKey( type.ToLower() ) )
+                                            {
+                                                manifestMap.Add( type.ToLower(), fileInfo.FullName );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             catch ( Exception )
             {
                 // There is no logging.
             }
+        }
+
+        public Dictionary<string, string> GetManifests( string modelName )
+        {
+            Dictionary<string, string> manifests = null;
+
+            _manifests.TryGetValue( modelName.ToLower(), out manifests );
+
+            return manifests;
         }
 
         private Opc.Ua.TraceConfiguration GetTraceConfiguration()
@@ -150,6 +224,10 @@ namespace Opc2Aml
 
         public Opc.Ua.TraceConfiguration TraceConfiguration { get { return GetTraceConfiguration(); } }
 
+        public string CertificateFile {  get { return _certificateFile; } }
+
+        public string Password { get { return _password; } }
+
         #endregion
 
         #region Variables
@@ -158,6 +236,13 @@ namespace Opc2Aml
         private bool _deleteOnLoad = true;
         private LogLevel _level = LogLevel.None;
         Opc.Ua.TraceConfiguration _trace = null;
+
+        private string _certificateFile = string.Empty;
+        private string _password = string.Empty;
+
+        Dictionary<string, Dictionary<string, string>> _manifests = new
+            Dictionary<string, Dictionary<string, string>>();
+
 
         #endregion
 
