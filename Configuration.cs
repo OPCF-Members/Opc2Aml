@@ -32,10 +32,12 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Opc.Ua;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static Opc.Ua.Utils;
@@ -45,12 +47,14 @@ namespace Opc2Aml
 
     public class Configuration
     {
+        public static readonly string ApplicationConfiguration = "app.config.json";
+
         public void Load()
         {
             try
             {
                 IConfiguration configuration = new ConfigurationBuilder()
-                    .AddJsonFile( "app.config.json" )
+                    .AddJsonFile( ApplicationConfiguration )
                     .Build();
 
                 IConfigurationSection trace = configuration.GetSection( "TraceConfiguration" );
@@ -103,6 +107,27 @@ namespace Opc2Aml
                     string password = signing.GetValue<string>( "Password" );
                     if ( !String.IsNullOrEmpty( password ) ) { 
                         _password = password;
+                    }
+
+                    string hashAlgorithm = signing.GetValue<string>( "HashAlgorithm" );
+                    if ( !String.IsNullOrEmpty( hashAlgorithm ) )
+                    {
+                        if ( hashAlgorithm.Equals("SHA1", StringComparison.OrdinalIgnoreCase) )
+                        {
+                            _algorithm = HashAlgorithmName.SHA1;
+                        }
+                        else if ( hashAlgorithm.Equals( "SHA256", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            _algorithm = HashAlgorithmName.SHA256;
+                        }
+                        else if( hashAlgorithm.Equals( "SHA384", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            _algorithm = HashAlgorithmName.SHA384;
+                        }
+                        else if( hashAlgorithm.Equals( "SHA512", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            _algorithm = HashAlgorithmName.SHA512;
+                        }
                     }
                 }
 
@@ -228,6 +253,8 @@ namespace Opc2Aml
 
         public string Password { get { return _password; } }
 
+        public HashAlgorithmName Algorithm { get { return _algorithm; } }
+
         #endregion
 
         #region Variables
@@ -239,6 +266,7 @@ namespace Opc2Aml
 
         private string _certificateFile = string.Empty;
         private string _password = string.Empty;
+        private HashAlgorithmName _algorithm = HashAlgorithmName.SHA256;
 
         Dictionary<string, Dictionary<string, string>> _manifests = new
             Dictionary<string, Dictionary<string, string>>();

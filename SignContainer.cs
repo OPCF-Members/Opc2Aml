@@ -46,8 +46,8 @@ namespace Opc2Aml
                             builder.EnqueueNamedPreset<VSIXSignatureBuilderPreset>();
 
                             var signingConfiguration = new SignConfigurationSet(
-                                fileDigestAlgorithm: HashAlgorithmName.SHA256,
-                                signatureDigestAlgorithm: HashAlgorithmName.SHA256,
+                                fileDigestAlgorithm: _configuration.Algorithm,
+                                signatureDigestAlgorithm: _configuration.Algorithm,
                                 publicCertificate: certificate,
                                 signingKey: certificate.GetRSAPrivateKey() );
 

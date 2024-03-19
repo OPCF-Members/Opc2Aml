@@ -7,14 +7,16 @@
     },
     "Signing": {
         "Certificate": "",
-        "Password": ""
+        "Password": "",
+        // SHA1, SHA256, SHA384, SHA512
+        "HashAlgorithm": ""
     },
     "Specifics": [
         {
             "Source": "",
             "Manifests": [
                 {
-                    "Uri": "",
+                    "Type": "",
                     "File": ""
                 }
             ]
