@@ -51,6 +51,7 @@ using System.Reflection;
 using MarkdownProcessor.NodeSet;
 using System.Xml;
 using Microsoft.AspNetCore.Identity;
+using System.IO;
 
 namespace MarkdownProcessor
 {
@@ -137,6 +138,11 @@ namespace MarkdownProcessor
             { "StatusCode" , "xs:unsignedInt"  },
             { Enumeration , "xs:int"  }
         };
+
+        private Dictionary<UANode, int> IgnoredReferences = new Dictionary<UANode, int>();
+        private Dictionary<string, int> HierarchicalCount = new Dictionary<string, int>();
+        private HashSet<UANode> AllowedReferences = new HashSet<UANode>();
+        private HashSet<uint> RejectedReferences = new HashSet<uint>();
 
         public NodeSetToAML(ModelManager modelManager)
         {
@@ -335,11 +341,21 @@ namespace MarkdownProcessor
             // write out the AML file
             // var OutFilename = modelName + ".aml";
             // m_cAEXDocument.SaveToFile(OutFilename, true);
+
+            using( FileStream fs = File.Create( "e://myStream.xml" ) )
+            {
+                //                m_cAEXDocument.XDocument.Save( memoryStream, prettyPrint ? SaveOptions.OmitDuplicateNamespaces : ( SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces ) );
+                m_cAEXDocument.XDocument.Save( fs, SaveOptions.OmitDuplicateNamespaces );
+            }
+
             var container = new AutomationMLContainer(modelName + ".amlx", System.IO.FileMode.Create);
             container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + modelName + ".aml", UriKind.Relative));
             container.Close();
 
             Utils.LogInfo( "Amlx Container Created for model " + modelName );
+
+            Nodeset_Investigate_References( modelPath );
+
 
         }
 
@@ -2235,8 +2251,6 @@ namespace MarkdownProcessor
                 // starting with the attributes
 
                 rtn = scl.SystemUnitClass.Append(refnode.DecodedBrowseName.Name);
-                // Helpful for Debugging
-                //AddModifyAttribute(rtn.Attribute, "NodeId", "String", AmlIDFromNodeId(nodeId));
                 if (BaseNodeId != null)
                 {
                     rtn.ID = AmlIDFromNodeId(nodeId);
@@ -2307,77 +2321,209 @@ namespace MarkdownProcessor
                 {
                     if (reference.IsForward == true)
                     {
-                        if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, AggregatesNodeId) == true)
+                        if( m_modelManager.IsTypeOf( reference.ReferenceTypeId, HasInterfaceNodeId ) == true )
                         {
-                            string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
-                            var ReferenceTypeNode = FindNode<UANode>(reference.ReferenceTypeId);
-                            var sourceInterface = FindOrAddSourceInterface(ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId);
-                            var targetNode = FindNode<UANode>(reference.TargetId);
+                            // add the elements of the UA Interface
+                            var targetNode = FindNode<UANode>( reference.TargetId );
+                            string rolepath = BuildLibraryReference( RCLPrefix, m_modelManager.FindModelUri( targetNode.DecodedNodeId ), targetNode.DecodedBrowseName.Name );
+                            var roleSUC = FindOrAddSUC( ref scl, ref rcl, reference.TargetId );  // make sure the AMLobjects are already created.
+                            var srt = rtn.New_SupportedRoleClass( rolepath, false );
+                            var inst = roleSUC.CreateClassInstance();
+                            foreach( var element in inst.InternalElement )
+                            {
+                                rtn.InternalElement.Append( element );
+                            }
+                        }
+                        else if ( UseReference( reference ) )
+                        {
+                            string refURI = m_modelManager.FindModelUri( reference.ReferenceTypeId );
+                            var ReferenceTypeNode = FindNode<UANode>( reference.ReferenceTypeId );
+                            var sourceInterface = FindOrAddSourceInterface( ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId );
+                            var targetNode = FindNode<UANode>( reference.TargetId );
                             //                           if (targetNode.NodeClass != NodeClass.Method) //  methods are now processed
                             {
                                 var TypeDefNodeId = reference.TargetId;
-                                if (targetNode.NodeClass == NodeClass.Variable || targetNode.NodeClass == NodeClass.Object)
-                                    TypeDefNodeId = m_modelManager.FindFirstTarget(reference.TargetId, HasTypeDefinitionNodeId, true);
-                                if (TypeDefNodeId == null)
+                                if( targetNode.NodeClass == NodeClass.Variable || targetNode.NodeClass == NodeClass.Object )
+                                    TypeDefNodeId = m_modelManager.FindFirstTarget( reference.TargetId, HasTypeDefinitionNodeId, true );
+                                if( TypeDefNodeId == null )
                                     TypeDefNodeId = reference.TargetId;
 
-                                var ie = GetReferenceInternalElement(ref scl, ref rcl,
-                                    rtn, TypeDefNodeId, reference.TargetId);
+                                var ie = GetReferenceInternalElement( ref scl, ref rcl,
+                                    rtn, TypeDefNodeId, reference.TargetId );
 
                                 ie.Name = targetNode.DecodedBrowseName.Name;
-                                ie.ID = AmlIDFromNodeId(reference.TargetId);
+                                ie.ID = AmlIDFromNodeId( reference.TargetId );
 
                                 UpdateIsAbstract( targetNode, ie );
 
-                                RebuildExternalInterfaces(rtn, ie);
+                                RebuildExternalInterfaces( rtn, ie );
 
-                                rtn.AddInstance(ie);
+                                rtn.AddInstance( ie );
 
-                                var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
-                                AddBaseNodeClassAttributes(ie.Attribute, targetNode, basenode);
-                                if (targetNode.NodeClass == NodeClass.Variable)
+                                var basenode = FindNode<NodeSet.UANode>( TypeDefNodeId );
+                                AddBaseNodeClassAttributes( ie.Attribute, targetNode, basenode );
+                                if( targetNode.NodeClass == NodeClass.Variable )
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
-                                    bool bListOf = (varnode.ValueRank >= ValueRanks.OneDimension);  // use ListOf when its a UA array
-                                    AddModifyAttribute(ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf);
+                                    bool bListOf = ( varnode.ValueRank >= ValueRanks.OneDimension );  // use ListOf when its a UA array
+                                    AddModifyAttribute( ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf );
                                     AddModifyAttribute( ie.Attribute, "ValueRank", "Int32", varnode.ValueRank );
                                     SetArrayDimensions( ie, varnode.ArrayDimensions );
 
 
                                     UpdateDerived( ref ie, TypeDefNodeId, reference.TargetId );
                                 }
-                                else if (targetNode.NodeClass == NodeClass.Method)
-                                    ie.RefBaseSystemUnitPath = BuildLibraryReference(SUCPrefix, MetaModelName, MethodNodeClass);
+                                else if( targetNode.NodeClass == NodeClass.Method )
+                                    ie.RefBaseSystemUnitPath = BuildLibraryReference( SUCPrefix, MetaModelName, MethodNodeClass );
                                 var ie_suc = ie as SystemUnitClassType;
 
 
-                                var destInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, reference.TargetId);
+                                var destInterface = FindOrAddInterface( ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute[ "InverseName" ].Value, reference.TargetId );
 
-                                var internalLink = rtn.New_InternalLink(targetNode.DecodedBrowseName.Name);
+                                var internalLink = rtn.New_InternalLink( targetNode.DecodedBrowseName.Name );
                                 internalLink.RefPartnerSideA = sourceInterface.ID;
                                 internalLink.RefPartnerSideB = destInterface.ID;
 
                                 //   set the modeling rule
-                                var modellingId = m_modelManager.FindFirstTarget(reference.TargetId, HasModellingRuleNodeId, true);
-                                var modellingRule = m_modelManager.FindNode<UANode>(modellingId);
-                                if (modellingRule != null)
-                                    AddModifyAttribute(destInterface.Attribute, "ModellingRule", "ModellingRuleType", modellingRule.DecodedBrowseName.Name, false, MetaModelName);
-                                
+                                var modellingId = m_modelManager.FindFirstTarget( reference.TargetId, HasModellingRuleNodeId, true );
+                                var modellingRule = m_modelManager.FindNode<UANode>( modellingId );
+                                if( modellingRule != null )
+                                    AddModifyAttribute( destInterface.Attribute, "ModellingRule", "ModellingRuleType", modellingRule.DecodedBrowseName.Name, false, MetaModelName );
+
                             }
                         }
-                        else if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, HasInterfaceNodeId) == true)
-                        {
-                            // add the elements of the UA Interface
-                            var targetNode = FindNode<UANode>(reference.TargetId);
-                            string rolepath = BuildLibraryReference(RCLPrefix, m_modelManager.FindModelUri(targetNode.DecodedNodeId), targetNode.DecodedBrowseName.Name);
-                            var roleSUC = FindOrAddSUC(ref scl, ref rcl, reference.TargetId);  // make sure the AMLobjects are already created.
-                            var srt = rtn.New_SupportedRoleClass(rolepath, false);
-                            var inst = roleSUC.CreateClassInstance();
-                            foreach (var element in inst.InternalElement)
-                            {
-                                rtn.InternalElement.Append(element);
-                            }
-                        }
+                        //else //if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, AggregatesNodeId) == true )
+                        //{
+                        //    bool previouslyUtilized = m_modelManager.IsTypeOf( reference.ReferenceTypeId, AggregatesNodeId ) == true;
+                        //    bool hierarchical = m_modelManager.IsTypeOf( reference.ReferenceTypeId, HierarchicalNodeId ) == true;
+                        //    bool nonhierarchical = m_modelManager.IsTypeOf( reference.ReferenceTypeId,
+                        //        Opc.Ua.ReferenceTypeIds.NonHierarchicalReferences ) == true;
+
+                        //    bool typeDefinition = reference.ReferenceTypeId == HasTypeDefinitionNodeId;
+                        //    bool modellingRuleDefinition = reference.ReferenceTypeId == HasModellingRuleNodeId;
+
+
+                        //    string logMessage = reference.ReferenceTypeId.ToString();
+
+                        //    bool runNonHiearchical = false;
+                        //    if( nonhierarchical )
+                        //    {
+                        //        runNonHiearchical = true;
+                        //        if( typeDefinition || modellingRuleDefinition )
+                        //        {
+                        //            runNonHiearchical = false;
+                        //        }
+
+                        //    }
+                        //    //if ( runNonHiearchical )
+                        //    //{
+                        //    //    Utils.LogCritical( "{0} started", logMessage );
+                        //    //}
+
+                        //    if ( reference.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.HasChild ) )
+                        //    {
+                        //        bool wait = true;
+                        //    }
+
+                        //    if ( ( previouslyUtilized || hierarchical || runNonHiearchical )  /*&& 
+                        //        !reference.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.HasSubtype ) &&
+                        //        !reference.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.Organizes )*/  )
+                        //    {
+ 
+                        //        string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
+                        //        var ReferenceTypeNode = FindNode<UANode>(reference.ReferenceTypeId);
+
+
+                        //        if( !previouslyUtilized )
+                        //        {
+                        //            string key = string.Empty;
+                        //            if ( hierarchical )
+                        //            {
+                        //                key = "Hierarchical - " + ReferenceTypeNode.BrowseName.ToString();
+                        //            }
+                        //            else
+                        //            {
+                        //                key = "NonHierarchical - " + ReferenceTypeNode.BrowseName.ToString();
+                        //            }
+
+                        //            if ( HierarchicalCount.ContainsKey( key ) )
+                        //            {
+                        //                HierarchicalCount[ key ]++;
+                        //            }
+                        //            else
+                        //            {
+                        //                HierarchicalCount.Add( key, 1 );
+                        //            }
+
+                        //            Debug.WriteLine( "HierarchicalCount" );
+                        //            foreach( KeyValuePair<string, int> entry in HierarchicalCount )
+                        //            {
+                        //                Debug.WriteLine( "\t\t{0} {1}", entry.Key, entry.Value );
+                        //            }
+                        //        }
+
+
+
+                        //        var sourceInterface = FindOrAddSourceInterface(ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId);
+                        //        var targetNode = FindNode<UANode>(reference.TargetId);
+                        //            //                           if (targetNode.NodeClass != NodeClass.Method) //  methods are now processed
+                        //        {
+                        //            var TypeDefNodeId = reference.TargetId;
+                        //            if( targetNode.NodeClass == NodeClass.Variable || targetNode.NodeClass == NodeClass.Object )
+                        //                TypeDefNodeId = m_modelManager.FindFirstTarget( reference.TargetId, HasTypeDefinitionNodeId, true );
+                        //            if( TypeDefNodeId == null )
+                        //                TypeDefNodeId = reference.TargetId;
+
+                        //            var ie = GetReferenceInternalElement( ref scl, ref rcl,
+                        //                rtn, TypeDefNodeId, reference.TargetId );
+
+                        //            ie.Name = targetNode.DecodedBrowseName.Name;
+                        //            ie.ID = AmlIDFromNodeId( reference.TargetId );
+
+                        //            UpdateIsAbstract( targetNode, ie );
+
+                        //            RebuildExternalInterfaces( rtn, ie );
+
+                        //            rtn.AddInstance( ie );
+
+                        //            var basenode = FindNode<NodeSet.UANode>( TypeDefNodeId );
+                        //            AddBaseNodeClassAttributes( ie.Attribute, targetNode, basenode );
+                        //            if( targetNode.NodeClass == NodeClass.Variable )
+                        //            {  //  Set the datatype for Value
+                        //                var varnode = targetNode as NodeSet.UAVariable;
+                        //                bool bListOf = ( varnode.ValueRank >= ValueRanks.OneDimension );  // use ListOf when its a UA array
+                        //                AddModifyAttribute( ie.Attribute, "Value", varnode.DecodedDataType, varnode.DecodedValue, bListOf );
+                        //                AddModifyAttribute( ie.Attribute, "ValueRank", "Int32", varnode.ValueRank );
+                        //                SetArrayDimensions( ie, varnode.ArrayDimensions );
+
+
+                        //                UpdateDerived( ref ie, TypeDefNodeId, reference.TargetId );
+                        //            }
+                        //            else if( targetNode.NodeClass == NodeClass.Method )
+                        //                ie.RefBaseSystemUnitPath = BuildLibraryReference( SUCPrefix, MetaModelName, MethodNodeClass );
+                        //            var ie_suc = ie as SystemUnitClassType;
+
+
+                        //            var destInterface = FindOrAddInterface( ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute[ "InverseName" ].Value, reference.TargetId );
+
+                        //            var internalLink = rtn.New_InternalLink( targetNode.DecodedBrowseName.Name );
+                        //            internalLink.RefPartnerSideA = sourceInterface.ID;
+                        //            internalLink.RefPartnerSideB = destInterface.ID;
+
+                        //            //   set the modeling rule
+                        //            var modellingId = m_modelManager.FindFirstTarget( reference.TargetId, HasModellingRuleNodeId, true );
+                        //            var modellingRule = m_modelManager.FindNode<UANode>( modellingId );
+                        //            if( modellingRule != null )
+                        //                AddModifyAttribute( destInterface.Attribute, "ModellingRule", "ModellingRuleType", modellingRule.DecodedBrowseName.Name, false, MetaModelName );
+
+                        //        }
+
+                        //        //if( runNonHiearchical )
+                        //        //{
+                        //        //    Utils.LogCritical( "{0} Complete", logMessage );
+                        //        //}
+                        //    }
+                        //}
                     }
                 }
                 rtn.New_SupportedRoleClass(RCLPrefix + MetaModelName + "/" + UaBaseRole, false);  // all UA SUCs support the UaBaseRole
@@ -3293,6 +3439,208 @@ namespace MarkdownProcessor
             }
 
             return null;
+        }
+
+        #endregion
+
+        #region Nodeset Investigation
+
+        private bool UseReference( ReferenceInfo reference )
+        {
+            bool useReference = true;
+
+            //if ( reference.BrowseName.Contains("ConnectsTo"))
+            //{
+            //    Debug.WriteLine(" UseReference " + reference.BrowseName + " " + reference.NodeId);
+            //}
+
+            if ( RejectedReferences.Count == 0 )
+            {
+                // This would be better accomplished by changing this to NotAllowedReferences
+
+                List<NodeId> rejectedNodeIds = new List<NodeId>();
+
+                // Hierachical References
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasSubtype );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.Organizes );
+
+                // Non Hierachical References
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTypeDefinition );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasModellingRule );
+
+                foreach( NodeId nodeId in rejectedNodeIds )
+                {
+                    if ( nodeId.IdType.Equals(IdType.Numeric) && nodeId.NamespaceIndex == 0)
+                    {
+                        RejectedReferences.Add( (uint)nodeId.Identifier );
+                    }   
+                }   
+
+
+                NodeId hasPushedSecurityGroup = new NodeId( 25345 );
+                NodeId hasLowerLayerInterface = new NodeId( 25238 );
+
+                // Todo this right, I would have to ask the model manager for each reference base,
+                // and that would be quite the performance hit
+                // So for now, I will just use the references that I know about
+                List<NodeId> nodeIds = new List<NodeId>();
+                // Hierachical References
+
+                #region Kills the system
+
+                //nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasSubType );
+                //nodeIds.Add( Opc.Ua.ReferenceTypeIds.Organizes );
+
+                #endregion
+
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.AlarmGroupMember);
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasAlarmSuppressionGroup );
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.DataSetToWriter );
+                nodeIds.Add( hasLowerLayerInterface );
+                nodeIds.Add( hasPushedSecurityGroup );
+                // Non Hierachical References
+
+                #region Kills the system
+
+                //nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTypeDefinition );
+                //nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasModellingRule );
+
+                #endregion
+
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.AlwaysGeneratesEvent );
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTrueSubState );
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.FromState );
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.ToState );
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasEffect );
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCause );
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCondition );
+                nodeIds.Add( Opc.Ua.ReferenceTypeIds.GeneratesEvent );
+
+            }
+
+            if ( !m_modelManager.IsTypeOf( reference.ReferenceTypeId, AggregatesNodeId ) == true )
+            {
+                // This is the current state
+                useReference = false;
+                //if( reference.ReferenceTypeId.IdType.Equals( IdType.Numeric ) && reference.ReferenceTypeId.NamespaceIndex == 0 )
+                //{
+                //    if ( RejectedReferences.Contains( (uint)reference.ReferenceTypeId.Identifier ) )
+                //    {
+                //        useReference = false;
+                //    }
+                //}
+            }
+
+            return useReference;
+        }
+
+        private void Nodeset_Investigate_References( string modelPath )
+        {
+            if ( !modelPath.Equals( "AmlFxTest.xml" ) )
+            {
+                return;
+            }
+
+            Utils.LogCritical( "Nodeset_Investigate_References model {0}",
+                modelPath );
+
+            Dictionary<UANode, List<string>> counts = new Dictionary<UANode, List<string>>();
+
+            foreach( KeyValuePair<NodeId, UANode> pair in m_modelManager.Nodes )
+            {
+                foreach( ReferenceInfo reference in m_modelManager.FindReferences( pair.Value.DecodedNodeId ) )
+                {
+                    if( reference.IsForward )
+                    {
+                        UANode sourceNode = m_modelManager.FindNode<UANode>( reference.SourceId );
+                        UANode targetNode = m_modelManager.FindNode<UANode>( reference.TargetId );
+                        UANode referenceNode = m_modelManager.FindNode<UANode>( reference.ReferenceTypeId );
+
+                        if ( sourceNode != null && targetNode != null && referenceNode != null )
+                        {
+                            if( !counts.ContainsKey( referenceNode ) )
+                            {
+                                counts.Add( referenceNode, new List<string>() );
+                            }
+
+                            string message = string.Format( "\t\tSource {0}, {1} - Target {2}, {3}",
+                                 sourceNode.BrowseName, sourceNode.NodeId,
+                                 targetNode.BrowseName, targetNode.NodeId );
+
+                            counts[ referenceNode ].Add( message );
+                        }
+                    }
+                }
+            }
+
+            List<string> paths = new List<string>();
+            Dictionary<UANode, string> morePaths = new Dictionary<UANode, string>();
+            Dictionary<UANode, bool> foundIgnoredReferences = new Dictionary<UANode, bool>();
+
+            foreach( KeyValuePair<UANode, List<string>> pair in counts )
+            {
+                List< ReferenceInfo> references = m_modelManager.FindReferences( pair.Key.DecodedNodeId );
+
+                string path = FindReferencePath( pair.Key );
+
+                paths.Add( path + " has " + pair.Value.Count + " references" );
+                morePaths.Add( pair.Key, path );
+
+                Utils.LogCritical( "Reference type {0}", FindReferencePath( pair.Key ) );
+
+                foreach( string message in pair.Value )
+                {
+                    Utils.LogCritical( "\t\t" + message );
+                }
+            }
+
+            foreach(KeyValuePair<UANode, int> pair in IgnoredReferences)
+            {
+                foundIgnoredReferences.Add( pair.Key, false );
+            }
+
+            foreach( KeyValuePair<UANode, string> pair in morePaths )
+            {
+                Utils.LogCritical( pair.Value );
+                if( foundIgnoredReferences.ContainsKey( pair.Key ) )
+                {
+                    Utils.LogCritical( "        Has " + IgnoredReferences[ pair.Key].ToString() + " Ignored References" );
+                    foundIgnoredReferences[ pair.Key ] = true;
+                }
+            }
+             
+            foreach( KeyValuePair<UANode, bool> pair in foundIgnoredReferences )
+            {
+                if( !pair.Value )
+                {
+                    Utils.LogCritical( "Unfound IgnoredReferences - {0} {1} has {2} references", pair.Key.BrowseName, pair.Key.NodeId, IgnoredReferences[ pair.Key ] );
+                }
+            }   
+
+        }
+
+        private string FindReferencePath( UANode uANode )
+        {
+            string path = string.Empty;
+            string referenceName = uANode.BrowseName;
+
+            List<ReferenceInfo> references = m_modelManager.FindReferences( uANode.DecodedNodeId );
+            foreach( ReferenceInfo reference in references )
+            {
+                if( !reference.IsForward )
+                {
+                    if ( reference.ReferenceTypeId.Equals( HasSubTypeNodeId ) )
+                    {
+                        UANode parent = m_modelManager.FindNode<UANode>( reference.TargetId );
+                        if( parent != null )
+                        {
+                            path = FindReferencePath( parent );
+                        }
+                    }
+                }
+            }
+
+            return path + "/" + referenceName;
         }
 
         #endregion
