@@ -141,7 +141,7 @@ namespace MarkdownProcessor
 
         private Dictionary<UANode, int> IgnoredReferences = new Dictionary<UANode, int>();
         private Dictionary<string, int> HierarchicalCount = new Dictionary<string, int>();
-        private HashSet<UANode> AllowedReferences = new HashSet<UANode>();
+        private HashSet<uint> AllowedReferences = new HashSet<uint>();
         private HashSet<uint> RejectedReferences = new HashSet<uint>();
 
         public NodeSetToAML(ModelManager modelManager)
@@ -3468,17 +3468,47 @@ namespace MarkdownProcessor
                 rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTypeDefinition );
                 rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasModellingRule );
 
+                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.AlwaysGeneratesEvent );
+                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTrueSubState );
+                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.FromState );
+                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.ToState );
+                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasEffect );
+                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCause );
+                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCondition );
+                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.GeneratesEvent );
+
+
                 foreach( NodeId nodeId in rejectedNodeIds )
                 {
                     if ( nodeId.IdType.Equals(IdType.Numeric) && nodeId.NamespaceIndex == 0)
                     {
                         RejectedReferences.Add( (uint)nodeId.Identifier );
                     }   
-                }   
+                }
 
-
+                List<NodeId> allowedNodeIds = new List<NodeId>();
+                allowedNodeIds.Add( Opc.Ua.ReferenceTypeIds.AlwaysGeneratesEvent );
+                allowedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTrueSubState );
+                allowedNodeIds.Add( Opc.Ua.ReferenceTypeIds.FromState );
+                allowedNodeIds.Add( Opc.Ua.ReferenceTypeIds.ToState );
+                allowedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasEffect );
+                allowedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCause );
+                allowedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCondition );
+                allowedNodeIds.Add( Opc.Ua.ReferenceTypeIds.GeneratesEvent );
                 NodeId hasPushedSecurityGroup = new NodeId( 25345 );
+                allowedNodeIds.Add( hasPushedSecurityGroup );
                 NodeId hasLowerLayerInterface = new NodeId( 25238 );
+                allowedNodeIds.Add( hasLowerLayerInterface );
+
+
+                foreach( NodeId nodeId in allowedNodeIds )
+                {
+                    if( nodeId.IdType.Equals( IdType.Numeric ) && nodeId.NamespaceIndex == 0 )
+                    {
+                        AllowedReferences.Add( (uint)nodeId.Identifier );
+                    }
+                }
+
 
                 // Todo this right, I would have to ask the model manager for each reference base,
                 // and that would be quite the performance hit
@@ -3486,12 +3516,14 @@ namespace MarkdownProcessor
                 List<NodeId> nodeIds = new List<NodeId>();
                 // Hierachical References
 
+
                 #region Kills the system
 
                 //nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasSubType );
                 //nodeIds.Add( Opc.Ua.ReferenceTypeIds.Organizes );
 
                 #endregion
+
 
                 nodeIds.Add( Opc.Ua.ReferenceTypeIds.AlarmGroupMember);
                 nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasAlarmSuppressionGroup );
@@ -3520,15 +3552,39 @@ namespace MarkdownProcessor
 
             if ( !m_modelManager.IsTypeOf( reference.ReferenceTypeId, AggregatesNodeId ) == true )
             {
-                // This is the current state
-                useReference = false;
                 //if( reference.ReferenceTypeId.IdType.Equals( IdType.Numeric ) && reference.ReferenceTypeId.NamespaceIndex == 0 )
                 //{
                 //    if ( RejectedReferences.Contains( (uint)reference.ReferenceTypeId.Identifier ) )
                 //    {
                 //        useReference = false;
                 //    }
+                //    //if( !AllowedReferences.Contains( (uint)reference.ReferenceTypeId.Identifier ) )
+                //    //{
+                //    //    useReference = false;
+                //    //}
                 //}
+
+
+                //// This is the current state
+                ////useReference = false;
+
+                bool hierarchical = m_modelManager.IsTypeOf( reference.ReferenceTypeId, HierarchicalNodeId ) == true;
+                if( hierarchical )
+                {
+                    // With hierarchical, the file is too big for the current implementation
+                    // Writes a 3.6 gig file
+                    useReference = false;
+                }
+                else
+                {
+                    if( reference.ReferenceTypeId.IdType.Equals( IdType.Numeric ) && reference.ReferenceTypeId.NamespaceIndex == 0 )
+                    {
+                        if( RejectedReferences.Contains( (uint)reference.ReferenceTypeId.Identifier ) )
+                        {
+                            useReference = false;
+                        }
+                    }
+                }
             }
 
             return useReference;
