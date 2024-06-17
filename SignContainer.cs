@@ -17,7 +17,7 @@ namespace Opc2Aml
         public SignContainer( string modelName, FileInfo source, Configuration configuration ) :
             base( Prefix, modelName, source, configuration)
         {
-
+            SignBlackBox = new SignContainerSecureBlackBox( modelName, source, configuration );
         }
 
         public void Run()
@@ -60,9 +60,12 @@ namespace Opc2Aml
                     Utils.LogError( "Unable to load certificate " + _configuration.CertificateFile );
                 }
             }
+
+            SignBlackBox.Run();
         }
 
         private static string Prefix = "Sign_";
+        private SignContainerSecureBlackBox SignBlackBox = null;
 
     }
 }
