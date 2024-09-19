@@ -244,7 +244,7 @@ namespace SystemTest
 
             DirectoryInfo outputDirectoryInfo = GetOpc2AmlDirectory();
             FileInfo extractFile = new FileInfo(Path.Combine(outputDirectoryInfo.FullName, amlxFile));
-            Assert.IsTrue(extractFile.Exists, "Unable to find expected file " + fileName);
+            Assert.IsTrue(extractFile.Exists, "Unable to find expected file " + amlxFile );
 
             DirectoryInfo extractedDirectory = GetExtractDirectory(amlxFile);
 

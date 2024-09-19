@@ -27,7 +27,9 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
+using Microsoft.Extensions.Configuration;
 using Opc.Ua;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace Opc2AmlConsole
@@ -36,21 +38,115 @@ namespace Opc2AmlConsole
     {
         static void Main( string[] args )
         {
-            string inputFile = "";
-            string outputFile = "";
+            DirectoryInfo directoryInfo = new DirectoryInfo( Directory.GetCurrentDirectory() );
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddJsonFile( "app.config.json" )
+                .Build();
 
-            if( args.Length > 1 )
+            string inputNodeset = string.Empty;
+            string output = string.Empty;
+
+            if( !String.IsNullOrEmpty( Environment.CommandLine ) )
             {
-                outputFile = args[ 1 ];
+                string[] parameters = Environment.CommandLine.Split( "--" );
+
+                foreach( string parameter in parameters )
+                {
+                    if( parameter.Contains( "Opc2AmlConsole.", StringComparison.OrdinalIgnoreCase ) )
+                    {
+                        continue;
+                    }
+
+                    string working = parameter.Trim();
+                    string[] parts = working.Split( ' ' );
+                    if( parts.Length > 1 )
+                    {
+                        string id = parts[ 0 ];
+                        string value = String.Join( ' ', parts, 1, parts.Length - 1 ).Replace( "\"", "" );
+
+                        Console.WriteLine( id + " [" + value + "]" );
+
+                        if( id.Equals( "DirectoryInfo", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            directoryInfo = new DirectoryInfo( value );
+                            if( !directoryInfo.Exists )
+                            {
+                                Console.WriteLine( "DirectoryInfo does not exist: " + value );
+                                ShowSyntax();
+                                return;
+                            }
+                        }
+                        else if( id.Equals( "Nodeset", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            inputNodeset = value;
+                        }
+                        else if( id.Equals( "Output", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            output = value;
+                        }
+                        else if( id.Equals( "Config", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            configuration = new ConfigurationBuilder()
+                                .AddJsonFile( value )
+                                .Build();
+                        }
+                    }
+                }
             }
 
-            if ( args.Length > 0 )
+            if( output != string.Empty && inputNodeset == string.Empty )
             {
-                inputFile = args[ 0 ];
+                Console.WriteLine( "NodesetFile must be specified when output is specified." );
+                ShowSyntax();
+                return;
             }
-            
-            Opc2Aml.Entry entry = new Opc2Aml.Entry();
-            entry.Run( inputFile, outputFile );
+
+            FileInfo nodesetFileInfo = null;
+            FileInfo outputInfo = null;
+
+            if ( !String.IsNullOrEmpty( inputNodeset ) )
+            {
+                nodesetFileInfo = new FileInfo( Path.Combine( directoryInfo.FullName, inputNodeset ) );
+                if( !nodesetFileInfo.Exists )
+                {
+                    Console.WriteLine( "NodesetFile does not exist: " + inputNodeset );
+                    ShowSyntax();
+                    return;
+                }
+            }
+
+            if( !String.IsNullOrEmpty( output ) )
+            {
+                outputInfo = new FileInfo( Path.Combine( directoryInfo.FullName, output ) );
+            }
+
+            Opc2Aml.Entry entry = new Opc2Aml.Entry( directoryInfo, configuration );
+
+            entry.Run( nodesetFileInfo, outputInfo );
         }
+
+        static void ShowSyntax()
+        {
+            Console.WriteLine( "\n++++++++++  Opc2Aml Help  +++++++++++" );
+            Console.WriteLine( "Converts one or more OPC UA Nodeset files into their equivalent AutomationML Libraries.\n" );
+            Console.WriteLine( "Opc2AmlConsole.exe [-- DirectoryInfo Directory NodesetFile] [AmlBaseFilename]\n" );
+            Console.WriteLine( "Parameters -- DirectoryInfo Directory where nodeset files can be found\n" );
+            Console.WriteLine( "Parameters -- Nodeset Specific nodeset file to be processed\n" );
+            Console.WriteLine( "Parameters -- Output File name of the AutomationML file to be written (without the .amlx extension).\n" );
+            Console.WriteLine( "Parameters -- Config Json file where configuration can be found\n" );
+            Console.WriteLine( "\nWith no arguments, all nodeset files in CWD are processed." );
+            Console.WriteLine( "NOTE: All dependent nodeset files need to be present in the directory, even if they are not processed. " );
+            Console.WriteLine( "Copyright(c) 2021-2024 OPC Foundation.  All rights reserved." );
+            Console.WriteLine( "+++++++++++++++++++++++++++++++++++++\n\n" );
+
+            PromptExit();
+        }
+
+        static void PromptExit()
+        {
+            Console.WriteLine( "\nPress Enter to exit.\n" );
+            Console.ReadLine();
+        }
+
     }
 }

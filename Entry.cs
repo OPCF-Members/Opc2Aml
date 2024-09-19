@@ -37,22 +37,22 @@ using System.IO;
 using System.Collections.Generic;
 using MarkdownProcessor;
 using Opc.Ua;
+using Microsoft.Extensions.Configuration;
 
 namespace Opc2Aml
 {
-
     public class Entry
     {
         private Dictionary<string, string> Models;  // dictionary of model URIs (key) with Nodeset filenames (value) for nodeset files in the CWD
 
-        public Entry()
+        public Entry( DirectoryInfo directory, IConfiguration configuration )
         {
-            Initialize();
+            Initialize( configuration );
 
             Models = new Dictionary<string, string>();
             // load the dictionary with the UA models available in the Current Working Directory (CWD)
-            string[] fileEntries = Directory.GetFiles( "./", "*.xml" );
-            foreach( string fileEntry in fileEntries )
+            FileInfo[] fileEntries = directory.GetFiles( "*.xml" );
+            foreach( FileInfo fileEntry in fileEntries )
             {
                 ModelManager manager = new ModelManager();
                 string uri;
@@ -60,23 +60,24 @@ namespace Opc2Aml
                 Utils.LogInfo( "Loading nodeset: " + fileEntry + "  ..." );
                 try
                 {
-                    uri = manager.LoadModel( fileEntry, null, null );
+                    uri = manager.LoadModel( fileEntry.FullName, null, null );
                 }
                 catch( Exception ex )
                 {
-                    Console.WriteLine( "Unable to load nodeset: " + fileEntry + "  Are you missing a <Uri> element or is the file not a proper nodeset?" );
-                    Utils.LogError( "Unable to load nodeset: " + fileEntry + " [{0}]", ex.Message );
+                    Console.WriteLine( "Unable to load nodeset: " + fileEntry.Name + 
+                        "  Are you missing a <Uri> element or is the file not a proper nodeset?" );
+                    Utils.LogError( "Unable to load nodeset: " + fileEntry.Name + " [{0}]", ex.Message );
                     throw;
                 }
                 if( uri != null )
-                    Models.Add( uri, fileEntry.Substring( 2 ) );
+                    Models.Add( uri, fileEntry.FullName );
             }
         }
 
-        private void Initialize()
+        private void Initialize( IConfiguration configuration )
         {
             _configuration = new Configuration();
-            _configuration.Load();
+            _configuration.Load( configuration );
             _configuration.TraceConfiguration.ApplySettings();
         }
 
@@ -116,25 +117,25 @@ namespace Opc2Aml
         private void ShowSyntax()
         {
             Console.WriteLine( "\n++++++++++  Opc2Aml Help  +++++++++++" );
-            Console.WriteLine( "Converts one or more OPC UA Nodeset files in the current working directory (CWD) into their equivalent" );
-            Console.WriteLine( "AutomationML Libraries.\n" );
-            Console.WriteLine( "Opc2Aml.exe [NodesetFile] [AmlBaseFilename]\n" );
-            Console.WriteLine( "NodesetFile       Name of nodeset file in the CWD to be processed" );
-            Console.WriteLine( "AmlBaseFilename   File name of the AutomationML file to be written (without the .amlx extension)." );
-            Console.WriteLine( "                  The default name is the NodesetFile if this argument is missing." );
+            Console.WriteLine( "Converts one or more OPC UA Nodeset files into their equivalent AutomationML Libraries.\n" );
+            Console.WriteLine( "Opc2AmlConsole.exe [-- DirectoryInfo Directory NodesetFile] [AmlBaseFilename]\n" );
+            Console.WriteLine( "Parameters -- DirectoryInfo Directory where nodeset files can be found\n" );
+            Console.WriteLine( "Parameters -- Nodeset Specific nodeset file to be processed\n" );
+            Console.WriteLine( "Parameters -- Output File name of the AutomationML file to be written (without the .amlx extension).\n" );
+            Console.WriteLine( "Parameters -- Config Json file where configuration can be found\n" );
             Console.WriteLine( "\nWith no arguments, all nodeset files in CWD are processed." );
-            Console.WriteLine( "NOTE: All dependent nodeset files need to be present in the CWD, even if they are not processed. " );
+            Console.WriteLine( "NOTE: All dependent nodeset files need to be present in the directory, even if they are not processed. " );
             Console.WriteLine( "Copyright(c) 2021-2024 OPC Foundation.  All rights reserved." );
             Console.WriteLine( "+++++++++++++++++++++++++++++++++++++\n\n" );
         }
 
-        public void Run( string nodesetFile, string output )
+        public void Run( FileInfo nodesetFile, FileInfo output )
         {
 #if (ENABLE_PROGRAM_EXCEPTION)
             try
 #endif
             {
-                if( String.IsNullOrEmpty( nodesetFile ) )
+                if( nodesetFile == null )
                 {
                     if( Models.Count == 0 )
                     {
@@ -145,13 +146,13 @@ namespace Opc2Aml
                         ConvertModel( model.Value );
                     }
                 }
-                else if( String.IsNullOrEmpty( output ) )
+                else if( output == null )
                 {
-                    ConvertModel( nodesetFile );
+                    ConvertModel( nodesetFile.FullName );
                 }
                 else
                 {
-                    ConvertModel( nodesetFile, output );
+                    ConvertModel( nodesetFile.FullName, output.FullName );
                 }
 
                 Console.WriteLine( "... completed successfully." );
