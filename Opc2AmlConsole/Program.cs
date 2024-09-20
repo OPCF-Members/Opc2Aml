@@ -45,6 +45,7 @@ namespace Opc2AmlConsole
 
             string inputNodeset = string.Empty;
             string output = string.Empty;
+            bool suppressPrompt = false;
 
             if( !String.IsNullOrEmpty( Environment.CommandLine ) )
             {
@@ -69,12 +70,6 @@ namespace Opc2AmlConsole
                         if( id.Equals( "DirectoryInfo", StringComparison.OrdinalIgnoreCase ) )
                         {
                             directoryInfo = new DirectoryInfo( value );
-                            if( !directoryInfo.Exists )
-                            {
-                                Console.WriteLine( "DirectoryInfo does not exist: " + value );
-                                ShowSyntax();
-                                return;
-                            }
                         }
                         else if( id.Equals( "Nodeset", StringComparison.OrdinalIgnoreCase ) )
                         {
@@ -91,14 +86,28 @@ namespace Opc2AmlConsole
                                 .Build();
                         }
                     }
+                    else if( parts.Length == 1 )
+                    {
+                        if ( parts[ 0 ].Equals( "SuppressPrompt", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            suppressPrompt = true;
+                        }   
+                    }
                 }
+            }
+
+            if( !directoryInfo.Exists )
+            {
+                Console.WriteLine( "DirectoryInfo does not exist: " + directoryInfo.FullName );
+                ShowSyntax(suppressPrompt);
+                Environment.Exit( 1 );
             }
 
             if( output != string.Empty && inputNodeset == string.Empty )
             {
                 Console.WriteLine( "NodesetFile must be specified when output is specified." );
-                ShowSyntax();
-                return;
+                ShowSyntax( suppressPrompt );
+                Environment.Exit( 1 );
             }
 
             FileInfo nodesetFileInfo = null;
@@ -110,8 +119,8 @@ namespace Opc2AmlConsole
                 if( !nodesetFileInfo.Exists )
                 {
                     Console.WriteLine( "NodesetFile does not exist: " + inputNodeset );
-                    ShowSyntax();
-                    return;
+                    ShowSyntax( suppressPrompt );
+                    Environment.Exit( 1 );
                 }
             }
 
@@ -122,10 +131,10 @@ namespace Opc2AmlConsole
 
             Opc2Aml.Entry entry = new Opc2Aml.Entry( directoryInfo, configuration );
 
-            entry.Run( nodesetFileInfo, outputInfo );
+            entry.Run( nodesetFileInfo, outputInfo, suppressPrompt );
         }
 
-        static void ShowSyntax()
+        static void ShowSyntax( bool suppressPrompt )
         {
             Console.WriteLine( "\n++++++++++  Opc2Aml Help  +++++++++++" );
             Console.WriteLine( "Converts one or more OPC UA Nodeset files into their equivalent AutomationML Libraries.\n" );
@@ -139,14 +148,16 @@ namespace Opc2AmlConsole
             Console.WriteLine( "Copyright(c) 2021-2024 OPC Foundation.  All rights reserved." );
             Console.WriteLine( "+++++++++++++++++++++++++++++++++++++\n\n" );
 
-            PromptExit();
+            PromptExit( suppressPrompt );
         }
 
-        static void PromptExit()
+        static void PromptExit(bool suppressPrompt )
         {
-            Console.WriteLine( "\nPress Enter to exit.\n" );
-            Console.ReadLine();
+            if( !suppressPrompt )
+            {
+                Console.WriteLine( "\nPress Enter to exit.\n" );
+                Console.ReadLine();
+            }
         }
-
     }
 }

@@ -160,7 +160,7 @@ namespace SystemTest
             return Path.Combine(outputDirectoryInfo.FullName, Opc2Aml);
         }
 
-        static public bool Execute()
+        static public bool Execute( string arguments = "", int expectedResult = 0 )
         {
             bool success = true;
 
@@ -168,21 +168,28 @@ namespace SystemTest
             ProcessStartInfo processStartInfo = new ProcessStartInfo(executableName);
             Assert.IsNotNull(processStartInfo, "Unable to create ProcessStartInfo");
             processStartInfo.WorkingDirectory = GetOpc2AmlDirectory().FullName;
+            processStartInfo.Arguments = "-- SuppressPrompt"; 
+            if ( arguments.Length > 0 )
+            {
+                processStartInfo.Arguments += arguments;
+            }
+
             Process opc2amlProcess = Process.Start(processStartInfo);
             
             int counter = 0;
-            while( !opc2amlProcess.HasExited && counter < 30 )
+            int limit = 150;
+            while( !opc2amlProcess.HasExited && counter < limit )
             {
-                System.Threading.Thread.Sleep(5000);
+                System.Threading.Thread.Sleep(1000);
                 counter++;
-                if ( counter >= 30 )
+                if ( counter >= limit )
                 {
                     success = false;
                     opc2amlProcess.Kill();
                 }
             }
 
-            Assert.AreEqual(0, opc2amlProcess.ExitCode, "Conversion tool failed");
+            Assert.AreEqual(expectedResult, opc2amlProcess.ExitCode);
             Assert.IsTrue(success, "Conversion tool exceeded time limit");
 
             return success;

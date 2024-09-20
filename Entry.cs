@@ -129,7 +129,7 @@ namespace Opc2Aml
             Console.WriteLine( "+++++++++++++++++++++++++++++++++++++\n\n" );
         }
 
-        public void Run( FileInfo nodesetFile, FileInfo output )
+        public void Run( FileInfo nodesetFile, FileInfo output, bool suppressPrompt )
         {
 #if (ENABLE_PROGRAM_EXCEPTION)
             try
@@ -167,8 +167,11 @@ namespace Opc2Aml
                 Console.WriteLine( "** FATAL EXCEPTION **" );
                 Console.WriteLine( ex.Message );
                 ShowSyntax();
-                Console.WriteLine( "Press Enter to exit." );
-                Console.ReadLine();
+                if ( !suppressPrompt )
+                {
+                    Console.WriteLine( "Press Enter to exit." );
+                    Console.ReadLine();
+                }
                 Environment.Exit( 1 );
             }
 #endif    
