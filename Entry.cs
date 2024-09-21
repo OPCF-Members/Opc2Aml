@@ -45,9 +45,9 @@ namespace Opc2Aml
     {
         private Dictionary<string, string> Models;  // dictionary of model URIs (key) with Nodeset filenames (value) for nodeset files in the CWD
 
-        public Entry( DirectoryInfo directory, IConfiguration configuration )
+        public Entry( DirectoryInfo directory, string configurationFile )
         {
-            Initialize( configuration );
+            Initialize( configurationFile );
 
             Models = new Dictionary<string, string>();
             // load the dictionary with the UA models available in the Current Working Directory (CWD)
@@ -74,8 +74,19 @@ namespace Opc2Aml
             }
         }
 
-        private void Initialize( IConfiguration configuration )
+        private void Initialize( string configurationFile )
         {
+            string configFile = "app.config.json";  
+            FileInfo fileInfo = new FileInfo( configurationFile );
+            if ( fileInfo.Exists )
+            {
+                configFile = fileInfo.FullName;
+            }
+
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddJsonFile( configFile, optional: true )
+                .Build();
+
             _configuration = new Configuration();
             _configuration.Load( configuration );
             _configuration.TraceConfiguration.ApplySettings();
@@ -129,7 +140,7 @@ namespace Opc2Aml
             Console.WriteLine( "+++++++++++++++++++++++++++++++++++++\n\n" );
         }
 
-        public void Run( FileInfo nodesetFile, FileInfo output, bool suppressPrompt )
+        public void Run( FileInfo nodesetFile = null, FileInfo output = null, bool suppressPrompt = false )
         {
 #if (ENABLE_PROGRAM_EXCEPTION)
             try

@@ -39,9 +39,8 @@ namespace Opc2AmlConsole
         static void Main( string[] args )
         {
             DirectoryInfo directoryInfo = new DirectoryInfo( Directory.GetCurrentDirectory() );
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddJsonFile( "app.config.json" )
-                .Build();
+            bool directorySpecified = false;
+            string configurationFile = "app.config.json";
 
             string inputNodeset = string.Empty;
             string output = string.Empty;
@@ -70,6 +69,7 @@ namespace Opc2AmlConsole
                         if( id.Equals( "DirectoryInfo", StringComparison.OrdinalIgnoreCase ) )
                         {
                             directoryInfo = new DirectoryInfo( value );
+                            directorySpecified = true;
                         }
                         else if( id.Equals( "Nodeset", StringComparison.OrdinalIgnoreCase ) )
                         {
@@ -81,12 +81,11 @@ namespace Opc2AmlConsole
                         }
                         else if( id.Equals( "Config", StringComparison.OrdinalIgnoreCase ) )
                         {
-                            configuration = new ConfigurationBuilder()
-                                .AddJsonFile( value )
-                                .Build();
+                            configurationFile = value;
                         }
                     }
                     else if( parts.Length == 1 )
+
                     {
                         if ( parts[ 0 ].Equals( "SuppressPrompt", StringComparison.OrdinalIgnoreCase ) )
                         {
@@ -126,10 +125,17 @@ namespace Opc2AmlConsole
 
             if( !String.IsNullOrEmpty( output ) )
             {
-                outputInfo = new FileInfo( Path.Combine( directoryInfo.FullName, output ) );
+                if ( Path.IsPathFullyQualified( output ) )
+                {
+                    outputInfo = new FileInfo( output );
+                }
+                else
+                {
+                    outputInfo = new FileInfo( Path.Combine( nodesetFileInfo.Directory.FullName, output ) );
+                }
             }
 
-            Opc2Aml.Entry entry = new Opc2Aml.Entry( directoryInfo, configuration );
+            Opc2Aml.Entry entry = new Opc2Aml.Entry( directoryInfo, configurationFile );
 
             entry.Run( nodesetFileInfo, outputInfo, suppressPrompt );
         }
