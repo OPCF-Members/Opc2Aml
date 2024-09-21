@@ -51,6 +51,7 @@ using System.Reflection;
 using MarkdownProcessor.NodeSet;
 using System.Xml;
 using Microsoft.AspNetCore.Identity;
+using System.IO;
 
 namespace MarkdownProcessor
 {
@@ -335,8 +336,10 @@ namespace MarkdownProcessor
             // write out the AML file
             // var OutFilename = modelName + ".aml";
             // m_cAEXDocument.SaveToFile(OutFilename, true);
-            var container = new AutomationMLContainer(modelName + ".amlx", System.IO.FileMode.Create);
-            container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + modelName + ".aml", UriKind.Relative));
+            FileInfo internalFileInfo = new FileInfo( modelName );
+            FileInfo outputFileInfo = new FileInfo( modelName + ".amlx" );
+            var container = new AutomationMLContainer(outputFileInfo.FullName, System.IO.FileMode.Create);
+            container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + internalFileInfo.Name + ".aml", UriKind.Relative));
             container.Close();
 
             Utils.LogInfo( "Amlx Container Created for model " + modelName );

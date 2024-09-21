@@ -13,7 +13,7 @@ namespace SystemTest
     internal class TestHelper
     {
         public const string ExtractPrefix = "Extract_";
-        public const string Opc2AmlName = "Opc2Aml";
+        public const string Opc2AmlName = "Opc2AmlConsole";
         public const string Opc2Aml = Opc2AmlName + ".exe";
 
         public const string TestAmlUri = "http://opcfoundation.org/UA/FX/AML/TESTING";
@@ -26,7 +26,7 @@ namespace SystemTest
         {
             if (!Executed)
             {
-                const bool EXECUTE_CONVERSION = false;
+                const bool EXECUTE_CONVERSION = true;
 
                 List<string> testFiles = GetTestFileNames();
                 if (EXECUTE_CONVERSION)
@@ -115,7 +115,7 @@ namespace SystemTest
             string configurationPath = GetConfigurationPath();
             // Doesn't work https://stackoverflow.com/questions/53102/why-does-path-combine-not-properly-concatenate-filenames-that-start-with-path-di
             //string exeDirectory = Path.Combine(rootDirectoryInfo.FullName, configurationPath);
-            string exeDirectory = rootDirectoryInfo.FullName + configurationPath;
+            string exeDirectory = rootDirectoryInfo.FullName + "\\" + Opc2AmlName + configurationPath;
             return new DirectoryInfo(exeDirectory);
         }
 
@@ -160,7 +160,7 @@ namespace SystemTest
             return Path.Combine(outputDirectoryInfo.FullName, Opc2Aml);
         }
 
-        static public bool Execute()
+        static public bool Execute( string arguments = "", int expectedResult = 0 )
         {
             bool success = true;
 
@@ -168,21 +168,28 @@ namespace SystemTest
             ProcessStartInfo processStartInfo = new ProcessStartInfo(executableName);
             Assert.IsNotNull(processStartInfo, "Unable to create ProcessStartInfo");
             processStartInfo.WorkingDirectory = GetOpc2AmlDirectory().FullName;
+            processStartInfo.Arguments = "-- SuppressPrompt"; 
+            if ( arguments.Length > 0 )
+            {
+                processStartInfo.Arguments += arguments;
+            }
+
             Process opc2amlProcess = Process.Start(processStartInfo);
             
             int counter = 0;
-            while( !opc2amlProcess.HasExited && counter < 30 )
+            int limit = 150;
+            while( !opc2amlProcess.HasExited && counter < limit )
             {
-                System.Threading.Thread.Sleep(5000);
+                System.Threading.Thread.Sleep(1000);
                 counter++;
-                if ( counter >= 30 )
+                if ( counter >= limit )
                 {
                     success = false;
                     opc2amlProcess.Kill();
                 }
             }
 
-            Assert.AreEqual(0, opc2amlProcess.ExitCode, "Conversion tool failed");
+            Assert.AreEqual(expectedResult, opc2amlProcess.ExitCode);
             Assert.IsTrue(success, "Conversion tool exceeded time limit");
 
             return success;
@@ -244,7 +251,7 @@ namespace SystemTest
 
             DirectoryInfo outputDirectoryInfo = GetOpc2AmlDirectory();
             FileInfo extractFile = new FileInfo(Path.Combine(outputDirectoryInfo.FullName, amlxFile));
-            Assert.IsTrue(extractFile.Exists, "Unable to find expected file " + fileName);
+            Assert.IsTrue(extractFile.Exists, "Unable to find expected file " + amlxFile );
 
             DirectoryInfo extractedDirectory = GetExtractDirectory(amlxFile);
 
