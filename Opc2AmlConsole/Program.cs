@@ -45,6 +45,7 @@ namespace Opc2AmlConsole
             string inputNodeset = string.Empty;
             string output = string.Empty;
             bool suppressPrompt = false;
+            bool configurationSpecified = false;
 
             if( !String.IsNullOrEmpty( Environment.CommandLine ) )
             {
@@ -82,6 +83,7 @@ namespace Opc2AmlConsole
                         else if( id.Equals( "Config", StringComparison.OrdinalIgnoreCase ) )
                         {
                             configurationFile = value;
+                            configurationSpecified = true;
                         }
                     }
                     else if( parts.Length == 1 )
@@ -135,7 +137,25 @@ namespace Opc2AmlConsole
                 }
             }
 
-            Opc2Aml.Entry entry = new Opc2Aml.Entry( directoryInfo, configurationFile );
+            FileInfo configurationInfo = null;
+
+            if( configurationSpecified )
+            {
+                if( Path.IsPathFullyQualified( configurationFile ) )
+                {
+                    configurationInfo = new FileInfo( configurationFile );
+                }
+                else
+                {
+                    configurationInfo = new FileInfo( Path.Combine( directoryInfo.FullName, configurationFile ) );
+                }
+            }
+            else
+            {
+                configurationInfo = new FileInfo( configurationFile );
+            }
+
+            Opc2Aml.Entry entry = new Opc2Aml.Entry( directoryInfo, configurationInfo.FullName );
 
             entry.Run( nodesetFileInfo, outputInfo, suppressPrompt );
         }

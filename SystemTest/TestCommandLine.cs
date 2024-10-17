@@ -194,7 +194,7 @@ namespace SystemTest
             string useRelativePath = relativeLog.Replace( '\\', '/' );
             WriteConfigFile( fileName, useRelativePath );
 
-            string relativePath = ConfigDirectoryString() + "RelativeConfig.json";
+            string relativePath = ".\\Config\\RelativeConfig.json";
 
             string commandLine = DirectoryParameter() +
                 NodesetParameter( "LevelOne.xml" ) +
