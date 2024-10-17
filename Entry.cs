@@ -140,6 +140,12 @@ namespace Opc2Aml
             Console.WriteLine( "+++++++++++++++++++++++++++++++++++++\n\n" );
         }
 
+        public void Reverse()
+        {
+            Reverse reverse = new Reverse();
+            reverse.Run( reverse.HardCodeFileName );
+        }
+
         public void Run( FileInfo nodesetFile = null, FileInfo output = null, bool suppressPrompt = false )
         {
 #if (ENABLE_PROGRAM_EXCEPTION)

@@ -45,6 +45,7 @@ namespace Opc2AmlConsole
             string inputNodeset = string.Empty;
             string output = string.Empty;
             bool suppressPrompt = false;
+            bool reverse = false;
 
             if( !String.IsNullOrEmpty( Environment.CommandLine ) )
             {
@@ -85,12 +86,15 @@ namespace Opc2AmlConsole
                         }
                     }
                     else if( parts.Length == 1 )
-
                     {
                         if ( parts[ 0 ].Equals( "SuppressPrompt", StringComparison.OrdinalIgnoreCase ) )
                         {
                             suppressPrompt = true;
-                        }   
+                        }
+                        else if ( parts[ 0 ].Equals( "Reverse", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            reverse = true;
+                        }
                     }
                 }
             }
@@ -137,7 +141,14 @@ namespace Opc2AmlConsole
 
             Opc2Aml.Entry entry = new Opc2Aml.Entry( directoryInfo, configurationFile );
 
-            entry.Run( nodesetFileInfo, outputInfo, suppressPrompt );
+            if( reverse )
+            {
+                entry.Reverse();
+            }
+            else
+            {
+                entry.Run( nodesetFileInfo, outputInfo, suppressPrompt );
+            }
         }
 
         static void ShowSyntax( bool suppressPrompt )
