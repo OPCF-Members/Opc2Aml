@@ -342,9 +342,8 @@ namespace MarkdownProcessor
             // var OutFilename = modelName + ".aml";
             // m_cAEXDocument.SaveToFile(OutFilename, true);
 
-            using( FileStream fs = File.Create( "e://myStream.xml" ) )
+            using( FileStream fs = File.Create( "e://" + modelName + ".xml" ) )
             {
-                //                m_cAEXDocument.XDocument.Save( memoryStream, prettyPrint ? SaveOptions.OmitDuplicateNamespaces : ( SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces ) );
                 m_cAEXDocument.XDocument.Save( fs, SaveOptions.OmitDuplicateNamespaces );
             }
 
@@ -3449,11 +3448,6 @@ namespace MarkdownProcessor
         {
             bool useReference = true;
 
-            //if ( reference.BrowseName.Contains("ConnectsTo"))
-            //{
-            //    Debug.WriteLine(" UseReference " + reference.BrowseName + " " + reference.NodeId);
-            //}
-
             if ( RejectedReferences.Count == 0 )
             {
                 // This would be better accomplished by changing this to NotAllowedReferences
@@ -3509,13 +3503,13 @@ namespace MarkdownProcessor
                     }
                 }
 
+                #region Not Being Used
 
                 // Todo this right, I would have to ask the model manager for each reference base,
                 // and that would be quite the performance hit
                 // So for now, I will just use the references that I know about
                 List<NodeId> nodeIds = new List<NodeId>();
                 // Hierachical References
-
 
                 #region Kills the system
 
@@ -3547,27 +3541,11 @@ namespace MarkdownProcessor
                 nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCause );
                 nodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCondition );
                 nodeIds.Add( Opc.Ua.ReferenceTypeIds.GeneratesEvent );
-
+                #endregion
             }
 
             if ( !m_modelManager.IsTypeOf( reference.ReferenceTypeId, AggregatesNodeId ) == true )
             {
-                //if( reference.ReferenceTypeId.IdType.Equals( IdType.Numeric ) && reference.ReferenceTypeId.NamespaceIndex == 0 )
-                //{
-                //    if ( RejectedReferences.Contains( (uint)reference.ReferenceTypeId.Identifier ) )
-                //    {
-                //        useReference = false;
-                //    }
-                //    //if( !AllowedReferences.Contains( (uint)reference.ReferenceTypeId.Identifier ) )
-                //    //{
-                //    //    useReference = false;
-                //    //}
-                //}
-
-
-                //// This is the current state
-                ////useReference = false;
-
                 bool hierarchical = m_modelManager.IsTypeOf( reference.ReferenceTypeId, HierarchicalNodeId ) == true;
                 if( hierarchical )
                 {

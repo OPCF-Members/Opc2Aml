@@ -26,7 +26,7 @@ namespace SystemTest
         {
             if (!Executed)
             {
-                const bool EXECUTE_CONVERSION = false;
+                const bool EXECUTE_CONVERSION = true;
 
                 List<string> testFiles = GetTestFileNames();
                 if (EXECUTE_CONVERSION)

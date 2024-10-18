@@ -10,8 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Opc2AmlConsole\**" />
     <Compile Remove="SystemTest\**" />
+    <EmbeddedResource Remove="Opc2AmlConsole\**" />
     <EmbeddedResource Remove="SystemTest\**" />
+    <None Remove="Opc2AmlConsole\**" />
     <None Remove="SystemTest\**" />
   </ItemGroup>
 
