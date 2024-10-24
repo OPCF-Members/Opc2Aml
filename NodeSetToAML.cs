@@ -52,6 +52,7 @@ using MarkdownProcessor.NodeSet;
 using System.Xml;
 using Microsoft.AspNetCore.Identity;
 using System.IO;
+using Opc2Aml;
 
 namespace MarkdownProcessor
 {
@@ -144,6 +145,8 @@ namespace MarkdownProcessor
         private HashSet<uint> AllowedReferences = new HashSet<uint>();
         private HashSet<uint> RejectedReferences = new HashSet<uint>();
 
+        CountReferences _countReferences = null;
+
         public NodeSetToAML(ModelManager modelManager)
         {
             m_modelManager = modelManager;
@@ -165,6 +168,9 @@ namespace MarkdownProcessor
             structureNode = m_modelManager.FindNodeByName("Structure");
             if (modelName == null)
                 modelName = modelPath;
+
+            _countReferences = new CountReferences( m_modelManager, modelName );
+
 
             Utils.LogInfo( "CreateAML for model {0}", modelName );
 
@@ -355,7 +361,7 @@ namespace MarkdownProcessor
 
             Nodeset_Investigate_References( modelPath );
 
-
+            _countReferences.Report();
         }
 
         private void AddLibraryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
@@ -2335,6 +2341,8 @@ namespace MarkdownProcessor
                         }
                         else if ( UseReference( reference ) )
                         {
+                            _countReferences.AddReference( reference.ReferenceTypeId );
+
                             string refURI = m_modelManager.FindModelUri( reference.ReferenceTypeId );
                             var ReferenceTypeNode = FindNode<UANode>( reference.ReferenceTypeId );
                             var sourceInterface = FindOrAddSourceInterface( ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId );
