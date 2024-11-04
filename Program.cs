@@ -36,7 +36,6 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using MarkdownProcessor;
-using Microsoft.Extensions.Configuration;
 using Opc.Ua;
 
 namespace Opc2Aml

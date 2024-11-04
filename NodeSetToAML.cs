@@ -35,10 +35,12 @@ using Opc.Ua;
 using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
+using UADataType = MarkdownProcessor.NodeSet.UADataType;
+using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
 using UANode = MarkdownProcessor.NodeSet.UANode;
+using UAObject = MarkdownProcessor.NodeSet.UAObject;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
-using UAInstance = MarkdownProcessor.NodeSet.UAInstance;
 using DataTypeField = MarkdownProcessor.NodeSet.DataTypeField;
 using Aml.Engine.Adapter;
 using System.Xml.Linq;
@@ -48,9 +50,7 @@ using System.Net;
 using NodeSetToAmlUtils;
 using System.Collections;
 using System.Reflection;
-using MarkdownProcessor.NodeSet;
 using System.Xml;
-using Microsoft.AspNetCore.Identity;
 
 namespace MarkdownProcessor
 {
@@ -221,20 +221,29 @@ namespace MarkdownProcessor
                 AddLibraryHeaderInfo(scl_temp as CAEXBasicObject, modelInfo);
 
                 SortedDictionary<string, AttributeFamilyType> SortedDataTypes = new SortedDictionary<string, AttributeFamilyType>();
+
                 SortedDictionary<string, NodeId> SortedReferenceTypes = new SortedDictionary<string, NodeId>();
                 SortedDictionary<string, NodeId> SortedObjectTypes = new SortedDictionary<string, NodeId>();  // also contains VariableTypes
 
-
-                foreach (var node in modelInfo.Types)
+                Dictionary<string, UANode> fieldDefinitions = new Dictionary<string, UANode>();
+                foreach (KeyValuePair<string, UANode> node in modelInfo.Types)
                 {
                     switch (node.Value.NodeClass)
                     {
                         case NodeClass.DataType:
-                            var toAdd = ProcessDataType(node.Value);
-                            if (toAdd != null)
+                            if( node.Key.Equals( "RedundantServerDataType", StringComparison.OrdinalIgnoreCase ) )
                             {
-                                if (!SortedDataTypes.ContainsKey(node.Value.DecodedBrowseName.Name))
-                                    SortedDataTypes.Add(node.Value.DecodedBrowseName.Name, toAdd);
+                                bool interesting = true;
+                            }
+
+                            AttributeFamilyType toAdd = ProcessDataType( node.Value );
+                            if( toAdd != null )
+                            {
+                                if( !SortedDataTypes.ContainsKey( node.Value.DecodedBrowseName.Name ) )
+                                {
+                                    SortedDataTypes.Add( node.Value.DecodedBrowseName.Name, toAdd );
+                                    fieldDefinitions.Add( node.Value.DecodedBrowseName.Name, node.Value );
+                                }
                             }
                             break;
                         case NodeClass.ReferenceType:
@@ -248,20 +257,40 @@ namespace MarkdownProcessor
                     }
                 }
 
-                foreach( var dicEntry in SortedDataTypes)
+                foreach( KeyValuePair<string, AttributeFamilyType> dicEntry in SortedDataTypes)
                 {
                     if (atl == null)
                     {
                         atl = m_cAEXDocument.CAEXFile.AttributeTypeLib.Append(ATLPrefix + modelInfo.NamespaceUri);
                         AddLibraryHeaderInfo(atl as CAEXBasicObject, modelInfo);
                     }
-                    atl.AttributeType.Insert(dicEntry.Value, false);  // insert into the AML document in alpha order
+
+                    atl.AttributeType.Insert( dicEntry.Value, false);  // insert into the AML document in alpha order
                 }
 
                 foreach( var dicEntry in SortedDataTypes)  // cteate the ListOf versions
                 {
                     atl.AttributeType.Insert(CreateListOf(dicEntry.Value), false);  // insert into the AML document in alpha order
                 }
+
+                if( atl != null )
+                {
+                    foreach( AttributeFamilyType attribute in atl.AttributeType )
+                    {
+                        if( fieldDefinitions.ContainsKey( attribute.Name ) )
+                        {
+                            AddStructureFieldDefinition( attribute, fieldDefinitions[ attribute.Name ] );
+                        }
+                        else
+                        {
+                            if( !attribute.Name.StartsWith( "ListOf" ) )
+                            {
+                                bool unexpected = true;
+                            }
+                        }
+                    }
+                }
+
 
                 foreach( var refType in SortedReferenceTypes)
                 {
@@ -331,6 +360,10 @@ namespace MarkdownProcessor
             CreateInstances(); //  add the instances for each model
 
             Utils.LogInfo( "Creating Instances Complete" );
+
+            RemoveTypeOnly();
+
+            Utils.LogInfo( "Remove Type Only information Complete" );
 
             // write out the AML file
             // var OutFilename = modelName + ".aml";
@@ -505,7 +538,58 @@ namespace MarkdownProcessor
 
             atl_meta.AttributeType.Insert(AliasAttr, false);
 
-            
+            //Add StructureFieldDefinition
+            AttributeFamilyType structureFieldDefinition = new AttributeFamilyType(
+                new System.Xml.Linq.XElement( defaultNS + "AttributeType" ) );
+            structureFieldDefinition.Name = "StructureFieldDefinition";
+
+            AttributeType nameAttribute = new AttributeType(
+                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+            nameAttribute.Name = "Name";
+            nameAttribute.AttributeDataType = "xs:string";
+            structureFieldDefinition.Insert( nameAttribute, false );
+
+            //AttributeType descriptionAttribute = new AttributeType(
+            //    new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+            //descriptionAttribute.Name = "Description";
+            //descriptionAttribute.AttributeDataType = "xs:string";
+            //structureFieldDefinition.Insert( descriptionAttribute, false );
+
+            AttributeType valueRankAttribute = new AttributeType(
+                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+            valueRankAttribute.Name = "ValueRank";
+            valueRankAttribute.AttributeDataType = "xs:int";
+            valueRankAttribute.RefAttributeType = "[ATL_http://opcfoundation.org/UA/]/[Int32]";
+            structureFieldDefinition.Insert( valueRankAttribute, false );
+
+            AttributeType isOptionalAttribute = new AttributeType(
+                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+            isOptionalAttribute.Name = "IsOptional";
+            isOptionalAttribute.AttributeDataType = "xs:boolean";
+            structureFieldDefinition.Insert( isOptionalAttribute, false );
+
+            AttributeType arrayDimensionsAttribute = new AttributeType(
+                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+            arrayDimensionsAttribute.Name = "ArrayDimensions";
+            arrayDimensionsAttribute.AttributeDataType = "xs:int";
+            arrayDimensionsAttribute.RefAttributeType = "[ATL_http://opcfoundation.org/UA/]/[ListOfInt32]";
+            structureFieldDefinition.Insert( arrayDimensionsAttribute, false );
+
+            AttributeType allowSubtypesAttribute = new AttributeType(
+                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+            allowSubtypesAttribute.Name = "AllowSubtypes";
+            allowSubtypesAttribute.AttributeDataType = "xs:boolean";
+            structureFieldDefinition.Insert( allowSubtypesAttribute, false );
+
+            AttributeType maxStringLengthAttribute = new AttributeType(
+                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+            maxStringLengthAttribute.Name = "MaxStringLength";
+            maxStringLengthAttribute.AttributeDataType = "xs:int";
+            maxStringLengthAttribute.RefAttributeType = "[ATL_http://opcfoundation.org/UA/]/[UInt32]";
+            structureFieldDefinition.Insert( maxStringLengthAttribute, false );
+
+            atl_meta.AttributeType.Insert( structureFieldDefinition, false );
+
 
             // add UABaseRole to the RCL
             var rcl_meta = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + MetaModelName);
@@ -1030,7 +1114,7 @@ namespace MarkdownProcessor
 
                 if( typeUaNode != null )
                 {
-                    UADataType typeDataType = typeUaNode as UADataType;
+                    NodeSet.UADataType typeDataType = typeUaNode as NodeSet.UADataType;
                     if( typeDataType != null && typeDataType.Definition != null && typeDataType.Definition.Field != null )
                     {
                         Dictionary<string, DataTypeField> fields = new Dictionary<string, DataTypeField>();
@@ -2390,20 +2474,25 @@ namespace MarkdownProcessor
 
         private void SetArrayDimensions( SystemUnitClassType element, string arrayDimensions )
         {
+            SetArrayDimensions( element.Attribute, arrayDimensions );
+        }
+
+        private void SetArrayDimensions( AttributeSequence attributes, string arrayDimensions )
+        {
             string[] parts = arrayDimensions.Split( ',' );
             List<uint> arrayValues = new List<uint>();
             foreach( string part in parts )
             {
                 UInt32 value;
-                if ( UInt32.TryParse( part, out value ) )
+                if( UInt32.TryParse( part, out value ) )
                 {
                     arrayValues.Add( value );
                 }
             }
 
-            AddModifyAttribute( element.Attribute, 
-                "ArrayDimensions", 
-                Opc.Ua.DataTypeIds.UInt32, 
+            AddModifyAttribute( attributes,
+                "ArrayDimensions",
+                Opc.Ua.DataTypeIds.UInt32,
                 new Variant( arrayValues.ToArray() ),
                 bListOf: true );
         }
@@ -2713,6 +2802,7 @@ namespace MarkdownProcessor
             }
             if (m_modelManager.IsTypeOf(nodeId, structureNode.DecodedNodeId))
             {
+                bool debugMessage = false;
                 att.AttributeDataType = "";
                 var MyNode = FindNode<UANode>(nodeId) as NodeSet.UADataType;
                 if (MyNode.Definition != null && MyNode.Definition.Field != null)
@@ -2774,6 +2864,67 @@ namespace MarkdownProcessor
                                     FillSubAttributes(ref b, MyNode.Definition.Field[i].DecodedDataType);
                                 }
                                 att.Attribute.Insert(a, false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void AddStructureFieldDefinition( AttributeFamilyType attribute, UANode uaNode)
+        {
+            if( m_modelManager.IsTypeOf( uaNode.DecodedNodeId, structureNode.DecodedNodeId ) )
+            {
+                attribute.AttributeDataType = "";
+                NodeSet.UADataType uaDataType = uaNode as NodeSet.UADataType;
+
+                if( uaDataType != null && 
+                    uaDataType.Definition != null && 
+                    uaDataType.Definition.Field != null )
+                {
+                    if( !uaDataType.Definition.IsOptionSet || 
+                        !m_modelManager.IsTypeOf( uaNode.DecodedNodeId, OptionSetStructureNodeId ) )
+                    {
+                        string path = BuildLibraryReference( ATLPrefix, MetaModelName, "StructureFieldDefinition" );
+
+                        for( int index = 0; index < uaDataType.Definition.Field.Length; index++ )
+                        {
+                            DataTypeField field = uaDataType.Definition.Field[ index ];
+                            AttributeTypeType fieldDefinitionAttribute = attribute.Attribute[ field.Name ] ;
+                            if( fieldDefinitionAttribute != null )
+                            {
+                                AttributeType structureFieldAttribute =
+                                    fieldDefinitionAttribute.Attribute[ "StructureFieldDefinition" ];
+
+                                if( structureFieldAttribute == null )
+                                {
+                                    AttributeFamilyType structureFieldDefinition = m_cAEXDocument.FindByPath( path ) as AttributeFamilyType;
+
+                                    structureFieldAttribute = new AttributeType(
+                                        new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
+
+                                    structureFieldAttribute.RecreateAttributeInstance( structureFieldDefinition as AttributeFamilyType );
+                                    structureFieldAttribute.Name = "StructureFieldDefinition";
+                                    structureFieldAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+
+
+                                    // NowFill the data
+                                    AddModifyAttribute( structureFieldAttribute.Attribute, 
+                                        "Name", "String", new Variant( field.Name ) );
+                                    AddModifyAttribute( structureFieldAttribute.Attribute,
+                                        "ValueRank", "Int32", new Variant( field.ValueRank ) );
+                                    AddModifyAttribute( structureFieldAttribute.Attribute,
+                                        "IsOptional", "Boolean", new Variant( field.IsOptional) );
+                                    
+                                    SetArrayDimensions( structureFieldAttribute.Attribute, field.ArrayDimensions );
+
+                                    AddModifyAttribute( structureFieldAttribute.Attribute,
+                                        "AllowSubtypes", "Boolean", new Variant( field.AllowSubTypes ) );
+                                    AddModifyAttribute( structureFieldAttribute.Attribute,
+                                        "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
+
+                                    fieldDefinitionAttribute.Attribute.Insert( structureFieldAttribute );
+                                }
                             }
                         }
                     }
@@ -3294,6 +3445,97 @@ namespace MarkdownProcessor
 
             return null;
         }
+
+        #endregion
+
+        #region Type Only
+
+        private void RemoveTypeOnly()
+        {
+            RemoveTypeOnlySystemUnitClasses();
+            RemoveTypeOnlyInstances();
+        }
+
+        private void RemoveTypeOnlyInstances( )
+        {
+            Utils.LogInfo("Remove TypeOnly Attributes - Instances" );
+
+            foreach( InstanceHierarchyType instanceHierarchy in m_cAEXDocument.CAEXFile.InstanceHierarchy )
+            {
+                Console.WriteLine( "InstanceHierarchy " + instanceHierarchy.Name );
+
+                foreach( InternalElementType internalElement in instanceHierarchy.InternalElement )
+                {
+                    RemoveTypeOnlySystemUnitClassTypes( internalElement );
+                }
+            }
+        }
+
+        private void RemoveTypeOnlySystemUnitClasses( )
+        {
+            Utils.LogInfo( "Remove TypeOnly Attributes - SystemUnitClasses" );
+
+            foreach( SystemUnitClassLibType libType in m_cAEXDocument.CAEXFile.SystemUnitClassLib )
+            {
+                Console.WriteLine( "SystemUnitClass LibType " + libType.Name );
+
+                foreach( SystemUnitFamilyType familyType in libType.SystemUnitClass )
+                {
+                    RemoveTypeOnlySystemUnitClassTypes( familyType );
+                }
+            }
+        }
+
+        private void RemoveTypeOnlySystemUnitClassTypes( SystemUnitClassType entity )
+        {
+            Console.WriteLine( "\tSystemUnitClassType " + entity.Name );
+
+            foreach( InternalElementType internalElement in entity.InternalElement )
+            {
+                RemoveTypeOnlySystemUnitClassTypes( internalElement );
+            }
+
+            RemoveTypeOnlyAttributes(entity.Attribute, entity.Name );
+        }
+
+        private void RemoveTypeOnlyAttributes( AttributeSequence attributes, string path )
+        {
+            List<AttributeType> attributesToRemove = new List<AttributeType>();
+
+            foreach( AttributeType attribute in attributes )
+            {
+                if ( attribute.AdditionalInformation != null && 
+                    attribute.AdditionalInformation.Count > 0 )
+                {
+                    foreach( object additionalInformation in attribute.AdditionalInformation )
+                    {
+                        if ( additionalInformation.GetType().Name == "String" )
+                        {
+                            string isTypeOnly = additionalInformation as string;
+                            if ( !string.IsNullOrEmpty( isTypeOnly ) && 
+                                isTypeOnly == "OpcUa:TypeOnly" )
+                            {
+                                attributesToRemove.Add( attribute );
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach( AttributeType attribute in attributesToRemove )
+            {
+                Utils.LogInfo( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
+                attributes.RemoveElement( attribute );
+            }
+
+            foreach( AttributeType attribute in attributes )
+            {
+                string subPath = path + " " + attribute.Name;
+                RemoveTypeOnlyAttributes( attribute.Attribute, subPath );
+            }   
+        }
+
 
         #endregion
     }
