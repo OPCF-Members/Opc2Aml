@@ -911,7 +911,7 @@ namespace MarkdownProcessor
                                     a.DefaultValue = null;
                                     a.Value = null;
 
-                                    MinimizeExplicitNodeId( rootNodeId );
+                                    MinimizeNodeId( a );
                                 }
 
                                 if ( expandedNodeId != null )

@@ -26,7 +26,7 @@ namespace SystemTest
         {
             if (!Executed)
             {
-                const bool EXECUTE_CONVERSION = false;
+                const bool EXECUTE_CONVERSION = true;
 
                 List<string> testFiles = GetTestFileNames();
                 if (EXECUTE_CONVERSION)
@@ -34,9 +34,9 @@ namespace SystemTest
                     PrepareUnconvertedXml(testFiles);
                     System.Threading.Thread.Sleep(1000);
                     Execute();
-                    List<FileInfo> amlFiles = ExtractAmlxFiles(testFiles);
-                    Assert.AreNotEqual(0, amlFiles.Count, "Unable to get Converted Aml files");
                 }
+                List<FileInfo> amlFiles = ExtractAmlxFiles( testFiles );
+                Assert.AreNotEqual(0, amlFiles.Count, "Unable to get Converted Aml files");
                 Executed = true;
             }
             List<FileInfo> amlxFiles = GetAmlxFiles();
