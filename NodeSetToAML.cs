@@ -279,14 +279,7 @@ namespace MarkdownProcessor
                     {
                         if( fieldDefinitions.ContainsKey( attribute.Name ) )
                         {
-                            AddStructureFieldDefinition( attribute, fieldDefinitions[ attribute.Name ] );
-                        }
-                        else
-                        {
-                            if( !attribute.Name.StartsWith( "ListOf" ) )
-                            {
-                                bool unexpected = true;
-                            }
+                            AddAttributeData( attribute, fieldDefinitions[ attribute.Name ] );
                         }
                     }
                 }
@@ -1053,6 +1046,25 @@ namespace MarkdownProcessor
             }
 
             return a;
+        }
+
+        private bool MinimizeNodeId( AttributeType nodeIdAttribute )
+        {
+            bool minimized = false;
+
+            AttributeType rootNodeId = nodeIdAttribute.Attribute[ "RootNodeId" ];
+
+            if ( rootNodeId != null )
+            {
+                if ( MinimizeExplicitNodeId( rootNodeId ) )
+                {
+                    nodeIdAttribute.Attribute.Remove();
+                    nodeIdAttribute.Attribute.Insert( rootNodeId );
+                    minimized = true;
+                }
+            }
+
+            return minimized;
         }
 
         private bool MinimizeExplicitNodeId( AttributeType explicitNodeIdAttribute )
@@ -2871,7 +2883,20 @@ namespace MarkdownProcessor
             }
         }
 
-        private void AddStructureFieldDefinition( AttributeFamilyType attribute, UANode uaNode)
+        private void AddAttributeData( AttributeFamilyType attribute, UANode uaNode )
+        {
+            AddStructureFieldDefinition( attribute, uaNode );
+
+            AttributeType nodeIdAttribute = AddModifyAttribute( attribute.Attribute,"NodeId", "NodeId", 
+                new Variant( uaNode.DecodedNodeId ) );
+
+            MinimizeNodeId( nodeIdAttribute );
+
+            nodeIdAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+        }
+
+
+        private void AddStructureFieldDefinition( AttributeFamilyType attribute, UANode uaNode )
         {
             if( m_modelManager.IsTypeOf( uaNode.DecodedNodeId, structureNode.DecodedNodeId ) )
             {
@@ -3487,11 +3512,25 @@ namespace MarkdownProcessor
             foreach( InternalElementType internalElement in entity.InternalElement )
             {
                 RemoveTypeOnlySystemUnitClassTypes( internalElement );
+                RemoveTypeOnlyExternalInterfaces( internalElement.ExternalInterface, internalElement.Name );
             }
 
             RemoveTypeOnlyAttributes(entity.Attribute, entity.Name );
         }
 
+        private void RemoveTypeOnlyExternalInterfaces( ExternalInterfaceSequence externalInterfaces, string path )
+        {
+            foreach( ExternalInterfaceType externalInterface in externalInterfaces )
+            {
+                RemoveTypeOnlyAttributes( externalInterface.Attribute, path + " " + externalInterface.Name );
+            }
+
+            foreach( ExternalInterfaceType externalInterface in externalInterfaces )
+            {
+                RemoveTypeOnlyExternalInterfaces( externalInterface.ExternalInterface, path + " " + externalInterface.Name );
+            }
+
+        }
         private void RemoveTypeOnlyAttributes( AttributeSequence attributes, string path )
         {
             List<AttributeType> attributesToRemove = new List<AttributeType>();
