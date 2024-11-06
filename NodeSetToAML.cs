@@ -2532,7 +2532,6 @@ namespace MarkdownProcessor
             a.Name = Name;
             a.AttributeDataType = AttType;
             a.AttributeValue = val;
-
         }
 
         private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
@@ -2578,7 +2577,7 @@ namespace MarkdownProcessor
             // it would take more time to look it up each time
             OverrideBooleanAttribute( added.Attribute, "IsAbstract", refnode.IsAbstract );
 
-            // ovveride any attribute values
+            // override any attribute values
             if (BaseNodeId != null)
             {
                 var basenode = FindNode<NodeSet.UAReferenceType>(BaseNodeId);
@@ -2594,12 +2593,8 @@ namespace MarkdownProcessor
                 OverrideAttribute(added, IsSource, "xs:boolean", true);
                 OverrideAttribute(added, RefClassConnectsToPath, "xs:string", (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
 
-
-
-
                 if (inverseAdded != null)
                 {
-
                     if (basenode.IsAbstract != refnode.IsAbstract)
                         OverrideBooleanAttribute(inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract);
                     if (basenode.Symmetric != refnode.Symmetric)
@@ -2608,11 +2603,12 @@ namespace MarkdownProcessor
 
                     OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
                     OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string", added.CAEXPath());
-
                 }
-
-
             }
+
+            AttributeType nodeIdAttribute = AddModifyAttribute(added.Attribute, "NodeId", "NodeId", new Variant( nodeId ) );
+            nodeIdAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+            MinimizeNodeId( nodeIdAttribute );
         }
 
         #endregion
@@ -3512,10 +3508,10 @@ namespace MarkdownProcessor
             foreach( InternalElementType internalElement in entity.InternalElement )
             {
                 RemoveTypeOnlySystemUnitClassTypes( internalElement );
-                RemoveTypeOnlyExternalInterfaces( internalElement.ExternalInterface, internalElement.Name );
             }
 
             RemoveTypeOnlyAttributes(entity.Attribute, entity.Name );
+            RemoveTypeOnlyExternalInterfaces( entity.ExternalInterface, entity.Name );
         }
 
         private void RemoveTypeOnlyExternalInterfaces( ExternalInterfaceSequence externalInterfaces, string path )
