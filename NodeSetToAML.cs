@@ -2886,6 +2886,7 @@ namespace MarkdownProcessor
                         !m_modelManager.IsTypeOf( uaNode.DecodedNodeId, OptionSetStructureNodeId ) )
                     {
                         string path = BuildLibraryReference( ATLPrefix, MetaModelName, "StructureFieldDefinition" );
+                        string alternatePath = BuildLibraryReference( ATLPrefix, Opc.Ua.Namespaces.OpcUa, "StructureField" );
 
                         for( int index = 0; index < uaDataType.Definition.Field.Length; index++ )
                         {
@@ -2899,6 +2900,8 @@ namespace MarkdownProcessor
                                 if( structureFieldAttribute == null )
                                 {
                                     AttributeFamilyType structureFieldDefinition = m_cAEXDocument.FindByPath( path ) as AttributeFamilyType;
+                                    structureFieldDefinition = 
+                                        m_atl_temp.CAEXDocument.FindByPath( alternatePath ) as AttributeFamilyType;
 
                                     structureFieldAttribute = new AttributeType(
                                         new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
@@ -2922,6 +2925,18 @@ namespace MarkdownProcessor
                                         "AllowSubtypes", "Boolean", new Variant( field.AllowSubTypes ) );
                                     AddModifyAttribute( structureFieldAttribute.Attribute,
                                         "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
+
+                                    List<NodeSet.LocalizedText> description = new List<NodeSet.LocalizedText> ( );
+                                    
+                                    if ( field.Description != null )
+                                    {
+                                        description = new List<NodeSet.LocalizedText>(field.Description);
+                                    }
+                                    AddModifyAttribute( structureFieldAttribute.Attribute,
+                                        "Description", "String", new Variant( field.Description ), true );
+
+                                    AddModifyAttribute( structureFieldAttribute.Attribute,
+                                        "DataType", "NodeId", new Variant( field.DecodedDataType ) );
 
                                     fieldDefinitionAttribute.Attribute.Insert( structureFieldAttribute );
                                 }
@@ -3462,8 +3477,6 @@ namespace MarkdownProcessor
 
             foreach( InstanceHierarchyType instanceHierarchy in m_cAEXDocument.CAEXFile.InstanceHierarchy )
             {
-                Console.WriteLine( "InstanceHierarchy " + instanceHierarchy.Name );
-
                 foreach( InternalElementType internalElement in instanceHierarchy.InternalElement )
                 {
                     RemoveTypeOnlySystemUnitClassTypes( internalElement );
@@ -3477,8 +3490,6 @@ namespace MarkdownProcessor
 
             foreach( SystemUnitClassLibType libType in m_cAEXDocument.CAEXFile.SystemUnitClassLib )
             {
-                Console.WriteLine( "SystemUnitClass LibType " + libType.Name );
-
                 foreach( SystemUnitFamilyType familyType in libType.SystemUnitClass )
                 {
                     RemoveTypeOnlySystemUnitClassTypes( familyType );
@@ -3488,8 +3499,6 @@ namespace MarkdownProcessor
 
         private void RemoveTypeOnlySystemUnitClassTypes( SystemUnitClassType entity )
         {
-            Console.WriteLine( "\tSystemUnitClassType " + entity.Name );
-
             foreach( InternalElementType internalElement in entity.InternalElement )
             {
                 RemoveTypeOnlySystemUnitClassTypes( internalElement );
