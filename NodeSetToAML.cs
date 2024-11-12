@@ -231,10 +231,6 @@ namespace MarkdownProcessor
                     switch (node.Value.NodeClass)
                     {
                         case NodeClass.DataType:
-                            if( node.Key.Equals( "RedundantServerDataType", StringComparison.OrdinalIgnoreCase ) )
-                            {
-                                bool interesting = true;
-                            }
 
                             AttributeFamilyType toAdd = ProcessDataType( node.Value );
                             if( toAdd != null )
@@ -530,59 +526,6 @@ namespace MarkdownProcessor
             AliasAttr.Insert(added2, false);
 
             atl_meta.AttributeType.Insert(AliasAttr, false);
-
-            //Add StructureFieldDefinition
-            AttributeFamilyType structureFieldDefinition = new AttributeFamilyType(
-                new System.Xml.Linq.XElement( defaultNS + "AttributeType" ) );
-            structureFieldDefinition.Name = "StructureFieldDefinition";
-
-            AttributeType nameAttribute = new AttributeType(
-                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
-            nameAttribute.Name = "Name";
-            nameAttribute.AttributeDataType = "xs:string";
-            structureFieldDefinition.Insert( nameAttribute, false );
-
-            //AttributeType descriptionAttribute = new AttributeType(
-            //    new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
-            //descriptionAttribute.Name = "Description";
-            //descriptionAttribute.AttributeDataType = "xs:string";
-            //structureFieldDefinition.Insert( descriptionAttribute, false );
-
-            AttributeType valueRankAttribute = new AttributeType(
-                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
-            valueRankAttribute.Name = "ValueRank";
-            valueRankAttribute.AttributeDataType = "xs:int";
-            valueRankAttribute.RefAttributeType = "[ATL_http://opcfoundation.org/UA/]/[Int32]";
-            structureFieldDefinition.Insert( valueRankAttribute, false );
-
-            AttributeType isOptionalAttribute = new AttributeType(
-                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
-            isOptionalAttribute.Name = "IsOptional";
-            isOptionalAttribute.AttributeDataType = "xs:boolean";
-            structureFieldDefinition.Insert( isOptionalAttribute, false );
-
-            AttributeType arrayDimensionsAttribute = new AttributeType(
-                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
-            arrayDimensionsAttribute.Name = "ArrayDimensions";
-            arrayDimensionsAttribute.AttributeDataType = "xs:int";
-            arrayDimensionsAttribute.RefAttributeType = "[ATL_http://opcfoundation.org/UA/]/[ListOfInt32]";
-            structureFieldDefinition.Insert( arrayDimensionsAttribute, false );
-
-            AttributeType allowSubtypesAttribute = new AttributeType(
-                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
-            allowSubtypesAttribute.Name = "AllowSubtypes";
-            allowSubtypesAttribute.AttributeDataType = "xs:boolean";
-            structureFieldDefinition.Insert( allowSubtypesAttribute, false );
-
-            AttributeType maxStringLengthAttribute = new AttributeType(
-                new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
-            maxStringLengthAttribute.Name = "MaxStringLength";
-            maxStringLengthAttribute.AttributeDataType = "xs:int";
-            maxStringLengthAttribute.RefAttributeType = "[ATL_http://opcfoundation.org/UA/]/[UInt32]";
-            structureFieldDefinition.Insert( maxStringLengthAttribute, false );
-
-            atl_meta.AttributeType.Insert( structureFieldDefinition, false );
-
 
             // add UABaseRole to the RCL
             var rcl_meta = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + MetaModelName);
@@ -2906,7 +2849,7 @@ namespace MarkdownProcessor
                     if( !uaDataType.Definition.IsOptionSet || 
                         !m_modelManager.IsTypeOf( uaNode.DecodedNodeId, OptionSetStructureNodeId ) )
                     {
-                        string path = BuildLibraryReference( ATLPrefix, MetaModelName, "StructureFieldDefinition" );
+                        string path = BuildLibraryReference( ATLPrefix, Opc.Ua.Namespaces.OpcUa, "StructureField" );
 
                         for( int index = 0; index < uaDataType.Definition.Field.Length; index++ )
                         {
@@ -2929,7 +2872,7 @@ namespace MarkdownProcessor
                                     structureFieldAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
 
 
-                                    // NowFill the data
+                                    // Now fill the data
                                     AddModifyAttribute( structureFieldAttribute.Attribute, 
                                         "Name", "String", new Variant( field.Name ) );
                                     AddModifyAttribute( structureFieldAttribute.Attribute,
@@ -2943,6 +2886,21 @@ namespace MarkdownProcessor
                                         "AllowSubtypes", "Boolean", new Variant( field.AllowSubTypes ) );
                                     AddModifyAttribute( structureFieldAttribute.Attribute,
                                         "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
+
+                                    if( field.Description != null  && field.Description.Length > 0 )
+                                    {
+                                        LocalizedText localizedText = new LocalizedText(
+                                            field.Description[0].Locale, field.Description[ 0 ].Value );
+                                        AddModifyAttribute( structureFieldAttribute.Attribute,
+                                            "Description", "LocalizedText", new Variant( localizedText ) );
+                                    }
+
+                                    // Remove the NodeId from the structure Field
+                                    AttributeType nodeIdAttribute = structureFieldAttribute.Attribute[ "DataType" ];
+                                    if( nodeIdAttribute != null )
+                                    {
+                                        structureFieldAttribute.Attribute.RemoveElement( nodeIdAttribute );
+                                    }
 
                                     fieldDefinitionAttribute.Attribute.Insert( structureFieldAttribute );
                                 }
