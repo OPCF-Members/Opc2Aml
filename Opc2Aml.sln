@@ -5,7 +5,9 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opc2Aml", "Opc2Aml.csproj", "{19700C18-8B1A-4007-97A1-3FB5FB92770E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemTest", "SystemTest\SystemTest.csproj", "{B70CE61B-67A0-4B8F-A5E4-D7B68A695BCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemTest", "SystemTest\SystemTest.csproj", "{B70CE61B-67A0-4B8F-A5E4-D7B68A695BCD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opc2AmlConsole", "Opc2AmlConsole\Opc2AmlConsole.csproj", "{A9BA826D-DC77-4A8B-90B0-5246A30FCBEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B70CE61B-67A0-4B8F-A5E4-D7B68A695BCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B70CE61B-67A0-4B8F-A5E4-D7B68A695BCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B70CE61B-67A0-4B8F-A5E4-D7B68A695BCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9BA826D-DC77-4A8B-90B0-5246A30FCBEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9BA826D-DC77-4A8B-90B0-5246A30FCBEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9BA826D-DC77-4A8B-90B0-5246A30FCBEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9BA826D-DC77-4A8B-90B0-5246A30FCBEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

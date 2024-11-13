@@ -45,14 +45,10 @@ namespace Opc2Aml
 
     public class Configuration
     {
-        public void Load()
+        public void Load( IConfiguration configuration )
         {
             try
             {
-                IConfiguration configuration = new ConfigurationBuilder()
-                    .AddJsonFile( "app.config.json" )
-                    .Build();
-
                 IConfigurationSection trace = configuration.GetSection( "TraceConfiguration" );
                 if( trace != null )
                 {
