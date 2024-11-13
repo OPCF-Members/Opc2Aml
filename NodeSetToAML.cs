@@ -1870,12 +1870,23 @@ namespace MarkdownProcessor
             ref SystemUnitClassLibType scl,
             ref RoleClassLibType rcl,
             SystemUnitFamilyType parent,
+            NodeId parentNodeId,
             NodeId typedefNodeId,
             NodeId targetId)
         {
             string pathToType = GetTypeNamePath(parent);
 
-            SystemUnitFamilyType typeDefSuc = FindOrAddSUC(ref scl, ref rcl, typedefNodeId);
+            SystemUnitFamilyType typeDefSuc = null;
+
+            if( typedefNodeId.Equals( parentNodeId ) )
+            {
+                typeDefSuc = parent;
+            }
+            else
+            {
+                typeDefSuc = FindOrAddSUC( ref scl, ref rcl, typedefNodeId );
+            }
+
             string prefix = pathToType + typeDefSuc.Name + "_";
 
             SystemUnitFamilyType targetChild = null;
@@ -2322,7 +2333,7 @@ namespace MarkdownProcessor
                                     TypeDefNodeId = reference.TargetId;
 
                                 var ie = GetReferenceInternalElement(ref scl, ref rcl,
-                                    rtn, TypeDefNodeId, reference.TargetId);
+                                    rtn, nodeId, TypeDefNodeId, reference.TargetId);
 
                                 ie.Name = targetNode.DecodedBrowseName.Name;
                                 ie.ID = AmlIDFromNodeId(reference.TargetId);
