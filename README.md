@@ -8,7 +8,7 @@ Command line utility to convert OPC UA Nodeset files to AutomationML Libraries f
 Converts one or more OPC UA Nodeset files in the current working directory (CWD) into their equivalent
 AutomationML Libraries.
 
-Opc2Aml.exe [NodesetFile] [AmlBaseFilename]
+Opc2AmlConsole.exe [NodesetFile] [AmlBaseFilename]
 
 NodesetFile         Name of nodeset file in the CWD to be processed
 AmlBaseFilename     File name of the AutomationML file to be written (without the .amlx extension).
@@ -32,9 +32,9 @@ The binary releases are provided as a ZIP file. To install the binaries do the f
 
 3. Run the app:
    
-   a. Windows command line> ` Opc2Aml.exe`
+   a. Windows command line> ` Opc2AmlConsole.exe`
    
-   b. Linux terminal> `dotnet Opc2Aml.dll`
+   b. Linux terminal> `dotnet Opc2AmlConsole.dll`
 
 ## Licenses
 
