@@ -52,6 +52,8 @@ using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Xml;
+using System.IO;
+using Opc2Aml;
 
 namespace MarkdownProcessor
 {
@@ -187,13 +189,10 @@ namespace MarkdownProcessor
             }
             MyModelInfoList.Add(m_modelManager.DefaultModel);
 
-            foreach( var modelInfo in MyModelInfoList )
-            {
-                Utils.LogInfo( "Model Uri {0} NamespaceIndex {1}",
-                    modelInfo.NamespaceUri, modelInfo.NamespaceIndex );
-            }
+            OrderModelInfo orderModelInfo = new OrderModelInfo();
+            List<ModelInfo> orderedModelList = orderModelInfo.GetProcessOrder(MyModelInfoList);
 
-            foreach( var modelInfo in MyModelInfoList)
+            foreach( var modelInfo in orderedModelList )
             {
                 Utils.LogInfo( "{0} processing model {1} NamespaceIndex {2}", 
                     modelName, modelInfo.NamespaceUri, modelInfo.NamespaceIndex );
