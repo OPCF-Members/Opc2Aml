@@ -1,8 +1,7 @@
 {
   "profiles": {
     "Opc2AmlConsole": {
-      "commandName": "Project",
-      "commandLineArgs": "--Output foo"
+      "commandName": "Project"
     }
   }
 }
