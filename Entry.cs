@@ -125,19 +125,19 @@ namespace Opc2Aml
             }
         }
 
-        private void ShowSyntax()
+        public static void ShowSyntax()
         {
-            Console.WriteLine( "\n++++++++++  Opc2Aml Help  +++++++++++" );
-            Console.WriteLine( "Converts one or more OPC UA Nodeset files into their equivalent AutomationML Libraries.\n" );
-            Console.WriteLine( "Opc2AmlConsole.exe [-- DirectoryInfo Directory NodesetFile] [AmlBaseFilename]\n" );
-            Console.WriteLine( "Parameters -- DirectoryInfo Directory where nodeset files can be found\n" );
-            Console.WriteLine( "Parameters -- Nodeset Specific nodeset file to be processed\n" );
-            Console.WriteLine( "Parameters -- Output File name of the AutomationML file to be written (without the .amlx extension).\n" );
-            Console.WriteLine( "Parameters -- Config Json file where configuration can be found\n" );
-            Console.WriteLine( "\nWith no arguments, all nodeset files in CWD are processed." );
-            Console.WriteLine( "NOTE: All dependent nodeset files need to be present in the directory, even if they are not processed. " );
-            Console.WriteLine( "Copyright(c) 2021-2024 OPC Foundation.  All rights reserved." );
-            Console.WriteLine( "+++++++++++++++++++++++++++++++++++++\n\n" );
+            Console.WriteLine("\n++++++++++  Opc2Aml Help  +++++++++++");
+            Console.WriteLine("Converts one or more OPC UA Nodeset files into their equivalent AutomationML Libraries.\n");
+            Console.WriteLine("Opc2AmlConsole.exe [--DirectoryInfo Directory] [--Nodeset NodesetFile] [--Output AmlBaseFilename] [--Config ConfigFile]\n\n");
+            Console.WriteLine("  --DirectoryInfo Directory      Directory where nodeset files can be found\n");
+            Console.WriteLine("  --Nodeset NodesetFile          Specific nodeset file to be processed\n");
+            Console.WriteLine("  --Output AmlBaseFilename       File name of the AutomationML file to be written (without the .amlx extension).\n");
+            Console.WriteLine("  --Config ConfigFile            Json file where configuration can be found\n");
+            Console.WriteLine("\nWith no arguments, all nodeset files in CWD are processed.");
+            Console.WriteLine("NOTE: All dependent nodeset files need to be present in the directory, even if they are not processed. ");
+            Console.WriteLine("Copyright(c) 2021-2024 OPC Foundation.  All rights reserved.");
+            Console.WriteLine("+++++++++++++++++++++++++++++++++++++\n\n");
         }
 
         public void Run( FileInfo nodesetFile = null, FileInfo output = null, bool suppressPrompt = false )
