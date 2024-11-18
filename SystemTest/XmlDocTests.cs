@@ -31,7 +31,7 @@ namespace SystemTest
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void InternalElementGuidCount()
         {
             foreach (XmlNode child in m_doc.ChildNodes)

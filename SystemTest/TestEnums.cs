@@ -25,7 +25,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow("5015", "TrueState", "FalseState", true, DisplayName = "Default Parameters")]
         [DataRow("5016", "OverrideTrueState", "OverrideFalseState", true, DisplayName = "Override Default Parameters")]
         [DataRow("5017", "InstanceTrueState", "InstanceFalseState", false, DisplayName = "Override Parameters")]
@@ -56,7 +56,7 @@ namespace SystemTest
 
 
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow("6012", "", "", false, DisplayName = "Has No Values")]
         [DataRow("6013", "TrueState", "FalseState", true, DisplayName = "Has Values")]
         public void TwoStateClasses(string nodeId, string expectedTrue, string expectedFalse, bool hasValues)
@@ -93,7 +93,7 @@ namespace SystemTest
             Assert.IsNotNull(valueAsText, "Unable to Find ValueAsText Property");
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow("5005", new string[] {"ZeroValue","OneValue"}, 1, DisplayName = "Default Parameters")]
         [DataRow("5007", new string[] { "OverrideZero", "OverrideOne" }, 1, DisplayName = "Override Default Parameters")]
         [DataRow("5006", new string[] { "InstanceZero", "InstanceOne" }, 0, DisplayName = "Override Parameters")]
@@ -104,7 +104,7 @@ namespace SystemTest
 
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow("6009", new string[] { }, false, DisplayName = "Has No Values")]
         [DataRow("6008", new string[] { "ZeroValue", "OneValue" }, true, DisplayName = "Has Values")]
         public void MultiStateVariableClasses(string nodeId, string[] values, bool hasValues)
@@ -112,7 +112,7 @@ namespace SystemTest
             EnumClassTest(nodeId, values, hasValues, "EnumValues", "ListOfEnumValueType");
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow("5008", new string[] { "ZeroState", "OneState" }, 1, DisplayName = "Default Parameters")]
         [DataRow("5009", new string[] { "OverrideZero", "OverrideOne" }, 1, DisplayName = "Override Default Parameters")]
         [DataRow("5010", new string[] { "InstanceZero", "InstanceOne" }, 0, DisplayName = "Override Parameters")]
@@ -122,7 +122,7 @@ namespace SystemTest
                 "Test_MultiState_", "EnumStrings", "ListOfLocalizedText");
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow("6010", new string[] { }, false, DisplayName = "Has No Values")]
         [DataRow("6011", new string[] { "ZeroState", "OneState" }, true, DisplayName = "Has Values")]
         public void MultiStateClasses(string nodeId, string[] values, bool hasValues)
@@ -130,7 +130,7 @@ namespace SystemTest
             EnumClassTest(nodeId, values, hasValues, "EnumStrings", "ListOfLocalizedText");
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
 
         [DataRow( Opc.Ua.DataTypes.NodeClass, new NodeClass(), DisplayName = "EnumValue Constraints - NodeClass" )]
         [DataRow( Opc.Ua.DataTypes.MessageSecurityMode, new MessageSecurityMode(), DisplayName = "EnumString Constraints - MessageSecurityMode" )]

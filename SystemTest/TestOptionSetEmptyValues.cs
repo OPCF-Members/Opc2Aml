@@ -55,7 +55,7 @@ namespace SystemTest
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestOperationalHealthOptionSet()
         {
             AttributeTypeLibType attributeLibrary = GetFxAcAttributes();
@@ -63,7 +63,7 @@ namespace SystemTest
             TestOptionSet( attributeFamilyType );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestAggregatedHealthOptionSet()
         {
             AttributeTypeLibType attributeLibrary = GetFxAcAttributes();
@@ -73,7 +73,7 @@ namespace SystemTest
             TestOptionSet( attributeType );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestInstance()
         {
             CAEXDocument document = GetDocument();

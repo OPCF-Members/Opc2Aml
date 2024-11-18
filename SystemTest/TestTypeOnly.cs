@@ -12,7 +12,7 @@ using System.Net.NetworkInformation;
 
 namespace SystemTest
 {
-    [TestClass, Timeout(TestHelper.UnitTestTimeout )]
+    [TestClass]
     public class TestTypeOnly
     {
         CAEXDocument m_document = null;
@@ -20,7 +20,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestLibraryAttributes()
         {
             CAEXDocument document = GetDocument();
@@ -76,7 +76,7 @@ namespace SystemTest
 
         private int count = 0;
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestForNodeId()
         {
             CAEXDocument document = GetDocument();
@@ -144,7 +144,7 @@ namespace SystemTest
         }
 
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestForStructureField()
         {
             CAEXDocument document = GetDocument();

@@ -2,6 +2,7 @@
 using Aml.Engine.CAEX;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -176,15 +177,16 @@ namespace SystemTest
                 processStartInfo.Arguments += arguments;
             }
 
+            DateTime startTime = DateTime.Now;
+            DateTime maxTime = startTime.AddMilliseconds(UnitTestTimeout);
+
             Process opc2amlProcess = Process.Start(processStartInfo);
+
             
-            int counter = 0;
-            int limit = 150;
-            while( !opc2amlProcess.HasExited && counter < limit )
+            while( !opc2amlProcess.HasExited )
             {
                 System.Threading.Thread.Sleep(1000);
-                counter++;
-                if ( counter >= limit )
+                if ( DateTime.Now > maxTime )
                 {
                     success = false;
                     opc2amlProcess.Kill();

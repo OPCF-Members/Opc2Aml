@@ -22,7 +22,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestEnabledFlag()
         {
             SystemUnitClassType testObject = GetTestObject( "2294", true );
@@ -31,7 +31,7 @@ namespace SystemTest
             Assert.AreEqual("true", attributeType.Value, true );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
 
         [DataRow( "6224", DisplayName = "SessionDiagnosticsDataType" )]
         [DataRow( "6225", DisplayName = "SessionSecurityDiagnosticsDataType" )]
