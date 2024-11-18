@@ -18,6 +18,8 @@ namespace SystemTest
 
         public const string TestAmlUri = "http://opcfoundation.org/UA/FX/AML/TESTING";
 
+        public const int UnitTestTimeout = 480000;
+
         static bool Executed = false;
 
         static Dictionary<string, CAEXDocument> ReadOnlyDocuments = new Dictionary<string, CAEXDocument>();
