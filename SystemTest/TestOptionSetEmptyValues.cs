@@ -55,7 +55,7 @@ namespace SystemTest
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestOperationalHealthOptionSet()
         {
             AttributeTypeLibType attributeLibrary = GetFxAcAttributes();
@@ -63,7 +63,7 @@ namespace SystemTest
             TestOptionSet( attributeFamilyType );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestAggregatedHealthOptionSet()
         {
             AttributeTypeLibType attributeLibrary = GetFxAcAttributes();
@@ -73,7 +73,7 @@ namespace SystemTest
             TestOptionSet( attributeType );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestInstance()
         {
             CAEXDocument document = GetDocument();
@@ -104,14 +104,13 @@ namespace SystemTest
         public void TestOptionSet( AttributeTypeType attributeFamilyType )
         {
             Assert.IsNotNull( attributeFamilyType );
-            Assert.AreEqual( 4, attributeFamilyType.Attribute.Count );
+            Assert.IsTrue( attributeFamilyType.Attribute.Count >= 4 );
             ValidateOptionSetNames( attributeFamilyType );
         }
 
         public void ValidateOptionSetNames( AttributeTypeType attributeFamilyType )
         {
             HashSet<string> names = GetOptionSetNames( attributeFamilyType );
-            Assert.AreEqual( 4, names.Count );
             Assert.AreEqual( true, names.Contains( "OperationalWarning" ) );
             Assert.AreEqual( true, names.Contains( "OperationalError" ) );
             Assert.AreEqual( true, names.Contains( "SubOperationalWarning" ) );

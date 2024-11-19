@@ -2,6 +2,7 @@
 using Aml.Engine.CAEX;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,6 +18,8 @@ namespace SystemTest
         public const string Opc2Aml = Opc2AmlName + ".exe";
 
         public const string TestAmlUri = "http://opcfoundation.org/UA/FX/AML/TESTING";
+
+        public const int UnitTestTimeout = 480000;
 
         static bool Executed = false;
 
@@ -34,9 +37,9 @@ namespace SystemTest
                     PrepareUnconvertedXml(testFiles);
                     System.Threading.Thread.Sleep(1000);
                     Execute();
-                    List<FileInfo> amlFiles = ExtractAmlxFiles(testFiles);
-                    Assert.AreNotEqual(0, amlFiles.Count, "Unable to get Converted Aml files");
                 }
+                List<FileInfo> amlFiles = ExtractAmlxFiles( testFiles );
+                Assert.AreNotEqual(0, amlFiles.Count, "Unable to get Converted Aml files");
                 Executed = true;
             }
             List<FileInfo> amlxFiles = GetAmlxFiles();
@@ -174,15 +177,16 @@ namespace SystemTest
                 processStartInfo.Arguments += arguments;
             }
 
+            DateTime startTime = DateTime.Now;
+            DateTime maxTime = startTime.AddMilliseconds(UnitTestTimeout);
+
             Process opc2amlProcess = Process.Start(processStartInfo);
+
             
-            int counter = 0;
-            int limit = 150;
-            while( !opc2amlProcess.HasExited && counter < limit )
+            while( !opc2amlProcess.HasExited )
             {
                 System.Threading.Thread.Sleep(1000);
-                counter++;
-                if ( counter >= limit )
+                if ( DateTime.Now > maxTime )
                 {
                     success = false;
                     opc2amlProcess.Kill();

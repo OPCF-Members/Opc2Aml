@@ -23,7 +23,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void Validation()
         {
             var lookupService = LookupService.Register();
@@ -67,7 +67,7 @@ namespace SystemTest
 
         // Test is done on AcknowledgeableConditionType/AckedState and AlarmConditionType/SuppressedState
         // As both use TwoStateConditionType, and StateVariableType
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow(
             Opc.Ua.Variables.AcknowledgeableConditionType_AckedState,
             Opc.Ua.Variables.AcknowledgeableConditionType_AckedState_Id,
@@ -112,7 +112,7 @@ namespace SystemTest
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow(
             Opc.Ua.Variables.StateMachineType_CurrentState,
             Opc.Ua.Variables.StateVariableType_Name,
@@ -202,7 +202,7 @@ namespace SystemTest
 
         // Objects/Server/PublishSubscribe/SecurityGroups is an instance that has been improved to have nodeIds as IDs.
         // This is an object picked semi-randomly as an Id test for InternalElements
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestSecurityGroupInstance()
         {
             string root = TestHelper.GetOpcRootName();
@@ -224,7 +224,7 @@ namespace SystemTest
         }
 
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow(new string[]
         {
             "DescriptionMethod",
