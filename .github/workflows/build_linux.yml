@@ -34,20 +34,19 @@ jobs:
       - name: Build dll
         run: dotnet build -c Release  
 
-      - name: Upload artifact
+      - name: Pack artifacts
+        run:
+          tar -czvf Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz -C ./Opc2AmlConsole/bin/Release/net6.0/ .
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dll_version-${{env.BUILD_VERSION}}
-          path: ./bin/Release
+          name: Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz
+          path: ./
           retention-days: 21
           if-no-files-found: error
 
-      - name: zip release artifacts
-        if: github.event_name == 'release'
-        run:
-          tar -czvf Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz ./bin/Release/net6.0/
-
-      - name: Upload to Release
+      - name: Upload on release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
