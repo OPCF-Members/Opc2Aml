@@ -41,8 +41,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz
-          path: ./Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz
+          name: Opc2Aml.binaries.${{env.BUILD_VERSION}}
+          path: ./Opc2AmlConsole/bin/Release/net6.0/
           retention-days: 21
           if-no-files-found: error
 
