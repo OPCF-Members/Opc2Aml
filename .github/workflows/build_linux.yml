@@ -16,7 +16,7 @@ defaults:
 
 env:
   CONAN_DRIVECONTROLLER_REMOTE_URL: https://global-artifacts.se.com/artifactory/api/conan/drivecontroller-conan-prod-fed
-  VERSION: ${{ github.event.release.tag_name || format('{0}{1}', 'temporary-build-', github.run_number) }}
+  BUILD_VERSION: ${{ github.event.release.tag_name || format('{0}{1}', 'temporary-build-', github.run_number) }}
 
 jobs:
   build-linux:
@@ -37,7 +37,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dll_version-${{env.VERSION}}
+          name: dll_version-${{env.BUILD_VERSION}}
           path: ./bin/Release
           retention-days: 21
           if-no-files-found: error
