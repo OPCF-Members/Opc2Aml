@@ -42,7 +42,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void OutputSpecific()
         {
             DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();
@@ -71,7 +71,7 @@ namespace SystemTest
             Assert.IsFalse( dontBuildfileInfo.Exists );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void OutputNonExistent()
         {
             string commandLine = "--Nodeset NonExistent.xml";
@@ -80,7 +80,7 @@ namespace SystemTest
         }
 
         // Test 6:  Output specific output overwrite
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void OutputSpecificOverwrite()
         {
             string commandLine = DirectoryParameter( ) + 
@@ -95,7 +95,7 @@ namespace SystemTest
             Assert.IsTrue( before < fileInfo.LastWriteTimeUtc );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void SpecificNoDirectory()
         {
             string commandLine = NodesetParameter( WorkingDirectoryString() + "LevelOne.xml" ) + 
@@ -107,7 +107,7 @@ namespace SystemTest
             Assert.IsTrue( fileInfo.Exists );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void NoDirectoryOutputSubdirectory()
         {
             string commandLine = NodesetParameter( WorkingDirectoryString() + "LevelOne.xml" ) +
@@ -119,7 +119,7 @@ namespace SystemTest
             Assert.IsTrue( fileInfo.Exists );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void RelativeDirectory()
         {
             string commandLine = DirectoryParameter() + 
@@ -132,7 +132,7 @@ namespace SystemTest
             Assert.IsTrue( fileInfo.Exists );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void AbsoluteDirectory()
         {
             DirectoryInfo directoryInfo = new DirectoryInfo( WorkingDirectory().FullName );
@@ -146,7 +146,7 @@ namespace SystemTest
             Assert.IsTrue( fileInfo.Exists );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void BadDirectory()
         {
             string commandLine = DirectoryParameter() + "BadDirectory" +
@@ -156,7 +156,7 @@ namespace SystemTest
             TestHelper.Execute( commandLine, expectedResult: 1 );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void OutputAllDirectory()
         {
             DirectoryInfo directoryInfo = new DirectoryInfo( WorkingDirectory().FullName );
@@ -176,7 +176,7 @@ namespace SystemTest
                 directoryInfo.GetFiles( "*.xml" ).Length );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void OutputOneDirectory()
         {
             string commandLine = DirectoryParameter() +
@@ -185,7 +185,7 @@ namespace SystemTest
             TestHelper.Execute( commandLine, expectedResult: 1 );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void RelativeConfig()
         {
             DirectoryInfo directoryInfo = new DirectoryInfo( ConfigDirectory().FullName );
@@ -207,7 +207,7 @@ namespace SystemTest
             Assert.IsTrue( expectedLog.Exists );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void AbsoluteConfig()
         {
             DirectoryInfo directoryInfo = new DirectoryInfo( ConfigDirectory().FullName );
@@ -228,7 +228,7 @@ namespace SystemTest
             Assert.IsTrue( expectedLog.Exists );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void BadConfig()
         {
             DateTime start = DateTime.UtcNow;
