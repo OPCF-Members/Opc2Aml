@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Opc2Aml": {
+    "Opc2AmlConsole": {
       "commandName": "Project"
     }
   }

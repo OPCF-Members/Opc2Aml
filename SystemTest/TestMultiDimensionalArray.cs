@@ -15,7 +15,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow( "6134", "3", "3,3,3", false, DisplayName = "Three Dimensions, no Value" )]
         [DataRow( "6126", "1", "10", true, DisplayName = "One Dimension" )]
         [DataRow( "6127", "2", "2,5", true, DisplayName = "Two Dimensions" )]
@@ -77,7 +77,7 @@ namespace SystemTest
         }
 
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestMethodClassAttributes()
         {
             CAEXDocument document = GetDocument();
@@ -98,7 +98,7 @@ namespace SystemTest
             Assert.AreEqual( "xs:string", nameAttribute.AttributeDataType );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow( "2330", "", false, true, DisplayName = "SUC HistoryServerCapabilitiesType should not have ArrayDimensions" )]
         [DataRow( "24186", "", true, true, DisplayName = "SUC FailureCode should have empty ArrayDimensions" )]
         [DataRow( "24187", "0,8", true, true, DisplayName = "SUC FailureSystemIdentifier ArrayDimensions" )]
@@ -146,7 +146,7 @@ namespace SystemTest
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow( "2330", "", false, true, DisplayName = "SUC HistoryServerCapabilitiesType should not have ValueRank" )]
         [DataRow( "24186", "-1", true, true, DisplayName = "SUC FailureCode should have Scalar ValueRank" )]
         [DataRow( "24187", "2", true, true, DisplayName = "SUC FailureSystemIdentifier" )]

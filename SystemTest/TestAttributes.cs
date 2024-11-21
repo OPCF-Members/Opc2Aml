@@ -15,7 +15,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow("Description", "5001",
             "A Folder to store instances specifically for testing purposes",
             true, DisplayName = "Instance Expected Description")]
@@ -59,7 +59,7 @@ namespace SystemTest
             }
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestMethodClassAttributes()
         {
             CAEXDocument document = GetDocument();

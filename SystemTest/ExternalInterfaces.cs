@@ -19,7 +19,7 @@ namespace SystemTest
 
         // This test is more about studying the file output, but has validity as a real test        
         private int LinkInternalElementDifferentCount;
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void DifferencesBetweenLinksAndInternalElements()
         {
             GetDocument();

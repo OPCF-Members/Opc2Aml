@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <StartupObject></StartupObject>
 	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -16,6 +16,10 @@
     <EmbeddedResource Remove="SystemTest\**" />
     <None Remove="Opc2AmlConsole\**" />
     <None Remove="SystemTest\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Program.cs" />
   </ItemGroup>
 
   <ItemGroup>

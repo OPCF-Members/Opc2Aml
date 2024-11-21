@@ -23,7 +23,7 @@ namespace SystemTest
         private const string LevelTwo = "http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/";
         private const string RootLevel = "http://opcfoundation.org/UA/";
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestDataSetMetaData()
         {
             SystemUnitClassType objectToTest = GetObjectFolder();
@@ -110,7 +110,7 @@ namespace SystemTest
         }
 
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestFieldTargetData()
         {
             SystemUnitClassType objectToTest = GetObjectFolder();
@@ -153,7 +153,7 @@ namespace SystemTest
             //Assert.AreEqual( "", overrideValue.AttributeDataType );
         }
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestPublishedVariableData()
         {
             SystemUnitClassType objectToTest = GetObjectFolder();

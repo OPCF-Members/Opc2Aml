@@ -35,7 +35,7 @@ namespace SystemTest
             ExternalInterfaceType
         };
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestAllIsAbstract()
         {
             DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();

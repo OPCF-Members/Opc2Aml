@@ -21,7 +21,7 @@ namespace SystemTest
         CAEXDocument m_document = null;
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         public void TestForGuids()
         {
             GetDocument();

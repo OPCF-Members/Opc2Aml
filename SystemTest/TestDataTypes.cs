@@ -21,7 +21,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow( "6192", "12345", "xs:int", "Value", DisplayName = "DataValue Value" )]
         [DataRow( "6192", "2165637120", "xs:unsignedInt", "StatusCode", DisplayName = "StatusCode" )]
         [DataRow( "6192", "2023-09-13T14:39:08-06:00", "xs:dateTime", "SourceTimestamp", DisplayName = "SourceTimestamp" )]

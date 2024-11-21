@@ -4,13 +4,9 @@
         <Uri>http://opcfoundation.org/UA/FX/AML/TESTING/AmlFxTest/</Uri>
         <Uri>http://opcfoundation.org/UA/FX/AC/</Uri>
         <Uri>http://opcfoundation.org/UA/FX/Data/</Uri>
-        <Uri>http://opcfoundation.org/UA/DI/</Uri>
     </NamespaceUris>
     <Models>
         <Model ModelUri="http://opcfoundation.org/UA/FX/AML/TESTING/AmlFxTest/">
-            <RequiredModel ModelUri="http://opcfoundation.org/UA/"/>
-            <RequiredModel ModelUri="http://opcfoundation.org/UA/DI/" />
-            <RequiredModel ModelUri="http://opcfoundation.org/UA/FX/Data/" />
             <RequiredModel ModelUri="http://opcfoundation.org/UA/FX/AC/" />
         </Model>
     </Models>
@@ -24,11 +20,6 @@
         <Alias Alias="DeviceHealthOptionSet">ns=2;i=3005</Alias>
         <Alias Alias="OperationalHealthOptionSet">ns=2;i=3010</Alias>
     </Aliases>
-    <Extensions>
-        <Extension>
-            <ua:ModelInfo Tool="UaModeler" Hash="WltXoHM4YlagD+N7UzeKkw==" Version="1.6.8"/>
-        </Extension>
-    </Extensions>
     <UAObject NodeId="ns=1;i=5003" BrowseName="1:AutomationComponentInstance">
         <DisplayName>AutomationComponentInstance</DisplayName>
         <References>

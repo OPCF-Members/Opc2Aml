@@ -16,7 +16,7 @@ namespace SystemTest
 
         #region Tests
 
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow( "6144", TestHelper.TestAmlUri, false, DisplayName = "EventId variable should have instance NodeId" )]
         [DataRow( "6130", TestHelper.TestAmlUri, false, DisplayName = "InputArguments should have instance NodeId" )]
         [DataRow( "2255", Opc.Ua.Namespaces.OpcUa, true, DisplayName = "Namespace variable should have instance NodeId" )]

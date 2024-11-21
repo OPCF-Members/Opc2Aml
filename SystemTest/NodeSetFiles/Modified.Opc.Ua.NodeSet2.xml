@@ -9730,9 +9730,16 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=18809</Reference>
     </References>
     <Definition Name="3DCartesianCoordinates" SymbolicName="ThreeDCartesianCoordinates">
-      <Field Name="X" DataType="i=11" />
-      <Field Name="Y" DataType="i=11" />
-      <Field Name="Z" DataType="i=11" />
+      <Field Name="X" DataType="i=11" >
+        <Description>No Locale</Description>
+      </Field>
+      <Field Name="Y" DataType="i=11" >
+        <Description Locale="en">With Locale</Description>
+      </Field>
+      <Field Name="Z" DataType="i=11" >
+        <Description>Multiple Descriptions</Description>
+        <Description Locale="en">Multiple Descriptions with Locale</Description>
+      </Field>
     </Definition>
   </UADataType>
   <UADataType NodeId="i=18811" BrowseName="Orientation" IsAbstract="true">

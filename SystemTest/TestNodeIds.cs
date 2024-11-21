@@ -21,7 +21,7 @@ namespace SystemTest
 
 
         #region Tests
-        [TestMethod]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow( "GuidNodeIdWithActualGuidId", "0EB66E95-DCED-415F-B8EC-43ED3F0C759B", IdType.Guid )]
         [DataRow( "NumericNodeIdWithActualNumericId", "12345", IdType.Numeric )]
         [DataRow( "OpaqueNodeIdWithActualOpaqueId", "T3BhcXVlTm9kZUlk", IdType.Opaque )]

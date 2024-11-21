@@ -2,6 +2,7 @@
 using Aml.Engine.CAEX;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,10 +14,12 @@ namespace SystemTest
     internal class TestHelper
     {
         public const string ExtractPrefix = "Extract_";
-        public const string Opc2AmlName = "Opc2Aml";
+        public const string Opc2AmlName = "Opc2AmlConsole";
         public const string Opc2Aml = Opc2AmlName + ".exe";
 
         public const string TestAmlUri = "http://opcfoundation.org/UA/FX/AML/TESTING";
+
+        public const int UnitTestTimeout = 480000;
 
         static bool Executed = false;
 
@@ -34,9 +37,9 @@ namespace SystemTest
                     PrepareUnconvertedXml(testFiles);
                     System.Threading.Thread.Sleep(1000);
                     Execute();
-                    List<FileInfo> amlFiles = ExtractAmlxFiles(testFiles);
-                    Assert.AreNotEqual(0, amlFiles.Count, "Unable to get Converted Aml files");
                 }
+                List<FileInfo> amlFiles = ExtractAmlxFiles( testFiles );
+                Assert.AreNotEqual(0, amlFiles.Count, "Unable to get Converted Aml files");
                 Executed = true;
             }
             List<FileInfo> amlxFiles = GetAmlxFiles();
@@ -115,7 +118,7 @@ namespace SystemTest
             string configurationPath = GetConfigurationPath();
             // Doesn't work https://stackoverflow.com/questions/53102/why-does-path-combine-not-properly-concatenate-filenames-that-start-with-path-di
             //string exeDirectory = Path.Combine(rootDirectoryInfo.FullName, configurationPath);
-            string exeDirectory = rootDirectoryInfo.FullName + configurationPath;
+            string exeDirectory = rootDirectoryInfo.FullName + "\\" + Opc2AmlName + configurationPath;
             return new DirectoryInfo(exeDirectory);
         }
 
@@ -160,7 +163,7 @@ namespace SystemTest
             return Path.Combine(outputDirectoryInfo.FullName, Opc2Aml);
         }
 
-        static public bool Execute()
+        static public bool Execute( string arguments = "", int expectedResult = 0 )
         {
             bool success = true;
 
@@ -168,21 +171,29 @@ namespace SystemTest
             ProcessStartInfo processStartInfo = new ProcessStartInfo(executableName);
             Assert.IsNotNull(processStartInfo, "Unable to create ProcessStartInfo");
             processStartInfo.WorkingDirectory = GetOpc2AmlDirectory().FullName;
-            Process opc2amlProcess = Process.Start(processStartInfo);
-            
-            int counter = 0;
-            while( !opc2amlProcess.HasExited && counter < 30 )
+            processStartInfo.Arguments = "-- SuppressPrompt"; 
+            if ( arguments.Length > 0 )
             {
-                System.Threading.Thread.Sleep(5000);
-                counter++;
-                if ( counter >= 30 )
+                processStartInfo.Arguments += arguments;
+            }
+
+            DateTime startTime = DateTime.Now;
+            DateTime maxTime = startTime.AddMilliseconds(UnitTestTimeout);
+
+            Process opc2amlProcess = Process.Start(processStartInfo);
+
+            
+            while( !opc2amlProcess.HasExited )
+            {
+                System.Threading.Thread.Sleep(1000);
+                if ( DateTime.Now > maxTime )
                 {
                     success = false;
                     opc2amlProcess.Kill();
                 }
             }
 
-            Assert.AreEqual(0, opc2amlProcess.ExitCode, "Conversion tool failed");
+            Assert.AreEqual(expectedResult, opc2amlProcess.ExitCode);
             Assert.IsTrue(success, "Conversion tool exceeded time limit");
 
             return success;
@@ -244,7 +255,7 @@ namespace SystemTest
 
             DirectoryInfo outputDirectoryInfo = GetOpc2AmlDirectory();
             FileInfo extractFile = new FileInfo(Path.Combine(outputDirectoryInfo.FullName, amlxFile));
-            Assert.IsTrue(extractFile.Exists, "Unable to find expected file " + fileName);
+            Assert.IsTrue(extractFile.Exists, "Unable to find expected file " + amlxFile );
 
             DirectoryInfo extractedDirectory = GetExtractDirectory(amlxFile);
 
