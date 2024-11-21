@@ -1,0 +1,54 @@
+name: Build - Linux
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+  push:
+    branches:
+      - "main" 
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CONAN_DRIVECONTROLLER_REMOTE_URL: https://global-artifacts.se.com/artifactory/api/conan/drivecontroller-conan-prod-fed
+  BUILD_VERSION: ${{ github.event.release.tag_name || format('{0}{1}', 'temporary-build-', github.run_number) }}
+
+jobs:
+  build-linux:
+    runs-on: [ubuntu-latest]
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:6.0
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Build dll
+        run: dotnet build -c Release  
+
+      - name: Pack artifacts
+        run:
+          tar -czvf Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz -C ./Opc2AmlConsole/bin/Release/net6.0/ .
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Opc2Aml.binaries.${{env.BUILD_VERSION}}
+          path: ./Opc2AmlConsole/bin/Release/net6.0/
+          retention-days: 21
+          if-no-files-found: error
+
+      - name: Upload on release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz
