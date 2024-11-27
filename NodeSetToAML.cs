@@ -364,13 +364,22 @@ namespace MarkdownProcessor
 
             Utils.LogInfo( "Remove Type Only information Complete" );
             
-            using( FileStream fs = File.Create( "e://" + modelName + ".xml" ) )
+
+            FileInfo internalFileInfo = new FileInfo( modelName );
+            FileInfo outputFileInfo = new FileInfo( modelName + ".amlx" );
+
+            if( !outputFileInfo.Directory.Exists )
+            {
+                outputFileInfo.Directory.Create();
+            }
+
+            using( FileStream fs = File.Create( internalFileInfo.FullName + ".xml" ) )
             {
                 m_cAEXDocument.XDocument.Save( fs, SaveOptions.OmitDuplicateNamespaces );
             }
 
-            FileInfo internalFileInfo = new FileInfo( modelName );
-            FileInfo outputFileInfo = new FileInfo( modelName + ".amlx" );
+
+
             var container = new AutomationMLContainer(outputFileInfo.FullName, System.IO.FileMode.Create);
             container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + internalFileInfo.Name + ".aml", UriKind.Relative));
             container.Close();
@@ -380,6 +389,12 @@ namespace MarkdownProcessor
             Nodeset_Investigate_References( modelPath );
 
             _countReferences.Report();
+
+            FileInfo currentReport = new FileInfo( "Opc2Aml.report.txt" );
+            FileInfo reportDestination = new FileInfo( outputFileInfo.DirectoryName + 
+                Path.DirectorySeparatorChar + currentReport.Name );
+
+            currentReport.CopyTo( reportDestination.FullName, true );
         }
 
         private void AddLibraryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
@@ -3704,16 +3719,15 @@ namespace MarkdownProcessor
 
                 // Non Hierachical References
                 rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTypeDefinition );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasEffect );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.AlwaysGeneratesEvent );
                 rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasModellingRule );
-
-                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.AlwaysGeneratesEvent );
-                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTrueSubState );
-                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.FromState );
-                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.ToState );
-                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasEffect );
-                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCause );
-                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCondition );
-                //rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.GeneratesEvent );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCondition );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasCause );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.FromState );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.ToState );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.HasTrueSubState );
+                rejectedNodeIds.Add( Opc.Ua.ReferenceTypeIds.GeneratesEvent );
 
 
                 foreach( NodeId nodeId in rejectedNodeIds )
