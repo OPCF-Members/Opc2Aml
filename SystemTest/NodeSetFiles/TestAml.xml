@@ -242,7 +242,13 @@
         </References>
     </UAVariable>
     <UAObjectType NodeId="ns=1;i=1007" BrowseName="1:Test_ConnectorType">
-        <DisplayName Locale="en">Test Connector Type Display Name</DisplayName>
+        <Description>Multiple Descriptions</Description>
+        <Description Locale="en">Multiple Descriptions with Locale</Description>
+        <Description Locale="fr">Descriptions multiples avec paramètres régionaux</Description>
+        <Description Locale="de">Mehrere Beschreibungen mit Gebietsschema</Description>
+        <DisplayName>Test Connector Type Display Name</DisplayName>
+        <DisplayName Locale="fr">Type de connecteur de test Nom d'affichage</DisplayName>
+        <DisplayName Locale="de">Anzeigename des Teststeckertyps</DisplayName>
         <References>
             <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
             <Reference ReferenceType="HasProperty">ns=1;i=6014</Reference>

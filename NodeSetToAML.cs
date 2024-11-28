@@ -586,21 +586,93 @@ namespace MarkdownProcessor
                 uriatt.Value = myuri;
             }
 
-            if (uanode.DisplayName != null &&
-                uanode.DisplayName.Length > 0 &&
-                uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
+            if ( uanode.BrowseName.Equals( "1:Test_ConnectorType" ) )
             {
-                AddModifyAttribute(seq, "DisplayName", "LocalizedText",
-                    uanode.DisplayName[0].Value);
+                bool gonnaWait = true;
             }
 
-            if (uanode.Description != null &&
-                uanode.Description.Length > 0 &&
-                uanode.Description[0].Value.Length > 0)
+            if( uanode.DisplayName != null )
             {
-                AddModifyAttribute(seq, "Description", "LocalizedText",
-                    uanode.Description[0].Value);
+                if ( uanode.DisplayName.Length > 1 )
+                {
+                    List<string> names = new List<string>();
+                    foreach( NodeSet.LocalizedText lt in uanode.DisplayName)
+                    {
+                        names.Add(lt.Value);
+                    }
+
+                    AddModifyAttribute( seq, "DisplayName", "LocalizedText",
+                        new Variant(names), bListOf:true );
+
+                    AttributeType displayNameAttribute = seq[ "DisplayName" ];
+                    if ( displayNameAttribute != null )
+                    {
+                        for( int index = 0; index < uanode.DisplayName.Length; index++ )
+                        {
+                            if ( !String.IsNullOrEmpty( uanode.DisplayName[ index ].Locale ) )
+                            {
+                                AttributeType indexed = displayNameAttribute.Attribute[ index.ToString() ];
+                                if( indexed != null )
+                                {
+                                    AddModifyAttribute( indexed.Attribute, "Locale", "String",
+                                        uanode.DisplayName[ index ].Locale );
+                                }
+                            }
+                        }
+
+                    }
+                }
+                else if( uanode.DisplayName.Length > 0 &&
+                    uanode.DisplayName[ 0 ].Value != uanode.DecodedBrowseName.Name )
+                {
+                    AddModifyAttribute( seq, "DisplayName", "LocalizedText",
+                        uanode.DisplayName[ 0 ].Value );
+                }
             }
+
+            if( uanode.Description != null )
+            {
+                if ( uanode.Description.Length > 1 )
+                {
+                    AttributeType descriptionAttribute = AddModifyAttribute( seq, "Description", "LocalizedText",
+                        new Variant(), bListOf: true );
+
+                    if( descriptionAttribute != null )
+                    {
+                        for( int index = 0; index < uanode.Description.Length; index++ )
+                        {
+                            AttributeType indexed = AddModifyAttribute( 
+                                descriptionAttribute.Attribute, index.ToString(), "LocalizedText",
+                                new Variant() );
+
+                            if( indexed != null )
+                            {
+                                AddModifyAttribute( indexed.Attribute, "Value", "String",
+                                    uanode.Description[ index ].Value );
+                                if( !String.IsNullOrEmpty( uanode.Description[ index ].Locale ) )
+                                {
+                                    AddModifyAttribute( indexed.Attribute, "Locale", "String",
+                                        uanode.Description[ index ].Locale );
+                                }
+                            }
+                        }
+                    }
+                }
+                else if( uanode.Description.Length > 0 &&
+                    uanode.Description[ 0 ].Value.Length > 0 )
+                {
+                    AddModifyAttribute( seq, "Description", "LocalizedText",
+                        uanode.Description[ 0 ].Value );
+                }
+            }
+
+            //if( uanode.Description != null &&
+            //    uanode.Description.Length > 0 &&
+            //    uanode.Description[0].Value.Length > 0)
+            //{
+            //    AddModifyAttribute(seq, "Description", "LocalizedText",
+            //        uanode.Description[0].Value);
+            //}
 
             UAType uaType = uanode as UAType;
             if (  uaType != null && uaType.IsAbstract )
