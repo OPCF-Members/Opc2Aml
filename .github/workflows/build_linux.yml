@@ -15,7 +15,6 @@ defaults:
     shell: bash
 
 env:
-  CONAN_DRIVECONTROLLER_REMOTE_URL: https://global-artifacts.se.com/artifactory/api/conan/drivecontroller-conan-prod-fed
   BUILD_VERSION: ${{ github.event.release.tag_name || format('{0}{1}', 'temporary-build-', github.run_number) }}
 
 jobs:
