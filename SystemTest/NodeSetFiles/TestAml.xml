@@ -2132,7 +2132,8 @@
         </References>
     </UAObject>
     <UAVariable DataType="Int32" ValueRank="1" NodeId="ns=1;i=6126" ArrayDimensions="10" BrowseName="1:OneDimension" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
-        <DisplayName>OneDimension</DisplayName>
+        <DisplayName>OneDimensionArray</DisplayName>
+        <Description>A One Dimensional Array</Description>
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -2153,7 +2154,10 @@
         </Value>
     </UAVariable>
     <UAVariable DataType="Int32" ValueRank="2" NodeId="ns=1;i=6127" ArrayDimensions="2,5" BrowseName="1:TwoDimensions" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
-        <DisplayName>TwoDimensions</DisplayName>
+        <DisplayName>TwoDimensionArray</DisplayName>
+        <DisplayName>aTwoDimensionalArray</DisplayName>
+        <Description>A Different Two Dimension Array </Description>
+        <Description>Another Two Dimension Array </Description>
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -2174,7 +2178,10 @@
         </Value>
     </UAVariable>
     <UAVariable DataType="Int32" ValueRank="5" NodeId="ns=1;i=6128" ArrayDimensions="2,2,2,2,2" BrowseName="1:FiveDimensions" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
-        <DisplayName>FiveDimensions</DisplayName>
+        <DisplayName Locale="en">FiveDimensionArray</DisplayName>
+        <Description Locale="fr">A Five DimensionArray</Description>
+        <Description>Another Five Dimension Array </Description>
+
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
