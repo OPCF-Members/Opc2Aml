@@ -586,87 +586,62 @@ namespace MarkdownProcessor
                 uriatt.Value = myuri;
             }
 
-            if( uanode.DisplayName != null )
-            {
-                if ( uanode.DisplayName.Length > 1 )
-                {
-                    AddModifyAttribute( seq, "DisplayName", "LocalizedText", Variant.Null );
-
-                    AttributeType displayNameAttribute = seq[ "DisplayName" ];
-                    if ( displayNameAttribute != null )
-                    {
-                        string previousLocaleId = string.Empty;
-                        string defaultLocaleId = GetLocaleId( uanode.DisplayName[ 0 ], ref previousLocaleId );
-                        AttributeType arrayRoot = AddModifyAttribute( displayNameAttribute.Attribute, defaultLocaleId, "String",
-                            uanode.DisplayName[ 0 ].Value );
-
-                        // Redo first element
-                        previousLocaleId = string.Empty;
-                        for( int index = 0; index < uanode.DisplayName.Length; index++ )
-                        {
-                            string localeId = GetLocaleId( uanode.DisplayName[ index ], ref previousLocaleId );
-                            AddModifyAttribute( arrayRoot.Attribute, "aml-lang=" + localeId, "String", uanode.DisplayName[ index ].Value );
-                        }
-                    }
-                }
-                else if( uanode.DisplayName.Length > 0 &&
-                    uanode.DisplayName[ 0 ].Value != uanode.DecodedBrowseName.Name )
-                {
-                    AddModifyAttribute( seq, "DisplayName", "LocalizedText", Variant.Null );
-                    AttributeType displayNameAttribute = seq[ "DisplayName" ];
-                    if( displayNameAttribute != null )
-                    {
-                        string previousLocaleId = string.Empty;
-                        string defaultLocaleId = GetLocaleId( uanode.DisplayName[ 0 ], ref previousLocaleId );
-                        AddModifyAttribute( displayNameAttribute.Attribute, defaultLocaleId, "String",
-                            uanode.DisplayName[ 0 ].Value );
-                    }
-                }
-            }
-
-            if( uanode.Description != null )
-            {
-                if( uanode.Description.Length > 1 )
-                {
-                    AddModifyAttribute( seq, "Description", "LocalizedText",
-                        new Variant() );
-
-                    AttributeType descriptionAttribute = seq[ "Description" ];
-                    if( descriptionAttribute != null )
-                    {
-                        string previousLocaleId = string.Empty;
-                        string defaultLocaleId = GetLocaleId( uanode.Description[ 0 ], ref previousLocaleId );
-                        AttributeType arrayRoot = AddModifyAttribute( descriptionAttribute.Attribute, defaultLocaleId, "String",
-                            uanode.DisplayName[ 0 ].Value );
-
-                        // Redo first element
-                        previousLocaleId = string.Empty;
-                        for( int index = 0; index < uanode.Description.Length; index++ )
-                        {
-                            string localeId = GetLocaleId( uanode.Description[ index ], ref previousLocaleId );
-                            AddModifyAttribute( arrayRoot.Attribute, "aml-lang=" + localeId, "String", 
-                                uanode.Description[ index ].Value );
-                        }
-                    }
-                }
-                else if( uanode.Description.Length > 0  )
-                {
-                    AddModifyAttribute( seq, "Description", "LocalizedText", Variant.Null );
-                    AttributeType descriptionAttribute = seq[ "Description" ];
-                    if( descriptionAttribute != null )
-                    {
-                        string previousLocaleId = string.Empty;
-                        string defaultLocaleId = GetLocaleId( uanode.Description[ 0 ], ref previousLocaleId );
-                        AddModifyAttribute( descriptionAttribute.Attribute, defaultLocaleId, "String",
-                            uanode.Description[ 0 ].Value );
-                    }
-                }
-            }
+            BuildLocalizedTextAttribute( seq, "DisplayName", uanode.DisplayName, 
+                uanode.DecodedBrowseName.Name, ignoreEqual: true );
+            BuildLocalizedTextAttribute( seq, "Description", uanode.Description,
+                uanode.DecodedBrowseName.Name, ignoreEqual: false );
 
             UAType uaType = uanode as UAType;
             if (  uaType != null && uaType.IsAbstract )
             {
                 AddModifyAttribute(seq, "IsAbstract", "Boolean", uaType.IsAbstract);
+            }
+        }
+
+        private void BuildLocalizedTextAttribute( 
+            AttributeSequence seq, 
+            string attributeName,
+            NodeSet.LocalizedText[] localizedTexts,
+            string equalityString, bool ignoreEqual )
+        {
+            if( localizedTexts != null )
+            {
+                if( localizedTexts.Length > 1 )
+                {
+                    AddModifyAttribute( seq, attributeName, "LocalizedText", localizedTexts[ 0 ].Value );
+
+                    AttributeType displayNameAttribute = seq[ attributeName ];
+                    if( displayNameAttribute != null )
+                    {
+                        string previousLocaleId = string.Empty;
+                        string defaultLocaleId = GetLocaleId( localizedTexts[ 0 ], ref previousLocaleId );
+                        AttributeType arrayRoot = AddModifyAttribute( displayNameAttribute.Attribute, defaultLocaleId, "String",
+                            localizedTexts[ 0 ].Value );
+
+                        // Redo first element
+                        previousLocaleId = string.Empty;
+                        for( int index = 0; index < localizedTexts.Length; index++ )
+                        {
+                            string localeId = GetLocaleId( localizedTexts[ index ], ref previousLocaleId );
+                            AddModifyAttribute( arrayRoot.Attribute, "aml-lang=" + localeId,
+                                "String", localizedTexts[ index ].Value );
+                        }
+                    }
+                }
+                else if( localizedTexts.Length > 0 )
+                {
+                    NodeSet.LocalizedText localizedText = localizedTexts[ 0 ];
+                    if( ignoreEqual == false ||
+                        localizedText.Value != equalityString )
+                    {
+                        AttributeType root = AddModifyAttribute( seq, attributeName, "LocalizedText", localizedText.Value );
+
+                        if( !String.IsNullOrEmpty( localizedText.Locale ) )
+                        {
+                            AddModifyAttribute( root.Attribute, localizedText.Locale, "LocalizedText", localizedText.Value );
+                        }
+                    }
+                }
             }
         }
 
@@ -715,7 +690,6 @@ namespace MarkdownProcessor
 
             return localeId;
         }
-
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
         {
@@ -1018,7 +992,13 @@ namespace MarkdownProcessor
                                 if( localizedText != null && localizedText.Text != null )
                                 {
                                     a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
+                                    if ( !string.IsNullOrEmpty( localizedText.Locale ) )
+                                    {
+                                        AddModifyAttribute(a.Attribute, localizedText.Locale, 
+                                            "String", localizedText.Text);    
+                                    }
                                 }
+
                                 break;
                             }
 
