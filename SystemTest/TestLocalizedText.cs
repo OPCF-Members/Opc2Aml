@@ -17,6 +17,78 @@ namespace SystemTest
         #region Tests
 
         [TestMethod]
+        public void TestNoValue( )
+        {
+            SystemUnitClassType objectToTest = GetTestObject( "6227" );
+            AttributeType attributeType = objectToTest.Attribute[ "Value" ];
+            Assert.IsNotNull( attributeType );
+            Assert.IsNull( attributeType.Value, "Unexpected Value found" );
+        }
+
+        [TestMethod]
+        [DataRow( "6228", "", "Attributes have display name and description, but no Locale",
+            DisplayName = "Single value no Locale" )]
+        [DataRow( "6229", "en", "Attributes have display name and description with a single Locale",
+            DisplayName = "Single value with Locale" )]
+        public void TestScalarValue( string node, string locale, string text )
+        {
+            SystemUnitClassType objectToTest = GetTestObject( node );
+            AttributeType value = ValidateAttribute( objectToTest.Attribute, "Value", text );
+
+            if( string.IsNullOrEmpty( locale ) )
+            {
+                Assert.AreEqual( 0, value.Attribute.Count );
+            }
+            else
+            {
+                ValidateAttribute( value.Attribute, locale, text );
+            }
+        }
+
+        [TestMethod]
+        [DataRow( "6230", new string[] { "", "en", "en"  },
+            new string[] {
+                "Multiple",
+                "DisplayNames and Descriptions",
+                "first without a locale" },
+            DisplayName = "Multiple Starting with no Locale" )]
+
+        [DataRow( "6231", new string[] { "en", "en", "" },
+            new string[] {
+                "Multiple",
+                "DisplayNames and Descriptions",
+                "last without a locale" },
+            DisplayName = "Multiple Ending with no Locale" )]
+
+        [DataRow( "6232", new string[] { "", "", "" },
+            new string[] {
+                "Multiple",
+                "DisplayNames and Descriptions",
+                "all without a locale" },
+            DisplayName = "Multiple all without no Locale" )]
+
+        public void TestArrayValue( string node, string[] locales, string[] values )
+        {
+            SystemUnitClassType objectToTest = GetTestObject( node );
+            AttributeType attributeType = objectToTest.Attribute[ "Value" ];
+            Assert.IsNotNull( attributeType );
+            Assert.IsNull( attributeType.Value, "Unexpected Value found" );
+
+            for( int index = 0; index < locales.Length; index++ )
+            {
+                AttributeType indexed = ValidateAttribute( attributeType.Attribute, index.ToString(), values[ index ] );
+                if( string.IsNullOrEmpty( locales[ index ] ) )
+                {
+                    Assert.AreEqual( 0, indexed.Attribute.Count, "Unexpected Locale found" );
+                }
+                else
+                {
+                    ValidateAttribute( indexed.Attribute, locales[ index ], values[ index ] );
+                }
+            }
+        }
+
+        [TestMethod]
         [DataRow( "DisplayName", DisplayName = "No LocalizedText DisplayName" )]
         [DataRow( "Description", DisplayName = "No LocalizedText Description" )]
         public void NoLocalizedText( string attributeName )
