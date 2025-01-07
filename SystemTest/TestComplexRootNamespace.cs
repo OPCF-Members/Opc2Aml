@@ -59,8 +59,8 @@ namespace SystemTest
             ValidateQualifiedName( structureDataType, "Name", RootLevel, "Structure Description One" );
 
             AttributeType structureDefinition = GetAttribute( structureDataType, "StructureDefinition", validateSubAttributes: true );
-            ValidateNodeId( structureDefinition, "DefaultEncodingId", LevelOne, new NodeId( "EncodingOne" ) );
-            ValidateNodeId( structureDefinition, "BaseDataType", LevelOne, new NodeId( "BaseDataTypeOne" ) );
+            ValidateNodeId( structureDefinition, "DefaultEncodingId", LevelOne, new NodeId( "EncodingOne", 1 ) );
+            ValidateNodeId( structureDefinition, "BaseDataType", LevelOne, new NodeId( "BaseDataTypeOne", 1 ) );
 
             AttributeType structureType = GetAttribute( structureDefinition, "StructureType", validateSubAttributes: false );
             Assert.AreEqual( "Structure", structureType.Value );
