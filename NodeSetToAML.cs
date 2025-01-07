@@ -586,27 +586,109 @@ namespace MarkdownProcessor
                 uriatt.Value = myuri;
             }
 
-            if (uanode.DisplayName != null &&
-                uanode.DisplayName.Length > 0 &&
-                uanode.DisplayName[0].Value != uanode.DecodedBrowseName.Name)
-            {
-                AddModifyAttribute(seq, "DisplayName", "LocalizedText",
-                    uanode.DisplayName[0].Value);
-            }
-
-            if (uanode.Description != null &&
-                uanode.Description.Length > 0 &&
-                uanode.Description[0].Value.Length > 0)
-            {
-                AddModifyAttribute(seq, "Description", "LocalizedText",
-                    uanode.Description[0].Value);
-            }
+            BuildLocalizedTextAttribute( seq, "DisplayName", uanode.DisplayName, 
+                uanode.DecodedBrowseName.Name, ignoreEqual: true );
+            BuildLocalizedTextAttribute( seq, "Description", uanode.Description,
+                uanode.DecodedBrowseName.Name, ignoreEqual: false );
 
             UAType uaType = uanode as UAType;
             if (  uaType != null && uaType.IsAbstract )
             {
                 AddModifyAttribute(seq, "IsAbstract", "Boolean", uaType.IsAbstract);
             }
+        }
+
+        private void BuildLocalizedTextAttribute( 
+            AttributeSequence seq, 
+            string attributeName,
+            NodeSet.LocalizedText[] localizedTexts,
+            string equalityString, bool ignoreEqual )
+        {
+            if( localizedTexts != null )
+            {
+                if( localizedTexts.Length > 1 )
+                {
+                    AddModifyAttribute( seq, attributeName, "LocalizedText", localizedTexts[ 0 ].Value );
+
+                    AttributeType displayNameAttribute = seq[ attributeName ];
+                    if( displayNameAttribute != null )
+                    {
+                        string previousLocaleId = string.Empty;
+                        string defaultLocaleId = GetLocaleId( localizedTexts[ 0 ], ref previousLocaleId );
+                        AttributeType arrayRoot = AddModifyAttribute( displayNameAttribute.Attribute, defaultLocaleId, "String",
+                            localizedTexts[ 0 ].Value );
+
+                        // Redo first element
+                        previousLocaleId = string.Empty;
+                        for( int index = 0; index < localizedTexts.Length; index++ )
+                        {
+                            string localeId = GetLocaleId( localizedTexts[ index ], ref previousLocaleId );
+                            AddModifyAttribute( arrayRoot.Attribute, "aml-lang=" + localeId,
+                                "String", localizedTexts[ index ].Value );
+                        }
+                    }
+                }
+                else if( localizedTexts.Length > 0 )
+                {
+                    NodeSet.LocalizedText localizedText = localizedTexts[ 0 ];
+                    if( ignoreEqual == false ||
+                        localizedText.Value != equalityString )
+                    {
+                        AttributeType root = AddModifyAttribute( seq, attributeName, "LocalizedText", localizedText.Value );
+
+                        if( !String.IsNullOrEmpty( localizedText.Locale ) )
+                        {
+                            AddModifyAttribute( root.Attribute, localizedText.Locale, "LocalizedText", localizedText.Value );
+                        }
+                    }
+                }
+            }
+        }
+
+        private string GetLocaleId( NodeSet.LocalizedText localizedText, ref string lastUnknownLocale )
+        {
+            string localeId = string.Empty;
+
+            if ( localizedText != null )
+            {
+                if ( String.IsNullOrEmpty( localizedText.Locale ) )
+                {
+                    if ( String.IsNullOrEmpty( lastUnknownLocale ) )
+                    {
+                        localeId = "qaa";
+                    }
+                    else
+                    {
+                        if ( lastUnknownLocale.Length == 3 && lastUnknownLocale[0] == 'q' )
+                        {
+                            char secondChar  = lastUnknownLocale[1];
+                            char lastChar = lastUnknownLocale[ 2 ];
+                            if ( lastChar == 'z' )
+                            {
+                                // It's pretty impractical to have 20*26 unknown locales for a single node.
+                                if( secondChar < 't' )
+                                {
+                                    secondChar++;
+                                    localeId = "q" + secondChar + 'a';
+                                }
+                            }
+                            else
+                            {
+                                localeId = "q" + secondChar + (char)( lastChar + 1 );
+                            }
+                        }
+                    }
+                    lastUnknownLocale = localeId;
+                }
+                else
+                {
+                    localeId = localizedText.Locale;
+                }
+                
+                return localeId;
+            }
+
+            return localeId;
         }
 
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
@@ -910,7 +992,13 @@ namespace MarkdownProcessor
                                 if( localizedText != null && localizedText.Text != null )
                                 {
                                     a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
+                                    if ( !string.IsNullOrEmpty( localizedText.Locale ) )
+                                    {
+                                        AddModifyAttribute(a.Attribute, localizedText.Locale, 
+                                            "String", localizedText.Text);    
+                                    }
                                 }
+
                                 break;
                             }
 

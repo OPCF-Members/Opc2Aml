@@ -2126,7 +2126,8 @@
         </References>
     </UAObject>
     <UAVariable DataType="Int32" ValueRank="1" NodeId="ns=1;i=6126" ArrayDimensions="10" BrowseName="1:OneDimension" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
-        <DisplayName>OneDimension</DisplayName>
+        <DisplayName>OneDimensionArray</DisplayName>
+        <Description>A One Dimensional Array</Description>
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -2147,7 +2148,10 @@
         </Value>
     </UAVariable>
     <UAVariable DataType="Int32" ValueRank="2" NodeId="ns=1;i=6127" ArrayDimensions="2,5" BrowseName="1:TwoDimensions" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
-        <DisplayName>TwoDimensions</DisplayName>
+        <DisplayName>TwoDimensionArray</DisplayName>
+        <DisplayName>aTwoDimensionalArray</DisplayName>
+        <Description>A Different Two Dimension Array </Description>
+        <Description>Another Two Dimension Array </Description>
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -2168,7 +2172,10 @@
         </Value>
     </UAVariable>
     <UAVariable DataType="Int32" ValueRank="5" NodeId="ns=1;i=6128" ArrayDimensions="2,2,2,2,2" BrowseName="1:FiveDimensions" ParentNodeId="ns=1;i=5011" UserAccessLevel="3" AccessLevel="3">
-        <DisplayName>FiveDimensions</DisplayName>
+        <DisplayName Locale="en">FiveDimensionArray</DisplayName>
+        <Description Locale="fr">A Five DimensionArray</Description>
+        <Description>Another Five Dimension Array </Description>
+
         <References>
             <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5011</Reference>
             <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -3087,13 +3094,143 @@
             </uax:ExtensionObject>
         </Value>
     </UAVariable>
+    <UAObject SymbolicName="LocalizedTextAttributes" NodeId="ns=1;i=5024" BrowseName="1:LocalizedTextAttributes" ParentNodeId="i=85">
+        <DisplayName>Localized Text Attributes</DisplayName>
+        <References>
+            <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+        </References>
+    </UAObject>
 
+    <UAVariable NodeId="ns=1;i=6227" BrowseName="1:NoLocalizedText" DataType="LocalizedText" ValueRank="-1" ArrayDimensions="" ParentNodeId="ns=1;i=5024" UserAccessLevel="3" AccessLevel="3" >
+        <References>
+            <Reference ReferenceType="HasTypeDefinition" BrowseName="PropertyType">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+    </UAVariable>
 
+    <UAVariable NodeId="ns=1;i=6228" BrowseName="1:SingleLocalizedText" DataType="LocalizedText" ValueRank="-1" ArrayDimensions="" ParentNodeId="ns=1;i=5024" UserAccessLevel="3" AccessLevel="3" >
+        <DisplayName>Single Localized Text</DisplayName>
+        <Description>A Single Description with no Locale</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition" BrowseName="PropertyType">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+        <Value>
+            <uax:LocalizedText>
+                <uax:Text>Attributes have display name and description, but no Locale</uax:Text>
+            </uax:LocalizedText>
+        </Value>
+    </UAVariable>
+
+    <UAVariable NodeId="ns=1;i=6229" BrowseName="1:SingleLocalizedTextLocale" DataType="LocalizedText" ValueRank="-1" ArrayDimensions="" ParentNodeId="ns=1;i=5024" UserAccessLevel="3" AccessLevel="3" >
+        <DisplayName Locale="en">Single Localized Text with Locale</DisplayName>
+        <Description Locale="en">A Single Description with a Locale</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition" BrowseName="PropertyType">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+        <Value>
+            <uax:LocalizedText>
+                <uax:Locale>en</uax:Locale>
+                <uax:Text>Attributes have display name and description with a single Locale</uax:Text>
+            </uax:LocalizedText>
+        </Value>
+    </UAVariable>
+
+    <UAVariable NodeId="ns=1;i=6230" BrowseName="1:MultipleFirstNoLocale" DataType="LocalizedText" ValueRank="1" ArrayDimensions="1" ParentNodeId="ns=1;i=5024" UserAccessLevel="3" AccessLevel="3" >
+        <DisplayName>First DisplayName with no Locale</DisplayName>
+        <Description>First Description with no Locale</Description>
+        <DisplayName Locale="en">Second DisplayName with a Locale</DisplayName>
+        <Description Locale="en">Second Description with a Locale</Description>
+        <DisplayName Locale="fr">Troisième texte localisé avec paramètres régionaux</DisplayName>
+        <Description Locale="fr">Troisième description avec un paramètre régional</Description>
+        <DisplayName Locale="de">Letzter lokalisierter Text mit Gebietsschema</DisplayName>
+        <Description Locale="de">Letzte Beschreibung mit einem Gebietsschema</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition" BrowseName="PropertyType">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+        <Value>
+            <uax:ListOfLocalizedText>
+                <uax:LocalizedText>
+                    <uax:Text>Multiple</uax:Text>
+                </uax:LocalizedText>
+                <uax:LocalizedText>
+                    <uax:Locale>en</uax:Locale>
+                    <uax:Text>DisplayNames and Descriptions</uax:Text>
+                </uax:LocalizedText>
+                <uax:LocalizedText>
+                    <uax:Locale>en</uax:Locale>
+                    <uax:Text>first without a locale</uax:Text>
+                </uax:LocalizedText>
+            </uax:ListOfLocalizedText>
+        </Value>
+    </UAVariable>
+
+    <UAVariable NodeId="ns=1;i=6231" BrowseName="1:MultipleLastNoLocale" DataType="LocalizedText" ValueRank="1" ArrayDimensions="1" ParentNodeId="ns=1;i=5024" UserAccessLevel="3" AccessLevel="3" >
+        <DisplayName Locale="en">First DisplayName with a Locale</DisplayName>
+        <Description Locale="en">First Description with a Locale</Description>
+        <DisplayName Locale="fr">Deuxième DisplayName avec une locale</DisplayName>
+        <Description Locale="fr">Deuxième description avec une locale</Description>
+        <DisplayName Locale="de">Dritter DisplayName mit einem Gebietsschema</DisplayName>
+        <Description Locale="de">Dritte Beschreibung mit einem Gebietsschema</Description>
+        <DisplayName>Last DisplayName with no Locale</DisplayName>
+        <Description>Last Description with no Locale</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition" BrowseName="PropertyType">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+        <Value>
+            <uax:ListOfLocalizedText>
+                <uax:LocalizedText>
+                    <uax:Locale>en</uax:Locale>
+                    <uax:Text>Multiple</uax:Text>
+                </uax:LocalizedText>
+                <uax:LocalizedText>
+                    <uax:Locale>en</uax:Locale>
+                    <uax:Text>DisplayNames and Descriptions</uax:Text>
+                </uax:LocalizedText>
+                <uax:LocalizedText>
+                    <uax:Text>last without a locale</uax:Text>
+                </uax:LocalizedText>
+            </uax:ListOfLocalizedText>
+        </Value>
+    </UAVariable>
+
+    <UAVariable NodeId="ns=1;i=6232" BrowseName="1:MultipleNoLocale" DataType="LocalizedText" ValueRank="1" ArrayDimensions="1" ParentNodeId="ns=1;i=5024" UserAccessLevel="3" AccessLevel="3" >
+        <DisplayName>First DisplayName with no Locale</DisplayName>
+        <Description>First Description with no Locale</Description>
+        <DisplayName>Second DisplayName with no Locale</DisplayName>
+        <Description>Second Description with no Locale</Description>
+        <DisplayName>Third DisplayName with no Locale</DisplayName>
+        <Description>Third Description with no Locale</Description>
+        <DisplayName>Last DisplayName with no Locale</DisplayName>
+        <Description>Last Description with no Locale</Description>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition" BrowseName="PropertyType">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+        <Value>
+            <uax:ListOfLocalizedText>
+                <uax:LocalizedText>
+                    <uax:Text>Multiple</uax:Text>
+                </uax:LocalizedText>
+                <uax:LocalizedText>
+                    <uax:Text>DisplayNames and Descriptions</uax:Text>
+                </uax:LocalizedText>
+                <uax:LocalizedText>
+                    <uax:Text>all without a locale</uax:Text>
+                </uax:LocalizedText>
+            </uax:ListOfLocalizedText>
+        </Value>
+    </UAVariable>
+    
     <!-- Next Numbers
     ObjectType 1009
     VariableType 2001
     DataType 3004
-    Object 5024
-    Variable 6227
+    Object 5025
+    Variable 6232
     -->
 </UANodeSet>
