@@ -694,14 +694,6 @@ namespace MarkdownProcessor
         private AttributeType AddModifyAttribute(AttributeSequence seq, string name, string refDataType, Variant val, bool bListOf = false, string sURI = uaNamespaceURI)
         {
             string sUADataType = refDataType;
-
-            var DataTypeNode = m_modelManager.FindNode<UANode>(refDataType);
-            if (DataTypeNode != null)
-            {
-                sUADataType = DataTypeNode.DecodedBrowseName.Name;
-                sURI = m_modelManager.FindModelUri(DataTypeNode.DecodedNodeId);
-            }
-
             string ListOfPrefix = "";
             if (bListOf == true)
                 ListOfPrefix = ListOf;
