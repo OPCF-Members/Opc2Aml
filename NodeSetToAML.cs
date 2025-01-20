@@ -364,7 +364,8 @@ namespace MarkdownProcessor
             container.Close();
 
             Utils.LogInfo( "Amlx Container Created for model " + modelName );
-
+            Utils.LogInfo( "Counts " + countOne.ToString() + " and  " + countTwo.ToString() + 
+                " for a total of " + (countOne + countTwo).ToString() );
         }
 
         private void AddLibraryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
@@ -1690,6 +1691,7 @@ namespace MarkdownProcessor
 
         private InternalElementType CreateClassInstanceWithIDReplacement(string prefix, SystemUnitFamilyType child)
         {
+            countTwo++;
             InternalElementType internalElementType = child.CreateClassInstance();
             
             CompareLinksToExternaInterfaces(child, internalElementType);
@@ -2327,6 +2329,9 @@ namespace MarkdownProcessor
         }
 
 
+        int countOne = 0;
+        int countTwo = 0;
+
         SystemUnitFamilyType FindOrAddSUC(ref SystemUnitClassLibType scl, ref RoleClassLibType rcl, NodeId nodeId)
         {
             var refnode = FindNode<NodeSet.UANode>(nodeId);
@@ -2504,6 +2509,7 @@ namespace MarkdownProcessor
                             string rolepath = BuildLibraryReference(RCLPrefix, m_modelManager.FindModelUri(targetNode.DecodedNodeId), targetNode.DecodedBrowseName.Name);
                             var roleSUC = FindOrAddSUC(ref scl, ref rcl, reference.TargetId);  // make sure the AMLobjects are already created.
                             var srt = rtn.New_SupportedRoleClass(rolepath, false);
+                            countOne++;
                             var inst = roleSUC.CreateClassInstance();
                             foreach (var element in inst.InternalElement)
                             {
