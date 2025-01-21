@@ -606,6 +606,10 @@ namespace MarkdownProcessor
         {
             if( localizedTexts != null )
             {
+                CAEXObject findObject = m_cAEXDocument.FindByPath( 
+                    "AutomationMLBaseAttributeTypeLib/LocalizedAttribute" );
+                AttributeFamilyType localizedAttributeFamilyType = findObject as AttributeFamilyType;
+
                 if( localizedTexts.Length > 1 )
                 {
                     AttributeType root = AddModifyAttribute( seq, attributeName, 
@@ -615,10 +619,11 @@ namespace MarkdownProcessor
                         string previousLocaleId = string.Empty;
                         for( int index = 0; index < localizedTexts.Length; index++ )
                         {
-                            string localeId = GetLocaleId( localizedTexts[ index ], ref previousLocaleId );
-                            AddModifyAttribute( root.Attribute, 
-                                localeId, "LocalizedText", 
-                                localizedTexts[ index ].Value );
+                            NodeSet.LocalizedText localizedText = localizedTexts[ index ];
+                            string localeId = GetLocaleId( localizedText, ref previousLocaleId );
+                            AttributeType textAttribute = root.Attribute.Append( localeId );
+                            textAttribute.RecreateAttributeInstance( localizedAttributeFamilyType );
+                            textAttribute.Value = localizedText.Value;
                         }
                     }
                 }
@@ -632,7 +637,9 @@ namespace MarkdownProcessor
 
                         if( !String.IsNullOrEmpty( localizedText.Locale ) )
                         {
-                            AddModifyAttribute( root.Attribute, localizedText.Locale, "LocalizedText", localizedText.Value );
+                            AttributeType textAttribute = root.Attribute.Append( localizedText.Locale );
+                            textAttribute.RecreateAttributeInstance( localizedAttributeFamilyType );
+                            textAttribute.Value = localizedText.Value;
                         }
                     }
                 }
