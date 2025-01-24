@@ -606,25 +606,24 @@ namespace MarkdownProcessor
         {
             if( localizedTexts != null )
             {
+                CAEXObject findObject = m_cAEXDocument.FindByPath( 
+                    "AutomationMLBaseAttributeTypeLib/LocalizedAttribute" );
+                AttributeFamilyType localizedAttributeFamilyType = findObject as AttributeFamilyType;
+
                 if( localizedTexts.Length > 1 )
                 {
-                    AddModifyAttribute( seq, attributeName, "LocalizedText", localizedTexts[ 0 ].Value );
-
-                    AttributeType displayNameAttribute = seq[ attributeName ];
-                    if( displayNameAttribute != null )
+                    AttributeType root = AddModifyAttribute( seq, attributeName, 
+                        "LocalizedText", localizedTexts[ 0 ].Value ); ;
+                    if( root != null )
                     {
                         string previousLocaleId = string.Empty;
-                        string defaultLocaleId = GetLocaleId( localizedTexts[ 0 ], ref previousLocaleId );
-                        AttributeType arrayRoot = AddModifyAttribute( displayNameAttribute.Attribute, defaultLocaleId, "String",
-                            localizedTexts[ 0 ].Value );
-
-                        // Redo first element
-                        previousLocaleId = string.Empty;
                         for( int index = 0; index < localizedTexts.Length; index++ )
                         {
-                            string localeId = GetLocaleId( localizedTexts[ index ], ref previousLocaleId );
-                            AddModifyAttribute( arrayRoot.Attribute, "aml-lang=" + localeId,
-                                "String", localizedTexts[ index ].Value );
+                            NodeSet.LocalizedText localizedText = localizedTexts[ index ];
+                            string localeId = GetLocaleId( localizedText, ref previousLocaleId );
+                            AttributeType textAttribute = root.Attribute.Append( localeId );
+                            textAttribute.RecreateAttributeInstance( localizedAttributeFamilyType );
+                            textAttribute.Value = localizedText.Value;
                         }
                     }
                 }
@@ -638,7 +637,9 @@ namespace MarkdownProcessor
 
                         if( !String.IsNullOrEmpty( localizedText.Locale ) )
                         {
-                            AddModifyAttribute( root.Attribute, localizedText.Locale, "LocalizedText", localizedText.Value );
+                            AttributeType textAttribute = root.Attribute.Append( localizedText.Locale );
+                            textAttribute.RecreateAttributeInstance( localizedAttributeFamilyType );
+                            textAttribute.Value = localizedText.Value;
                         }
                     }
                 }
@@ -986,8 +987,13 @@ namespace MarkdownProcessor
                                     a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
                                     if ( !string.IsNullOrEmpty( localizedText.Locale ) )
                                     {
-                                        AddModifyAttribute(a.Attribute, localizedText.Locale, 
-                                            "String", localizedText.Text);    
+                                        CAEXObject findObject = m_cAEXDocument.FindByPath(
+                                            "AutomationMLBaseAttributeTypeLib/LocalizedAttribute" );
+                                        AttributeFamilyType localizedAttributeFamilyType = 
+                                            findObject as AttributeFamilyType;
+                                        AttributeType textAttribute = a.Attribute.Append( localizedText.Locale );
+                                        textAttribute.RecreateAttributeInstance( localizedAttributeFamilyType );
+                                        textAttribute.Value = localizedText.Text;
                                     }
                                 }
 

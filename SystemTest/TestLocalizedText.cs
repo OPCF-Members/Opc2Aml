@@ -178,12 +178,11 @@ namespace SystemTest
         {
             SystemUnitClassType objectToTest = GetTestObject( nodeId );
             AttributeType topLevel = ValidateAttribute( objectToTest.Attribute, attributeName, text[ 0 ] );
-            AttributeType textLevel = ValidateAttribute( topLevel.Attribute, localeId[0], text[ 0 ] );
 
             for( int index = 0; index < localeId.Length; index++ )
             {
-                string subLocale = "aml-lang=" + localeId[ index ];  
-                ValidateAttribute( textLevel.Attribute, subLocale, text[index] );
+                string subLocale = localeId[ index ];  
+                ValidateAttribute( topLevel.Attribute, subLocale, text[index] );
             }
         }
 
