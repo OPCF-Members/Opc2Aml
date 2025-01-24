@@ -842,7 +842,7 @@ namespace MarkdownProcessor
                         case BuiltInType.UInteger:
                         case BuiltInType.Enumeration:
                             {
-                                a.DefaultAttributeValue = a.AttributeValue = val;
+                                a.AttributeValue = val;
                                 break;
                             }
 
@@ -852,13 +852,7 @@ namespace MarkdownProcessor
                                 if ( bytes != null )
                                 {
                                     string encoded = Convert.ToBase64String( bytes, 0, bytes.Length );
-                                    a.DefaultAttributeValue = a.AttributeValue = new Variant( encoded.ToString() );
-                                    //StringBuilder stringBuilder = new StringBuilder();
-                                    //for( int index = 0; index < bytes.Length; index++ )
-                                    //{
-                                    //    stringBuilder.Append( (char)bytes[ index ] );
-                                    //}
-                                    //a.DefaultAttributeValue = a.AttributeValue = new Variant( stringBuilder.ToString() );
+                                    a.AttributeValue = new Variant( encoded.ToString() );
                                 }
 
                                 break;
@@ -881,7 +875,7 @@ namespace MarkdownProcessor
 
                                 if ( nodeId != null )
                                 {
-                                    a.DefaultAttributeValue = a.AttributeValue = nodeId;
+                                    a.AttributeValue = nodeId;
                                     AttributeType rootNodeId = a.Attribute[ "RootNodeId" ];
                                     if ( rootNodeId != null )
                                     {
@@ -956,14 +950,14 @@ namespace MarkdownProcessor
                         case BuiltInType.StatusCode:
                             {
                                 StatusCode statusCode = (StatusCode)val.Value;
-                                a.DefaultAttributeValue = a.AttributeValue = statusCode.Code;
+                                a.AttributeValue = statusCode.Code;
 
                                 break;
                             }
 
                         case BuiltInType.QualifiedName:
                             {
-                                a.DefaultAttributeValue = a.AttributeValue = val;
+                                a.AttributeValue = val;
 
                                 QualifiedName qualifiedName = val.Value as QualifiedName;
                                 if( qualifiedName != null )
@@ -984,7 +978,7 @@ namespace MarkdownProcessor
                                 Opc.Ua.LocalizedText localizedText = (Opc.Ua.LocalizedText)val.Value;
                                 if( localizedText != null && localizedText.Text != null )
                                 {
-                                    a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
+                                    a.AttributeValue = localizedText.Text;
                                     if ( !string.IsNullOrEmpty( localizedText.Locale ) )
                                     {
                                         CAEXObject findObject = m_cAEXDocument.FindByPath(
