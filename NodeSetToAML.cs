@@ -987,8 +987,13 @@ namespace MarkdownProcessor
                                     a.DefaultAttributeValue = a.AttributeValue = localizedText.Text;
                                     if ( !string.IsNullOrEmpty( localizedText.Locale ) )
                                     {
-                                        AddModifyAttribute(a.Attribute, localizedText.Locale, 
-                                            "String", localizedText.Text);    
+                                        CAEXObject findObject = m_cAEXDocument.FindByPath(
+                                            "AutomationMLBaseAttributeTypeLib/LocalizedAttribute" );
+                                        AttributeFamilyType localizedAttributeFamilyType = 
+                                            findObject as AttributeFamilyType;
+                                        AttributeType textAttribute = a.Attribute.Append( localizedText.Locale );
+                                        textAttribute.RecreateAttributeInstance( localizedAttributeFamilyType );
+                                        textAttribute.Value = localizedText.Text;
                                     }
                                 }
 
