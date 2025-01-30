@@ -158,7 +158,7 @@ namespace MarkdownProcessor
 
         public void CreateAML(string modelPath, string modelName = null)
         {
-            DateTime startTime = DateTime.Now;
+            DateTime startTime = DateTime.UtcNow;
             string modelUri = m_modelManager.LoadModel(modelPath, null, null);
             structureNode = m_modelManager.FindNodeByName("Structure");
             if (modelName == null)
@@ -365,7 +365,7 @@ namespace MarkdownProcessor
             container.Close();
 
             Utils.LogInfo( "Amlx Container Created for model " + modelName );
-            DateTime endTime = DateTime.Now;
+            DateTime endTime = DateTime.UtcNow;
             TimeSpan totalTime = endTime - startTime;
             Utils.LogError( "Total time to create AMLX file: " + totalTime.ToString() );
             double percentage = ( problem.TotalSeconds / totalTime.TotalSeconds ) * 100;
@@ -1701,9 +1701,9 @@ namespace MarkdownProcessor
 
         private InternalElementType CreateClassInstanceWithIDReplacement(string prefix, SystemUnitFamilyType child)
         {
-            DateTime start = DateTime.Now;
+            DateTime start = DateTime.UtcNow;
             InternalElementType internalElementType = child.CreateClassInstance();
-            TimeSpan duration = DateTime.Now - start;
+            TimeSpan duration = DateTime.UtcNow - start;
             problem += duration;
 
             CompareLinksToExternaInterfaces( child, internalElementType);
