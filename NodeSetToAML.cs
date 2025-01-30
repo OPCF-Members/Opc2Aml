@@ -368,7 +368,9 @@ namespace MarkdownProcessor
             DateTime endTime = DateTime.Now;
             TimeSpan totalTime = endTime - startTime;
             Utils.LogError( "Total time to create AMLX file: " + totalTime.ToString() );
+            double percentage = ( problem.TotalSeconds / totalTime.TotalSeconds ) * 100;
             Utils.LogError( "Total time in CreateClassInstance: " + problem.ToString() );
+            Utils.LogError( "Percent in CreateClassInstance: " + percentage.ToString( "0.##" ) );
 
 
 
