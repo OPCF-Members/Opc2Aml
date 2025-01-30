@@ -158,6 +158,7 @@ namespace MarkdownProcessor
 
         public void CreateAML(string modelPath, string modelName = null)
         {
+            DateTime startTime = DateTime.Now;
             string modelUri = m_modelManager.LoadModel(modelPath, null, null);
             structureNode = m_modelManager.FindNodeByName("Structure");
             if (modelName == null)
@@ -364,6 +365,11 @@ namespace MarkdownProcessor
             container.Close();
 
             Utils.LogInfo( "Amlx Container Created for model " + modelName );
+            DateTime endTime = DateTime.Now;
+            TimeSpan totalTime = endTime - startTime;
+            Utils.LogError( "Total time to create AMLX file: " + totalTime.ToString() );
+
+
 
         }
 
