@@ -368,6 +368,7 @@ namespace MarkdownProcessor
             DateTime endTime = DateTime.Now;
             TimeSpan totalTime = endTime - startTime;
             Utils.LogError( "Total time to create AMLX file: " + totalTime.ToString() );
+            Utils.LogError( "Total time in CreateClassInstance: " + problem.ToString() );
 
 
 
@@ -1693,12 +1694,17 @@ namespace MarkdownProcessor
             AmlExpandedNodeId a = new AmlExpandedNodeId(nodeId, m_modelManager.FindModelUri(nodeId), prefix);
             return a.ToString();
          }
+        TimeSpan problem = new TimeSpan( 0, 0, 0, 0, 0 );
+
 
         private InternalElementType CreateClassInstanceWithIDReplacement(string prefix, SystemUnitFamilyType child)
         {
+            DateTime start = DateTime.Now;
             InternalElementType internalElementType = child.CreateClassInstance();
-            
-            CompareLinksToExternaInterfaces(child, internalElementType);
+            TimeSpan duration = DateTime.Now - start;
+            problem += duration;
+
+            CompareLinksToExternaInterfaces( child, internalElementType);
 
             InternalElementSequence originalInternalElements = child.InternalElement;
             InternalElementSequence createdInternalElements = internalElementType.InternalElement;
