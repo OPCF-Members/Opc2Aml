@@ -262,7 +262,13 @@ namespace MarkdownProcessor
                         AddLibraryHeaderInfo(atl as CAEXBasicObject, modelInfo);
                     }
 
-                    atl.AttributeType.Insert( dicEntry.Value, false);  // insert into the AML document in alpha order
+                    AttributeFamilyType created = atl.AttributeType.Insert( dicEntry.Value, false);  // insert into the AML document in alpha order
+
+                    Utils.LogError( "Entry Name {0} ID {1}, Created Name {2} ID {3} ",
+                        dicEntry.Value.Name,
+                        dicEntry.Value.ID,
+                        created.Name,
+                        created.ID);
                 }
 
                 foreach( var dicEntry in SortedDataTypes)  // cteate the ListOf versions
