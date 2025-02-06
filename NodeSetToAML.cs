@@ -71,6 +71,7 @@ namespace MarkdownProcessor
         private const string IsSource = "IsSource";
         private const string ForwardPrefix = "f";
         private const string ReversePrefix = "r";
+        private const string RoleClassPrefix = "rc";
         private const string Enumeration = "Enumeration";
         private ModelManager m_modelManager;
         private CAEXDocument m_cAEXDocument;
@@ -262,13 +263,7 @@ namespace MarkdownProcessor
                         AddLibraryHeaderInfo(atl as CAEXBasicObject, modelInfo);
                     }
 
-                    AttributeFamilyType created = atl.AttributeType.Insert( dicEntry.Value, false);  // insert into the AML document in alpha order
-
-                    Utils.LogError( "Entry Name {0} ID {1}, Created Name {2} ID {3} ",
-                        dicEntry.Value.Name,
-                        dicEntry.Value.ID,
-                        created.Name,
-                        created.ID);
+                    atl.AttributeType.Insert( dicEntry.Value, asFirst: false, asIs: true );
                 }
 
                 foreach( var dicEntry in SortedDataTypes)  // cteate the ListOf versions
@@ -309,9 +304,8 @@ namespace MarkdownProcessor
                             icl = m_cAEXDocument.CAEXFile.InterfaceClassLib.Append(ICLPrefix + modelInfo.NamespaceUri);
                             AddLibraryHeaderInfo(icl as CAEXBasicObject, modelInfo);
                         }
-                        icl.Insert(ict, false);
+                        icl.Insert(ict, asFirst: false, asIs: true);
                     }
-
                 }
 
                 Utils.LogInfo( "Processing SystemUnitClass Types" );
@@ -334,7 +328,7 @@ namespace MarkdownProcessor
                             scl = m_cAEXDocument.CAEXFile.SystemUnitClassLib.Append(SUCPrefix + modelInfo.NamespaceUri);
                             AddLibraryHeaderInfo(scl as CAEXBasicObject, modelInfo);
                         }
-                        scl.Insert(sft, false);
+                        scl.Insert(sft, asFirst: false, asIs: true );
                     }
 
                     string rclpath = BuildLibraryReference(RCLPrefix, modelInfo.NamespaceUri, obType.Key);
@@ -346,7 +340,7 @@ namespace MarkdownProcessor
                             rcl = m_cAEXDocument.CAEXFile.RoleClassLib.Append(RCLPrefix + modelInfo.NamespaceUri);
                             AddLibraryHeaderInfo(rcl as CAEXBasicObject, modelInfo);
                         }
-                        rcl.Insert(rft, false);
+                        rcl.Insert(rft, asFirst: false, asIs: true );
                     }
                 }
             }
@@ -858,6 +852,11 @@ namespace MarkdownProcessor
                         case BuiltInType.Enumeration:
                             {
                                 a.AttributeValue = val;
+                                if( val.TypeInfo.BuiltInType == BuiltInType.XmlElement )
+                                {
+                                    // For consistency with previous versions
+                                    a.AttributeDataType = "";
+                                }
                                 break;
                             }
 
@@ -2136,13 +2135,13 @@ namespace MarkdownProcessor
 
             foreach (ExternalInterfaceType externalInterface in usedInterfaces.Values)
             {
-                typeDefSucCreated.ExternalInterface.Insert(externalInterface);
+                typeDefSucCreated.ExternalInterface.Insert( externalInterface, asFirst: false, asIs: true );
             }
 
             foreach (KeyValuePair<string, InternalElementsAndLinks> entry in usedInternalElements)
             {
-                typeDefSucCreated.InternalElement.Insert(entry.Value.ElementType);
-                typeDefSucCreated.InternalLink.Insert(entry.Value.LinkType);
+                typeDefSucCreated.InternalElement.Insert(entry.Value.ElementType, asFirst: false, asIs: true );
+                typeDefSucCreated.InternalLink.Insert(entry.Value.LinkType, asFirst: false, asIs: true );
             }
 
             CompareLinksToExternaInterfaces(typeDefSucCreated, typeDefSucCreated);
@@ -2219,7 +2218,7 @@ namespace MarkdownProcessor
             systemUnitClass.ExternalInterface.Remove();
             foreach( ExternalInterfaceType externalInterface in newTypes.Values )
             {
-                systemUnitClass.ExternalInterface.Insert( externalInterface );
+                systemUnitClass.ExternalInterface.Insert( externalInterface, asFirst: false, asIs: true );
             }
         }
 
@@ -2365,7 +2364,7 @@ namespace MarkdownProcessor
                 if (m_modelManager.IsTypeOf(nodeId, BaseInterfaceNodeId) == true)
                 {
                     var rc = rcl.New_RoleClass(refnode.DecodedBrowseName.Name);  // create a RoleClass for UA interfaces
-                    rc.ID = AmlIDFromNodeId(nodeId);
+                    rc.ID = AmlIDFromNodeId(nodeId, RoleClassPrefix);
                     if (nodeId == BaseInterfaceNodeId)
                         rc.RefBaseClassPath = RCLPrefix + MetaModelName + "/" + UaBaseRole;
                     else
