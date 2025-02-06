@@ -364,16 +364,10 @@ namespace MarkdownProcessor
             container.AddRoot(m_cAEXDocument.SaveToStream(true), new Uri("/" + internalFileInfo.Name + ".aml", UriKind.Relative));
             container.Close();
 
-            Utils.LogInfo( "Amlx Container Created for model " + modelName );
             DateTime endTime = DateTime.UtcNow;
             TimeSpan totalTime = endTime - startTime;
-            Utils.LogError( "Total time to create AMLX file: " + totalTime.ToString() );
-            double percentage = ( problem.TotalSeconds / totalTime.TotalSeconds ) * 100;
-            Utils.LogError( "Total time in CreateClassInstance: " + problem.ToString() );
-            Utils.LogError( "Percent in CreateClassInstance: " + percentage.ToString( "0.##" ) );
-
-
-
+            Utils.LogInfo( "Amlx Container Created for model " + modelName + 
+                " (Time in creation " + totalTime.ToString() + ")" );
         }
 
         private void AddLibraryHeaderInfo(CAEXBasicObject bo, ModelInfo modelInfo = null)
@@ -1701,15 +1695,10 @@ namespace MarkdownProcessor
             AmlExpandedNodeId a = new AmlExpandedNodeId(nodeId, m_modelManager.FindModelUri(nodeId), prefix);
             return a.ToString();
          }
-        TimeSpan problem = new TimeSpan( 0, 0, 0, 0, 0 );
-
 
         private InternalElementType CreateClassInstanceWithIDReplacement(string prefix, SystemUnitFamilyType child)
         {
-            DateTime start = DateTime.UtcNow;
             InternalElementType internalElementType = child.CreateClassInstance();
-            TimeSpan duration = DateTime.UtcNow - start;
-            problem += duration;
 
             CompareLinksToExternaInterfaces( child, internalElementType);
 

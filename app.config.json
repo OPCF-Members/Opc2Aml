@@ -3,6 +3,6 @@
         "OutputFilePath": "Opc2Aml.report.txt",
         "DeleteOnLoad": true,
         // None, Error, Information, Debug
-        "LogLevel": "Error"
+        "LogLevel": "Information"
     }
 }
