@@ -87,7 +87,7 @@ namespace MarkdownProcessor
             LoadModel(filePath, filePath, filePath);
         }
 
-        public string LoadModel(string filePath, string repositoryPath, string baseWebUrl)
+        public string LoadModel(string filePath, string repositoryPath, string baseWebUrl, List<string> insert = null)
         {
             // load the model from disk.
             var nodeset = Read(filePath);
@@ -96,7 +96,24 @@ namespace MarkdownProcessor
             // recursively load all required models.
             if (nodeset.Models != null)
             {
-                foreach (var ii in nodeset.Models)
+                if ( nodeset.Models.Length > 0 )
+                {
+                    if( insert != null )
+                    {
+                        IEnumerable<ModelTableEntry> workingList = new List<ModelTableEntry>( nodeset.Models[0].RequiredModel );
+
+                        foreach( string insertUri in insert )
+                        {
+                            var anothervar = new ModelTableEntry() { ModelUri = insertUri };
+                            workingList = workingList.Append<ModelTableEntry>( anothervar );
+                        }
+
+                        nodeset.Models[0].RequiredModel = workingList.ToArray();
+                    }
+
+                }
+
+                foreach( var ii in nodeset.Models)
                 {
                     if (Models.ContainsKey(ii.ModelUri))
                     {
