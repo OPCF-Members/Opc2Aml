@@ -46,6 +46,8 @@ namespace Opc2AmlConsole
             string output = string.Empty;
             bool suppressPrompt = false;
             bool configurationSpecified = false;
+            bool insert = false;
+            string insertUris = string.Empty;
 
             if( !String.IsNullOrEmpty( Environment.CommandLine ) )
             {
@@ -84,6 +86,11 @@ namespace Opc2AmlConsole
                         {
                             configurationFile = value;
                             configurationSpecified = true;
+                        }
+                        else if( id.Equals( "Insert", StringComparison.OrdinalIgnoreCase ) )
+                        {
+                            insertUris = value;
+                            insert = true;
                         }
                     }
                     else if( parts.Length == 1 )
@@ -137,6 +144,22 @@ namespace Opc2AmlConsole
                 }
             }
 
+            List<string> insertList = null;
+            if ( insert )
+            {
+                if ( !String.IsNullOrEmpty( insertUris ) )
+                {
+                    string[] uris = insertUris.Split( ',' );
+                    insertList = new List<string>( uris );
+                }
+                else
+                { 
+                    Console.WriteLine( "Insert uris not specified" );
+                    ShowSyntax( suppressPrompt );
+                    Environment.Exit( 1 );
+                }
+            }
+
             FileInfo configurationInfo = null;
 
             if( configurationSpecified )
@@ -157,7 +180,7 @@ namespace Opc2AmlConsole
 
             Opc2Aml.Entry entry = new Opc2Aml.Entry( directoryInfo, configurationInfo.FullName );
 
-            entry.Run( nodesetFileInfo, outputInfo, suppressPrompt );
+            entry.Run( nodesetFileInfo, insertList, outputInfo, suppressPrompt );
         }
 
         static void ShowSyntax( bool suppressPrompt )

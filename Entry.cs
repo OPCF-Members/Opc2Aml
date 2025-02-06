@@ -112,7 +112,9 @@ namespace Opc2Aml
             throw new ArgumentException( "Nodeset file '" + filename + "' does not exist in the CWD: " + Directory.GetCurrentDirectory() );
         }
 
-        private void ConvertModel( string NodesetFile, string outputFile = null )
+        private void ConvertModel( string NodesetFile, 
+            string outputFile = null, 
+            List<string> insert = null )
         {
             if( FileIsGood( NodesetFile ) )
             {
@@ -121,7 +123,7 @@ namespace Opc2Aml
                 ModelManager manager = new ModelManager();
                 manager.ModelRequired += ModelImporter_ModelRequired;
                 NodeSetToAML convertor = new NodeSetToAML( manager );
-                convertor.CreateAML( NodesetFile, outputFile );
+                convertor.CreateAML( NodesetFile, outputFile, insert );
             }
         }
 
@@ -129,18 +131,21 @@ namespace Opc2Aml
         {
             Console.WriteLine("\n++++++++++  Opc2Aml Help  +++++++++++");
             Console.WriteLine("Converts one or more OPC UA Nodeset files into their equivalent AutomationML Libraries.\n");
-            Console.WriteLine("Opc2AmlConsole.exe [--DirectoryInfo Directory] [--Nodeset NodesetFile] [--Output AmlBaseFilename] [--Config ConfigFile]\n\n");
+            Console.WriteLine( "Opc2AmlConsole.exe [--DirectoryInfo Directory] [--Nodeset NodesetFile] [--Insert NodesetFile] [--Output AmlBaseFilename] [--Config ConfigFile]\n\n" );
             Console.WriteLine("  --DirectoryInfo Directory      Directory where nodeset files can be found\n");
             Console.WriteLine("  --Nodeset NodesetFile          Specific nodeset file to be processed\n");
+            Console.WriteLine("  --Insert Uri                   Comma separated list of Uri's to insert.\n" );
             Console.WriteLine("  --Output AmlBaseFilename       File name of the AutomationML file to be written (without the .amlx extension).\n");
             Console.WriteLine("  --Config ConfigFile            Json file where configuration can be found\n");
             Console.WriteLine("\nWith no arguments, all nodeset files in CWD are processed.");
             Console.WriteLine("NOTE: All dependent nodeset files need to be present in the directory, even if they are not processed. ");
+            Console.WriteLine("      Output is dependent on a single Nodeset being configured.");
+            Console.WriteLine("      Insert can take multiple nodesets to insert, and is dependent on a single Nodeset being configured." );
             Console.WriteLine("Copyright(c) 2021-2024 OPC Foundation.  All rights reserved.");
             Console.WriteLine("+++++++++++++++++++++++++++++++++++++\n\n");
         }
 
-        public void Run( FileInfo nodesetFile = null, FileInfo output = null, bool suppressPrompt = false )
+        public void Run( FileInfo nodesetFile = null, List<string> insertUris = null, FileInfo output = null, bool suppressPrompt = false )
         {
 #if (ENABLE_PROGRAM_EXCEPTION)
             try
@@ -159,11 +164,11 @@ namespace Opc2Aml
                 }
                 else if( output == null )
                 {
-                    ConvertModel( nodesetFile.FullName );
+                    ConvertModel( nodesetFile.FullName, null, insertUris );
                 }
                 else
                 {
-                    ConvertModel( nodesetFile.FullName, output.FullName );
+                    ConvertModel( nodesetFile.FullName, output.FullName, insertUris );
                 }
 
                 Console.WriteLine( "... completed successfully." );

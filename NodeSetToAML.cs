@@ -156,9 +156,9 @@ namespace MarkdownProcessor
             return node as T;
         }
 
-        public void CreateAML(string modelPath, string modelName = null)
+        public void CreateAML(string modelPath, string modelName = null, List<string> insert = null)
         {
-            string modelUri = m_modelManager.LoadModel(modelPath, null, null);
+            string modelUri = m_modelManager.LoadModel(modelPath, null, null, insert);
             structureNode = m_modelManager.FindNodeByName("Structure");
             if (modelName == null)
                 modelName = modelPath;
