@@ -846,11 +846,6 @@ namespace MarkdownProcessor
                         case BuiltInType.Enumeration:
                             {
                                 a.AttributeValue = val;
-                                if( val.TypeInfo.BuiltInType == BuiltInType.XmlElement )
-                                {
-                                    // For consistency with previous versions
-                                    a.AttributeDataType = "";
-                                }
                                 break;
                             }
 
