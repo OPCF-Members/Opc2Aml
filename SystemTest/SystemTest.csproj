@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,17 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aml.Engine" Version="3.2.1" />
-    <PackageReference Include="Aml.Engine.Resources" Version="3.0.0" />
-    <PackageReference Include="Aml.Engine.Services" Version="3.2.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.0.2" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
-    <PackageReference Include="coverlet.collector" Version="3.2.0">
+    <PackageReference Include="Aml.Engine" Version="4.4.0" />
+    <PackageReference Include="Aml.Engine.Services" Version="4.2.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.7.3" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.7.3" />
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.374.158" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.375.443" />
   </ItemGroup>
 
   <ItemGroup>
