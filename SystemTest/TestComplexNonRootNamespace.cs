@@ -48,10 +48,9 @@ namespace SystemTest
             TestValue( value, "Guid", "13131313-1313-1313-1313-131313131313", "xs:string" );
             TestValue( value, "ByteString", "MTQxNDE0MTQ=", "xs:base64Binary" );
             
-            string unknownDataType = "";
             TestValue( value, "XmlElement", 
                 "<TheFifteenthElement xmlns=\"http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd\">Fifteen</TheFifteenthElement>",
-                unknownDataType );
+                "xs:string" );
 
             ValidateNodeId( value, "NodeId", GetUri( 2 ), new NodeId( 16 ) );
             ValidateNodeId( value, "ExpandedNodeId", GetUri( 2 ), new NodeId( 17 ) );
