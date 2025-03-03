@@ -551,7 +551,7 @@ namespace MarkdownProcessor
             // Manually add these to simulate what the AddModifyAttribute would do if it were possible
             AttributeType browseNameAttributeType = methodNodeClass.Attribute.Append( "BrowseName" );
             browseNameAttributeType.RefAttributeType = "[" + ATLPrefix + Opc.Ua.Namespaces.OpcUa + "]/[QualifiedName]";
-            AttributeType namespaceUriAttributeType = browseNameAttributeType.Attribute.Append( "NamespaceURI" );
+            AttributeType namespaceUriAttributeType = browseNameAttributeType.Attribute.Append( "NamespaceUri" );
             namespaceUriAttributeType.AttributeDataType = "xs:anyURI";
             AttributeType nameAttributeType = browseNameAttributeType.Attribute.Append( "Name" );
             nameAttributeType.AttributeDataType = "xs:string";
@@ -584,7 +584,7 @@ namespace MarkdownProcessor
 
             if (myuri != baseuri)
             {
-                var uriatt = browse.Attribute["NamespaceURI"];
+                var uriatt = browse.Attribute["NamespaceUri"];
 
                 uriatt.Value = myuri;
             }
@@ -965,7 +965,7 @@ namespace MarkdownProcessor
                                 QualifiedName qualifiedName = val.Value as QualifiedName;
                                 if( qualifiedName != null )
                                 {
-                                    AttributeType uri = a.Attribute[ "NamespaceURI" ];
+                                    AttributeType uri = a.Attribute[ "NamespaceUri" ];
                                     uri.Value = m_modelManager.ModelNamespaceIndexes[ qualifiedName.NamespaceIndex ].NamespaceUri;
                                     AttributeType nameAttribute = a.Attribute[ "Name" ];
                                     nameAttribute.Value = qualifiedName.Name;
@@ -1580,7 +1580,7 @@ namespace MarkdownProcessor
 
         private string BaseRefFromNodeId(NodeId nodeId, string LibPrefix, bool UseInverseName = false, bool IsArray = false)
         {
-            string NamespaceURI = m_modelManager.FindModelUri(nodeId);
+            string NamespaceUri = m_modelManager.FindModelUri(nodeId);
             var BaseNode = m_modelManager.FindNode<UANode>(nodeId);
             if (BaseNode != null)
             {
@@ -1590,16 +1590,16 @@ namespace MarkdownProcessor
                     if (refnode.InverseName != null)
                     {
                         if (BaseNode.DecodedBrowseName.Name != refnode.InverseName[0].Value)
-                            return BuildLibraryReference(LibPrefix, NamespaceURI, BaseNode.DecodedBrowseName.Name, refnode.InverseName[0].Value);
+                            return BuildLibraryReference(LibPrefix, NamespaceUri, BaseNode.DecodedBrowseName.Name, refnode.InverseName[0].Value);
                     }
                 }
                 if (IsArray == true)
                 {
-                    return BuildLibraryReference(LibPrefix, NamespaceURI, ListOf + BaseNode.DecodedBrowseName.Name);  //add ListOf
+                    return BuildLibraryReference(LibPrefix, NamespaceUri, ListOf + BaseNode.DecodedBrowseName.Name);  //add ListOf
                 }
                 else
                 {
-                    return BuildLibraryReference(LibPrefix, NamespaceURI, BaseNode.DecodedBrowseName.Name);
+                    return BuildLibraryReference(LibPrefix, NamespaceUri, BaseNode.DecodedBrowseName.Name);
                 }
             }
             return "";
@@ -2785,7 +2785,7 @@ namespace MarkdownProcessor
             {
                 att.AttributeDataType = "";
                 AttributeType ns = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
-                ns.Name = "NamespaceURI";
+                ns.Name = "NamespaceUri";
                 ns.AttributeDataType = "xs:anyURI";
                 att.Attribute.Insert(ns);
                 AttributeType n = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
