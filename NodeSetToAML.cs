@@ -2783,11 +2783,15 @@ namespace MarkdownProcessor
             }
             else if (nodeId == QualifiedNameNodeId)
             {
+                string namespaceUriPath = BuildLibraryReference(ATLPrefix, MetaModelName, "NamespaceUri");
+                AttributeFamilyType namespaceUriRoot = m_cAEXDocument.FindByPath(namespaceUriPath) as AttributeFamilyType;
+
+                AttributeType newNamespaceUri = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                newNamespaceUri.Name = "NamespaceUri";
+                newNamespaceUri.RecreateAttributeInstance(namespaceUriRoot);
+                att.Attribute.Insert(newNamespaceUri);
+
                 att.AttributeDataType = "";
-                AttributeType ns = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
-                ns.Name = "NamespaceUri";
-                ns.AttributeDataType = "xs:anyURI";
-                att.Attribute.Insert(ns);
                 AttributeType n = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
                 n.Name = "Name";
                 n.AttributeDataType = "xs:string";
