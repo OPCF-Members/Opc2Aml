@@ -142,6 +142,8 @@ namespace MarkdownProcessor
             { Enumeration , "xs:int"  }
         };
 
+        private bool _runningInstances = false;
+
         public NodeSetToAML(ModelManager modelManager)
         {
             m_modelManager = modelManager;
@@ -346,6 +348,8 @@ namespace MarkdownProcessor
             }
 
             Utils.LogInfo( "Creating Instances" );
+
+            _runningInstances = true;
 
             CreateInstances(); //  add the instances for each model
 
@@ -576,18 +580,53 @@ namespace MarkdownProcessor
                 nodeId = AddModifyAttribute(seq, "NodeId", "NodeId", variant);
             }
 
-            var browse = seq["BrowseName"];
-            if (browse == null)
+            /*
+                Issue 100 -  NamespaceURI of a BrowseName of SUCs is handled differently across different Libraries
+                https://github.com/OPCF-Members/Opc2Aml/issues/100
+
+                Part 83 specifies the following:
+                If the NamespaceUri sub-attribute of the BrowseName AML attribute is not present and the AML Object 
+                is contained in an AML library, the NamespaceUri portion of the BrowseName is the OPC UA Namespace 
+                referenced in the AML library definition.
+
+                Therefore, the BrowseName could be left empty for all SUCs in all libraries. 
+                It could even be considered to omit the NamespaceURI entirely (the same applies to Name, as it is always empty).
+
+                From a usability perspective, I would leave the NamespaceURI empty but omit the Name completely. The NamespaceURI
+                usually needs to be filled for an instance, whereas the Name will most likely always match the InternalElement name.
+
+                However, the NamespaceURI should be unified across all SUC libraries.
+            */
+
             {
-                browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
+                AttributeType browse = seq["BrowseName"];
+                if (browse == null)
+                {
+                    browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
+                }
+
+                AttributeType uriAttribute = browse.Attribute["NamespaceURI"];
+
+                if (_runningInstances)
+                {
+                    if (myuri != baseuri)
+                    {
+                        uriAttribute.Value = myuri;
+                    }
+                }
+                else
+                {
+                    uriAttribute.Value = null;
+                }
+
+                // Remove the name for everything?  Start with that
+                AttributeType nameSubAttribute = browse.Attribute["Name"];
+                if (nameSubAttribute != null)
+                {
+                    browse.Attribute.RemoveElement(nameSubAttribute);
+                }
             }
 
-            if (myuri != baseuri)
-            {
-                var uriatt = browse.Attribute["NamespaceURI"];
-
-                uriatt.Value = myuri;
-            }
 
             BuildLocalizedTextAttribute( seq, "DisplayName", uanode.DisplayName, 
                 uanode.DecodedBrowseName.Name, ignoreEqual: true );
