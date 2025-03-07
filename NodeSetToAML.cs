@@ -1549,9 +1549,16 @@ namespace MarkdownProcessor
         }
 
 
-        private void OverrideBooleanAttribute(AttributeSequence seq, string AttributeName, Boolean value)
+        private void OverrideBooleanAttribute(AttributeSequence seq, 
+            string AttributeName, 
+            Boolean value,
+            bool typeOnly = false)
         {
             var at = AddModifyAttribute(seq, AttributeName, "Boolean", value);
+            if ( typeOnly )
+            {
+                at.AdditionalInformation.Append("OpcUa:TypeOnly");
+            }
         }
 
 
@@ -2553,10 +2560,12 @@ namespace MarkdownProcessor
 
         #region ICL
 
-        private void OverrideAttribute(IClassWithBaseClassReference owner, string Name, string AttType, object val)
+        private void OverrideAttribute(
+            IClassWithBaseClassReference owner, string Name, string AttType, object val,
+            bool typeOnly = false)
         {
-            var atts = owner.GetInheritedAttributes();
-            foreach (var aa in atts)
+            IEnumerable<AttributeType> atts = owner.GetInheritedAttributes();
+            foreach (AttributeType aa in atts)
             {
                 if (aa.Name == Name)
                 {
@@ -2571,6 +2580,10 @@ namespace MarkdownProcessor
             a.Name = Name;
             a.AttributeDataType = AttType;
             a.AttributeValue = val;
+            if ( typeOnly )
+            {
+                a.AdditionalInformation.Append("OpcUa:TypeOnly");
+            }
         }
 
         private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
@@ -2595,8 +2608,8 @@ namespace MarkdownProcessor
              //   OverrideBooleanAttribute(added.Attribute, "Symmetric", true);
              //   OverrideBooleanAttribute(added.Attribute, "IsAbstract", true);
              //   OverrideAttribute(added, IsSource, "xs:boolean", true);
-                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", added.CAEXPath());
-
+                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", 
+                    added.CAEXPath(), typeOnly:true);
             }
             // look for inverse name
             InterfaceFamilyType inverseAdded = null;
@@ -2605,6 +2618,7 @@ namespace MarkdownProcessor
                 if (refnode.Symmetric == false && refnode.InverseName[0].Value != refnode.DecodedBrowseName.Name)
                 {
                     inverseAdded = added.InterfaceClass.Append(refnode.InverseName[0].Value);
+                    inverseAdded.AdditionalInformation.Append("OpcUa:TypeOnly"); 
                     inverseAdded.ID = AmlIDFromNodeId(nodeId, ReversePrefix);
                     if (BaseNodeId != null)
                         inverseAdded.RefBaseClassPath = BaseRefFromNodeId(BaseNodeId, ICLPrefix, true);
@@ -2614,7 +2628,7 @@ namespace MarkdownProcessor
             // Only sets it if it is true -
             // It doesn't matter if 'References' is set x times,
             // it would take more time to look it up each time
-            OverrideBooleanAttribute( added.Attribute, "IsAbstract", refnode.IsAbstract );
+            OverrideBooleanAttribute( added.Attribute, "IsAbstract", refnode.IsAbstract, typeOnly: true );
 
             // override any attribute values
             if (BaseNodeId != null)
@@ -2622,26 +2636,41 @@ namespace MarkdownProcessor
                 var basenode = FindNode<NodeSet.UAReferenceType>(BaseNodeId);
  
                 if (basenode.IsAbstract != refnode.IsAbstract)
-                    OverrideBooleanAttribute(added.Attribute, "IsAbstract", refnode.IsAbstract);
+                    OverrideBooleanAttribute(added.Attribute, "IsAbstract", refnode.IsAbstract, typeOnly: true);
                 if (basenode.Symmetric != refnode.Symmetric)
                     OverrideBooleanAttribute(added.Attribute, "Symmetric", refnode.Symmetric);
 
                 if (refnode.InverseName != null)
-                    AddModifyAttribute(added.Attribute, "InverseName", "LocalizedText", refnode.InverseName[0].Value);
+                {
+                    AttributeType inverseAttribute = AddModifyAttribute(added.Attribute, 
+                        "InverseName", "LocalizedText", refnode.InverseName[0].Value);
 
-                OverrideAttribute(added, IsSource, "xs:boolean", true);
-                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
+                    inverseAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
+                }
+
+                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", 
+                    (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()),
+                    typeOnly: true);
 
                 if (inverseAdded != null)
                 {
                     if (basenode.IsAbstract != refnode.IsAbstract)
-                        OverrideBooleanAttribute(inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract);
+                        OverrideBooleanAttribute(inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract, typeOnly: true);
                     if (basenode.Symmetric != refnode.Symmetric)
                         OverrideBooleanAttribute(inverseAdded.Attribute, "Symmetric", refnode.Symmetric);
-                    AddModifyAttribute(inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
-
-                    OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
-                    OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string", added.CAEXPath());
+                    AttributeType checkForTypeOnly = AddModifyAttribute(inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
+                   
+                    if ( checkForTypeOnly.AdditionalInformation.Count > 0 )
+                    {
+                        bool whoa = true;
+                    }
+                    else
+                    {
+                        checkForTypeOnly.AdditionalInformation.Append("OpcUa:TypeOnly");
+                    }
+                    OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false, typeOnly: true);
+                    OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string", 
+                        added.CAEXPath(), typeOnly: true);
                 }
             }
 
