@@ -564,14 +564,15 @@ namespace MarkdownProcessor
             // only set the value if different from the base node
             string baseuri = "";
             if (basenode != null )
-              baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedNodeId.NamespaceIndex].NamespaceUri;
-            string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedNodeId.NamespaceIndex].NamespaceUri;
+              baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
+            string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
 
             var nodeId = seq["NodeId"];
 
             if (uanode.DecodedNodeId.IsNullNodeId == false)
             {
-                ExpandedNodeId expandedNodeId = new ExpandedNodeId(uanode.DecodedNodeId, myuri);
+                ExpandedNodeId expandedNodeId = new ExpandedNodeId(uanode.DecodedNodeId,
+                    m_modelManager.ModelNamespaceIndexes[uanode.DecodedNodeId.NamespaceIndex].NamespaceUri);
                 Variant variant = new Variant(expandedNodeId);
                 nodeId = AddModifyAttribute(seq, "NodeId", "NodeId", variant);
             }
