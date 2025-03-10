@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using static Org.BouncyCastle.Math.EC.ECCurve;
@@ -332,7 +334,20 @@ namespace SystemTest
 
         private string RelativePath( )
         {
-            return  "..\\..\\..\\..\\SystemTest\\bin\\" + GetBuildType() + "\\net6.0\\";
+            TargetFrameworkAttribute targetFramework = Assembly.GetExecutingAssembly()
+                .GetCustomAttributes(typeof(System.Runtime.Versioning.TargetFrameworkAttribute), false)
+                .SingleOrDefault() as TargetFrameworkAttribute;
+
+            Assert.IsNotNull(targetFramework);
+            string working = targetFramework.FrameworkDisplayName;
+            if (targetFramework.FrameworkDisplayName.StartsWith('.'))
+            {
+                working = targetFramework.FrameworkDisplayName.Substring(1);
+            }
+            working = working.Replace(" ", "");
+
+
+            return  "..\\..\\..\\..\\SystemTest\\bin\\" + GetBuildType() + "\\" + working + "\\";
         }
 
         private string GetBuildType()
