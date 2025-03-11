@@ -590,7 +590,7 @@ namespace MarkdownProcessor
             // Ensure that NamespaceUri is always present
             AttributeType uriAttribute = browse.Attribute["NamespaceUri"];
             uriAttribute.Value = 
-                m_modelManager.ModelNamespaceIndexes[uanode.DecodedNodeId.NamespaceIndex].NamespaceUri;
+                m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
 
 
             // Remove the name for everything

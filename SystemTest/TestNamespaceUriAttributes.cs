@@ -57,7 +57,7 @@ namespace SystemTest
             SystemUnitClassType objectToTest = GetTestObject(instance, nodeIdentifier);
             AttributeType browseName = objectToTest.Attribute["BrowseName"];
             Assert.IsNotNull(browseName);
-            AttributeType namespaceUri = browseName.Attribute["NamespaceURI"];
+            AttributeType namespaceUri = browseName.Attribute["NamespaceUri"];
             Assert.IsNotNull(namespaceUri);
             Assert.AreEqual(expectedUri, namespaceUri.Value);
         }
