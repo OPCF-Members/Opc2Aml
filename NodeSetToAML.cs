@@ -563,14 +563,8 @@ namespace MarkdownProcessor
             AddLibraryHeaderInfo( suc_meta as CAEXBasicObject);
         }
 
-        private void AddBaseNodeClassAttributes( AttributeSequence seq, UANode uanode, UANode basenode = null)
+        private void AddBaseNodeClassAttributes( AttributeSequence seq, UANode uanode)
         {
-            // only set the value if different from the base node
-            string baseuri = "";
-            if (basenode != null )
-              baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
-            string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
-
             var nodeId = seq["NodeId"];
 
             if (uanode.DecodedNodeId.IsNullNodeId == false)
@@ -587,19 +581,17 @@ namespace MarkdownProcessor
                 browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
             }
 
-            // Ensure that NamespaceUri is always present
+            // Ensure that NamespaceUri is always present #100
             AttributeType uriAttribute = browse.Attribute["NamespaceUri"];
             uriAttribute.Value = 
                 m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
 
-
-            // Remove the name for everything
+            // Remove the name for everything #100
             AttributeType nameSubAttribute = browse.Attribute["Name"];
             if (nameSubAttribute != null)
             {
                 browse.Attribute.RemoveElement(nameSubAttribute);
             }
-
 
             BuildLocalizedTextAttribute( seq, "DisplayName", uanode.DisplayName, 
                 uanode.DecodedBrowseName.Name, ignoreEqual: true );
@@ -2393,7 +2385,7 @@ namespace MarkdownProcessor
                     // override any attribute values
 
                     var basenode = FindNode<NodeSet.UANode>(BaseNodeId);
-                    AddBaseNodeClassAttributes(rtn.Attribute, refnode, basenode);
+                    AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                     switch (refnode.NodeClass)
                     {
                         case NodeClass.ObjectType:
@@ -2481,7 +2473,7 @@ namespace MarkdownProcessor
                                 rtn.AddInstance(ie);
 
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
-                                AddBaseNodeClassAttributes(ie.Attribute, targetNode, basenode);
+                                AddBaseNodeClassAttributes(ie.Attribute, targetNode);
                                 if (targetNode.NodeClass == NodeClass.Variable)
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
