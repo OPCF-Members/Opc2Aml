@@ -580,51 +580,23 @@ namespace MarkdownProcessor
                 nodeId = AddModifyAttribute(seq, "NodeId", "NodeId", variant);
             }
 
-            /*
-                Issue 100 -  NamespaceURI of a BrowseName of SUCs is handled differently across different Libraries
-                https://github.com/OPCF-Members/Opc2Aml/issues/100
-
-                Part 83 specifies the following:
-                If the NamespaceUri sub-attribute of the BrowseName AML attribute is not present and the AML Object 
-                is contained in an AML library, the NamespaceUri portion of the BrowseName is the OPC UA Namespace 
-                referenced in the AML library definition.
-
-                Therefore, the BrowseName could be left empty for all SUCs in all libraries. 
-                It could even be considered to omit the NamespaceURI entirely (the same applies to Name, as it is always empty).
-
-                From a usability perspective, I would leave the NamespaceURI empty but omit the Name completely. The NamespaceURI
-                usually needs to be filled for an instance, whereas the Name will most likely always match the InternalElement name.
-
-                However, the NamespaceURI should be unified across all SUC libraries.
-            */
-
+            AttributeType browse = seq["BrowseName"];
+            if (browse == null)
             {
-                AttributeType browse = seq["BrowseName"];
-                if (browse == null)
-                {
-                    browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
-                }
+                browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
+            }
 
-                AttributeType uriAttribute = browse.Attribute["NamespaceUri"];
+            // Ensure that NamespaceUri is always present
+            AttributeType uriAttribute = browse.Attribute["NamespaceUri"];
+            uriAttribute.Value = 
+                m_modelManager.ModelNamespaceIndexes[uanode.DecodedNodeId.NamespaceIndex].NamespaceUri;
 
-                if (_runningInstances)
-                {
-                    if (myuri != baseuri)
-                    {
-                        uriAttribute.Value = myuri;
-                    }
-                }
-                else
-                {
-                    uriAttribute.Value = null;
-                }
 
-                // Remove the name for everything?  Start with that
-                AttributeType nameSubAttribute = browse.Attribute["Name"];
-                if (nameSubAttribute != null)
-                {
-                    browse.Attribute.RemoveElement(nameSubAttribute);
-                }
+            // Remove the name for everything
+            AttributeType nameSubAttribute = browse.Attribute["Name"];
+            if (nameSubAttribute != null)
+            {
+                browse.Attribute.RemoveElement(nameSubAttribute);
             }
 
 
