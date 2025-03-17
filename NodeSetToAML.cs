@@ -2634,7 +2634,19 @@ namespace MarkdownProcessor
                     OverrideBooleanAttribute(added.Attribute, "Symmetric", refnode.Symmetric);
 
                 if (refnode.InverseName != null)
-                    AddModifyAttribute(added.Attribute, "InverseName", "LocalizedText", refnode.InverseName[0].Value);
+                {
+                    AttributeType inverseNameAttribute = AddModifyAttribute(added.Attribute, 
+                        "InverseName", "LocalizedText", refnode.InverseName[0].Value);
+
+                    if ( inverseNameAttribute != null )
+                    {
+                        AttributeType unwantedNodeIdAttribute = inverseNameAttribute.Attribute["NodeId"];
+                        if ( unwantedNodeIdAttribute != null )
+                        {
+                            inverseNameAttribute.Attribute.RemoveElement(unwantedNodeIdAttribute);
+                        }
+                    }
+                }
 
                 OverrideAttribute(added, IsSource, "xs:boolean", true);
                 OverrideAttribute(added, RefClassConnectsToPath, "xs:string", (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
