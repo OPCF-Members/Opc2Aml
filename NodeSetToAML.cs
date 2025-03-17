@@ -142,6 +142,8 @@ namespace MarkdownProcessor
             { Enumeration , "xs:int"  }
         };
 
+        private bool _runningInstances = false;
+
         public NodeSetToAML(ModelManager modelManager)
         {
             m_modelManager = modelManager;
@@ -347,6 +349,8 @@ namespace MarkdownProcessor
 
             Utils.LogInfo( "Creating Instances" );
 
+            _runningInstances = true;
+
             CreateInstances(); //  add the instances for each model
 
             Utils.LogInfo( "Creating Instances Complete" );
@@ -551,7 +555,7 @@ namespace MarkdownProcessor
             // Manually add these to simulate what the AddModifyAttribute would do if it were possible
             AttributeType browseNameAttributeType = methodNodeClass.Attribute.Append( "BrowseName" );
             browseNameAttributeType.RefAttributeType = "[" + ATLPrefix + Opc.Ua.Namespaces.OpcUa + "]/[QualifiedName]";
-            AttributeType namespaceUriAttributeType = browseNameAttributeType.Attribute.Append( "NamespaceURI" );
+            AttributeType namespaceUriAttributeType = browseNameAttributeType.Attribute.Append( "NamespaceUri" );
             namespaceUriAttributeType.AttributeDataType = "xs:anyURI";
             AttributeType nameAttributeType = browseNameAttributeType.Attribute.Append( "Name" );
             nameAttributeType.AttributeDataType = "xs:string";
@@ -559,34 +563,34 @@ namespace MarkdownProcessor
             AddLibraryHeaderInfo( suc_meta as CAEXBasicObject);
         }
 
-        private void AddBaseNodeClassAttributes( AttributeSequence seq, UANode uanode, UANode basenode = null)
+        private void AddBaseNodeClassAttributes( AttributeSequence seq, UANode uanode)
         {
-            // only set the value if different from the base node
-            string baseuri = "";
-            if (basenode != null )
-              baseuri = m_modelManager.ModelNamespaceIndexes[basenode.DecodedNodeId.NamespaceIndex].NamespaceUri;
-            string myuri = m_modelManager.ModelNamespaceIndexes[uanode.DecodedNodeId.NamespaceIndex].NamespaceUri;
-
             var nodeId = seq["NodeId"];
 
             if (uanode.DecodedNodeId.IsNullNodeId == false)
             {
-                ExpandedNodeId expandedNodeId = new ExpandedNodeId(uanode.DecodedNodeId, myuri);
+                ExpandedNodeId expandedNodeId = new ExpandedNodeId(uanode.DecodedNodeId,
+                    m_modelManager.ModelNamespaceIndexes[uanode.DecodedNodeId.NamespaceIndex].NamespaceUri);
                 Variant variant = new Variant(expandedNodeId);
                 nodeId = AddModifyAttribute(seq, "NodeId", "NodeId", variant);
             }
 
-            var browse = seq["BrowseName"];
+            AttributeType browse = seq["BrowseName"];
             if (browse == null)
             {
                 browse = AddModifyAttribute(seq, "BrowseName", "QualifiedName", Variant.Null);
             }
 
-            if (myuri != baseuri)
-            {
-                var uriatt = browse.Attribute["NamespaceURI"];
+            // Ensure that NamespaceUri is always present #100
+            AttributeType uriAttribute = browse.Attribute["NamespaceUri"];
+            uriAttribute.Value = 
+                m_modelManager.ModelNamespaceIndexes[uanode.DecodedBrowseName.NamespaceIndex].NamespaceUri;
 
-                uriatt.Value = myuri;
+            // Remove the name for everything #100
+            AttributeType nameSubAttribute = browse.Attribute["Name"];
+            if (nameSubAttribute != null)
+            {
+                browse.Attribute.RemoveElement(nameSubAttribute);
             }
 
             BuildLocalizedTextAttribute( seq, "DisplayName", uanode.DisplayName, 
@@ -965,7 +969,7 @@ namespace MarkdownProcessor
                                 QualifiedName qualifiedName = val.Value as QualifiedName;
                                 if( qualifiedName != null )
                                 {
-                                    AttributeType uri = a.Attribute[ "NamespaceURI" ];
+                                    AttributeType uri = a.Attribute[ "NamespaceUri" ];
                                     uri.Value = m_modelManager.ModelNamespaceIndexes[ qualifiedName.NamespaceIndex ].NamespaceUri;
                                     AttributeType nameAttribute = a.Attribute[ "Name" ];
                                     nameAttribute.Value = qualifiedName.Name;
@@ -1580,7 +1584,7 @@ namespace MarkdownProcessor
 
         private string BaseRefFromNodeId(NodeId nodeId, string LibPrefix, bool UseInverseName = false, bool IsArray = false)
         {
-            string NamespaceURI = m_modelManager.FindModelUri(nodeId);
+            string NamespaceUri = m_modelManager.FindModelUri(nodeId);
             var BaseNode = m_modelManager.FindNode<UANode>(nodeId);
             if (BaseNode != null)
             {
@@ -1590,16 +1594,16 @@ namespace MarkdownProcessor
                     if (refnode.InverseName != null)
                     {
                         if (BaseNode.DecodedBrowseName.Name != refnode.InverseName[0].Value)
-                            return BuildLibraryReference(LibPrefix, NamespaceURI, BaseNode.DecodedBrowseName.Name, refnode.InverseName[0].Value);
+                            return BuildLibraryReference(LibPrefix, NamespaceUri, BaseNode.DecodedBrowseName.Name, refnode.InverseName[0].Value);
                     }
                 }
                 if (IsArray == true)
                 {
-                    return BuildLibraryReference(LibPrefix, NamespaceURI, ListOf + BaseNode.DecodedBrowseName.Name);  //add ListOf
+                    return BuildLibraryReference(LibPrefix, NamespaceUri, ListOf + BaseNode.DecodedBrowseName.Name);  //add ListOf
                 }
                 else
                 {
-                    return BuildLibraryReference(LibPrefix, NamespaceURI, BaseNode.DecodedBrowseName.Name);
+                    return BuildLibraryReference(LibPrefix, NamespaceUri, BaseNode.DecodedBrowseName.Name);
                 }
             }
             return "";
@@ -2381,7 +2385,7 @@ namespace MarkdownProcessor
                     // override any attribute values
 
                     var basenode = FindNode<NodeSet.UANode>(BaseNodeId);
-                    AddBaseNodeClassAttributes(rtn.Attribute, refnode, basenode);
+                    AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                     switch (refnode.NodeClass)
                     {
                         case NodeClass.ObjectType:
@@ -2469,7 +2473,7 @@ namespace MarkdownProcessor
                                 rtn.AddInstance(ie);
 
                                 var basenode = FindNode<NodeSet.UANode>(TypeDefNodeId);                               
-                                AddBaseNodeClassAttributes(ie.Attribute, targetNode, basenode);
+                                AddBaseNodeClassAttributes(ie.Attribute, targetNode);
                                 if (targetNode.NodeClass == NodeClass.Variable)
                                 {  //  Set the datatype for Value
                                     var varnode = targetNode as NodeSet.UAVariable;
@@ -2786,11 +2790,15 @@ namespace MarkdownProcessor
             }
             else if (nodeId == QualifiedNameNodeId)
             {
+                string namespaceUriPath = BuildLibraryReference(ATLPrefix, MetaModelName, "NamespaceUri");
+                AttributeFamilyType namespaceUriRoot = m_cAEXDocument.FindByPath(namespaceUriPath) as AttributeFamilyType;
+
+                AttributeType newNamespaceUri = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                newNamespaceUri.Name = "NamespaceUri";
+                newNamespaceUri.RecreateAttributeInstance(namespaceUriRoot);
+                att.Attribute.Insert(newNamespaceUri);
+
                 att.AttributeDataType = "";
-                AttributeType ns = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
-                ns.Name = "NamespaceURI";
-                ns.AttributeDataType = "xs:anyURI";
-                att.Attribute.Insert(ns);
                 AttributeType n = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
                 n.Name = "Name";
                 n.AttributeDataType = "xs:string";

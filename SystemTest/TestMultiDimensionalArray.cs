@@ -92,7 +92,7 @@ namespace SystemTest
             AttributeType browseNameAttribute = objectToTest.Attribute[ "BrowseName" ];
             Assert.IsNotNull( browseNameAttribute );
 
-            AttributeType namespaceUriAttribute = browseNameAttribute.Attribute[ "NamespaceURI" ];
+            AttributeType namespaceUriAttribute = browseNameAttribute.Attribute[ "NamespaceUri" ];
             Assert.IsNotNull( namespaceUriAttribute );
             Assert.AreEqual( "xs:anyURI", namespaceUriAttribute.AttributeDataType );
 
