@@ -2541,11 +2541,14 @@ namespace MarkdownProcessor
                 }
             }
 
-            AddModifyAttribute( attributes,
-                "ArrayDimensions",
-                Opc.Ua.DataTypeIds.UInt32,
-                new Variant( arrayValues.ToArray() ),
-                bListOf: true );
+            if (arrayValues.Count > 0)
+            {
+                AddModifyAttribute(attributes,
+                    "ArrayDimensions",
+                    Opc.Ua.DataTypeIds.UInt32,
+                    new Variant(arrayValues.ToArray()),
+                    bListOf: true);
+            }
         }
 
         #endregion

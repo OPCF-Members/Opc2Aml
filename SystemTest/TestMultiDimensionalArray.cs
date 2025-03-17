@@ -33,10 +33,13 @@ namespace SystemTest
             Assert.AreEqual( valueRank, valueRankAttribute.Value );
 
             AttributeType arrayDimensionsAttribute = objectToTest.Attribute[ "ArrayDimensions" ];
-            Assert.IsNotNull( arrayDimensionsAttribute, "Unable to find ArrayDimensions" );
-            if( arrayDimensions.Length == 0 )
+            if (string.IsNullOrEmpty(arrayDimensions))
             {
-                Assert.IsNull( arrayDimensionsAttribute.Value );
+                Assert.IsNull(arrayDimensionsAttribute);
+            }
+            else
+            {
+                Assert.IsNotNull(arrayDimensionsAttribute, "Unable to find ArrayDimensions");
             }
 
             AttributeType valueAttribute = objectToTest.Attribute[ "Value" ];
@@ -100,10 +103,10 @@ namespace SystemTest
 
         [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow( "2330", "", false, true, DisplayName = "SUC HistoryServerCapabilitiesType should not have ArrayDimensions" )]
-        [DataRow( "24186", "", true, true, DisplayName = "SUC FailureCode should have empty ArrayDimensions" )]
+        [DataRow( "24186", "", false, true, DisplayName = "SUC FailureCode should not have ArrayDimensions" )]
         [DataRow( "24187", "0,8", true, true, DisplayName = "SUC FailureSystemIdentifier ArrayDimensions" )]
         [DataRow( "5013", "", false, false, DisplayName = "Folder should not have ArrayDimensions" )]
-        [DataRow( "6190", "", true, false, DisplayName = "Scalar Value should not have ArrayDimension elements" )]
+        [DataRow( "6190", "", false, false, DisplayName = "Scalar Value should not have ArrayDimension elements" )]
         [DataRow( "6126", "10", true, false, DisplayName = "Single ArrayDimension element" )]
         [DataRow( "6129", "3,3,3", true, false, DisplayName = "Three ArrayDimension elements" )]
         [DataRow( "6128", "2,2,2,2,2", true, false, DisplayName = "Five ArrayDimension elements" )]
