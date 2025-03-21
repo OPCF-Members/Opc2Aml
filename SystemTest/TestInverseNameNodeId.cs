@@ -17,15 +17,48 @@ namespace SystemTest
         // The Namespaces of BrowseNames differ between the generated AML file and the original Nodeset file.
         // Test Both NodeId NamespaceUris and BrowseNameUris
 
-        private const string FxIdPrefix = "nsu%3Dhttp%3A%2F%2Fopcfoundation.org%2FUA%2FFX%2FAC%2F%3Bi%3D";
-        private const string AmlFxTestPrefix = "nsu%3Dhttp%3A%2F%2Fopcfoundation.org%2FUA%2FFX%2FAML%2FTESTING%2FAmlFxTest%2F%3Bi%3D";
-        public const string TestAmlUri = "http://opcfoundation.org/UA/FX/AML/TESTING/AmlFxTest/";
-        private const string FxAcUri = "http://opcfoundation.org/UA/FX/AC/";
-        private const string DiUri = "http://opcfoundation.org/UA/DI/";
-
         CAEXDocument m_document = null;
 
         #region Tests
+
+        [TestMethod]
+        public void TestAllReferenceAttributes()
+        {
+            CAEXDocument document = GetDocument();
+
+            foreach (InterfaceClassLibType classLibType in document.InterfaceClassLib)
+            {
+                foreach (InterfaceFamilyType interfaceType in classLibType)
+                {
+                    string name = classLibType.Name + "_" + interfaceType.Name + "_" + interfaceType.Name;
+                    TestInterfaceType( interfaceType, name);
+                }
+            }
+        }
+
+        private void TestInterfaceType( InterfaceFamilyType interfaceFamilyType, string name)
+        {
+            foreach (AttributeType attribute in interfaceFamilyType.Attribute)
+            {
+                TestAttribute(attribute, interfaceFamilyType.Name + "_" + attribute.Name);
+            }
+
+            foreach (InterfaceFamilyType interfaceType in interfaceFamilyType)
+            {
+                TestInterfaceType(interfaceType, name + "_" + interfaceType.Name);
+            }
+        }
+
+        private void TestAttribute(AttributeType attribute, string name)
+        {
+            AttributeType subAttribute = attribute.Attribute["NodeId"];
+            Assert.IsNull(subAttribute, name + " should not have NodeId");
+
+            foreach (AttributeType sub in attribute.Attribute)
+            {
+                TestAttribute(sub, name + "_" + sub.Name);
+            }
+        }
 
         [TestMethod]
         public void TestAll()
