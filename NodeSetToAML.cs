@@ -1553,9 +1553,17 @@ namespace MarkdownProcessor
         }
 
 
-        private AttributeType OverrideBooleanAttribute(AttributeSequence seq, string AttributeName, Boolean value)
+        private AttributeType OverrideBooleanAttribute(AttributeSequence seq,
+            string AttributeName,
+            Boolean value,
+            bool typeOnly = false)
         {
-            return AddModifyAttribute(seq, AttributeName, "Boolean", value);
+            var at = AddModifyAttribute(seq, AttributeName, "Boolean", value);
+            if (at != null && typeOnly)
+            {
+                at.AdditionalInformation.Append("OpcUa:TypeOnly");
+            }
+            return at;
         }
 
 
@@ -2560,14 +2568,17 @@ namespace MarkdownProcessor
 
         #region ICL
 
-        private void OverrideAttribute(IClassWithBaseClassReference owner, string Name, string AttType, object val)
+        private void OverrideAttribute(IClassWithBaseClassReference owner, 
+            string Name, 
+            string AttType, 
+            object value)
         {
             var atts = owner.GetInheritedAttributes();
             foreach (var aa in atts)
             {
                 if (aa.Name == Name)
                 {
-                    if (aa.AttributeDataType == AttType && aa.AttributeValue.Equals(val))
+                    if (aa.AttributeDataType == AttType && aa.AttributeValue.Equals(value))
                     {
                         return;  // no need to override
                     }
@@ -2577,7 +2588,9 @@ namespace MarkdownProcessor
             AttributeType a = owner.Attribute.Append();
             a.Name = Name;
             a.AttributeDataType = AttType;
-            a.AttributeValue = val;
+            a.AttributeValue = value;
+
+            a.AdditionalInformation.Append("OpcUa:TypeOnly");
         }
 
         private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
@@ -2623,7 +2636,7 @@ namespace MarkdownProcessor
             // it would take more time to look it up each time
             RemoveUnwantedNodeIdAttribute(
                 OverrideBooleanAttribute(
-                    added.Attribute, "IsAbstract", refnode.IsAbstract));
+                    added.Attribute, "IsAbstract", refnode.IsAbstract, typeOnly: true));
 
             // override any attribute values
             if (BaseNodeId != null)
@@ -2634,7 +2647,7 @@ namespace MarkdownProcessor
                 {
                     RemoveUnwantedNodeIdAttribute(
                         OverrideBooleanAttribute(
-                            added.Attribute, "Symmetric", refnode.Symmetric));
+                            added.Attribute, "Symmetric", refnode.Symmetric, typeOnly: true));
                 }
 
                 if (refnode.InverseName != null)
@@ -2642,10 +2655,13 @@ namespace MarkdownProcessor
                     AttributeType inverseNameAttribute = AddModifyAttribute(added.Attribute, 
                         "InverseName", "LocalizedText", refnode.InverseName[0].Value);
                     RemoveUnwantedNodeIdAttribute(inverseNameAttribute);
+                    inverseNameAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
                 }
 
-                OverrideAttribute(added, IsSource, "xs:boolean", true);
-                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
+                // Need typeonly here
+                OverrideAttribute(added, IsSource, "xs:boolean", value: true);
+                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", 
+                    (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
 
                 if (inverseAdded != null)
                 {
@@ -2653,18 +2669,19 @@ namespace MarkdownProcessor
                     {
                         RemoveUnwantedNodeIdAttribute(
                             OverrideBooleanAttribute(
-                                inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract));
+                                inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract, typeOnly: true));
                     }
                     if (basenode.Symmetric != refnode.Symmetric)
                     {
                         RemoveUnwantedNodeIdAttribute(
                             OverrideBooleanAttribute(
-                                inverseAdded.Attribute, "Symmetric", refnode.Symmetric));
+                                inverseAdded.Attribute, "Symmetric", refnode.Symmetric, typeOnly: true));
                     }
 
-                    RemoveUnwantedNodeIdAttribute(
-                        AddModifyAttribute(
-                            inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name));
+                    AttributeType inverseNameAttribute = AddModifyAttribute(
+                        inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
+                    RemoveUnwantedNodeIdAttribute(inverseNameAttribute);
+                    inverseNameAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
 
                     OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
                     OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string", added.CAEXPath());
