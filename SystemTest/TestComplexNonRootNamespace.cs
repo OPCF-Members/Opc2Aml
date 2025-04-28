@@ -638,7 +638,7 @@ namespace SystemTest
         {
             AttributeType qualifiedNameAttribute = GetAttribute( attribute, name, validateSubAttributes: true );
             AttributeType nameAttribute = GetAttribute( qualifiedNameAttribute, "Name", validateSubAttributes: false );
-            AttributeType namespaceUriAttribute = GetAttribute( qualifiedNameAttribute, "NamespaceURI", validateSubAttributes: false );
+            AttributeType namespaceUriAttribute = GetAttribute( qualifiedNameAttribute, "NamespaceUri", validateSubAttributes: false );
 
             Assert.AreEqual( uri, namespaceUriAttribute.Value );
             Assert.AreEqual( "xs:anyURI", namespaceUriAttribute.AttributeDataType );

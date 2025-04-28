@@ -4,14 +4,16 @@
         <Uri>http://opcfoundation.org/UA/FX/AML/TESTING/AmlFxTest/</Uri>
         <Uri>http://opcfoundation.org/UA/FX/AC/</Uri>
         <Uri>http://opcfoundation.org/UA/FX/Data/</Uri>
-    </NamespaceUris>
+		<Uri>http://opcfoundation.org/UA/DI/</Uri>
+	</NamespaceUris>
     <Models>
         <Model ModelUri="http://opcfoundation.org/UA/FX/AML/TESTING/AmlFxTest/">
             <RequiredModel ModelUri="http://opcfoundation.org/UA/FX/AC/" />
         </Model>
     </Models>
     <Aliases>
-        <Alias Alias="Organizes">i=35</Alias>
+		<Alias Alias="LocalizedText">i=21</Alias>
+		<Alias Alias="Organizes">i=35</Alias>
         <Alias Alias="HasTypeDefinition">i=40</Alias>
         <Alias Alias="HasProperty">i=46</Alias>
         <Alias Alias="HasComponent">i=47</Alias>
@@ -77,7 +79,23 @@
             <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5003</Reference>
         </References>
     </UAObject>
-    <UAMethod ParentNodeId="ns=1;i=5003" NodeId="ns=1;i=7001" BrowseName="2:CloseConnections" MethodDeclarationId="ns=2;i=293">
+
+	<UAObject NodeId="ns=1;i=5008" BrowseName="1:AnAsset" ParentNodeId="ns=1;i=5004">
+		<DisplayName>AnAsset</DisplayName>
+		<References>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5004</Reference>
+			<Reference ReferenceType="HasTypeDefinition">ns=2;i=3</Reference>
+		</References>
+	</UAObject>
+	<UAVariable DataType="LocalizedText" NodeId="ns=1;i=6008" BrowseName="4:Manufacturer" ParentNodeId="ns=1;i=5008" UserAccessLevel="3" AccessLevel="3">
+		<DisplayName>Manufacturer</DisplayName>
+		<References>
+			<Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5008</Reference>
+			<Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+		</References>
+	</UAVariable>
+
+	<UAMethod ParentNodeId="ns=1;i=5003" NodeId="ns=1;i=7001" BrowseName="2:CloseConnections" MethodDeclarationId="ns=2;i=293">
         <DisplayName>CloseConnections</DisplayName>
         <References>
             <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5003</Reference>

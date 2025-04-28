@@ -8,16 +8,37 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 
 namespace SystemTest
 {
-    internal class TestHelper
+    public class TestHelper
     {
         public const string ExtractPrefix = "Extract_";
         public const string Opc2AmlName = "Opc2AmlConsole";
         public const string Opc2Aml = Opc2AmlName + ".exe";
 
         public const string TestAmlUri = "http://opcfoundation.org/UA/FX/AML/TESTING";
+
+        public enum Uris 
+        {
+            Root,
+            Di,
+            Data,
+            Ac,
+            Test,
+            AmlFxTest
+        }
+
+        public static readonly Dictionary<Uris, string> UriMap = new Dictionary<Uris, string>()
+        {
+            { Uris.Root, "http://opcfoundation.org/UA/"},
+            { Uris.Di, "http://opcfoundation.org/UA/DI/"},
+            { Uris.Data, "http://opcfoundation.org/UA/FX/Data/"},
+            { Uris.Ac, "http://opcfoundation.org/UA/FX/AC/"},
+            { Uris.Test, TestHelper.TestAmlUri },
+            { Uris.AmlFxTest, "http://opcfoundation.org/UA/FX/AML/TESTING/AmlFxTest/"}
+        };
 
         public const int UnitTestTimeout = 480000;
 
@@ -295,6 +316,32 @@ namespace SystemTest
             }
 
             return success;
+        }
+
+        static public string GetUri( Uris uriEnum )
+        {
+            string uri = string.Empty;
+
+            TestHelper.UriMap.TryGetValue(uriEnum, out uri);
+
+            return uri;
+        }
+
+        static public string BuildAmlId( string prefix, Uris uriEnum, string numericNodeId )
+        {
+            string uri = TestHelper.GetUri( uriEnum );
+            Assert.IsFalse(string.IsNullOrEmpty(uri));
+            Assert.IsFalse(string.IsNullOrEmpty(numericNodeId));
+
+            string workingId = string.Empty;
+            if (!string.IsNullOrEmpty(prefix)) 
+            {
+                workingId = prefix + ";";
+            }
+
+            string unencoded = workingId + "nsu=" + uri + ";i=" + numericNodeId;
+
+            return WebUtility.UrlEncode(unencoded);
         }
 
     }

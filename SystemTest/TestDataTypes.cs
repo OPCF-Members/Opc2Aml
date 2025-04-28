@@ -27,7 +27,7 @@ namespace SystemTest
         [DataRow( "6192", "2023-09-13T14:39:08-06:00", "xs:dateTime", "SourceTimestamp", DisplayName = "SourceTimestamp" )]
 
         [DataRow( "6191", "d23c82b6-1715-4951-acd1-84fb898d6b6c", "xs:string", DisplayName = "Guid" )]
-        [DataRow( "6190", "http://opcfoundation.org/UA/FX/AML/TESTING", "xs:anyURI", "NamespaceURI", DisplayName = "Qualified NamespaceURI" )]
+        [DataRow( "6190", "http://opcfoundation.org/UA/FX/AML/TESTING", "xs:anyURI", "NamespaceUri", DisplayName = "Qualified NamespaceUri" )]
         [DataRow( "6190", "MyQualifiedName", "xs:string", "Name", DisplayName = "Qualified Name" )]
 
         [DataRow( "6139", "StringNodeId", "xs:string", "RootNodeId", "StringId", DisplayName = "NodeId String" )]
