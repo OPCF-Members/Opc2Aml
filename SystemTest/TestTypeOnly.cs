@@ -74,6 +74,30 @@ namespace SystemTest
             Debug.WriteLine( $"Attributes tested: {attributesTested} Interfaces {interfacesTested} RoleClasses {roleClassesTested}" );
         }
 
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestTypeOnlyInterface()
+        {
+            CAEXDocument document = GetDocument();
+
+            int badCount = 0;
+
+            int interfacesTested = 0;
+            foreach (InterfaceClassLibType libType in document.CAEXFile.InterfaceClassLib)
+            {
+                if (libType.Name.StartsWith("ICL_http", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (InterfaceFamilyType interfaceFamilyType in libType)
+                    {
+                        badCount += TestAttributeForTypeOnly(interfaceFamilyType.Attribute);
+                    }
+                }
+            }
+
+            Assert.AreEqual(0, badCount, "There are " + badCount.ToString() + " attributes without TypeOnly in the additional information");
+        }
+
+
         private int count = 0;
 
         [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
@@ -322,7 +346,51 @@ namespace SystemTest
             }
         }
 
+        private int TestAttributeForTypeOnly(AttributeSequence attributes)
+        {
+            int badCount = 0;
 
+            foreach (AttributeType attributeType in attributes)
+            {
+                if (attributeType.Name != "NodeId")
+                {
+                    badCount += TestAttributeForTypeOnly(attributeType.Attribute);
+                }
+
+                if (attributeType.AdditionalInformation != null)
+                {
+                    if (attributeType.AdditionalInformation.Count == 1)
+                    {
+                        foreach (object info in attributeType.AdditionalInformation)
+                        {
+                            if (info.GetType().Name == "String")
+                            {
+                                string value = (string)info;
+                                if (value != TypeOnly)
+                                {
+                                    badCount++;
+                                }
+                            }
+                            else
+                            {
+                                badCount++;
+                            }
+                        }
+                    }
+                    else 
+                    {
+                        badCount++;
+                        Console.WriteLine("AttributeType: " + attributeType.Name + " has " + attributeType.AdditionalInformation.Count + " additional information");
+                    }
+                }
+                else
+                {
+                    badCount++;
+                }
+            }
+
+            return badCount;
+        }
 
         #endregion
     }

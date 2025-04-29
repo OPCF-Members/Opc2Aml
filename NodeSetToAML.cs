@@ -1553,9 +1553,17 @@ namespace MarkdownProcessor
         }
 
 
-        private void OverrideBooleanAttribute(AttributeSequence seq, string AttributeName, Boolean value)
+        private AttributeType OverrideBooleanAttribute(AttributeSequence seq,
+            string AttributeName,
+            Boolean value,
+            bool typeOnly = false)
         {
             var at = AddModifyAttribute(seq, AttributeName, "Boolean", value);
+            if (at != null && typeOnly)
+            {
+                at.AdditionalInformation.Append("OpcUa:TypeOnly");
+            }
+            return at;
         }
 
 
@@ -2560,14 +2568,17 @@ namespace MarkdownProcessor
 
         #region ICL
 
-        private void OverrideAttribute(IClassWithBaseClassReference owner, string Name, string AttType, object val)
+        private void OverrideAttribute(IClassWithBaseClassReference owner, 
+            string Name, 
+            string AttType, 
+            object value)
         {
             var atts = owner.GetInheritedAttributes();
             foreach (var aa in atts)
             {
                 if (aa.Name == Name)
                 {
-                    if (aa.AttributeDataType == AttType && aa.AttributeValue.Equals(val))
+                    if (aa.AttributeDataType == AttType && aa.AttributeValue.Equals(value))
                     {
                         return;  // no need to override
                     }
@@ -2577,7 +2588,9 @@ namespace MarkdownProcessor
             AttributeType a = owner.Attribute.Append();
             a.Name = Name;
             a.AttributeDataType = AttType;
-            a.AttributeValue = val;
+            a.AttributeValue = value;
+
+            a.AdditionalInformation.Append("OpcUa:TypeOnly");
         }
 
         private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
@@ -2621,43 +2634,54 @@ namespace MarkdownProcessor
             // Only sets it if it is true -
             // It doesn't matter if 'References' is set x times,
             // it would take more time to look it up each time
-            OverrideBooleanAttribute( added.Attribute, "IsAbstract", refnode.IsAbstract );
+            RemoveUnwantedNodeIdAttribute(
+                OverrideBooleanAttribute(
+                    added.Attribute, "IsAbstract", refnode.IsAbstract, typeOnly: true));
 
             // override any attribute values
             if (BaseNodeId != null)
             {
                 var basenode = FindNode<NodeSet.UAReferenceType>(BaseNodeId);
- 
-                if (basenode.IsAbstract != refnode.IsAbstract)
-                    OverrideBooleanAttribute(added.Attribute, "IsAbstract", refnode.IsAbstract);
+
                 if (basenode.Symmetric != refnode.Symmetric)
-                    OverrideBooleanAttribute(added.Attribute, "Symmetric", refnode.Symmetric);
+                {
+                    RemoveUnwantedNodeIdAttribute(
+                        OverrideBooleanAttribute(
+                            added.Attribute, "Symmetric", refnode.Symmetric, typeOnly: true));
+                }
 
                 if (refnode.InverseName != null)
                 {
                     AttributeType inverseNameAttribute = AddModifyAttribute(added.Attribute, 
                         "InverseName", "LocalizedText", refnode.InverseName[0].Value);
-
-                    if ( inverseNameAttribute != null )
-                    {
-                        AttributeType unwantedNodeIdAttribute = inverseNameAttribute.Attribute["NodeId"];
-                        if ( unwantedNodeIdAttribute != null )
-                        {
-                            inverseNameAttribute.Attribute.RemoveElement(unwantedNodeIdAttribute);
-                        }
-                    }
+                    RemoveUnwantedNodeIdAttribute(inverseNameAttribute);
+                    inverseNameAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
                 }
 
-                OverrideAttribute(added, IsSource, "xs:boolean", true);
-                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
+                // Need typeonly here
+                OverrideAttribute(added, IsSource, "xs:boolean", value: true);
+                OverrideAttribute(added, RefClassConnectsToPath, "xs:string", 
+                    (inverseAdded != null ? inverseAdded.CAEXPath() : added.CAEXPath()));
 
                 if (inverseAdded != null)
                 {
                     if (basenode.IsAbstract != refnode.IsAbstract)
-                        OverrideBooleanAttribute(inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract);
+                    {
+                        RemoveUnwantedNodeIdAttribute(
+                            OverrideBooleanAttribute(
+                                inverseAdded.Attribute, "IsAbstract", refnode.IsAbstract, typeOnly: true));
+                    }
                     if (basenode.Symmetric != refnode.Symmetric)
-                        OverrideBooleanAttribute(inverseAdded.Attribute, "Symmetric", refnode.Symmetric);
-                    AddModifyAttribute(inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
+                    {
+                        RemoveUnwantedNodeIdAttribute(
+                            OverrideBooleanAttribute(
+                                inverseAdded.Attribute, "Symmetric", refnode.Symmetric, typeOnly: true));
+                    }
+
+                    AttributeType inverseNameAttribute = AddModifyAttribute(
+                        inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
+                    RemoveUnwantedNodeIdAttribute(inverseNameAttribute);
+                    inverseNameAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
 
                     OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
                     OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string", added.CAEXPath());
@@ -2667,6 +2691,18 @@ namespace MarkdownProcessor
             AttributeType nodeIdAttribute = AddModifyAttribute(added.Attribute, "NodeId", "NodeId", new Variant( nodeId ) );
             nodeIdAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
             MinimizeNodeId( nodeIdAttribute );
+        }
+
+        private void RemoveUnwantedNodeIdAttribute( AttributeType attribute )
+        {
+            if (attribute != null)
+            {
+                AttributeType unwantedNodeIdAttribute = attribute.Attribute["NodeId"];
+                if (unwantedNodeIdAttribute != null)
+                {
+                    attribute.Attribute.RemoveElement(unwantedNodeIdAttribute);
+                }
+            }
         }
 
         #endregion
