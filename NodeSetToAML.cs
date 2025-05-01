@@ -52,7 +52,6 @@ using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Xml;
-using System.IO;
 using Opc2Aml;
 
 namespace MarkdownProcessor
@@ -777,9 +776,10 @@ namespace MarkdownProcessor
 
                         case BuiltInType.ExtensionObject:
                             {
-                                if( refDataType == "EnumValueType" && referenceName == "EnumValues" )
+                                addElements = false;
+
+                                if ( refDataType == "EnumValueType" && referenceName == "EnumValues" )
                                 {
-                                    addElements = false;
                                     AttributeTypeType attributeType = a as AttributeTypeType;
                                     if( attributeType != null )
                                     {
@@ -801,6 +801,23 @@ namespace MarkdownProcessor
                                                 }
                                             }
                                             attributeType.Constraint.Insert( stringValueRequirement );
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    IList valueAsList = val.Value as IList;
+                                    if (valueAsList != null)
+                                    {
+                                        for (int index = 0; index < valueAsList.Count; index++)
+                                        {
+                                            Variant elementVariant = new Variant(valueAsList[index]);
+                                            ExtensionObject extensionObject = elementVariant.Value as ExtensionObject;
+                                            NodeId typeId = ExpandedNodeId.ToNodeId(extensionObject.TypeId, m_modelManager.NamespaceUris);
+
+                                            bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+
+                                            AddModifyAttribute(a.Attribute, index.ToString(), typeId, elementVariant, elementListOf);
                                         }
                                     }
                                 }
@@ -3349,7 +3366,28 @@ namespace MarkdownProcessor
             Variant variant = new Variant();
 
             XmlElement xmlElement = SearchForElement( name, source );
-            if( xmlElement != null )
+
+            if (xmlElement == null)
+            {
+                if (source.Name.Equals("ExtensionObject", StringComparison.OrdinalIgnoreCase))
+                {
+                    XmlElement body = SearchForElement("Body", source);
+                    if ( body != null )
+                    {
+                        if ( body.ChildNodes.Count == 1 )
+                        {
+                            XmlNodeList list = body.ChildNodes;
+                            XmlElement subBody = list.Item(0) as XmlElement;
+                            if (subBody != null)
+                            {
+                                xmlElement = SearchForElement(name, subBody);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if ( xmlElement != null )
             {
                 BuiltInType baseBuiltInType = BuiltInType.Null;
 
@@ -3446,10 +3484,20 @@ namespace MarkdownProcessor
 
                                 if( typeDefinition.ValueRank >= ValueRanks.OneDimension )
                                 {
+                                    ExpandedNodeId elementId = absoluteId;
+
                                     List<ExtensionObject> extensions = new List<ExtensionObject>();
                                     foreach( XmlElement arrayElement in xmlElement.ChildNodes )
                                     {
-                                        extensions.Add( new ExtensionObject( absoluteId, arrayElement ) );
+                                        if ( typeDefinition.AllowSubTypes)
+                                        {
+                                            ExpandedNodeId expandedNodeId = GetExtensionObjectType(arrayElement);
+                                            if (expandedNodeId != null)
+                                            {
+                                                elementId = expandedNodeId;
+                                            }
+                                        }
+                                        extensions.Add( new ExtensionObject( elementId, arrayElement ) );
                                     }
 
                                     variant = new Variant( extensions );
@@ -3578,6 +3626,55 @@ namespace MarkdownProcessor
             }
 
             return null;
+        }
+
+        private ExpandedNodeId GetExtensionObjectType(XmlElement extensionXml)
+        {
+            ExpandedNodeId expandedTypeNodeId = null;
+
+            NodeId typeNodeId = null;
+
+            XmlElement typeIdXmlElement = SearchForElement("TypeId", extensionXml);
+            if (typeIdXmlElement != null)
+            {
+                XmlElement identifierXmlElement = SearchForElement("Identifier", typeIdXmlElement);
+                if (identifierXmlElement != null)
+                {
+                    typeNodeId = new NodeId(identifierXmlElement.InnerText);
+                    if (typeNodeId != null && !typeNodeId.IsNullNodeId)
+                    {
+                        UANode uaNode = m_modelManager.FindNode<UANode>(typeNodeId);
+
+                        if ( uaNode != null )
+                        {
+                            UAObject uaObject = uaNode as UAObject;
+                            if (uaObject != null)
+                            {
+                                // Look for encoding
+                                List<ReferenceInfo> referenceList = m_modelManager.FindReferences(typeNodeId);
+                                foreach (ReferenceInfo referenceInfo in referenceList)
+                                {
+                                    if (!referenceInfo.IsForward && 
+                                        referenceInfo.ReferenceTypeId.Equals(Opc.Ua.ReferenceTypeIds.HasEncoding))
+                                    {
+                                        typeNodeId = referenceInfo.TargetId;
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (typeNodeId != null)
+            {
+                expandedTypeNodeId = NodeId.ToExpandedNodeId(typeNodeId, 
+                    m_modelManager.NamespaceUris);
+            }
+
+            return expandedTypeNodeId;
         }
 
         #endregion
