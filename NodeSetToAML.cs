@@ -1407,49 +1407,10 @@ namespace MarkdownProcessor
                 XmlElement xmlElement = value as XmlElement;
                 if( xmlElement != null )
                 {
-                    NodeId typeDefinition = typeNodeId;
-                    UANode uANode = m_modelManager.FindNode<UANode>(typeNodeId);
-                    UAObject uaObject = uANode as UAObject;
-                    if (uaObject != null)
-                    {
-                        // Look for encoding
-                        List<ReferenceInfo> referenceList = m_modelManager.FindReferences(typeNodeId);
-                        foreach (ReferenceInfo referenceInfo in referenceList)
-                        {
-                            if (!referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals(Opc.Ua.ReferenceTypeIds.HasEncoding))
-                            {
-                                typeDefinition = referenceInfo.TargetId;
-                                break;
-                            }
-                        }
-                        bool wait = true;
-                    }
-
-
-                    if ( xmlElement.Name.Contains("AbstractionChildOneC"))
-                    {
-                        bool wait = true;
-                    }
-                    if (xmlElement.Name.Contains("ChildOneCMember"))
-                    {
-                        bool wait = true;
-                    }
-                    if (xmlElement.Name.Contains("AbstractionOne"))
-                    {
-                        bool wait = true;
-                    }
-                    if (xmlElement.Name.Contains("AbstractionSub"))
-                    {
-                        bool wait = true;
-                    }
-
-
                     UANode typeDefinition2 = GetDataTypeFromXmlElement( xmlElement, typeNodeId);
 
                     Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
                         attribute, typeDefinition2.DecodedNodeId);
-                    //Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
-                    //    attribute, typeDefinition);
 
                     if ( fieldReferenceTypes != null )
                     {
@@ -1458,39 +1419,11 @@ namespace MarkdownProcessor
                             UANode fieldTypeDefinition = GetDataTypeFromXmlElement(xmlElement, 
                                 fieldReferenceType.Value.DecodedDataType );
 
-                            if ( !fieldTypeDefinition.DecodedNodeId.Equals( fieldReferenceType.Value.DecodedDataType ) )
-                            {
-                                bool wait = true;
-
-                            }
-                            Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
+                            Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, 
+                                fieldReferenceType.Value, xmlElement );
 
                             string attributeName = fieldReferenceType.Key;
                             NodeId createDataType = fieldReferenceType.Value.DecodedDataType;
-
-                            // Archie - This attempt to fix the data type causes more problems than it solves.
-                            //ExtensionObject fieldExtensionObject = fieldVariant.Value as ExtensionObject;
-                            //if (fieldExtensionObject != null)
-                            //{
-                            //    NodeId variantDataType = ExpandedNodeId.ToNodeId(
-                            //        fieldExtensionObject.TypeId, m_modelManager.NamespaceUris);
-                            //    UANode variantDataTypeNodeID =
-                            //        m_modelManager.FindNode<UANode>(variantDataType);
-                            //    //if ( !attributeName.Equals(variantDataTypeNodeID.DecodedBrowseName.Name))
-                            //    //{
-                            //    //    Utils.LogError("Previous Name " + attributeName + " potential Name " + 
-                            //    //        variantDataTypeNodeID.DecodedBrowseName.Name);
-                            //    //    attributeName = variantDataTypeNodeID.DecodedBrowseName.Name;
-                            //    //}
-                            //    //if (!variantDataType.Equals(createDataType))
-                            //    //{
-                            //    //    Utils.LogError("Previous NodeId " + createDataType.ToString() + " potential nodeId " +
-                            //    //        variantDataType.ToString());
-                            //    //    attributeName = variantDataTypeNodeID.DecodedBrowseName.Name;
-                            //    //}
-                            //    //attributeName = variantDataTypeNodeID.DecodedBrowseName.Name;
-                            //    //createDataType = variantDataType;
-                            //}
 
                             bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
 
@@ -3271,12 +3204,6 @@ namespace MarkdownProcessor
 
         InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd, bool serverDiagnostics) where T : IInternalElementContainer
         {
-            bool interesting = false;
-            if ( toAdd.BrowseName.Contains("ChildOneCValue"))
-            {
-                interesting = true;
-            }
-
             string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
             string prefix = toAdd.DecodedBrowseName.Name;
 
@@ -3345,11 +3272,6 @@ namespace MarkdownProcessor
                     // Don't set this value
                     variant = new Variant();
                     Debug.WriteLine( "Server Diagnostics and " + toAdd.BrowseName + " [" + toAdd.NodeId + "]" );
-                }
-
-                if ( interesting )
-                {
-                    bool wait = true;
                 }
 
                 AddModifyAttribute( ie.Attribute, "Value", varnode.DecodedDataType, variant, bListOf);
