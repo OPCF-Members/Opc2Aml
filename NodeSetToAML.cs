@@ -54,6 +54,7 @@ using System.Reflection;
 using System.Xml;
 using Opc2Aml;
 
+
 namespace MarkdownProcessor
 {
     public class NodeSetToAML
@@ -1164,6 +1165,82 @@ namespace MarkdownProcessor
             return minimized;
         }
 
+        private UANode GetDataTypeFromXmlElement( XmlElement xmlElement, NodeId defined )
+        {
+            UANode dataType = m_modelManager.FindNode<UANode>(defined);
+            UAObject uaObject = dataType as UAObject;
+            if (uaObject != null)
+            {
+                // Look for encoding
+                List<ReferenceInfo> referenceList = m_modelManager.FindReferences(defined);
+                foreach (ReferenceInfo referenceInfo in referenceList)
+                {
+                    if (!referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals(
+                        Opc.Ua.ReferenceTypeIds.HasEncoding))
+                    {
+                        UANode potential = m_modelManager.FindNode<UANode>(referenceInfo.TargetId);
+                        if ( potential != null )
+                        {
+                            dataType = potential;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            UADataType uaDataType = dataType as UADataType;
+            if (uaDataType != null)
+            {
+                if (uaDataType.IsAbstract)
+                {
+                    List<ReferenceInfo> dataTypeReferences = m_modelManager.FindReferences(uaDataType.DecodedNodeId);
+                    Dictionary<NodeId, UANode> dataTypeDictionary = new Dictionary<NodeId, UANode>();
+                    foreach( ReferenceInfo referenceInfo in dataTypeReferences)
+                    {
+                        if (referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals(
+                            Opc.Ua.ReferenceTypeIds.HasSubtype))
+                        {
+                            UANode dataTypeUaNode = m_modelManager.FindNode<UANode>(referenceInfo.TargetId);
+                            if (dataTypeUaNode != null)
+                            {
+                                dataTypeDictionary.Add(referenceInfo.TargetId, dataTypeUaNode);
+                            }
+                        }
+                    }
+
+                    // Go find the actual typedefinition
+                    XmlElement type = SearchForElement("TypeId", xmlElement);
+                    if (type != null)
+                    {
+                        XmlElement typeIdentifier = SearchForElement("Identifier", type);
+                        if (typeIdentifier != null)
+                        {
+                            // This is not accurate, I'm just lucky at this point
+                            // I'm not lucky anymore.
+                            NodeId nodeId = new NodeId(typeIdentifier.InnerText);
+                            if (nodeId != null && !nodeId.IsNullNodeId)
+                            {
+                                UANode potential = GetDataTypeFromXmlElement(xmlElement, nodeId);
+                                if (dataTypeDictionary.ContainsKey(potential.DecodedNodeId))
+                                {
+                                    dataType = potential;
+                                }
+                                else
+                                {
+                                    UADataType potentialDataType = potential as UADataType;
+                                    if (potentialDataType != null && potentialDataType.IsAbstract == false)
+                                    {
+                                        dataType = potential;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return dataType;
+        }
 
         private Dictionary<string, DataTypeField> CreateFieldReferenceTypes( AttributeType attribute, NodeId typeNodeId )
         {
@@ -1331,38 +1408,98 @@ namespace MarkdownProcessor
                 if( xmlElement != null )
                 {
                     NodeId typeDefinition = typeNodeId;
-                    UANode uANode = m_modelManager.FindNode<UANode>( typeNodeId );
+                    UANode uANode = m_modelManager.FindNode<UANode>(typeNodeId);
                     UAObject uaObject = uANode as UAObject;
-                    if( uaObject != null )
+                    if (uaObject != null)
                     {
                         // Look for encoding
-                        List<ReferenceInfo> referenceList = m_modelManager.FindReferences( typeNodeId );
-                        foreach( ReferenceInfo referenceInfo in referenceList )
+                        List<ReferenceInfo> referenceList = m_modelManager.FindReferences(typeNodeId);
+                        foreach (ReferenceInfo referenceInfo in referenceList)
                         {
-                            if( !referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.HasEncoding ) )
+                            if (!referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals(Opc.Ua.ReferenceTypeIds.HasEncoding))
                             {
                                 typeDefinition = referenceInfo.TargetId;
                                 break;
                             }
                         }
+                        bool wait = true;
                     }
 
-                    Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
-                        attribute, typeDefinition );
 
-                    if( fieldReferenceTypes != null )
+                    if ( xmlElement.Name.Contains("AbstractionChildOneC"))
+                    {
+                        bool wait = true;
+                    }
+                    if (xmlElement.Name.Contains("ChildOneCMember"))
+                    {
+                        bool wait = true;
+                    }
+                    if (xmlElement.Name.Contains("AbstractionOne"))
+                    {
+                        bool wait = true;
+                    }
+                    if (xmlElement.Name.Contains("AbstractionSub"))
+                    {
+                        bool wait = true;
+                    }
+
+
+                    UANode typeDefinition2 = GetDataTypeFromXmlElement( xmlElement, typeNodeId);
+
+                    Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
+                        attribute, typeDefinition2.DecodedNodeId);
+                    //Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
+                    //    attribute, typeDefinition);
+
+                    if ( fieldReferenceTypes != null )
                     {
                         foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
                         {
+                            UANode fieldTypeDefinition = GetDataTypeFromXmlElement(xmlElement, 
+                                fieldReferenceType.Value.DecodedDataType );
+
+                            if ( !fieldTypeDefinition.DecodedNodeId.Equals( fieldReferenceType.Value.DecodedDataType ) )
+                            {
+                                bool wait = true;
+
+                            }
                             Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
-                           
+
+                            string attributeName = fieldReferenceType.Key;
+                            NodeId createDataType = fieldReferenceType.Value.DecodedDataType;
+
+                            // Archie - This attempt to fix the data type causes more problems than it solves.
+                            //ExtensionObject fieldExtensionObject = fieldVariant.Value as ExtensionObject;
+                            //if (fieldExtensionObject != null)
+                            //{
+                            //    NodeId variantDataType = ExpandedNodeId.ToNodeId(
+                            //        fieldExtensionObject.TypeId, m_modelManager.NamespaceUris);
+                            //    UANode variantDataTypeNodeID =
+                            //        m_modelManager.FindNode<UANode>(variantDataType);
+                            //    //if ( !attributeName.Equals(variantDataTypeNodeID.DecodedBrowseName.Name))
+                            //    //{
+                            //    //    Utils.LogError("Previous Name " + attributeName + " potential Name " + 
+                            //    //        variantDataTypeNodeID.DecodedBrowseName.Name);
+                            //    //    attributeName = variantDataTypeNodeID.DecodedBrowseName.Name;
+                            //    //}
+                            //    //if (!variantDataType.Equals(createDataType))
+                            //    //{
+                            //    //    Utils.LogError("Previous NodeId " + createDataType.ToString() + " potential nodeId " +
+                            //    //        variantDataType.ToString());
+                            //    //    attributeName = variantDataTypeNodeID.DecodedBrowseName.Name;
+                            //    //}
+                            //    //attributeName = variantDataTypeNodeID.DecodedBrowseName.Name;
+                            //    //createDataType = variantDataType;
+                            //}
+
                             bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
 
                             AddModifyAttribute(
                                 attribute.Attribute,
-                                fieldReferenceType.Key,
-                                fieldReferenceType.Value.DecodedDataType,
-                                fieldVariant, bListOf: listOf );
+                                attributeName,
+                                createDataType,
+                                fieldVariant, 
+                                bListOf: listOf);
                         }
                     }
                 }
@@ -3134,6 +3271,12 @@ namespace MarkdownProcessor
 
         InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd, bool serverDiagnostics) where T : IInternalElementContainer
         {
+            bool interesting = false;
+            if ( toAdd.BrowseName.Contains("ChildOneCValue"))
+            {
+                interesting = true;
+            }
+
             string amlId = AmlIDFromNodeId(toAdd.DecodedNodeId);
             string prefix = toAdd.DecodedBrowseName.Name;
 
@@ -3202,6 +3345,11 @@ namespace MarkdownProcessor
                     // Don't set this value
                     variant = new Variant();
                     Debug.WriteLine( "Server Diagnostics and " + toAdd.BrowseName + " [" + toAdd.NodeId + "]" );
+                }
+
+                if ( interesting )
+                {
+                    bool wait = true;
                 }
 
                 AddModifyAttribute( ie.Attribute, "Value", varnode.DecodedDataType, variant, bListOf);
@@ -3369,19 +3517,18 @@ namespace MarkdownProcessor
 
             if (xmlElement == null)
             {
-                if (source.Name.Equals("ExtensionObject", StringComparison.OrdinalIgnoreCase))
+                XmlElement body = SearchForElement("Body", source);
+                XmlElement type = SearchForElement("TypeId", source);
+
+                if (body != null && type != null)
                 {
-                    XmlElement body = SearchForElement("Body", source);
-                    if ( body != null )
+                    if (body.ChildNodes.Count == 1)
                     {
-                        if ( body.ChildNodes.Count == 1 )
+                        XmlNodeList list = body.ChildNodes;
+                        XmlElement subBody = list.Item(0) as XmlElement;
+                        if (subBody != null)
                         {
-                            XmlNodeList list = body.ChildNodes;
-                            XmlElement subBody = list.Item(0) as XmlElement;
-                            if (subBody != null)
-                            {
-                                xmlElement = SearchForElement(name, subBody);
-                            }
+                            xmlElement = SearchForElement(name, subBody);
                         }
                     }
                 }
@@ -3397,7 +3544,7 @@ namespace MarkdownProcessor
                     baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
                 }
 
-                if( typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
+                if(typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
                 {
                     // Defined as variant, or nothing at all
                     baseBuiltInType = BuiltInType.Variant;
@@ -3764,7 +3911,7 @@ namespace MarkdownProcessor
 
             foreach( AttributeType attribute in attributesToRemove )
             {
-                Utils.LogInfo( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
+//                Utils.LogInfo( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
                 attributes.RemoveElement( attribute );
             }
 

@@ -3333,6 +3333,251 @@
 		</References>
 	</UAObject>
 
+
+
+	<UAObject NodeId="ns=1;i=5015" BrowseName="1:InstanceLevelType">
+		<DisplayName>InstanceLevelType</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">ns=1;i=1023</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5007</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6028</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6030</Reference>
+		</References>
+	</UAObject>
+	<UAVariable DataType="AbstractionChildOneC" ParentNodeId="ns=1;i=5015" NodeId="ns=1;i=6028" BrowseName="1:One" AccessLevel="3">
+		<DisplayName>One</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5015</Reference>
+		</References>
+		<Value>
+			<uax:ExtensionObject>
+				<uax:TypeId>
+					<uax:Identifier>ns=3;i=5012</uax:Identifier>
+				</uax:TypeId>
+				<uax:Body>
+					<AbstractionChildOneC xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+						<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">3103.3</ParentOne>
+						<ChildOneCMember>
+							<TypeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+								<Identifier>ns=2;i=5012</Identifier>
+							</TypeId>
+							<Body xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+								<AbstractionSub xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+									<AbstractionOne>
+										<TypeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+											<Identifier>ns=3;i=5015</Identifier>
+										</TypeId>
+										<Body xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+											<AbstractionChildOneD xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+												<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">0</ParentOne>
+												<ChildOneDMember>
+													<ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+														<TypeId>
+															<Identifier>ns=3;i=5006</Identifier>
+														</TypeId>
+														<Body>
+															<AbstractionChildOneA xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+																<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">3401.1</ParentOne>
+																<ChildOneAMember>3401</ChildOneAMember>
+															</AbstractionChildOneA>
+														</Body>
+													</ExtensionObject>
+													<ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+														<TypeId>
+															<Identifier>ns=3;i=5009</Identifier>
+														</TypeId>
+														<Body>
+															<AbstractionChildOneB xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+																<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">3402.2</ParentOne>
+																<ChildOneBMember>3402</ChildOneBMember>
+															</AbstractionChildOneB>
+														</Body>
+													</ExtensionObject>
+													<ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+														<TypeId>
+															<Identifier>ns=3;i=5012</Identifier>
+														</TypeId>
+														<Body>
+															<AbstractionChildOneC xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+																<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">3403.3</ParentOne>
+																<ChildOneCMember>
+																	<TypeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+																		<Identifier>ns=2;i=5012</Identifier>
+																	</TypeId>
+																	<Body xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+																		<AbstractionSub xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+																			<AbstractionOne>
+																				<TypeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+																					<Identifier>ns=3;i=5012</Identifier>
+																				</TypeId>
+																				<Body xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+																					<AbstractionChildOneC xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+																						<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">3403.4</ParentOne>
+																						<ChildOneCMember>
+																							<TypeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+																								<Identifier>ns=2;i=5012</Identifier>
+																							</TypeId>
+																							<Body xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+																								<AbstractionSub xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+																									<AbstractionOne>
+																										<TypeId xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+																											<Identifier>ns=3;i=5009</Identifier>
+																										</TypeId>
+																										<Body xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+																											<AbstractionChildOneB xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+																												<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">3403.5</ParentOne>
+																												<ChildOneBMember>3403.6</ChildOneBMember>
+																											</AbstractionChildOneB>
+																										</Body>
+																									</AbstractionOne>
+																								</AbstractionSub>
+																							</Body>
+																						</ChildOneCMember>
+																					</AbstractionChildOneC>
+																				</Body>
+																			</AbstractionOne>
+																		</AbstractionSub>
+																	</Body>
+																</ChildOneCMember>
+															</AbstractionChildOneC>
+														</Body>
+													</ExtensionObject>
+												</ChildOneDMember>
+											</AbstractionChildOneD>
+										</Body>
+									</AbstractionOne>
+								</AbstractionSub>
+							</Body>
+						</ChildOneCMember>
+					</AbstractionChildOneC>
+				</uax:Body>
+			</uax:ExtensionObject>
+		</Value>
+	</UAVariable>
+	<UAVariable DataType="AbstractionChildTwoA" ParentNodeId="ns=1;i=5015" NodeId="ns=1;i=6030" BrowseName="1:Two" AccessLevel="3">
+		<DisplayName>Two</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5015</Reference>
+		</References>
+		<Value>
+			<uax:ExtensionObject>
+				<uax:TypeId>
+					<uax:Identifier>ns=3;i=5018</uax:Identifier>
+				</uax:TypeId>
+				<uax:Body>
+					<AbstractionChildTwoA xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+						<ParentTwo xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">3201</ParentTwo>
+						<ChildTwoAMember>3201.1</ChildTwoAMember>
+					</AbstractionChildTwoA>
+				</uax:Body>
+			</uax:ExtensionObject>
+		</Value>
+	</UAVariable>
+
+	<UAObject NodeId="ns=1;i=5008" BrowseName="1:LevelOneType">
+		<DisplayName>LevelOneType</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">ns=2;i=1003</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5007</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6018</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6021</Reference>
+		</References>
+	</UAObject>
+	<UAVariable DataType="AbstractionChildOneA" ParentNodeId="ns=1;i=5008" NodeId="ns=1;i=6018" BrowseName="2:One" AccessLevel="3">
+		<DisplayName>One</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5008</Reference>
+		</References>
+		<Value>
+			<uax:ExtensionObject>
+				<uax:TypeId>
+					<uax:Identifier>ns=3;i=5006</uax:Identifier>
+				</uax:TypeId>
+				<uax:Body>
+					<AbstractionChildOneA xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+						<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">1101.1</ParentOne>
+						<ChildOneAMember>1101</ChildOneAMember>
+					</AbstractionChildOneA>
+				</uax:Body>
+			</uax:ExtensionObject>
+		</Value>
+	</UAVariable>
+	<UAVariable DataType="AbstractionChildTwoA" ParentNodeId="ns=1;i=5008" NodeId="ns=1;i=6021" BrowseName="2:Two" AccessLevel="3">
+		<DisplayName>Two</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5008</Reference>
+		</References>
+		<Value>
+			<uax:ExtensionObject>
+				<uax:TypeId>
+					<uax:Identifier>ns=3;i=5018</uax:Identifier>
+				</uax:TypeId>
+				<uax:Body>
+					<AbstractionChildTwoA xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+						<ParentTwo xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">1201</ParentTwo>
+						<ChildTwoAMember>1201.1</ChildTwoAMember>
+					</AbstractionChildTwoA>
+				</uax:Body>
+			</uax:ExtensionObject>
+		</Value>
+	</UAVariable>
+	<UAObject NodeId="ns=1;i=5012" BrowseName="1:LevelTwoType">
+		<DisplayName>LevelTwoType</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">ns=3;i=1013</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5007</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6024</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6025</Reference>
+		</References>
+	</UAObject>
+	<UAVariable DataType="AbstractionChildOneB" ParentNodeId="ns=1;i=5012" NodeId="ns=1;i=6024" BrowseName="3:One" AccessLevel="3">
+		<DisplayName>One</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5012</Reference>
+		</References>
+		<Value>
+			<uax:ExtensionObject>
+				<uax:TypeId>
+					<uax:Identifier>ns=3;i=5009</uax:Identifier>
+				</uax:TypeId>
+				<uax:Body>
+					<AbstractionChildOneB xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+						<ParentOne xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">2102.2</ParentOne>
+						<ChildOneBMember>2102</ChildOneBMember>
+					</AbstractionChildOneB>
+				</uax:Body>
+			</uax:ExtensionObject>
+		</Value>
+	</UAVariable>
+	<UAVariable DataType="AbstractionChildTwoB" ParentNodeId="ns=1;i=5012" NodeId="ns=1;i=6025" BrowseName="3:Two" AccessLevel="3">
+		<DisplayName>Two</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5012</Reference>
+		</References>
+		<Value>
+			<uax:ExtensionObject>
+				<uax:TypeId>
+					<uax:Identifier>ns=3;i=5036</uax:Identifier>
+				</uax:TypeId>
+				<uax:Body>
+					<AbstractionChildTwoB xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
+						<ParentTwo xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">2202</ParentTwo>
+						<ChildTwoBMember>2202 Int32</ChildTwoBMember>
+					</AbstractionChildTwoB>
+				</uax:Body>
+			</uax:ExtensionObject>
+		</Value>
+	</UAVariable>
+
+
+
+
 	<UAObject NodeId="ns=1;i=5010" BrowseName="1:Singles">
 		<DisplayName>Singles</DisplayName>
 		<References>
