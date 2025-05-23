@@ -53,6 +53,7 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 using Opc2Aml;
+using Newtonsoft.Json.Linq;
 
 
 namespace MarkdownProcessor
@@ -816,6 +817,20 @@ namespace MarkdownProcessor
                                             ExtensionObject extensionObject = elementVariant.Value as ExtensionObject;
                                             NodeId typeId = ExpandedNodeId.ToNodeId(extensionObject.TypeId, m_modelManager.NamespaceUris);
 
+                                            Type extentionObjectType = extensionObject.Body.GetType();
+                                            if ( extensionObject.Body.GetType().FullName.Equals( "System.Xml.XmlElement") )
+                                            {
+                                                XmlElement xmlElement = extensionObject.Body as XmlElement;
+                                                if (xmlElement != null)
+                                                {
+                                                    UANode potential = GetDataTypeFromXmlElement(xmlElement, typeId);
+                                                    if ( potential != null )
+                                                    {
+                                                        typeId = potential.DecodedNodeId;
+                                                    }
+                                                }
+                                            }
+
                                             bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
 
                                             AddModifyAttribute(a.Attribute, index.ToString(), typeId, elementVariant, elementListOf);
@@ -1407,10 +1422,10 @@ namespace MarkdownProcessor
                 XmlElement xmlElement = value as XmlElement;
                 if( xmlElement != null )
                 {
-                    UANode typeDefinition2 = GetDataTypeFromXmlElement( xmlElement, typeNodeId);
+                    UANode typeDefinition = GetDataTypeFromXmlElement( xmlElement, typeNodeId);
 
                     Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
-                        attribute, typeDefinition2.DecodedNodeId);
+                        attribute, typeDefinition.DecodedNodeId);
 
                     if ( fieldReferenceTypes != null )
                     {
