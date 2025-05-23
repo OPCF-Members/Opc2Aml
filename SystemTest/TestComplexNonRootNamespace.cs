@@ -11,6 +11,8 @@ using System;
 using System.Xml.Linq;
 using System.Linq;
 using Newtonsoft.Json.Linq;
+using Aml.Engine.Adapter;
+using static Opc.Ua.RelativePathFormatter;
 
 namespace SystemTest
 {
@@ -489,8 +491,444 @@ namespace SystemTest
             ValidateQualifiedName( metaDataProperties, "1", RootLevel, "anothername" );
         }
 
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestSimpleAbstractStructure()
+        {
+            AttributeType value = GetExtentionObjectValue("LevelOneStructure");
+            {
+                AttributeType abstractionOne = GetAttribute(value, "AbstractionOne", validateSubAttributes: false);
+                AttributeType parent = GetAttribute(abstractionOne, "ParentOne", validateSubAttributes: false);
+                Assert.AreEqual("101.1", parent.Value);
+                Assert.AreEqual("xs:double", parent.AttributeDataType);
+                AttributeType child = GetAttribute(abstractionOne, "ChildOneAMember", validateSubAttributes: false);
+                Assert.AreEqual("101", child.Value);
+                Assert.AreEqual("xs:int", child.AttributeDataType);
+            }
+
+            {
+                AttributeType abstractionTwo = GetAttribute(value, "AbstractionTwo", validateSubAttributes: false);
+                AttributeType parent = GetAttribute(abstractionTwo, "ParentTwo", validateSubAttributes: false);
+                Assert.AreEqual("202", parent.Value);
+                Assert.AreEqual("xs:int", parent.AttributeDataType);
+                AttributeType child = GetAttribute(abstractionTwo, "ChildTwoBMember", validateSubAttributes: false);
+                Assert.AreEqual("Two Hundred Two", child.Value);
+                Assert.AreEqual("xs:string", child.AttributeDataType);
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestComplexAbstractStructure()
+        {
+            AttributeType value = GetExtentionObjectValue("LevelTwoStructureArray");
+            Assert.AreEqual(2, value.Attribute.Count);
+
+            #region FirstElement - Simple Cases
+
+            {
+                AttributeType arrayElement = GetAttribute(value, "0", validateSubAttributes: false);
+                Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionStructureTwo]",
+                    arrayElement.RefAttributeType);
+                Assert.AreEqual(2, arrayElement.Attribute.Count);
+
+                #region An Array of AbstractionOne
+
+                {
+                    AttributeType firstArray = GetAttribute(arrayElement, "AbstractionOneArray", validateSubAttributes: false);
+                    Assert.AreEqual(2, firstArray.Attribute.Count);
+                    {
+                        AttributeType subArrayElement = GetAttribute(firstArray, "0", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneA]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("1", parent.Value);
+                        Assert.AreEqual("xs:double", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildOneAMember", validateSubAttributes: false);
+                        Assert.AreEqual("2", child.Value);
+                        Assert.AreEqual("xs:int", child.AttributeDataType);
+                    }
+                    {
+                        AttributeType subArrayElement = GetAttribute(firstArray, "1", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneB]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("3", parent.Value);
+                        Assert.AreEqual("xs:double", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildOneBMember", validateSubAttributes: false);
+                        Assert.AreEqual("4", child.Value);
+                        Assert.AreEqual("xs:double", child.AttributeDataType);
+                    }
+                }
+
+                #endregion
+
+                #region An Array of AbstractionTwo
+
+                {
+                    AttributeType secondArray = GetAttribute(arrayElement, "AbstractionTwoArray", validateSubAttributes: false);
+                    Assert.AreEqual(2, secondArray.Attribute.Count);
+                    {
+                        AttributeType subArrayElement = GetAttribute(secondArray, "0", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildTwoA]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentTwo", validateSubAttributes: false);
+                        Assert.AreEqual("5", parent.Value);
+                        Assert.AreEqual("xs:int", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildTwoAMember", validateSubAttributes: false);
+                        Assert.AreEqual("6", child.Value);
+                        Assert.AreEqual("xs:double", child.AttributeDataType);
+                    }
+                    {
+                        AttributeType subArrayElement = GetAttribute(secondArray, "1", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildTwoB]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentTwo", validateSubAttributes: false);
+                        Assert.AreEqual("7", parent.Value);
+                        Assert.AreEqual("xs:int", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildTwoBMember", validateSubAttributes: false);
+                        Assert.AreEqual("Eight", child.Value);
+                        Assert.AreEqual("xs:string", child.AttributeDataType);
+                    }
+                }
+
+                #endregion
+
+            }
+
+            #endregion
+
+            #region Second Element - Complex Nested Cases
+
+            {
+                AttributeType arrayElement = GetAttribute(value, "1", validateSubAttributes: false);
+                Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionStructureTwo]",
+                    arrayElement.RefAttributeType);
+                Assert.AreEqual(2, arrayElement.Attribute.Count);
+
+                #region An Array of AbstractionOne - Nested Cases
+
+                {
+                    AttributeType firstArray = GetAttribute(arrayElement, "AbstractionOneArray", validateSubAttributes: false);
+                    Assert.AreEqual(4, firstArray.Attribute.Count);
+                    {
+                        AttributeType subArrayElement = GetAttribute(firstArray, "0", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneA]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("9", parent.Value);
+                        Assert.AreEqual("xs:double", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildOneAMember", validateSubAttributes: false);
+                        Assert.AreEqual("10", child.Value);
+                        Assert.AreEqual("xs:int", child.AttributeDataType);
+                    }
+                    {
+                        AttributeType subArrayElement = GetAttribute(firstArray, "1", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneB]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("11", parent.Value);
+                        Assert.AreEqual("xs:double", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildOneBMember", validateSubAttributes: false);
+                        Assert.AreEqual("12", child.Value);
+                        Assert.AreEqual("xs:double", child.AttributeDataType);
+                    }
+
+                    #region ChildC re-adds AbstractionOne using AbstractionSub, adding the possibility of many levels of nesting 
+
+                    {
+                        AttributeType subArrayElement = GetAttribute(firstArray, "2", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneC]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("13", parent.Value);
+                        Assert.AreEqual("xs:double", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildOneCMember", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/]/[AbstractionSub]",
+                            child.RefAttributeType);
+                        AttributeType subLevelOne = GetAttribute(child, "AbstractionOne", validateSubAttributes: false);
+                        AttributeType subLevelOneParent = GetAttribute(subLevelOne, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("14", subLevelOneParent.Value);
+                        Assert.AreEqual("xs:double", subLevelOneParent.AttributeDataType);
+                        AttributeType subLevelOneChild = GetAttribute(subLevelOne, "ChildOneCMember", validateSubAttributes: false);
+                        AttributeType subLevelTwo = GetAttribute(subLevelOneChild, "AbstractionOne", validateSubAttributes: false);
+                        AttributeType subLevelTwoParent = GetAttribute(subLevelTwo, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("15", subLevelTwoParent.Value);
+                        Assert.AreEqual("xs:double", subLevelTwoParent.AttributeDataType);
+                        AttributeType subLevelTwoChild = GetAttribute(subLevelTwo, "ChildOneDMember", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/]/[ListOfAbstractionOne]",
+                            subLevelTwoChild.RefAttributeType);
+                        Assert.AreEqual(2, subLevelTwoChild.Attribute.Count);
+                        {
+                            AttributeType dArrayElement = GetAttribute(subLevelTwoChild, "0", validateSubAttributes: false);
+                            Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneA]",
+                                dArrayElement.RefAttributeType);
+                            AttributeType dParent = GetAttribute(dArrayElement, "ParentOne", validateSubAttributes: false);
+                            Assert.AreEqual("16", dParent.Value);
+                            Assert.AreEqual("xs:double", dParent.AttributeDataType);
+                            AttributeType dChild = GetAttribute(dArrayElement, "ChildOneAMember", validateSubAttributes: false);
+                            Assert.AreEqual("17", dChild.Value);
+                            Assert.AreEqual("xs:int", dChild.AttributeDataType);
+                        }
+                        {
+                            AttributeType dArrayElement = GetAttribute(subLevelTwoChild, "1", validateSubAttributes: false);
+                            Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneB]",
+                                dArrayElement.RefAttributeType);
+                            AttributeType dParent = GetAttribute(dArrayElement, "ParentOne", validateSubAttributes: false);
+                            Assert.AreEqual("18", dParent.Value);
+                            Assert.AreEqual("xs:double", dParent.AttributeDataType);
+                            AttributeType dChild = GetAttribute(dArrayElement, "ChildOneBMember", validateSubAttributes: false);
+                            Assert.AreEqual("19", dChild.Value);
+                            Assert.AreEqual("xs:double", dChild.AttributeDataType);
+                        }
+                    }
+
+                    #endregion
+
+                    #region ChildD is an array of AbstractionOne, adding the possibility of many levels of nesting 
+
+                    {
+                        AttributeType subArrayElement = GetAttribute(firstArray, "3", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneD]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("20", parent.Value);
+                        Assert.AreEqual("xs:double", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildOneDMember", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/]/[ListOfAbstractionOne]",
+                            child.RefAttributeType);
+                        Assert.AreEqual(2, child.Attribute.Count);
+
+                        {
+                            AttributeType dElement = GetAttribute(child, "0", validateSubAttributes: false);
+                            Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneA]",
+                                dElement.RefAttributeType);
+                            AttributeType dParent = GetAttribute(dElement, "ParentOne", validateSubAttributes: false);
+                            Assert.AreEqual("21", dParent.Value);
+                            Assert.AreEqual("xs:double", dParent.AttributeDataType);
+                            AttributeType dChild = GetAttribute(dElement, "ChildOneAMember", validateSubAttributes: false);
+                            Assert.AreEqual("22", dChild.Value);
+                            Assert.AreEqual("xs:int", dChild.AttributeDataType);
+                        }
+                        {
+                            AttributeType dElement = GetAttribute(child, "1", validateSubAttributes: false);
+                            Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneB]",
+                                dElement.RefAttributeType);
+                            AttributeType dParent = GetAttribute(dElement, "ParentOne", validateSubAttributes: false);
+                            Assert.AreEqual("23", dParent.Value);
+                            Assert.AreEqual("xs:double", dParent.AttributeDataType);
+                            AttributeType dChild = GetAttribute(dElement, "ChildOneBMember", validateSubAttributes: false);
+                            Assert.AreEqual("24", dChild.Value);
+                            Assert.AreEqual("xs:double", dChild.AttributeDataType);
+                        }
+                    }
+
+                    #endregion
+                }
+
+                #endregion
+
+                #region An Array of AbstractionTwo - Not as complicated, but has multiple instances of each derived type
+
+                {
+                    AttributeType secondArray = GetAttribute(arrayElement, "AbstractionTwoArray", validateSubAttributes: false);
+                    Assert.AreEqual(4, secondArray.Attribute.Count);
+                    {
+                        AttributeType subArrayElement = GetAttribute(secondArray, "0", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildTwoA]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentTwo", validateSubAttributes: false);
+                        Assert.AreEqual("25", parent.Value);
+                        Assert.AreEqual("xs:int", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildTwoAMember", validateSubAttributes: false);
+                        Assert.AreEqual("26", child.Value);
+                        Assert.AreEqual("xs:double", child.AttributeDataType);
+                    }
+                    {
+                        AttributeType subArrayElement = GetAttribute(secondArray, "1", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildTwoB]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentTwo", validateSubAttributes: false);
+                        Assert.AreEqual("27", parent.Value);
+                        Assert.AreEqual("xs:int", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildTwoBMember", validateSubAttributes: false);
+                        Assert.AreEqual("Twenty Eight", child.Value);
+                        Assert.AreEqual("xs:string", child.AttributeDataType);
+                    }
+                    {
+                        AttributeType subArrayElement = GetAttribute(secondArray, "2", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildTwoA]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentTwo", validateSubAttributes: false);
+                        Assert.AreEqual("29", parent.Value);
+                        Assert.AreEqual("xs:int", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildTwoAMember", validateSubAttributes: false);
+                        Assert.AreEqual("30", child.Value);
+                        Assert.AreEqual("xs:double", child.AttributeDataType);
+                    }
+                    {
+                        AttributeType subArrayElement = GetAttribute(secondArray, "3", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildTwoB]",
+                            subArrayElement.RefAttributeType);
+                        AttributeType parent = GetAttribute(subArrayElement, "ParentTwo", validateSubAttributes: false);
+                        Assert.AreEqual("31", parent.Value);
+                        Assert.AreEqual("xs:int", parent.AttributeDataType);
+                        AttributeType child = GetAttribute(subArrayElement, "ChildTwoBMember", validateSubAttributes: false);
+                        Assert.AreEqual("Thirty Two", child.Value);
+                        Assert.AreEqual("xs:string", child.AttributeDataType);
+                    }
+                }
+
+                #endregion
+            }
+
+            #endregion
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestComplexAbstractObject()
+        {
+            SystemUnitClassType folder = GetExtentionObjectFolder();
+            SystemUnitClassType levelOneType = GetObject(folder, "LevelOneType");
+            SystemUnitClassType one = GetObject(levelOneType, "One");
+            {
+                AttributeType value = GetAttribute(one, "Value", validateSubAttributes: false);
+                Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneA]",
+                    value.RefAttributeType);
+                AttributeType parent = GetAttribute(value, "ParentOne", validateSubAttributes: false);
+                Assert.AreEqual("1101.1", parent.Value);
+                Assert.AreEqual("xs:double", parent.AttributeDataType);
+                AttributeType child = GetAttribute(value, "ChildOneAMember", validateSubAttributes: false);
+                Assert.AreEqual("1101", child.Value);
+                Assert.AreEqual("xs:int", child.AttributeDataType);
+
+            }
+
+            SystemUnitClassType two = GetObject(levelOneType, "Two");
+            {
+                AttributeType value = GetAttribute(two, "Value", validateSubAttributes: false);
+                Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildTwoA]",
+                    value.RefAttributeType);
+                AttributeType parent = GetAttribute(value, "ParentTwo", validateSubAttributes: false);
+                Assert.AreEqual("1201", parent.Value);
+                Assert.AreEqual("xs:int", parent.AttributeDataType);
+                AttributeType child = GetAttribute(value, "ChildTwoAMember", validateSubAttributes: false);
+                Assert.AreEqual("1201.1", child.Value);
+                Assert.AreEqual("xs:double", child.AttributeDataType);
+
+            }
+
+            SystemUnitClassType notInObjectDefinition = GetObject(levelOneType, "NotInObjectDefinition");
+            {
+                AttributeType value = GetAttribute(notInObjectDefinition, "Value", validateSubAttributes: false);
+                Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneD]",
+                    value.RefAttributeType);
+
+                AttributeType parent = GetAttribute(value, "ParentOne", validateSubAttributes: false);
+                Assert.AreEqual("1", parent.Value);
+                Assert.AreEqual("xs:double", parent.AttributeDataType);
+                AttributeType child = GetAttribute(value, "ChildOneDMember", validateSubAttributes: false);
+                Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/]/[ListOfAbstractionOne]",
+                    child.RefAttributeType);
+                Assert.AreEqual(2, child.Attribute.Count);
+
+                #region First Array element is ChildC - Nested at least once
+                {
+                    AttributeType subArrayElement = GetAttribute(child, "0", validateSubAttributes: false);
+                    Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneC]",
+                        subArrayElement.RefAttributeType);
+                    AttributeType subParent = GetAttribute(subArrayElement, "ParentOne", validateSubAttributes: false);
+                    Assert.AreEqual("2", subParent.Value);
+                    Assert.AreEqual("xs:double", subParent.AttributeDataType);
+                    AttributeType subChild = GetAttribute(subArrayElement, "ChildOneCMember", validateSubAttributes: false);
+                    Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/]/[AbstractionSub]",
+                        subChild.RefAttributeType);
+                    AttributeType subLevelOne = GetAttribute(subChild, "AbstractionOne", validateSubAttributes: false);
+                    AttributeType subLevelOneParent = GetAttribute(subLevelOne, "ParentOne", validateSubAttributes: false);
+                    Assert.AreEqual("3", subLevelOneParent.Value);
+                    Assert.AreEqual("xs:double", subLevelOneParent.AttributeDataType);
+                    AttributeType subLevelOneChild = GetAttribute(subLevelOne, "ChildOneDMember", validateSubAttributes: false);
+
+                    Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/]/[ListOfAbstractionOne]",
+                        subLevelOneChild.RefAttributeType);
+                    Assert.AreEqual(2, subLevelOneChild.Attribute.Count);
+
+                    {
+                        AttributeType arrayElement = GetAttribute(subLevelOneChild, "0", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneC]",
+                            arrayElement.RefAttributeType);
+                        AttributeType arrayElementParent = GetAttribute(arrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("4", arrayElementParent.Value);
+                        Assert.AreEqual("xs:double", arrayElementParent.AttributeDataType);
+                        AttributeType arrayElementChild= GetAttribute(arrayElement, "ChildOneCMember", validateSubAttributes: false);
+                        AttributeType subArrayElementChild = GetAttribute(arrayElementChild, "AbstractionOne", validateSubAttributes: false);
+
+                        // Final Element
+
+                        AttributeType finalParent = GetAttribute(subArrayElementChild, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("5", finalParent.Value);
+                        Assert.AreEqual("xs:double", finalParent.AttributeDataType);
+                        AttributeType finalChild = GetAttribute(subArrayElementChild, "ChildOneAMember", validateSubAttributes: false);
+                        Assert.AreEqual("6", finalChild.Value);
+                        Assert.AreEqual("xs:int", finalChild.AttributeDataType);
+
+                    }
+
+                    {
+                        AttributeType arrayElement = GetAttribute(subLevelOneChild, "1", validateSubAttributes: false);
+                        Assert.AreEqual("[ATL_http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/]/[AbstractionChildOneA]",
+                            arrayElement.RefAttributeType);
+                        AttributeType arrayElementParent = GetAttribute(arrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("7", arrayElementParent.Value);
+                        Assert.AreEqual("xs:double", arrayElementParent.AttributeDataType);
+                        AttributeType arrayElementChild = GetAttribute(arrayElement, "ChildOneAMember", validateSubAttributes: false);
+                        Assert.AreEqual("8", arrayElementChild.Value);
+                        Assert.AreEqual("xs:int", arrayElementChild.AttributeDataType);
+                    }
 
 
+                }
+
+                #endregion
+
+                #region Second Array Element is ChildD - Array
+                {
+                    AttributeType subArrayElement = GetAttribute(child, "1", validateSubAttributes: false);
+
+                    AttributeType subParent = GetAttribute(subArrayElement, "ParentOne", validateSubAttributes: false);
+                    Assert.AreEqual("9", subParent.Value);
+                    Assert.AreEqual("xs:double", subParent.AttributeDataType);
+                    AttributeType subChild = GetAttribute(subArrayElement, "ChildOneDMember", validateSubAttributes: false);
+
+                    Assert.AreEqual(2, subChild.Attribute.Count);
+
+                    {
+                        AttributeType arrayElement = GetAttribute(subChild, "0", validateSubAttributes: false);
+                        AttributeType arrayElementParent = GetAttribute(arrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("10", arrayElementParent.Value);
+                        Assert.AreEqual("xs:double", arrayElementParent.AttributeDataType);
+                        AttributeType arrayElementChild = GetAttribute(arrayElement, "ChildOneAMember", validateSubAttributes: false);
+                        Assert.AreEqual("11", arrayElementChild.Value);
+                        Assert.AreEqual("xs:int", arrayElementChild.AttributeDataType);
+                    }
+
+                    {
+                        AttributeType arrayElement = GetAttribute(subChild, "1", validateSubAttributes: false);
+                        AttributeType arrayElementParent = GetAttribute(arrayElement, "ParentOne", validateSubAttributes: false);
+                        Assert.AreEqual("12", arrayElementParent.Value);
+                        Assert.AreEqual("xs:double", arrayElementParent.AttributeDataType);
+                        AttributeType arrayElementChild = GetAttribute(arrayElement, "ChildOneBMember", validateSubAttributes: false);
+                        Assert.AreEqual("13", arrayElementChild.Value);
+                        Assert.AreEqual("xs:double", arrayElementChild.AttributeDataType);
+                    }
+
+                }
+
+                #endregion
+
+            }
+
+
+
+        }
 
         #endregion
 
@@ -504,6 +942,32 @@ namespace SystemTest
             }
             Assert.IsNotNull(m_document, "Unable to retrieve Document");
             return m_document;
+        }
+
+        public AttributeType GetExtentionObjectValue( string objectName )
+        {
+            SystemUnitClassType extensionObjectsFolder = GetExtentionObjectFolder();
+            SystemUnitClassType desiredObject = extensionObjectsFolder.InternalElement[objectName];
+            Assert.IsNotNull(desiredObject, "Unable to find Extension Object");
+            AttributeType value = desiredObject.Attribute["Value"];
+            Assert.IsNotNull(value, "Unable to find Value Attribute");
+            return value;
+        }
+
+        public SystemUnitClassType GetObject( SystemUnitClassType source, string desired)
+        {
+            SystemUnitClassType objectToTest = source.InternalElement[desired];
+            Assert.IsNotNull(objectToTest, "Unable to find Object " + desired);
+            return objectToTest;
+        }
+
+
+        public SystemUnitClassType GetExtentionObjectFolder()
+        {
+            SystemUnitClassType objectFolder = GetObjectFolder();
+            SystemUnitClassType extensionObjectsFolder = objectFolder.InternalElement["ExtensionObjects"];
+            Assert.IsNotNull(extensionObjectsFolder, "Unable to find Extension Object Folder");
+            return extensionObjectsFolder;
         }
 
         public SystemUnitClassType GetObjectFolder()
