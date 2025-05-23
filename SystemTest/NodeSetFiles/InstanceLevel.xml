@@ -3422,7 +3422,7 @@
 									<Body>
 										<AbstractionChildTwoA xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/Types.xsd">
 											<ParentTwo xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">5</ParentTwo>
-											<ChildTwoAMember>0</ChildTwoAMember>
+											<ChildTwoAMember>6</ChildTwoAMember>
 										</AbstractionChildTwoA>
 									</Body>
 								</ExtensionObject>
