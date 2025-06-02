@@ -357,7 +357,7 @@ namespace MarkdownProcessor
 
             RemoveTypeOnly();
 
-            Utils.LogInfo( "Remove Type Only information Complete" );
+            Utils.LogDebug( "Remove Type Only information Complete" );
 
             // write out the AML file
             // var OutFilename = modelName + ".aml";
@@ -2981,6 +2981,8 @@ namespace MarkdownProcessor
         {
             AddStructureFieldDefinition( attribute, uaNode );
 
+            AddEnumerationFieldDefinition( attribute, uaNode );
+
             AttributeType nodeIdAttribute = AddModifyAttribute( attribute.Attribute,"NodeId", "NodeId", 
                 new Variant( uaNode.DecodedNodeId ) );
 
@@ -3062,6 +3064,67 @@ namespace MarkdownProcessor
                             }
                         }
                     }
+                }
+            }
+        }
+
+        private void AddEnumerationFieldDefinition(AttributeFamilyType attribute, UANode uaNode)
+        {
+            UADataType enumNode = uaNode as UADataType;
+            if (enumNode != null && 
+                enumNode.Definition != null && 
+                enumNode.Definition.Field != null &&
+                enumNode.Definition.Field.Length > 0 )
+            {
+                string enumPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, Enumeration);
+
+                if (attribute.RefBaseClassPath.Equals(enumPath))
+                {
+                    string path = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "ListOfEnumField");
+                    AttributeFamilyType enumFieldDefinition = m_cAEXDocument.FindByPath(path) as AttributeFamilyType;
+
+                    AttributeType enumFields = new AttributeType(
+                        new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+
+                    enumFields.RecreateAttributeInstance(enumFieldDefinition as AttributeFamilyType);
+                    enumFields.Name = "EnumFieldDefinition";
+                    enumFields.AdditionalInformation.Append("OpcUa:TypeOnly");
+
+                    string enumFieldPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "EnumField");
+                    AttributeFamilyType enumFieldSource = m_cAEXDocument.FindByPath(enumFieldPath) as AttributeFamilyType;
+
+                    foreach (DataTypeField fieldDefinition in enumNode.Definition.Field)
+                    {
+                        AttributeType fieldAttribute = new AttributeType( new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+
+                        fieldAttribute.RecreateAttributeInstance(enumFieldSource);
+                        fieldAttribute.Name = fieldDefinition.Name;
+
+                        AddModifyAttribute(fieldAttribute.Attribute,
+                            "Name", "String", new Variant(fieldDefinition.Name));
+
+                        if (fieldDefinition.Description != null && fieldDefinition.Description.Length > 0)
+                        {
+                            LocalizedText localizedText = new LocalizedText(
+                                fieldDefinition.Description[0].Locale, fieldDefinition.Description[0].Value);
+                            AddModifyAttribute(fieldAttribute.Attribute,
+                                "Description", "LocalizedText", new Variant(localizedText));
+                        }
+
+                        if (fieldDefinition.DisplayName != null && fieldDefinition.DisplayName.Length > 0)
+                        {
+                            LocalizedText localizedText = new LocalizedText(
+                                fieldDefinition.DisplayName[0].Locale, fieldDefinition.DisplayName[0].Value);
+                            AddModifyAttribute(fieldAttribute.Attribute,
+                                "DisplayName", "LocalizedText", new Variant(localizedText));
+                        }
+
+                        AddModifyAttribute(fieldAttribute.Attribute,
+                            "Value", "Int32", new Variant(fieldDefinition.Value));
+
+                        enumFields.Attribute.Insert(fieldAttribute, false, true);
+                    }
+                    attribute.Attribute.Insert(enumFields, false, true);
                 }
             }
         }
@@ -3605,7 +3668,7 @@ namespace MarkdownProcessor
 
         private void RemoveTypeOnlySystemUnitClasses( )
         {
-            Utils.LogInfo( "Remove TypeOnly Attributes - SystemUnitClasses" );
+            Utils.LogDebug( "Remove TypeOnly Attributes - SystemUnitClasses" );
 
             foreach( SystemUnitClassLibType libType in m_cAEXDocument.CAEXFile.SystemUnitClassLib )
             {
@@ -3667,7 +3730,7 @@ namespace MarkdownProcessor
 
             foreach( AttributeType attribute in attributesToRemove )
             {
-                Utils.LogInfo( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
+                Utils.LogDebug( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
                 attributes.RemoveElement( attribute );
             }
 
