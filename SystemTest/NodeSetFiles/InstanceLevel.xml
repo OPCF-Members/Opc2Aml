@@ -24,15 +24,18 @@
 		<Alias Alias="HasProperty">i=46</Alias>
 		<Alias Alias="HasComponent">i=47</Alias>
 		<Alias Alias="IdType">i=256</Alias>
+		<Alias Alias="NodeClass">i=257</Alias>
 		<Alias Alias="NumericRange">i=291</Alias>
 		<Alias Alias="PublishedVariableDataType">i=14273</Alias>
 		<Alias Alias="DataSetMetaDataType">i=14523</Alias>
 		<Alias Alias="FieldTargetDataType">i=14744</Alias>
+		<Alias Alias="NegotiationStatus">i=24216</Alias>
 		<Alias Alias="ComprehensiveScalarType">ns=2;i=3003</Alias>
 		<Alias Alias="ComprehensiveArrayType">ns=3;i=3004</Alias>
 		<Alias Alias="AbstractionOne">ns=2;i=3007</Alias>
 		<Alias Alias="AbstractionSub">ns=2;i=3008</Alias>
 		<Alias Alias="AbstractionTwo">ns=2;i=3010</Alias>
+		<Alias Alias="EnumerationStructure">ns=2;i=3009</Alias>
 		<Alias Alias="AbstractionStructureOne">ns=2;i=3014</Alias>
 		<Alias Alias="AbstractionChildOneA">ns=3;i=3003</Alias>
 		<Alias Alias="AbstractionChildOneB">ns=3;i=3007</Alias>
@@ -2858,6 +2861,32 @@
 		</References>
 	</UAVariable>
 
+    <UAVariable DataType="EnumerationStructure" NodeId="ns=1;i=6036" BrowseName="1:EnumerationStructure" AccessLevel="3">
+        <DisplayName>EnumerationStructure</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+        </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>ns=2;i=5015</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <EnumerationStructure xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
+                        <One>ReferenceType_32</One>
+                        <Two>
+							<ListOfNegotiationStatus>
+								<NegotiationStatus xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Failed_2</NegotiationStatus>
+								<NegotiationStatus xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Complete_1</NegotiationStatus>
+							</ListOfNegotiationStatus>
+                        </Two>
+                    </EnumerationStructure>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+	
 
 	<UAVariable DataType="DataSetMetaDataType" NodeId="ns=1;i=6016" BrowseName="1:DataSetMetaData" AccessLevel="3">
 		<DisplayName>DataSetMetaData</DisplayName>
@@ -3323,6 +3352,39 @@
 					</uax:Body>
 				</uax:ExtensionObject>
 			</uax:ListOfExtensionObject>
+		</Value>
+	</UAVariable>
+
+	<UAObject NodeId="ns=1;i=5009" BrowseName="1:EnumerationObjectValue">
+		<DisplayName>EnumerationObjectValue</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">ns=3;i=1004</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6020</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6026</Reference>
+		</References>
+	</UAObject>
+	<UAVariable DataType="NegotiationStatus" ParentNodeId="ns=1;i=5009" NodeId="ns=1;i=6020" BrowseName="3:One" AccessLevel="3">
+		<DisplayName>One</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+		</References>
+		<Value>
+			<uax:Int32>2</uax:Int32>
+		</Value>
+	</UAVariable>
+	<UAVariable DataType="NodeClass" ParentNodeId="ns=1;i=5009" ValueRank="1" NodeId="ns=1;i=6026" ArrayDimensions="0" BrowseName="3:Two" AccessLevel="3">
+		<DisplayName>Two</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+		</References>
+		<Value>
+			<uax:ListOfInt32>
+				<uax:Int32>2</uax:Int32>
+				<uax:Int32>8</uax:Int32>
+			</uax:ListOfInt32>
 		</Value>
 	</UAVariable>
 

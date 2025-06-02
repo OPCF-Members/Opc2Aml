@@ -38,12 +38,13 @@
         <Alias Alias="HasProperty">i=46</Alias>
         <Alias Alias="HasComponent">i=47</Alias>
         <Alias Alias="IdType">i=256</Alias>
-        <Alias Alias="NumericRange">i=291</Alias>
+		<Alias Alias="NodeClass">i=257</Alias>
+		<Alias Alias="NumericRange">i=291</Alias>
         <Alias Alias="PublishedVariableDataType">i=14273</Alias>
         <Alias Alias="DataSetMetaDataType">i=14523</Alias>
+		<Alias Alias="NegotiationStatus">i=24216</Alias>
 		<Alias Alias="AbstractionOne">ns=1;i=3007</Alias>
 		<Alias Alias="AbstractionTwo">ns=1;i=3010</Alias>
-		<Alias Alias="AbstractTop">ns=1;i=3012</Alias>
 	</Aliases>
     <Extensions>
         <Extension>
@@ -128,6 +129,20 @@
             <Field DataType="DiagnosticInfo" Name="DiagnosticInfo"/>
         </Definition>
     </UADataType>
+
+	<UADataType NodeId="ns=1;i=3009" BrowseName="1:EnumerationStructure">
+		<DisplayName>EnumerationStructure</DisplayName>
+		<References>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5014</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5016</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5015</Reference>
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
+		</References>
+		<Definition Name="1:EnumerationStructure">
+			<Field DataType="NodeClass" Name="One"/>
+			<Field DataType="NegotiationStatus" ValueRank="1" ArrayDimensions="0" Name="Two"/>
+		</Definition>
+	</UADataType>
 
 	<UAObjectType NodeId="ns=1;i=1003" BrowseName="1:AbstractLevelOne">
 		<DisplayName>AbstractLevelOne</DisplayName>
@@ -293,6 +308,27 @@
 		<References>
 			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
 			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3008</Reference>
+		</References>
+	</UAObject>
+	<UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5014" BrowseName="Default Binary">
+		<DisplayName>Default Binary</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3009</Reference>
+		</References>
+	</UAObject>
+	<UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5015" BrowseName="Default XML">
+		<DisplayName>Default XML</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3009</Reference>
+		</References>
+	</UAObject>
+	<UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5016" BrowseName="Default JSON">
+		<DisplayName>Default JSON</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3009</Reference>
 		</References>
 	</UAObject>
 </UANodeSet>

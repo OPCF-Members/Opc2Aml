@@ -1596,49 +1596,64 @@ namespace MarkdownProcessor
 
             if( val.TypeInfo != null && val.TypeInfo.BuiltInType == BuiltInType.Int32 )
             {
-                int enumerationValue = -1;
+                UANode dataTypeNode = FindNode<UANode>(refDataType);
+                string dataTypeName = dataTypeNode.DecodedBrowseName.Name;
+                string uri = m_modelManager.FindModelUri(dataTypeNode.DecodedNodeId);
 
                 if( val.TypeInfo.ValueRank == ValueRanks.Scalar )
                 {
-                    enumerationValue = (int)val.Value;
-                }
-                else if( val.TypeInfo.ValueRank == ValueRanks.OneDimension )
-                {
-                    int[] enumerationValues = (int[])val.Value;
-                    if( enumerationValues.Length == 1 )
+                    int enumerationValue = (int)val.Value;
+                    UADataType enumerationNode = FindNode<UADataType>(dataTypeNode.DecodedNodeId);
+                    if (enumerationNode != null)
                     {
-                        enumerationValue = enumerationValues[ 0 ];
-                    }
-                }
-
-                if( enumerationValue >= 0 )
-                {
-                    var dataTypeNode = FindNode<UANode>( refDataType );
-                    var dataTypeName = dataTypeNode.DecodedBrowseName.Name;
-                    var uri = m_modelManager.FindModelUri( dataTypeNode.DecodedNodeId );
-
-                    UADataType enumerationNode = FindNode<UADataType>( dataTypeNode.DecodedNodeId );
-                    if( enumerationNode != null )
-                    {
-                        if( enumerationNode.Definition != null &&
+                        if (enumerationNode.Definition != null &&
                             enumerationNode.Definition.Field != null &&
-                            enumerationNode.Definition.Field.Length > 0 )
+                            enumerationNode.Definition.Field.Length > 0)
                         {
-                            foreach( DataTypeField field in enumerationNode.Definition.Field )
+                            foreach (DataTypeField field in enumerationNode.Definition.Field)
                             {
-                                if( field.Value == enumerationValue )
+                                if (field.Value == enumerationValue)
                                 {
-                                    Variant enumerationAsString = new Variant( field.Name );
+                                    Variant enumerationAsString = new Variant(field.Name);
 
-                                    attributeType = AddModifyAttribute( seq,
+                                    attributeType = AddModifyAttribute(seq,
                                         name,
                                         dataTypeName,
                                         enumerationAsString,
                                         bListOf: false,
-                                        sURI: uri );
+                                        sURI: uri);
 
                                     break;
                                 }
+                            }
+                        }
+                    }
+                }
+                else if( val.TypeInfo.ValueRank >= ValueRanks.OneDimension )
+                {
+                    int[] enumerationValues = (int[])val.Value;
+                    if( enumerationValues.Length > 0 )
+                    {
+                        string path = BuildLibraryReference(ATLPrefix, uri, ListOf + dataTypeName);
+                        CAEXObject attributeList = m_cAEXDocument.FindByPath(path);
+                        AttributeFamilyType listAttribute = attributeList as AttributeFamilyType;
+                        attributeType = seq[name];  //find the existing attribute with the name
+                        if (attributeType == null)
+                        {
+                            attributeType = seq.Append(name);  // not found so create a new one
+                        }
+
+                        attributeType.RecreateAttributeInstance(listAttribute);
+
+                        IList valueAsList = val.Value as IList;
+                        if (valueAsList != null)
+                        {
+                            for (int index = 0; index < valueAsList.Count; index++)
+                            {
+                                Variant elementVariant = new Variant(valueAsList[index]);
+                                bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+                                AddModifyAttribute(attributeType.Attribute, index.ToString(), refDataType,
+                                    elementVariant );
                             }
                         }
                     }

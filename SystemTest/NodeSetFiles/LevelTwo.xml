@@ -35,8 +35,10 @@
         <Alias Alias="HasProperty">i=46</Alias>
         <Alias Alias="HasComponent">i=47</Alias>
         <Alias Alias="IdType">i=256</Alias>
-        <Alias Alias="NumericRange">i=291</Alias>
-        <Alias Alias="ComprehensiveScalarType">ns=2;i=3003</Alias>
+		<Alias Alias="NodeClass">i=257</Alias>
+		<Alias Alias="NumericRange">i=291</Alias>
+		<Alias Alias="NegotiationStatus">i=24216</Alias>
+		<Alias Alias="ComprehensiveScalarType">ns=2;i=3003</Alias>
 		<Alias Alias="AbstractionOne">ns=2;i=3007</Alias>
 		<Alias Alias="AbstractionSub">ns=2;i=3008</Alias>
 		<Alias Alias="AbstractionTwo">ns=2;i=3010</Alias>
@@ -181,10 +183,30 @@
 			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1013</Reference>
 		</References>
 	</UAVariable>
-
-
-
-
+	<UAObjectType NodeId="ns=1;i=1004" BrowseName="1:EnumerationObject">
+		<DisplayName>EnumerationObject</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6010</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6011</Reference>
+		</References>
+	</UAObjectType>
+	<UAVariable DataType="NegotiationStatus" ParentNodeId="ns=1;i=1004" NodeId="ns=1;i=6010" BrowseName="1:One" AccessLevel="3">
+		<DisplayName>One</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasModellingRule">i=78</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1004</Reference>
+		</References>
+	</UAVariable>
+	<UAVariable DataType="NodeClass" ParentNodeId="ns=1;i=1004" ValueRank="1" NodeId="ns=1;i=6011" ArrayDimensions="0" BrowseName="1:Two" AccessLevel="3">
+		<DisplayName>Two</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasModellingRule">i=78</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1004</Reference>
+		</References>
+	</UAVariable>
 	<UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING_LevelTwo_" NodeId="ns=1;i=5004" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/</DisplayName>
         <References>
