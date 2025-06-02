@@ -52,8 +52,9 @@ using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Xml;
-using System.IO;
 using Opc2Aml;
+using Newtonsoft.Json.Linq;
+
 
 namespace MarkdownProcessor
 {
@@ -777,9 +778,10 @@ namespace MarkdownProcessor
 
                         case BuiltInType.ExtensionObject:
                             {
-                                if( refDataType == "EnumValueType" && referenceName == "EnumValues" )
+                                addElements = false;
+
+                                if ( refDataType == "EnumValueType" && referenceName == "EnumValues" )
                                 {
-                                    addElements = false;
                                     AttributeTypeType attributeType = a as AttributeTypeType;
                                     if( attributeType != null )
                                     {
@@ -801,6 +803,37 @@ namespace MarkdownProcessor
                                                 }
                                             }
                                             attributeType.Constraint.Insert( stringValueRequirement );
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    IList valueAsList = val.Value as IList;
+                                    if (valueAsList != null)
+                                    {
+                                        for (int index = 0; index < valueAsList.Count; index++)
+                                        {
+                                            Variant elementVariant = new Variant(valueAsList[index]);
+                                            ExtensionObject extensionObject = elementVariant.Value as ExtensionObject;
+                                            NodeId typeId = ExpandedNodeId.ToNodeId(extensionObject.TypeId, m_modelManager.NamespaceUris);
+
+                                            Type extentionObjectType = extensionObject.Body.GetType();
+                                            if ( extensionObject.Body.GetType().FullName.Equals( "System.Xml.XmlElement") )
+                                            {
+                                                XmlElement xmlElement = extensionObject.Body as XmlElement;
+                                                if (xmlElement != null)
+                                                {
+                                                    UANode potential = GetDataTypeFromXmlElement(xmlElement, typeId);
+                                                    if ( potential != null )
+                                                    {
+                                                        typeId = potential.DecodedNodeId;
+                                                    }
+                                                }
+                                            }
+
+                                            bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+
+                                            AddModifyAttribute(a.Attribute, index.ToString(), typeId, elementVariant, elementListOf);
                                         }
                                     }
                                 }
@@ -1147,6 +1180,82 @@ namespace MarkdownProcessor
             return minimized;
         }
 
+        private UANode GetDataTypeFromXmlElement( XmlElement xmlElement, NodeId defined )
+        {
+            UANode dataType = m_modelManager.FindNode<UANode>(defined);
+            UAObject uaObject = dataType as UAObject;
+            if (uaObject != null)
+            {
+                // Look for encoding
+                List<ReferenceInfo> referenceList = m_modelManager.FindReferences(defined);
+                foreach (ReferenceInfo referenceInfo in referenceList)
+                {
+                    if (!referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals(
+                        Opc.Ua.ReferenceTypeIds.HasEncoding))
+                    {
+                        UANode potential = m_modelManager.FindNode<UANode>(referenceInfo.TargetId);
+                        if ( potential != null )
+                        {
+                            dataType = potential;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            UADataType uaDataType = dataType as UADataType;
+            if (uaDataType != null)
+            {
+                if (uaDataType.IsAbstract)
+                {
+                    List<ReferenceInfo> dataTypeReferences = m_modelManager.FindReferences(uaDataType.DecodedNodeId);
+                    Dictionary<NodeId, UANode> dataTypeDictionary = new Dictionary<NodeId, UANode>();
+                    foreach( ReferenceInfo referenceInfo in dataTypeReferences)
+                    {
+                        if (referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals(
+                            Opc.Ua.ReferenceTypeIds.HasSubtype))
+                        {
+                            UANode dataTypeUaNode = m_modelManager.FindNode<UANode>(referenceInfo.TargetId);
+                            if (dataTypeUaNode != null)
+                            {
+                                dataTypeDictionary.Add(referenceInfo.TargetId, dataTypeUaNode);
+                            }
+                        }
+                    }
+
+                    // Go find the actual typedefinition
+                    XmlElement type = SearchForElement("TypeId", xmlElement);
+                    if (type != null)
+                    {
+                        XmlElement typeIdentifier = SearchForElement("Identifier", type);
+                        if (typeIdentifier != null)
+                        {
+                            // This is not accurate, I'm just lucky at this point
+                            // I'm not lucky anymore.
+                            NodeId nodeId = new NodeId(typeIdentifier.InnerText);
+                            if (nodeId != null && !nodeId.IsNullNodeId)
+                            {
+                                UANode potential = GetDataTypeFromXmlElement(xmlElement, nodeId);
+                                if (dataTypeDictionary.ContainsKey(potential.DecodedNodeId))
+                                {
+                                    dataType = potential;
+                                }
+                                else
+                                {
+                                    UADataType potentialDataType = potential as UADataType;
+                                    if (potentialDataType != null && potentialDataType.IsAbstract == false)
+                                    {
+                                        dataType = potential;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return dataType;
+        }
 
         private Dictionary<string, DataTypeField> CreateFieldReferenceTypes( AttributeType attribute, NodeId typeNodeId )
         {
@@ -1313,39 +1422,32 @@ namespace MarkdownProcessor
                 XmlElement xmlElement = value as XmlElement;
                 if( xmlElement != null )
                 {
-                    NodeId typeDefinition = typeNodeId;
-                    UANode uANode = m_modelManager.FindNode<UANode>( typeNodeId );
-                    UAObject uaObject = uANode as UAObject;
-                    if( uaObject != null )
-                    {
-                        // Look for encoding
-                        List<ReferenceInfo> referenceList = m_modelManager.FindReferences( typeNodeId );
-                        foreach( ReferenceInfo referenceInfo in referenceList )
-                        {
-                            if( !referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.HasEncoding ) )
-                            {
-                                typeDefinition = referenceInfo.TargetId;
-                                break;
-                            }
-                        }
-                    }
+                    UANode typeDefinition = GetDataTypeFromXmlElement( xmlElement, typeNodeId);
 
                     Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
-                        attribute, typeDefinition );
+                        attribute, typeDefinition.DecodedNodeId);
 
-                    if( fieldReferenceTypes != null )
+                    if ( fieldReferenceTypes != null )
                     {
                         foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
                         {
-                            Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
-                           
+                            UANode fieldTypeDefinition = GetDataTypeFromXmlElement(xmlElement, 
+                                fieldReferenceType.Value.DecodedDataType );
+
+                            Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, 
+                                fieldReferenceType.Value, xmlElement );
+
+                            string attributeName = fieldReferenceType.Key;
+                            NodeId createDataType = fieldReferenceType.Value.DecodedDataType;
+
                             bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
 
                             AddModifyAttribute(
                                 attribute.Attribute,
-                                fieldReferenceType.Key,
-                                fieldReferenceType.Value.DecodedDataType,
-                                fieldVariant, bListOf: listOf );
+                                attributeName,
+                                createDataType,
+                                fieldVariant, 
+                                bListOf: listOf);
                         }
                     }
                 }
@@ -3412,7 +3514,27 @@ namespace MarkdownProcessor
             Variant variant = new Variant();
 
             XmlElement xmlElement = SearchForElement( name, source );
-            if( xmlElement != null )
+
+            if (xmlElement == null)
+            {
+                XmlElement body = SearchForElement("Body", source);
+                XmlElement type = SearchForElement("TypeId", source);
+
+                if (body != null && type != null)
+                {
+                    if (body.ChildNodes.Count == 1)
+                    {
+                        XmlNodeList list = body.ChildNodes;
+                        XmlElement subBody = list.Item(0) as XmlElement;
+                        if (subBody != null)
+                        {
+                            xmlElement = SearchForElement(name, subBody);
+                        }
+                    }
+                }
+            }
+
+            if ( xmlElement != null )
             {
                 BuiltInType baseBuiltInType = BuiltInType.Null;
 
@@ -3422,7 +3544,7 @@ namespace MarkdownProcessor
                     baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
                 }
 
-                if( typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
+                if(typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
                 {
                     // Defined as variant, or nothing at all
                     baseBuiltInType = BuiltInType.Variant;
@@ -3509,10 +3631,20 @@ namespace MarkdownProcessor
 
                                 if( typeDefinition.ValueRank >= ValueRanks.OneDimension )
                                 {
+                                    ExpandedNodeId elementId = absoluteId;
+
                                     List<ExtensionObject> extensions = new List<ExtensionObject>();
                                     foreach( XmlElement arrayElement in xmlElement.ChildNodes )
                                     {
-                                        extensions.Add( new ExtensionObject( absoluteId, arrayElement ) );
+                                        if ( typeDefinition.AllowSubTypes)
+                                        {
+                                            ExpandedNodeId expandedNodeId = GetExtensionObjectType(arrayElement);
+                                            if (expandedNodeId != null)
+                                            {
+                                                elementId = expandedNodeId;
+                                            }
+                                        }
+                                        extensions.Add( new ExtensionObject( elementId, arrayElement ) );
                                     }
 
                                     variant = new Variant( extensions );
@@ -3641,6 +3773,55 @@ namespace MarkdownProcessor
             }
 
             return null;
+        }
+
+        private ExpandedNodeId GetExtensionObjectType(XmlElement extensionXml)
+        {
+            ExpandedNodeId expandedTypeNodeId = null;
+
+            NodeId typeNodeId = null;
+
+            XmlElement typeIdXmlElement = SearchForElement("TypeId", extensionXml);
+            if (typeIdXmlElement != null)
+            {
+                XmlElement identifierXmlElement = SearchForElement("Identifier", typeIdXmlElement);
+                if (identifierXmlElement != null)
+                {
+                    typeNodeId = new NodeId(identifierXmlElement.InnerText);
+                    if (typeNodeId != null && !typeNodeId.IsNullNodeId)
+                    {
+                        UANode uaNode = m_modelManager.FindNode<UANode>(typeNodeId);
+
+                        if ( uaNode != null )
+                        {
+                            UAObject uaObject = uaNode as UAObject;
+                            if (uaObject != null)
+                            {
+                                // Look for encoding
+                                List<ReferenceInfo> referenceList = m_modelManager.FindReferences(typeNodeId);
+                                foreach (ReferenceInfo referenceInfo in referenceList)
+                                {
+                                    if (!referenceInfo.IsForward && 
+                                        referenceInfo.ReferenceTypeId.Equals(Opc.Ua.ReferenceTypeIds.HasEncoding))
+                                    {
+                                        typeNodeId = referenceInfo.TargetId;
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (typeNodeId != null)
+            {
+                expandedTypeNodeId = NodeId.ToExpandedNodeId(typeNodeId, 
+                    m_modelManager.NamespaceUris);
+            }
+
+            return expandedTypeNodeId;
         }
 
         #endregion
