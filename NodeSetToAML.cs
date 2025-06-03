@@ -52,8 +52,9 @@ using System.Collections;
 using System.IO;
 using System.Reflection;
 using System.Xml;
-using System.IO;
 using Opc2Aml;
+using Newtonsoft.Json.Linq;
+
 
 namespace MarkdownProcessor
 {
@@ -357,7 +358,7 @@ namespace MarkdownProcessor
 
             RemoveTypeOnly();
 
-            Utils.LogInfo( "Remove Type Only information Complete" );
+            Utils.LogDebug( "Remove Type Only information Complete" );
 
             // write out the AML file
             // var OutFilename = modelName + ".aml";
@@ -777,9 +778,10 @@ namespace MarkdownProcessor
 
                         case BuiltInType.ExtensionObject:
                             {
-                                if( refDataType == "EnumValueType" && referenceName == "EnumValues" )
+                                addElements = false;
+
+                                if ( refDataType == "EnumValueType" && referenceName == "EnumValues" )
                                 {
-                                    addElements = false;
                                     AttributeTypeType attributeType = a as AttributeTypeType;
                                     if( attributeType != null )
                                     {
@@ -801,6 +803,37 @@ namespace MarkdownProcessor
                                                 }
                                             }
                                             attributeType.Constraint.Insert( stringValueRequirement );
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    IList valueAsList = val.Value as IList;
+                                    if (valueAsList != null)
+                                    {
+                                        for (int index = 0; index < valueAsList.Count; index++)
+                                        {
+                                            Variant elementVariant = new Variant(valueAsList[index]);
+                                            ExtensionObject extensionObject = elementVariant.Value as ExtensionObject;
+                                            NodeId typeId = ExpandedNodeId.ToNodeId(extensionObject.TypeId, m_modelManager.NamespaceUris);
+
+                                            Type extentionObjectType = extensionObject.Body.GetType();
+                                            if ( extensionObject.Body.GetType().FullName.Equals( "System.Xml.XmlElement") )
+                                            {
+                                                XmlElement xmlElement = extensionObject.Body as XmlElement;
+                                                if (xmlElement != null)
+                                                {
+                                                    UANode potential = GetDataTypeFromXmlElement(xmlElement, typeId);
+                                                    if ( potential != null )
+                                                    {
+                                                        typeId = potential.DecodedNodeId;
+                                                    }
+                                                }
+                                            }
+
+                                            bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+
+                                            AddModifyAttribute(a.Attribute, index.ToString(), typeId, elementVariant, elementListOf);
                                         }
                                     }
                                 }
@@ -1147,6 +1180,82 @@ namespace MarkdownProcessor
             return minimized;
         }
 
+        private UANode GetDataTypeFromXmlElement( XmlElement xmlElement, NodeId defined )
+        {
+            UANode dataType = m_modelManager.FindNode<UANode>(defined);
+            UAObject uaObject = dataType as UAObject;
+            if (uaObject != null)
+            {
+                // Look for encoding
+                List<ReferenceInfo> referenceList = m_modelManager.FindReferences(defined);
+                foreach (ReferenceInfo referenceInfo in referenceList)
+                {
+                    if (!referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals(
+                        Opc.Ua.ReferenceTypeIds.HasEncoding))
+                    {
+                        UANode potential = m_modelManager.FindNode<UANode>(referenceInfo.TargetId);
+                        if ( potential != null )
+                        {
+                            dataType = potential;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            UADataType uaDataType = dataType as UADataType;
+            if (uaDataType != null)
+            {
+                if (uaDataType.IsAbstract)
+                {
+                    List<ReferenceInfo> dataTypeReferences = m_modelManager.FindReferences(uaDataType.DecodedNodeId);
+                    Dictionary<NodeId, UANode> dataTypeDictionary = new Dictionary<NodeId, UANode>();
+                    foreach( ReferenceInfo referenceInfo in dataTypeReferences)
+                    {
+                        if (referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals(
+                            Opc.Ua.ReferenceTypeIds.HasSubtype))
+                        {
+                            UANode dataTypeUaNode = m_modelManager.FindNode<UANode>(referenceInfo.TargetId);
+                            if (dataTypeUaNode != null)
+                            {
+                                dataTypeDictionary.Add(referenceInfo.TargetId, dataTypeUaNode);
+                            }
+                        }
+                    }
+
+                    // Go find the actual typedefinition
+                    XmlElement type = SearchForElement("TypeId", xmlElement);
+                    if (type != null)
+                    {
+                        XmlElement typeIdentifier = SearchForElement("Identifier", type);
+                        if (typeIdentifier != null)
+                        {
+                            // This is not accurate, I'm just lucky at this point
+                            // I'm not lucky anymore.
+                            NodeId nodeId = new NodeId(typeIdentifier.InnerText);
+                            if (nodeId != null && !nodeId.IsNullNodeId)
+                            {
+                                UANode potential = GetDataTypeFromXmlElement(xmlElement, nodeId);
+                                if (dataTypeDictionary.ContainsKey(potential.DecodedNodeId))
+                                {
+                                    dataType = potential;
+                                }
+                                else
+                                {
+                                    UADataType potentialDataType = potential as UADataType;
+                                    if (potentialDataType != null && potentialDataType.IsAbstract == false)
+                                    {
+                                        dataType = potential;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return dataType;
+        }
 
         private Dictionary<string, DataTypeField> CreateFieldReferenceTypes( AttributeType attribute, NodeId typeNodeId )
         {
@@ -1313,39 +1422,32 @@ namespace MarkdownProcessor
                 XmlElement xmlElement = value as XmlElement;
                 if( xmlElement != null )
                 {
-                    NodeId typeDefinition = typeNodeId;
-                    UANode uANode = m_modelManager.FindNode<UANode>( typeNodeId );
-                    UAObject uaObject = uANode as UAObject;
-                    if( uaObject != null )
-                    {
-                        // Look for encoding
-                        List<ReferenceInfo> referenceList = m_modelManager.FindReferences( typeNodeId );
-                        foreach( ReferenceInfo referenceInfo in referenceList )
-                        {
-                            if( !referenceInfo.IsForward && referenceInfo.ReferenceTypeId.Equals( Opc.Ua.ReferenceTypeIds.HasEncoding ) )
-                            {
-                                typeDefinition = referenceInfo.TargetId;
-                                break;
-                            }
-                        }
-                    }
+                    UANode typeDefinition = GetDataTypeFromXmlElement( xmlElement, typeNodeId);
 
                     Dictionary<string, DataTypeField> fieldReferenceTypes = CreateFieldReferenceTypes(
-                        attribute, typeDefinition );
+                        attribute, typeDefinition.DecodedNodeId);
 
-                    if( fieldReferenceTypes != null )
+                    if ( fieldReferenceTypes != null )
                     {
                         foreach( KeyValuePair<string, DataTypeField> fieldReferenceType in fieldReferenceTypes )
                         {
-                            Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, fieldReferenceType.Value, xmlElement );
-                           
+                            UANode fieldTypeDefinition = GetDataTypeFromXmlElement(xmlElement, 
+                                fieldReferenceType.Value.DecodedDataType );
+
+                            Variant fieldVariant = CreateComplexVariant( fieldReferenceType.Key, 
+                                fieldReferenceType.Value, xmlElement );
+
+                            string attributeName = fieldReferenceType.Key;
+                            NodeId createDataType = fieldReferenceType.Value.DecodedDataType;
+
                             bool listOf = fieldReferenceType.Value.ValueRank >= ValueRanks.OneDimension;
 
                             AddModifyAttribute(
                                 attribute.Attribute,
-                                fieldReferenceType.Key,
-                                fieldReferenceType.Value.DecodedDataType,
-                                fieldVariant, bListOf: listOf );
+                                attributeName,
+                                createDataType,
+                                fieldVariant, 
+                                bListOf: listOf);
                         }
                     }
                 }
@@ -1494,49 +1596,64 @@ namespace MarkdownProcessor
 
             if( val.TypeInfo != null && val.TypeInfo.BuiltInType == BuiltInType.Int32 )
             {
-                int enumerationValue = -1;
+                UANode dataTypeNode = FindNode<UANode>(refDataType);
+                string dataTypeName = dataTypeNode.DecodedBrowseName.Name;
+                string uri = m_modelManager.FindModelUri(dataTypeNode.DecodedNodeId);
 
                 if( val.TypeInfo.ValueRank == ValueRanks.Scalar )
                 {
-                    enumerationValue = (int)val.Value;
-                }
-                else if( val.TypeInfo.ValueRank == ValueRanks.OneDimension )
-                {
-                    int[] enumerationValues = (int[])val.Value;
-                    if( enumerationValues.Length == 1 )
+                    int enumerationValue = (int)val.Value;
+                    UADataType enumerationNode = FindNode<UADataType>(dataTypeNode.DecodedNodeId);
+                    if (enumerationNode != null)
                     {
-                        enumerationValue = enumerationValues[ 0 ];
-                    }
-                }
-
-                if( enumerationValue >= 0 )
-                {
-                    var dataTypeNode = FindNode<UANode>( refDataType );
-                    var dataTypeName = dataTypeNode.DecodedBrowseName.Name;
-                    var uri = m_modelManager.FindModelUri( dataTypeNode.DecodedNodeId );
-
-                    UADataType enumerationNode = FindNode<UADataType>( dataTypeNode.DecodedNodeId );
-                    if( enumerationNode != null )
-                    {
-                        if( enumerationNode.Definition != null &&
+                        if (enumerationNode.Definition != null &&
                             enumerationNode.Definition.Field != null &&
-                            enumerationNode.Definition.Field.Length > 0 )
+                            enumerationNode.Definition.Field.Length > 0)
                         {
-                            foreach( DataTypeField field in enumerationNode.Definition.Field )
+                            foreach (DataTypeField field in enumerationNode.Definition.Field)
                             {
-                                if( field.Value == enumerationValue )
+                                if (field.Value == enumerationValue)
                                 {
-                                    Variant enumerationAsString = new Variant( field.Name );
+                                    Variant enumerationAsString = new Variant(field.Name);
 
-                                    attributeType = AddModifyAttribute( seq,
+                                    attributeType = AddModifyAttribute(seq,
                                         name,
                                         dataTypeName,
                                         enumerationAsString,
                                         bListOf: false,
-                                        sURI: uri );
+                                        sURI: uri);
 
                                     break;
                                 }
+                            }
+                        }
+                    }
+                }
+                else if( val.TypeInfo.ValueRank >= ValueRanks.OneDimension )
+                {
+                    int[] enumerationValues = (int[])val.Value;
+                    if( enumerationValues.Length > 0 )
+                    {
+                        string path = BuildLibraryReference(ATLPrefix, uri, ListOf + dataTypeName);
+                        CAEXObject attributeList = m_cAEXDocument.FindByPath(path);
+                        AttributeFamilyType listAttribute = attributeList as AttributeFamilyType;
+                        attributeType = seq[name];  //find the existing attribute with the name
+                        if (attributeType == null)
+                        {
+                            attributeType = seq.Append(name);  // not found so create a new one
+                        }
+
+                        attributeType.RecreateAttributeInstance(listAttribute);
+
+                        IList valueAsList = val.Value as IList;
+                        if (valueAsList != null)
+                        {
+                            for (int index = 0; index < valueAsList.Count; index++)
+                            {
+                                Variant elementVariant = new Variant(valueAsList[index]);
+                                bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
+                                AddModifyAttribute(attributeType.Attribute, index.ToString(), refDataType,
+                                    elementVariant );
                             }
                         }
                     }
@@ -2981,6 +3098,8 @@ namespace MarkdownProcessor
         {
             AddStructureFieldDefinition( attribute, uaNode );
 
+            AddEnumerationFieldDefinition( attribute, uaNode );
+
             AttributeType nodeIdAttribute = AddModifyAttribute( attribute.Attribute,"NodeId", "NodeId", 
                 new Variant( uaNode.DecodedNodeId ) );
 
@@ -3062,6 +3181,67 @@ namespace MarkdownProcessor
                             }
                         }
                     }
+                }
+            }
+        }
+
+        private void AddEnumerationFieldDefinition(AttributeFamilyType attribute, UANode uaNode)
+        {
+            UADataType enumNode = uaNode as UADataType;
+            if (enumNode != null && 
+                enumNode.Definition != null && 
+                enumNode.Definition.Field != null &&
+                enumNode.Definition.Field.Length > 0 )
+            {
+                string enumPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, Enumeration);
+
+                if (attribute.RefBaseClassPath.Equals(enumPath))
+                {
+                    string path = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "ListOfEnumField");
+                    AttributeFamilyType enumFieldDefinition = m_cAEXDocument.FindByPath(path) as AttributeFamilyType;
+
+                    AttributeType enumFields = new AttributeType(
+                        new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+
+                    enumFields.RecreateAttributeInstance(enumFieldDefinition as AttributeFamilyType);
+                    enumFields.Name = "EnumFieldDefinition";
+                    enumFields.AdditionalInformation.Append("OpcUa:TypeOnly");
+
+                    string enumFieldPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "EnumField");
+                    AttributeFamilyType enumFieldSource = m_cAEXDocument.FindByPath(enumFieldPath) as AttributeFamilyType;
+
+                    foreach (DataTypeField fieldDefinition in enumNode.Definition.Field)
+                    {
+                        AttributeType fieldAttribute = new AttributeType( new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+
+                        fieldAttribute.RecreateAttributeInstance(enumFieldSource);
+                        fieldAttribute.Name = fieldDefinition.Name;
+
+                        AddModifyAttribute(fieldAttribute.Attribute,
+                            "Name", "String", new Variant(fieldDefinition.Name));
+
+                        if (fieldDefinition.Description != null && fieldDefinition.Description.Length > 0)
+                        {
+                            LocalizedText localizedText = new LocalizedText(
+                                fieldDefinition.Description[0].Locale, fieldDefinition.Description[0].Value);
+                            AddModifyAttribute(fieldAttribute.Attribute,
+                                "Description", "LocalizedText", new Variant(localizedText));
+                        }
+
+                        if (fieldDefinition.DisplayName != null && fieldDefinition.DisplayName.Length > 0)
+                        {
+                            LocalizedText localizedText = new LocalizedText(
+                                fieldDefinition.DisplayName[0].Locale, fieldDefinition.DisplayName[0].Value);
+                            AddModifyAttribute(fieldAttribute.Attribute,
+                                "DisplayName", "LocalizedText", new Variant(localizedText));
+                        }
+
+                        AddModifyAttribute(fieldAttribute.Attribute,
+                            "Value", "Int32", new Variant(fieldDefinition.Value));
+
+                        enumFields.Attribute.Insert(fieldAttribute, false, true);
+                    }
+                    attribute.Attribute.Insert(enumFields, false, true);
                 }
             }
         }
@@ -3349,7 +3529,27 @@ namespace MarkdownProcessor
             Variant variant = new Variant();
 
             XmlElement xmlElement = SearchForElement( name, source );
-            if( xmlElement != null )
+
+            if (xmlElement == null)
+            {
+                XmlElement body = SearchForElement("Body", source);
+                XmlElement type = SearchForElement("TypeId", source);
+
+                if (body != null && type != null)
+                {
+                    if (body.ChildNodes.Count == 1)
+                    {
+                        XmlNodeList list = body.ChildNodes;
+                        XmlElement subBody = list.Item(0) as XmlElement;
+                        if (subBody != null)
+                        {
+                            xmlElement = SearchForElement(name, subBody);
+                        }
+                    }
+                }
+            }
+
+            if ( xmlElement != null )
             {
                 BuiltInType baseBuiltInType = BuiltInType.Null;
 
@@ -3359,7 +3559,7 @@ namespace MarkdownProcessor
                     baseBuiltInType = ComplexGetBuiltInType( baseBuiltInTypeNodeId );
                 }
 
-                if( typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
+                if(typeDefinition.DecodedDataType.Equals( Opc.Ua.DataTypeIds.BaseDataType ) )
                 {
                     // Defined as variant, or nothing at all
                     baseBuiltInType = BuiltInType.Variant;
@@ -3446,10 +3646,20 @@ namespace MarkdownProcessor
 
                                 if( typeDefinition.ValueRank >= ValueRanks.OneDimension )
                                 {
+                                    ExpandedNodeId elementId = absoluteId;
+
                                     List<ExtensionObject> extensions = new List<ExtensionObject>();
                                     foreach( XmlElement arrayElement in xmlElement.ChildNodes )
                                     {
-                                        extensions.Add( new ExtensionObject( absoluteId, arrayElement ) );
+                                        if ( typeDefinition.AllowSubTypes)
+                                        {
+                                            ExpandedNodeId expandedNodeId = GetExtensionObjectType(arrayElement);
+                                            if (expandedNodeId != null)
+                                            {
+                                                elementId = expandedNodeId;
+                                            }
+                                        }
+                                        extensions.Add( new ExtensionObject( elementId, arrayElement ) );
                                     }
 
                                     variant = new Variant( extensions );
@@ -3466,49 +3676,53 @@ namespace MarkdownProcessor
 
                         case BuiltInType.Enumeration:
                             {
-                                string value = xmlElement.InnerText;
-
                                 UADataType enumDefinition = m_modelManager.FindNode<UADataType>( typeDefinition.DecodedDataType );
 
                                 if( enumDefinition != null &&
                                     enumDefinition.Definition != null &&
                                     enumDefinition.Definition.Field != null )
                                 {
-
-                                    int parsedValue = -1;
-                                    bool useInt = int.TryParse( value, out parsedValue );
-                                    if( !useInt )
+                                    if (typeDefinition.ValueRank >= ValueRanks.OneDimension)
                                     {
-                                        if( value.Contains( '_' ) )
+                                        // There should be one child node with a list
+                                        if ( xmlElement.ChildNodes.Count == 1 )
                                         {
-                                            string[] parts = value.Split( '_' );
-                                            // This only works if there are three parts
-                                            if( parts.Length == 2 )
+                                            XmlElement listNode = xmlElement.FirstChild as XmlElement;
+                                            if ( listNode != null )
                                             {
-                                                useInt = int.TryParse( parts[ 1 ], out parsedValue );
+                                                List<int> values = new List<int>();
+                                                foreach (XmlElement child in listNode.ChildNodes)
+                                                {
+                                                    int enumValue = ParseEnumFromXml(enumDefinition, child);
+
+                                                    if (enumValue >= 0)
+                                                    {
+                                                        values.Add(enumValue);
+                                                    }
+                                                }
+                                                if (values.Count > 0)
+                                                {
+                                                    variant = new Variant(values);
+                                                }
+
                                             }
+                                            else
+                                            {
+                                                bool unexpected = true;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            bool unexpected = true;
                                         }
                                     }
-
-                                    foreach( DataTypeField dataTypeField in enumDefinition.Definition.Field )
+                                    else
                                     {
-                                        int createEnumValue = -1;
-                                        if( useInt )
-                                        {
-                                            if( dataTypeField.Value == parsedValue )
-                                            {
-                                                createEnumValue = dataTypeField.Value;
-                                            }
-                                        }
-                                        else if( dataTypeField.Name.Equals( value, StringComparison.OrdinalIgnoreCase ) )
-                                        {
-                                            createEnumValue = dataTypeField.Value;
-                                        }
+                                        int enumValue = ParseEnumFromXml(enumDefinition, xmlElement);
 
-                                        if( createEnumValue >= 0 )
+                                        if (enumValue >= 0)
                                         {
-                                            variant = new Variant( createEnumValue );
-                                            break;
+                                            variant = new Variant(enumValue);
                                         }
                                     }
                                 }
@@ -3526,6 +3740,51 @@ namespace MarkdownProcessor
             }
 
             return variant;
+        }
+
+        private int ParseEnumFromXml(UADataType enumDefinition, XmlElement xmlElement )
+        {
+            int enumValue = -1;
+
+            string value = xmlElement.InnerText;
+
+            int parsedValue = -1;
+            bool useInt = int.TryParse(value, out parsedValue);
+            if (!useInt)
+            {
+                if (value.Contains('_'))
+                {
+                    string[] parts = value.Split('_');
+                    if (parts.Length == 2)
+                    {
+                        useInt = int.TryParse(parts[1], out parsedValue);
+                    }
+                }
+            }
+
+            foreach (DataTypeField dataTypeField in enumDefinition.Definition.Field)
+            {
+                int createEnumValue = -1;
+                if (useInt)
+                {
+                    if (dataTypeField.Value == parsedValue)
+                    {
+                        createEnumValue = dataTypeField.Value;
+                    }
+                }
+                else if (dataTypeField.Name.Equals(value, StringComparison.OrdinalIgnoreCase))
+                {
+                    createEnumValue = dataTypeField.Value;
+                }
+
+                if (createEnumValue >= 0)
+                {
+                    enumValue = createEnumValue;
+                    break;
+                }
+            }
+
+            return enumValue;
         }
 
         private BuiltInType ComplexGetBuiltInType( NodeId source )
@@ -3580,6 +3839,55 @@ namespace MarkdownProcessor
             return null;
         }
 
+        private ExpandedNodeId GetExtensionObjectType(XmlElement extensionXml)
+        {
+            ExpandedNodeId expandedTypeNodeId = null;
+
+            NodeId typeNodeId = null;
+
+            XmlElement typeIdXmlElement = SearchForElement("TypeId", extensionXml);
+            if (typeIdXmlElement != null)
+            {
+                XmlElement identifierXmlElement = SearchForElement("Identifier", typeIdXmlElement);
+                if (identifierXmlElement != null)
+                {
+                    typeNodeId = new NodeId(identifierXmlElement.InnerText);
+                    if (typeNodeId != null && !typeNodeId.IsNullNodeId)
+                    {
+                        UANode uaNode = m_modelManager.FindNode<UANode>(typeNodeId);
+
+                        if ( uaNode != null )
+                        {
+                            UAObject uaObject = uaNode as UAObject;
+                            if (uaObject != null)
+                            {
+                                // Look for encoding
+                                List<ReferenceInfo> referenceList = m_modelManager.FindReferences(typeNodeId);
+                                foreach (ReferenceInfo referenceInfo in referenceList)
+                                {
+                                    if (!referenceInfo.IsForward && 
+                                        referenceInfo.ReferenceTypeId.Equals(Opc.Ua.ReferenceTypeIds.HasEncoding))
+                                    {
+                                        typeNodeId = referenceInfo.TargetId;
+
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (typeNodeId != null)
+            {
+                expandedTypeNodeId = NodeId.ToExpandedNodeId(typeNodeId, 
+                    m_modelManager.NamespaceUris);
+            }
+
+            return expandedTypeNodeId;
+        }
+
         #endregion
 
         #region Type Only
@@ -3605,7 +3913,7 @@ namespace MarkdownProcessor
 
         private void RemoveTypeOnlySystemUnitClasses( )
         {
-            Utils.LogInfo( "Remove TypeOnly Attributes - SystemUnitClasses" );
+            Utils.LogDebug( "Remove TypeOnly Attributes - SystemUnitClasses" );
 
             foreach( SystemUnitClassLibType libType in m_cAEXDocument.CAEXFile.SystemUnitClassLib )
             {
@@ -3667,7 +3975,7 @@ namespace MarkdownProcessor
 
             foreach( AttributeType attribute in attributesToRemove )
             {
-                Utils.LogInfo( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
+                Utils.LogDebug( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
                 attributes.RemoveElement( attribute );
             }
 
