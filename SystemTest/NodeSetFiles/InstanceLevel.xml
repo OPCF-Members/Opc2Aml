@@ -2876,7 +2876,7 @@
                     <EnumerationStructure xmlns="http://opcfoundation.org/UA/FX/AML/TESTING/LevelOne/Types.xsd">
                         <One>ReferenceType_32</One>
                         <Two>
-							<ListOfNegotiationStatus>
+							<ListOfNegotiationStatus xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
 								<NegotiationStatus xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Failed_2</NegotiationStatus>
 								<NegotiationStatus xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">Complete_1</NegotiationStatus>
 							</ListOfNegotiationStatus>

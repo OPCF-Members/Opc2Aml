@@ -229,6 +229,80 @@ namespace SystemTest
             Assert.IsNull(fieldDefinition, "Unexpected EnumFieldDefinition");
         }
 
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+
+        public void TestEnumStructure()
+        {
+            CAEXDocument doc = TestHelper.GetReadOnlyDocument("InstanceLevel.xml.amlx");
+            string enumerationStructureId = TestHelper.BuildAmlId("", TestHelper.Uris.InstanceLevel, "6036");
+            CAEXObject initialObject = doc.FindByID(enumerationStructureId);
+            InternalElementType internalElement = initialObject as InternalElementType;
+            Assert.IsNotNull(internalElement, "Unable to find Initial Object");
+
+            // Must have correct values, and no EnumFieldDefinition
+            AttributeType valueAttribute = internalElement.Attribute["Value"];
+            Assert.IsNotNull(valueAttribute, "Unable to retrieve Value Attribute");
+            Assert.IsNull(valueAttribute.Attribute["EnumFieldDefinition"], "Unexpected EnumFieldDefinition");
+            // 
+            AttributeType firstValue = valueAttribute.Attribute["One"];
+            Assert.IsNotNull(firstValue, "Unable to retrieve First Value Attribute");
+            Assert.IsNotNull(firstValue.Value, "First Value Attribute Value is null");
+            Assert.AreEqual("ReferenceType", firstValue.Value, "Unexpected Value for First Value Attribute");
+
+            AttributeType secondValue = valueAttribute.Attribute["Two"];
+            Assert.IsNotNull(secondValue, "Unable to retrieve Second Value Attribute");
+            {
+                AttributeType element = secondValue.Attribute["0"];
+                Assert.IsNotNull(element, "Unable to retrieve First Element Attribute");
+                Assert.IsNotNull(element.Value, "First Element Attribute Value is null");
+                Assert.AreEqual("Failed", element.Value, "Unexpected Value for First Element");
+            }
+            {
+                AttributeType element = secondValue.Attribute["1"];
+                Assert.IsNotNull(element, "Unable to retrieve Second Element Attribute");
+                Assert.IsNotNull(element.Value, "Second Element Attribute Value is null");
+                Assert.AreEqual("Complete", element.Value, "Unexpected Value for Second Element");
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+
+        public void TestEnumObject()
+        {
+            CAEXDocument doc = TestHelper.GetReadOnlyDocument("InstanceLevel.xml.amlx");
+            string enumerationObjectId = TestHelper.BuildAmlId("", TestHelper.Uris.InstanceLevel, "5009");
+            CAEXObject initialObject = doc.FindByID(enumerationObjectId);
+            InternalElementType internalElement = initialObject as InternalElementType;
+            Assert.IsNotNull(internalElement, "Unable to find Initial Object");
+
+            {
+                InternalElementType testObject = internalElement.InternalElement["One"];
+                AttributeType valueAttribute = testObject.Attribute["Value"];
+                Assert.IsNotNull(valueAttribute, "Unable to first Value Attribute");
+                Assert.IsNull(valueAttribute.Attribute["EnumFieldDefinition"], "Unexpected EnumFieldDefinition");
+                Assert.IsNotNull(valueAttribute.Value, "Unable to retrieve first Value-Value Attribute");
+                Assert.AreEqual("Failed", valueAttribute.Value, "Unexpected Value for First Value Attribute");
+            }
+            {
+                InternalElementType testObject = internalElement.InternalElement["Two"];
+                AttributeType valueAttribute = testObject.Attribute["Value"];
+                Assert.IsNotNull(valueAttribute, "Unable to first Value Attribute");
+                Assert.IsNull(valueAttribute.Attribute["EnumFieldDefinition"], "Unexpected EnumFieldDefinition");
+                {
+                    AttributeType element = valueAttribute.Attribute["0"];
+                    Assert.IsNotNull(element, "Unable to retrieve First Element Attribute");
+                    Assert.IsNotNull(element.Value, "First Element Attribute Value is null");
+                    Assert.AreEqual("Variable", element.Value, "Unexpected Value for First Element");
+                }
+                {
+                    AttributeType element = valueAttribute.Attribute["1"];
+                    Assert.IsNotNull(element, "Unable to retrieve Second Element Attribute");
+                    Assert.IsNotNull(element.Value, "Second Element Attribute Value is null");
+                    Assert.AreEqual("ObjectType", element.Value, "Unexpected Value for Second Element");
+                }
+            }
+        }
+
         #endregion
 
         #region Helpers

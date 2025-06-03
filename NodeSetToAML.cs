@@ -3676,49 +3676,53 @@ namespace MarkdownProcessor
 
                         case BuiltInType.Enumeration:
                             {
-                                string value = xmlElement.InnerText;
-
                                 UADataType enumDefinition = m_modelManager.FindNode<UADataType>( typeDefinition.DecodedDataType );
 
                                 if( enumDefinition != null &&
                                     enumDefinition.Definition != null &&
                                     enumDefinition.Definition.Field != null )
                                 {
-
-                                    int parsedValue = -1;
-                                    bool useInt = int.TryParse( value, out parsedValue );
-                                    if( !useInt )
+                                    if (typeDefinition.ValueRank >= ValueRanks.OneDimension)
                                     {
-                                        if( value.Contains( '_' ) )
+                                        // There should be one child node with a list
+                                        if ( xmlElement.ChildNodes.Count == 1 )
                                         {
-                                            string[] parts = value.Split( '_' );
-                                            // This only works if there are three parts
-                                            if( parts.Length == 2 )
+                                            XmlElement listNode = xmlElement.FirstChild as XmlElement;
+                                            if ( listNode != null )
                                             {
-                                                useInt = int.TryParse( parts[ 1 ], out parsedValue );
+                                                List<int> values = new List<int>();
+                                                foreach (XmlElement child in listNode.ChildNodes)
+                                                {
+                                                    int enumValue = ParseEnumFromXml(enumDefinition, child);
+
+                                                    if (enumValue >= 0)
+                                                    {
+                                                        values.Add(enumValue);
+                                                    }
+                                                }
+                                                if (values.Count > 0)
+                                                {
+                                                    variant = new Variant(values);
+                                                }
+
                                             }
+                                            else
+                                            {
+                                                bool unexpected = true;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            bool unexpected = true;
                                         }
                                     }
-
-                                    foreach( DataTypeField dataTypeField in enumDefinition.Definition.Field )
+                                    else
                                     {
-                                        int createEnumValue = -1;
-                                        if( useInt )
-                                        {
-                                            if( dataTypeField.Value == parsedValue )
-                                            {
-                                                createEnumValue = dataTypeField.Value;
-                                            }
-                                        }
-                                        else if( dataTypeField.Name.Equals( value, StringComparison.OrdinalIgnoreCase ) )
-                                        {
-                                            createEnumValue = dataTypeField.Value;
-                                        }
+                                        int enumValue = ParseEnumFromXml(enumDefinition, xmlElement);
 
-                                        if( createEnumValue >= 0 )
+                                        if (enumValue >= 0)
                                         {
-                                            variant = new Variant( createEnumValue );
-                                            break;
+                                            variant = new Variant(enumValue);
                                         }
                                     }
                                 }
@@ -3736,6 +3740,51 @@ namespace MarkdownProcessor
             }
 
             return variant;
+        }
+
+        private int ParseEnumFromXml(UADataType enumDefinition, XmlElement xmlElement )
+        {
+            int enumValue = -1;
+
+            string value = xmlElement.InnerText;
+
+            int parsedValue = -1;
+            bool useInt = int.TryParse(value, out parsedValue);
+            if (!useInt)
+            {
+                if (value.Contains('_'))
+                {
+                    string[] parts = value.Split('_');
+                    if (parts.Length == 2)
+                    {
+                        useInt = int.TryParse(parts[1], out parsedValue);
+                    }
+                }
+            }
+
+            foreach (DataTypeField dataTypeField in enumDefinition.Definition.Field)
+            {
+                int createEnumValue = -1;
+                if (useInt)
+                {
+                    if (dataTypeField.Value == parsedValue)
+                    {
+                        createEnumValue = dataTypeField.Value;
+                    }
+                }
+                else if (dataTypeField.Name.Equals(value, StringComparison.OrdinalIgnoreCase))
+                {
+                    createEnumValue = dataTypeField.Value;
+                }
+
+                if (createEnumValue >= 0)
+                {
+                    enumValue = createEnumValue;
+                    break;
+                }
+            }
+
+            return enumValue;
         }
 
         private BuiltInType ComplexGetBuiltInType( NodeId source )
