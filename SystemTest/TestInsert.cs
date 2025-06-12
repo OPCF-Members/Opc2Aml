@@ -1,12 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Org.BouncyCastle.Math.EC.ECCurve;
+using Aml.Engine.CAEX;
+using Aml.Engine.AmlObjects;
 
 namespace SystemTest
 {
@@ -14,363 +10,172 @@ namespace SystemTest
 
     public class TestInsert
     {
-        private static string _workingDirectory = "Working";
-        private static string _outputDirectory = "Output";
-        private static string _outputAllDirectory = "OutputAll";
-        private static string _configDirectory = "Config";
-
-        //[ClassInitialize]
-        //public static void ClassInitialize(TestContext context)
-        //{
-        //    DirectoryInfo source = new DirectoryInfo( "NodeSetFiles" );
-        //    DirectoryInfo destination = new DirectoryInfo( _workingDirectory );
-        //    if ( destination.Exists )
-        //    {
-        //        destination.Delete( true );
-        //    }
-
-        //    destination.Create();
-
-        //    foreach( FileInfo file in source.GetFiles() )
-        //    {
-        //        file.CopyTo( Path.Combine( destination.FullName, file.Name ) );
-        //    }
-
-        //    destination.CreateSubdirectory( _outputDirectory );
-        //    destination.CreateSubdirectory( _configDirectory );
-        //}
-
         #region Tests
 
         [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        public void One()
+        [DataRow("Minimal.xml.amlx")]
+        [DataRow("OneVariable.xml.amlx")]
+        public void Existing(string fileName)
         {
             DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();
             FileInfo existingFile = new FileInfo( 
-                Path.Combine( outputDirectoryInfo.FullName, "Minimal.xml.amlx" ) );
-            if ( existingFile.Exists )
+                Path.Combine( outputDirectoryInfo.FullName, fileName) );
+            Assert.IsTrue(existingFile.Exists);
+
+            TestUris(fileName, shouldExist: false);
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow("Minimal.xml", "MinimalInserted")]
+        [DataRow("OneVariable.xml", "OneVariableInserted")]
+        public void Simple(string inputFile, string outputFile)
+        {
+            DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();
+            FileInfo existingFile = new FileInfo(
+                Path.Combine(outputDirectoryInfo.FullName, outputFile + ".amlx"));
+            if (existingFile.Exists)
             {
                 existingFile.Delete();
             }
             existingFile.Refresh();
-            Assert.IsFalse( existingFile.Exists );
-            string commandLine = "--Nodeset Minimal.xml --Insert http://opcfoundation.org/UA/FX/AC/";
-            TestHelper.Execute( commandLine, expectedResult: 0 );
+            Assert.IsFalse(existingFile.Exists);
+            string commandLine = "--Nodeset " + inputFile +
+                " --Output " + outputFile +
+                " --Insert " + TestHelper.GetUri(TestHelper.Uris.Ac);
+
+            TestHelper.Execute(commandLine, expectedResult: 0);
 
             // Need to crack it now.
             existingFile.Refresh();
-            Assert.IsTrue( existingFile.Exists );
+            Assert.IsTrue(existingFile.Exists);
+
+            //  Now test it has the proper nodesets
+            TestUris(existingFile.Name, shouldExist: true);
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestMissingAll()
+        {
+            // Create a Directory to work in
+            DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();
+            string missingAll = "MissingAll";
+            DirectoryInfo missingAllDirectoryInfo = new DirectoryInfo(
+                Path.Combine(outputDirectoryInfo.FullName, missingAll));
+            if ( !missingAllDirectoryInfo.Exists )
+            {
+                missingAllDirectoryInfo.Create();
+                missingAllDirectoryInfo.Refresh();
+            }
+
+            FileInfo inputFile = new FileInfo(
+                Path.Combine(missingAllDirectoryInfo.FullName, "OneVariable.xml"));
+
+            if (!inputFile.Exists)
+            {
+                FileInfo sourceFile = new FileInfo(
+                    Path.Combine(outputDirectoryInfo.FullName, "OneVariable.xml"));
+                Assert.IsTrue(sourceFile.Exists);
+                sourceFile.CopyTo(inputFile.FullName, true);
+            }
+
+            FileInfo outputFile = new FileInfo(
+                Path.Combine(missingAllDirectoryInfo.FullName, "OneVariable.xml.amlx"));
+
+            if (outputFile.Exists)
+            {
+                outputFile.Delete();
+                outputFile.Refresh();
+            }
+
+            string commandLine = " --DirectoryInfo " + missingAllDirectoryInfo.FullName + 
+                "--Nodeset " + inputFile +
+                " --Insert " + TestHelper.GetUri(TestHelper.Uris.Ac);
+
+            TestHelper.Execute(commandLine, expectedResult: 1);
 
         }
 
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void OutputSpecific()
-        //{
-        //    DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestMissingOne()
+        {
+            // Create a Directory to work in
+            DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();
+            string missingOne = "MissingOne";
+            DirectoryInfo missingOneDirectoryInfo = new DirectoryInfo(
+                Path.Combine(outputDirectoryInfo.FullName, missingOne));
+            if (!missingOneDirectoryInfo.Exists)
+            {
+                missingOneDirectoryInfo.Create();
+                missingOneDirectoryInfo.Refresh();
+            }
 
-        //    FileInfo fileInfo = new FileInfo(outputDirectoryInfo.FullName + "\\InstanceLevel.xml.amlx" );
-        //    if ( fileInfo.Exists)
-        //    {
-        //        fileInfo.Delete();
-        //    }
+            List<string> copyFiles = new List<string>
+            {
+                "OneVariable.xml",
+                "Modified.Opc.Ua.NodeSet2.xml",
+                "Opc.Ua.Di.NodeSet2.xml",
+                //"Opc.Ua.fx.data.nodeset2.xml",  Deliberately not copied
+                "Opc.Ua.fx.ac.nodeset2.xml"
+            };
 
-        //    // Delete another file
-        //    FileInfo dontBuildfileInfo = new FileInfo(outputDirectoryInfo.FullName + "\\LevelOne.xml.amlx" );
-        //    if( dontBuildfileInfo.Exists )
-        //    {
-        //        dontBuildfileInfo.Delete();
-        //    }
+            foreach (string copyFile in copyFiles)
+            {
+                FileInfo inputFile = new FileInfo(
+                    Path.Combine(missingOneDirectoryInfo.FullName, copyFile));
 
-        //    string commandLine = NodesetParameter( "InstanceLevel.xml" );
+                if (!inputFile.Exists)
+                {
+                    FileInfo sourceFile = new FileInfo(
+                        Path.Combine(outputDirectoryInfo.FullName, copyFile));
+                    Assert.IsTrue(sourceFile.Exists);
+                    sourceFile.CopyTo(inputFile.FullName, true);
+                }
+            }
 
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
+            FileInfo outputFile = new FileInfo(
+                Path.Combine(missingOneDirectoryInfo.FullName, "OneVariable.xml.amlx"));
 
-        //    fileInfo.Refresh();
-        //    Assert.IsTrue(fileInfo.Exists);
+            if (outputFile.Exists)
+            {
+                outputFile.Delete();
+                outputFile.Refresh();
+            }
 
-        //    dontBuildfileInfo.Refresh();
-        //    Assert.IsFalse( dontBuildfileInfo.Exists );
-        //}
+            string commandLine = " --DirectoryInfo " + missingOneDirectoryInfo.FullName +
+                "--Nodeset OneVariable.xml" +
+                " --Insert " + TestHelper.GetUri(TestHelper.Uris.Ac);
 
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void OutputNonExistent()
-        //{
-        //    string commandLine = "--Nodeset NonExistent.xml";
-
-        //    TestHelper.Execute( commandLine, expectedResult: 1 );
-        //}
-
-        //// Test 6:  Output specific output overwrite
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void OutputSpecificOverwrite()
-        //{
-        //    string commandLine = DirectoryParameter( ) + 
-        //        NodesetParameter( "LevelOne.xml" ) +
-        //        OutputParameter( _outputDirectory + "\\OverwriteMe" );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-        //    DateTime before = DateTime.UtcNow;
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-        //    FileInfo fileInfo = new FileInfo( OutputDirectory().FullName + "\\OverwriteMe.amlx" );
-        //    Assert.IsTrue( fileInfo.Exists );
-        //    Assert.IsTrue( before < fileInfo.LastWriteTimeUtc );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void SpecificNoDirectory()
-        //{
-        //    string commandLine = NodesetParameter( WorkingDirectoryString() + "LevelOne.xml" ) + 
-        //        OutputParameter( "SpecificNoDirectory" );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-        //    // Check the working directory for the file
-        //    FileInfo fileInfo = new FileInfo( WorkingDirectory().FullName + "\\SpecificNoDirectory.amlx" );
-        //    Assert.IsTrue( fileInfo.Exists );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void NoDirectoryOutputSubdirectory()
-        //{
-        //    string commandLine = NodesetParameter( WorkingDirectoryString() + "LevelOne.xml" ) +
-        //        OutputParameter( _outputDirectory + "\\NoDirectoryOutputSubdirectory" );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-        //    // Check the working directory for the file
-        //    FileInfo fileInfo = new FileInfo( OutputDirectory().FullName + "\\NoDirectoryOutputSubdirectory.amlx" );
-        //    Assert.IsTrue( fileInfo.Exists );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void RelativeDirectory()
-        //{
-        //    string commandLine = DirectoryParameter() + 
-        //        NodesetParameter( "LevelOne.xml" ) +
-        //        OutputParameter( _outputDirectory + "\\RelativeDirectory" );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-        //    // Check the working directory for the file
-        //    FileInfo fileInfo = new FileInfo( OutputDirectory().FullName + "\\RelativeDirectory.amlx" );
-        //    Assert.IsTrue( fileInfo.Exists );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void AbsoluteDirectory()
-        //{
-        //    DirectoryInfo directoryInfo = new DirectoryInfo( WorkingDirectory().FullName );
-        //    string commandLine = "--DirectoryInfo " + directoryInfo.FullName  +
-        //        NodesetParameter( "LevelOne.xml" ) +
-        //        OutputParameter( _outputDirectory + "\\AbsoluteDirectory" );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-        //    // Check the working directory for the file
-        //    FileInfo fileInfo = new FileInfo( OutputDirectory().FullName + "\\AbsoluteDirectory.amlx" );
-        //    Assert.IsTrue( fileInfo.Exists );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void BadDirectory()
-        //{
-        //    string commandLine = DirectoryParameter() + "BadDirectory" +
-        //        NodesetParameter( "LevelOne.xml" ) +
-        //        OutputParameter( _outputDirectory + "\\BadDirectory" );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 1 );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void OutputAllDirectory()
-        //{
-        //    DirectoryInfo directoryInfo = new DirectoryInfo( WorkingDirectory().FullName );
-
-        //    foreach( FileInfo file in directoryInfo.GetFiles( "*.amlx") )
-        //    {
-        //        file.Delete();
-        //    }
-
-        //    Assert.AreEqual( 0, directoryInfo.GetFiles( "*.amlx" ).Length );
-
-        //    string commandLine = DirectoryParameter();
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-
-        //    Assert.IsTrue( directoryInfo.GetFiles( "*.amlx" ).Length > 0 );
-        //    Assert.IsTrue( directoryInfo.GetFiles( "*.amlx" ).Length == 
-        //        directoryInfo.GetFiles( "*.xml" ).Length );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void OutputOneDirectory()
-        //{
-        //    string commandLine = DirectoryParameter() +
-        //        OutputParameter( _outputDirectory + "\\OutputOneDirectory" );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 1 );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void RelativeConfig()
-        //{
-        //    DirectoryInfo directoryInfo = new DirectoryInfo( ConfigDirectory().FullName );
-        //    string fileName = Path.Combine( directoryInfo.FullName, "RelativeConfig.json" );
-        //    string relativeLog = ConfigDirectoryString() + "RelativeConfig.log";
-        //    string useRelativePath = relativeLog.Replace( '\\', '/' );
-        //    WriteConfigFile( fileName, useRelativePath );
-
-        //    string relativePath = ".\\Config\\RelativeConfig.json";
-
-        //    string commandLine = DirectoryParameter() +
-        //        NodesetParameter( "LevelOne.xml" ) +
-        //        OutputParameter( _outputDirectory + "\\RelativeConfig" +
-        //        ConfigParameter( relativePath ) );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-
-        //    FileInfo expectedLog = new FileInfo( relativeLog );
-        //    Assert.IsTrue( expectedLog.Exists );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void AbsoluteConfig()
-        //{
-        //    DirectoryInfo directoryInfo = new DirectoryInfo( ConfigDirectory().FullName );
-        //    string fileName = Path.Combine( directoryInfo.FullName, "AbsoluteConfig.json" );
-
-        //    string absoluteLog = directoryInfo.FullName + "\\AbsoluteConfig.log";
-        //    string useAbsolutePath = absoluteLog.Replace( '\\', '/' );
-        //    WriteConfigFile( fileName, useAbsolutePath );
-
-        //    string commandLine = DirectoryParameter() +
-        //        NodesetParameter( "LevelOne.xml" ) +
-        //        OutputParameter( _outputDirectory + "\\AbsoluteConfig" +
-        //        ConfigParameter( fileName ) );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-
-        //    FileInfo expectedLog = new FileInfo( absoluteLog );
-        //    Assert.IsTrue( expectedLog.Exists );
-        //}
-
-        //[TestMethod, Timeout( TestHelper.UnitTestTimeout )]
-        //public void BadConfig()
-        //{
-        //    DateTime start = DateTime.UtcNow;
-
-        //    DirectoryInfo directoryInfo = new DirectoryInfo( ConfigDirectory().FullName );
-        //    string fileName = Path.Combine( directoryInfo.FullName, "BadConfig.json" );
-
-        //    string absoluteLog = directoryInfo.FullName + "\\BadConfig.log";
-        //    string useAbsolutePath = absoluteLog.Replace( '\\', '/' );
-        //    WriteConfigFile( fileName, useAbsolutePath );
-
-        //    string commandLine = DirectoryParameter() +
-        //        NodesetParameter( "LevelOne.xml" ) +
-        //        OutputParameter( _outputDirectory + "\\BadConfig" +
-        //        ConfigParameter( fileName + "bad" ) );
-
-        //    TestHelper.Execute( commandLine, expectedResult: 0 );
-
-        //    // Get the time of Opc2Aml.report.txt
-        //    FileInfo defaultReport = new FileInfo( TestHelper.GetOpc2AmlDirectory().FullName + "\\Opc2Aml.report.txt" );
-        //    Assert.IsTrue( defaultReport.Exists );
-        //    Assert.IsTrue( start < defaultReport.LastWriteTimeUtc );
-        //}
-
+            TestHelper.Execute(commandLine, expectedResult: 1);
+        }
 
         #endregion
 
-        #region Helpers
-
-
-        private void WriteConfigFile( string filename, string parameter )
+        public void TestUris(string fileName, bool shouldExist)
         {
-            List<string> lines = new List<string>();
+            DirectoryInfo outputDirectoryInfo = TestHelper.GetOpc2AmlDirectory();
+            FileInfo existingFile = new FileInfo(
+                Path.Combine(outputDirectoryInfo.FullName, fileName));
+            Assert.IsTrue(existingFile.Exists);
 
-            lines.Add( "{" );
-            lines.Add( "\t\"TraceConfiguration\": {" );
-            lines.Add( "\t\t\"OutputFilePath\": \"" + parameter + "\"," );
-            lines.Add( "\t\t\"DeleteOnLoad\": true," );
-            lines.Add( "\t\t\"LogLevel\": \"Information\"" );
+            AutomationMLContainer container = new AutomationMLContainer(existingFile.FullName,
+                System.IO.FileMode.Open, FileAccess.Read);
+            Assert.IsNotNull(container, "Unable to find container");
+            CAEXDocument document = CAEXDocument.LoadFromStream(container.RootDocumentStream());
+            Assert.IsNotNull(document, "Unable to find document");
 
-            lines.Add( "\t}" );
-            lines.Add( "}" );
+            bool found = false;
 
-            TestHelper.WriteFile( filename, lines );
+            string searchFor = "SUC_" + TestHelper.GetUri(TestHelper.Uris.Ac);
+            foreach (SystemUnitClassLibType systemUnitClass in document.CAEXFile.SystemUnitClassLib)
+            {
+                if (systemUnitClass.Name.Equals(searchFor))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            Assert.AreEqual(shouldExist, found);
         }
-
-        private DirectoryInfo OutputDirectory()
-        {
-            return new DirectoryInfo( WorkingDirectory().FullName + "\\" + _outputDirectory );
-        }
-
-        private DirectoryInfo ConfigDirectory()
-        {
-            return new DirectoryInfo( WorkingDirectory().FullName + "\\" + _configDirectory );
-        }
-
-        private DirectoryInfo WorkingDirectory()
-        {
-            return new DirectoryInfo( _workingDirectory );
-        }
-
-        private string NodesetParameter(string nodeset)
-        {
-            return " --Nodeset " + nodeset;
-        }
-
-        private string DirectoryParameter( )
-        {
-            return " --DirectoryInfo " + WorkingDirectoryString();
-        }
-
-        private string OutputParameter( string output)
-        {
-            return  " --Output " + output;
-        }
-
-        private string ConfigParameter( string config )
-        {
-            return " --Config " + config;
-        }
-
-        private string InsertParameter( string insert )
-        {
-            return " --Insert " + insert;
-        }
-
-        private string InsertParameter( List<string> insert )
-        {
-            string multiple = string.Join( ",", insert );
-            return " --Insert " + multiple;
-        }
-
-        private string OutputDirectoryString()
-        {
-            return WorkingDirectoryString() + _outputDirectory + "\\";
-        }
-
-        private string WorkingDirectoryString()
-        {
-            return RelativePath() + _workingDirectory + "\\";
-        }
-        private string ConfigDirectoryString()
-        {
-            return WorkingDirectoryString() + _configDirectory + "\\";
-        }
-
-
-        private string RelativePath( )
-        {
-            return  "..\\..\\..\\..\\SystemTest\\bin\\" + GetBuildType() + "\\net6.0\\";
-        }
-
-        private string GetBuildType()
-        {
-#if DEBUG
-            return "Debug";
-#else
-            return "Release";
-#endif
-        }
-
-        #endregion
     }
 }
