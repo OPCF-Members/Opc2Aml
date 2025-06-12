@@ -22,7 +22,7 @@ jobs:
     runs-on: [ubuntu-latest]
     timeout-minutes: 30
     container:
-      image: mcr.microsoft.com/dotnet/sdk:6.0
+      image: mcr.microsoft.com/dotnet/sdk:8.0
 
     steps:
       - name: Checkout source code
@@ -35,13 +35,13 @@ jobs:
 
       - name: Pack artifacts
         run:
-          tar -czvf Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz -C ./Opc2AmlConsole/bin/Release/net6.0/ .
+          tar -czvf Opc2Aml.binaries.${{env.BUILD_VERSION}}.tar.gz -C ./Opc2AmlConsole/bin/Release/net8.0/ .
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Opc2Aml.binaries.${{env.BUILD_VERSION}}
-          path: ./Opc2AmlConsole/bin/Release/net6.0/
+          path: ./Opc2AmlConsole/bin/Release/net8.0/
           retention-days: 21
           if-no-files-found: error
 

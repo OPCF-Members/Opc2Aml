@@ -14,7 +14,9 @@
         <Alias Alias="Boolean">i=1</Alias>
         <Alias Alias="Int16">i=4</Alias>
         <Alias Alias="UInt16">i=5</Alias>
-        <Alias Alias="String">i=12</Alias>
+		<Alias Alias="Int32">i=6</Alias>
+		<Alias Alias="Double">i=11</Alias>
+		<Alias Alias="String">i=12</Alias>
         <Alias Alias="DateTime">i=13</Alias>
         <Alias Alias="Guid">i=14</Alias>
         <Alias Alias="ByteString">i=15</Alias>
@@ -26,21 +28,112 @@
         <Alias Alias="LocalizedText">i=21</Alias>
         <Alias Alias="DataValue">i=23</Alias>
         <Alias Alias="DiagnosticInfo">i=25</Alias>
-        <Alias Alias="HasEncoding">i=38</Alias>
+		<Alias Alias="HasModellingRule">i=37</Alias>
+		<Alias Alias="HasEncoding">i=38</Alias>
         <Alias Alias="HasTypeDefinition">i=40</Alias>
         <Alias Alias="HasSubtype">i=45</Alias>
         <Alias Alias="HasProperty">i=46</Alias>
         <Alias Alias="HasComponent">i=47</Alias>
         <Alias Alias="IdType">i=256</Alias>
-        <Alias Alias="NumericRange">i=291</Alias>
-        <Alias Alias="ComprehensiveScalarType">ns=2;i=3003</Alias>
-    </Aliases>
+		<Alias Alias="NodeClass">i=257</Alias>
+		<Alias Alias="NumericRange">i=291</Alias>
+		<Alias Alias="NegotiationStatus">i=24216</Alias>
+		<Alias Alias="ComprehensiveScalarType">ns=2;i=3003</Alias>
+		<Alias Alias="AbstractionOne">ns=2;i=3007</Alias>
+		<Alias Alias="AbstractionSub">ns=2;i=3008</Alias>
+		<Alias Alias="AbstractionTwo">ns=2;i=3010</Alias>
+	</Aliases>
     <Extensions>
         <Extension>
             <ua:ModelInfo Tool="UaModeler" Hash="WkxFfHzAEqrG+dN5a3SCkg==" Version="1.6.8"/>
         </Extension>
     </Extensions>
-    <UADataType NodeId="ns=1;i=3004" BrowseName="1:ComprehensiveArrayType">
+	<UADataType NodeId="ns=1;i=3003" BrowseName="1:AbstractionChildOneA">
+		<DisplayName>AbstractionChildOneA</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">ns=2;i=3007</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5005</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5007</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5006</Reference>
+		</References>
+		<Definition Name="1:AbstractionChildOneA">
+			<Field DataType="Int32" Name="ChildOneAMember"/>
+		</Definition>
+	</UADataType>
+	<UADataType NodeId="ns=1;i=3007" BrowseName="1:AbstractionChildOneB">
+		<DisplayName>AbstractionChildOneB</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">ns=2;i=3007</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5008</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5010</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5009</Reference>
+		</References>
+		<Definition Name="1:AbstractionChildOneB">
+			<Field DataType="Double" Name="ChildOneBMember"/>
+		</Definition>
+	</UADataType>
+	<UADataType NodeId="ns=1;i=3011" BrowseName="1:AbstractionChildOneC">
+		<DisplayName>AbstractionChildOneC</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">ns=2;i=3007</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5011</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5013</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5012</Reference>
+		</References>
+		<Definition Name="1:AbstractionChildOneC">
+			<Field AllowSubTypes="true" DataType="AbstractionSub" Name="ChildOneCMember"/>
+		</Definition>
+	</UADataType>
+	<UADataType NodeId="ns=1;i=3015" BrowseName="1:AbstractionChildOneD">
+		<DisplayName>AbstractionChildOneD</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">ns=2;i=3007</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5014</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5016</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5015</Reference>
+		</References>
+		<Definition Name="1:AbstractionChildOneD">
+			<Field AllowSubTypes="true" DataType="AbstractionOne" ValueRank="1" ArrayDimensions="0" Name="ChildOneDMember"/>
+		</Definition>
+	</UADataType>
+	<UADataType NodeId="ns=1;i=3017" BrowseName="1:AbstractionStructureTwo">
+		<DisplayName>AbstractionStructureTwo</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5038</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5040</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5039</Reference>
+		</References>
+		<Definition Name="1:AbstractionStructureTwo">
+			<Field AllowSubTypes="true" DataType="AbstractionOne" ValueRank="1" ArrayDimensions="0" Name="AbstractionOneArray"/>
+			<Field AllowSubTypes="true" DataType="AbstractionTwo" ValueRank="1" ArrayDimensions="0" Name="AbstractionTwoArray"/>
+		</Definition>
+	</UADataType>
+	<UADataType NodeId="ns=1;i=3019" BrowseName="1:AbstractionChildTwoA">
+		<DisplayName>AbstractionChildTwoA</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">ns=2;i=3010</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5017</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5019</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5018</Reference>
+		</References>
+		<Definition Name="1:AbstractionChildTwoA">
+			<Field DataType="Double" Name="ChildTwoAMember"/>
+		</Definition>
+	</UADataType>
+	<UADataType NodeId="ns=1;i=3023" BrowseName="1:AbstractionChildTwoB">
+		<DisplayName>AbstractionChildTwoB</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">ns=2;i=3010</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5035</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5037</Reference>
+			<Reference ReferenceType="HasEncoding">ns=1;i=5036</Reference>
+		</References>
+		<Definition Name="1:AbstractionChildTwoB">
+			<Field DataType="String" Name="ChildTwoBMember"/>
+		</Definition>
+	</UADataType>
+	<UADataType NodeId="ns=1;i=3004" BrowseName="1:ComprehensiveArrayType">
         <DisplayName>ComprehensiveArrayType</DisplayName>
         <References>
             <Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
@@ -65,7 +158,56 @@
             <Field DataType="DiagnosticInfo" ValueRank="1" ArrayDimensions="2" Name="DiagnosticInfo"/>
         </Definition>
     </UADataType>
-    <UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING_LevelTwo_" NodeId="ns=1;i=5004" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/">
+
+	<UAObjectType NodeId="ns=1;i=1013" BrowseName="1:AbstractLevelTwo">
+		<DisplayName>AbstractLevelTwo</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6018</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6019</Reference>
+		</References>
+	</UAObjectType>
+	<UAVariable DataType="AbstractionOne" ParentNodeId="ns=1;i=1013" NodeId="ns=1;i=6018" BrowseName="1:One" AccessLevel="3">
+		<DisplayName>One</DisplayName>
+		<References>
+			<Reference ReferenceType="HasModellingRule">i=78</Reference>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1013</Reference>
+		</References>
+	</UAVariable>
+	<UAVariable DataType="AbstractionTwo" ParentNodeId="ns=1;i=1013" NodeId="ns=1;i=6019" BrowseName="1:Two" AccessLevel="3">
+		<DisplayName>Two</DisplayName>
+		<References>
+			<Reference ReferenceType="HasModellingRule">i=78</Reference>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1013</Reference>
+		</References>
+	</UAVariable>
+	<UAObjectType NodeId="ns=1;i=1004" BrowseName="1:EnumerationObject">
+		<DisplayName>EnumerationObject</DisplayName>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6010</Reference>
+			<Reference ReferenceType="HasComponent">ns=1;i=6011</Reference>
+		</References>
+	</UAObjectType>
+	<UAVariable DataType="NegotiationStatus" ParentNodeId="ns=1;i=1004" NodeId="ns=1;i=6010" BrowseName="1:One" AccessLevel="3">
+		<DisplayName>One</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasModellingRule">i=78</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1004</Reference>
+		</References>
+	</UAVariable>
+	<UAVariable DataType="NodeClass" ParentNodeId="ns=1;i=1004" ValueRank="1" NodeId="ns=1;i=6011" ArrayDimensions="0" BrowseName="1:Two" AccessLevel="3">
+		<DisplayName>Two</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="HasModellingRule">i=78</Reference>
+			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1004</Reference>
+		</References>
+	</UAVariable>
+	<UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING_LevelTwo_" NodeId="ns=1;i=5004" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING/LevelTwo/</DisplayName>
         <References>
             <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
@@ -161,4 +303,151 @@
             <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3004</Reference>
         </References>
     </UAObject>
+    <UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5005" BrowseName="Default Binary">
+        <DisplayName>Default Binary</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3003</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5006" BrowseName="Default XML">
+        <DisplayName>Default XML</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3003</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5007" BrowseName="Default JSON">
+        <DisplayName>Default JSON</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3003</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5008" BrowseName="Default Binary">
+        <DisplayName>Default Binary</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3007</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5009" BrowseName="Default XML">
+        <DisplayName>Default XML</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3007</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5010" BrowseName="Default JSON">
+        <DisplayName>Default JSON</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3007</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5011" BrowseName="Default Binary">
+        <DisplayName>Default Binary</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3011</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5012" BrowseName="Default XML">
+        <DisplayName>Default XML</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3011</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5013" BrowseName="Default JSON">
+        <DisplayName>Default JSON</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3011</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5014" BrowseName="Default Binary">
+        <DisplayName>Default Binary</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3015</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5015" BrowseName="Default XML">
+        <DisplayName>Default XML</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3015</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5016" BrowseName="Default JSON">
+        <DisplayName>Default JSON</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3015</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5017" BrowseName="Default Binary">
+        <DisplayName>Default Binary</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3019</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5018" BrowseName="Default XML">
+        <DisplayName>Default XML</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3019</Reference>
+        </References>
+    </UAObject>
+    <UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5019" BrowseName="Default JSON">
+        <DisplayName>Default JSON</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+            <Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3019</Reference>
+        </References>
+    </UAObject>
+	<UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5035" BrowseName="Default Binary">
+		<DisplayName>Default Binary</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3023</Reference>
+		</References>
+	</UAObject>
+	<UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5036" BrowseName="Default XML">
+		<DisplayName>Default XML</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3023</Reference>
+		</References>
+	</UAObject>
+	<UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5037" BrowseName="Default JSON">
+		<DisplayName>Default JSON</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3023</Reference>
+		</References>
+	</UAObject>
+	<UAObject SymbolicName="DefaultBinary" NodeId="ns=1;i=5038" BrowseName="Default Binary">
+		<DisplayName>Default Binary</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3017</Reference>
+		</References>
+	</UAObject>
+	<UAObject SymbolicName="DefaultXml" NodeId="ns=1;i=5039" BrowseName="Default XML">
+		<DisplayName>Default XML</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3017</Reference>
+		</References>
+	</UAObject>
+	<UAObject SymbolicName="DefaultJson" NodeId="ns=1;i=5040" BrowseName="Default JSON">
+		<DisplayName>Default JSON</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+			<Reference ReferenceType="HasEncoding" IsForward="false">ns=1;i=3017</Reference>
+		</References>
+	</UAObject>
 </UANodeSet>

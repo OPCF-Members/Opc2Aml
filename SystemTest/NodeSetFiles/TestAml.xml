@@ -35,11 +35,13 @@
         <Alias Alias="HasEncoding">i=38</Alias>
         <Alias Alias="HasDescription">i=39</Alias>
         <Alias Alias="IdType">i=256</Alias>
-        <Alias Alias="NumericRange">i=291</Alias>
-        <Alias Alias="SessionDiagnosticsDataType">i=865</Alias>
+		<Alias Alias="NodeClass">i=257</Alias>
+    	<Alias Alias="NumericRange">i=291</Alias>
+		<Alias Alias="SessionDiagnosticsDataType">i=865</Alias>
         <Alias Alias="SessionSecurityDiagnosticsDataType">i=868</Alias>
         <Alias Alias="SubscriptionDiagnosticsDataType">i=874</Alias>
-        <Alias Alias="LowLevelStructure">ns=1;i=3003</Alias>
+		<Alias Alias="NegotiationStatus">i=24216</Alias>
+		<Alias Alias="LowLevelStructure">ns=1;i=3003</Alias>
 
     </Aliases>
 
@@ -3225,12 +3227,34 @@
             </uax:ListOfLocalizedText>
         </Value>
     </UAVariable>
-    
-    <!-- Next Numbers
+
+
+	<UAVariable DataType="NegotiationStatus" NodeId="ns=1;i=6233" BrowseName="1:NegotiationStatusValue" AccessLevel="3">
+		<DisplayName>NegotiationStatusValue</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5001</Reference>
+		</References>
+		<Value>
+			<uax:Int32>2</uax:Int32>
+		</Value>
+	</UAVariable>
+	<UAVariable DataType="NodeClass" NodeId="ns=1;i=6234" BrowseName="1:NodeClassValue" AccessLevel="3">
+		<DisplayName>NodeClassValue</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5001</Reference>
+		</References>
+		<Value>
+			<uax:Int32>8</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<!-- Next Numbers
     ObjectType 1009
     VariableType 2001
     DataType 3004
     Object 5025
-    Variable 6232
+    Variable 6235
     -->
 </UANodeSet>
