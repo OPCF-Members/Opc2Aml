@@ -107,6 +107,7 @@ namespace MarkdownProcessor
         private readonly NodeId IntegerNodeId = Opc.Ua.DataTypeIds.Integer;
 
         private readonly System.Xml.Linq.XNamespace defaultNS = "http://www.dke.de/CAEX";
+        private const string OpcUaTypeOnly = "OpcUa:TypeOnly";
         private const string uaNamespaceURI = "http://opcfoundation.org/UA/";
         private const string OpcLibInfoNamespace = "http://opcfoundation.org/UA/FX/2021/08/OpcUaLibInfo.xsd";
         private UANode structureNode;
@@ -1678,7 +1679,7 @@ namespace MarkdownProcessor
             var at = AddModifyAttribute(seq, AttributeName, "Boolean", value);
             if (at != null && typeOnly)
             {
-                at.AdditionalInformation.Append("OpcUa:TypeOnly");
+                at.AdditionalInformation.Append(OpcUaTypeOnly);
             }
             return at;
         }
@@ -2707,7 +2708,7 @@ namespace MarkdownProcessor
             a.AttributeDataType = AttType;
             a.AttributeValue = value;
 
-            a.AdditionalInformation.Append("OpcUa:TypeOnly");
+            a.AdditionalInformation.Append(OpcUaTypeOnly);
         }
 
         private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
@@ -2772,7 +2773,7 @@ namespace MarkdownProcessor
                     AttributeType inverseNameAttribute = AddModifyAttribute(added.Attribute, 
                         "InverseName", "LocalizedText", refnode.InverseName[0].Value);
                     RemoveUnwantedNodeIdAttribute(inverseNameAttribute);
-                    inverseNameAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
+                    inverseNameAttribute.AdditionalInformation.Append(OpcUaTypeOnly);
                 }
 
                 // Need typeonly here
@@ -2798,7 +2799,7 @@ namespace MarkdownProcessor
                     AttributeType inverseNameAttribute = AddModifyAttribute(
                         inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
                     RemoveUnwantedNodeIdAttribute(inverseNameAttribute);
-                    inverseNameAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
+                    inverseNameAttribute.AdditionalInformation.Append(OpcUaTypeOnly);
 
                     OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
                     OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string", added.CAEXPath());
@@ -2806,7 +2807,7 @@ namespace MarkdownProcessor
             }
 
             AttributeType nodeIdAttribute = AddModifyAttribute(added.Attribute, "NodeId", "NodeId", new Variant( nodeId ) );
-            nodeIdAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+            nodeIdAttribute.AdditionalInformation.Append( OpcUaTypeOnly );
             MinimizeNodeId( nodeIdAttribute );
         }
 
@@ -2867,6 +2868,7 @@ namespace MarkdownProcessor
                 }
 
                 att.Constraint.Insert( stringValueRequirement );
+
                 return;
             }
 
@@ -3105,7 +3107,7 @@ namespace MarkdownProcessor
 
             MinimizeNodeId( nodeIdAttribute );
 
-            nodeIdAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+            nodeIdAttribute.AdditionalInformation.Append( OpcUaTypeOnly );
         }
 
 
@@ -3143,7 +3145,7 @@ namespace MarkdownProcessor
 
                                     structureFieldAttribute.RecreateAttributeInstance( structureFieldDefinition as AttributeFamilyType );
                                     structureFieldAttribute.Name = "StructureFieldDefinition";
-                                    structureFieldAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+                                    structureFieldAttribute.AdditionalInformation.Append( OpcUaTypeOnly );
 
 
                                     // Now fill the data
@@ -3197,6 +3199,33 @@ namespace MarkdownProcessor
 
                 if (attribute.RefBaseClassPath.Equals(enumPath))
                 {
+                    NodeId enumStringsNodeId = m_modelManager.FindFirstTarget(uaNode.DecodedNodeId,
+                        HasPropertyNodeId, true, "EnumStrings");
+                    if (enumStringsNodeId != null)
+                    {
+                        UAVariable enumStrings = FindNode<UAVariable>(enumStringsNodeId);
+                        AttributeType added = AddModifyAttribute(attribute.Attribute, "EnumStrings", "LocalizedText", 
+                            enumStrings.DecodedValue, bListOf: true);
+                        if (added != null)
+                        {
+                            added.AdditionalInformation.Append(OpcUaTypeOnly);
+                        }
+                    }
+                    else
+                    {
+                        NodeId EnumValuesPropertyId = m_modelManager.FindFirstTarget(uaNode.DecodedNodeId, HasPropertyNodeId, true, "EnumValues");
+                        if (EnumValuesPropertyId != null)
+                        {
+                            UAVariable enumValues = FindNode<UAVariable>(EnumValuesPropertyId);
+                            AttributeType added = AddModifyAttribute(attribute.Attribute, "EnumValues", "EnumValueType",
+                                enumValues.DecodedValue, bListOf: true);
+                            if (added != null)
+                            {
+                                added.AdditionalInformation.Append(OpcUaTypeOnly);
+                            }
+                        }
+                    }
+
                     string path = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "ListOfEnumField");
                     AttributeFamilyType enumFieldDefinition = m_cAEXDocument.FindByPath(path) as AttributeFamilyType;
 
@@ -3205,7 +3234,7 @@ namespace MarkdownProcessor
 
                     enumFields.RecreateAttributeInstance(enumFieldDefinition as AttributeFamilyType);
                     enumFields.Name = "EnumFieldDefinition";
-                    enumFields.AdditionalInformation.Append("OpcUa:TypeOnly");
+                    enumFields.AdditionalInformation.Append(OpcUaTypeOnly);
 
                     string enumFieldPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "EnumField");
                     AttributeFamilyType enumFieldSource = m_cAEXDocument.FindByPath(enumFieldPath) as AttributeFamilyType;
@@ -3963,7 +3992,7 @@ namespace MarkdownProcessor
                         {
                             string isTypeOnly = additionalInformation as string;
                             if ( !string.IsNullOrEmpty( isTypeOnly ) && 
-                                isTypeOnly == "OpcUa:TypeOnly" )
+                                isTypeOnly == OpcUaTypeOnly )
                             {
                                 attributesToRemove.Add( attribute );
                                 break;
@@ -3975,7 +4004,6 @@ namespace MarkdownProcessor
 
             foreach( AttributeType attribute in attributesToRemove )
             {
-                Utils.LogDebug( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
                 attributes.RemoveElement( attribute );
             }
 
@@ -3984,6 +4012,44 @@ namespace MarkdownProcessor
                 string subPath = path + " " + attribute.Name;
                 RemoveTypeOnlyAttributes( attribute.Attribute, subPath );
             }   
+        }
+
+        
+        private AttributeType RecreateAttributeInstance( AttributeFamilyType source, AttributeType destination )
+        {
+            destination.RecreateAttributeInstance(source);
+            bool remove = true;
+            if (remove)
+            {
+                foreach (AttributeType sub in destination.Attribute)
+                {
+                    if (sub.AdditionalInformation != null)
+                    {
+                        bool keepGoing = true;
+                        while (keepGoing)
+                        {
+                            keepGoing = false;
+                            for (int index = 0; index < sub.AdditionalInformation.Count; index++)
+                            {
+                                object additionalInformation = sub.AdditionalInformation[index];
+                                if (additionalInformation.GetType().Name == "String")
+                                {
+                                    string isTypeOnly = additionalInformation as string;
+                                    if (!string.IsNullOrEmpty(isTypeOnly) &&
+                                        isTypeOnly == OpcUaTypeOnly)
+                                    {
+                                        sub.AdditionalInformation.RemoveAt(index);
+                                        keepGoing = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return destination;
         }
 
 
