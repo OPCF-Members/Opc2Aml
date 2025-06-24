@@ -4041,45 +4041,6 @@ namespace MarkdownProcessor
             }   
         }
 
-        
-        private AttributeType RecreateAttributeInstance( AttributeFamilyType source, AttributeType destination )
-        {
-            destination.RecreateAttributeInstance(source);
-            bool remove = true;
-            if (remove)
-            {
-                foreach (AttributeType sub in destination.Attribute)
-                {
-                    if (sub.AdditionalInformation != null)
-                    {
-                        bool keepGoing = true;
-                        while (keepGoing)
-                        {
-                            keepGoing = false;
-                            for (int index = 0; index < sub.AdditionalInformation.Count; index++)
-                            {
-                                object additionalInformation = sub.AdditionalInformation[index];
-                                if (additionalInformation.GetType().Name == "String")
-                                {
-                                    string isTypeOnly = additionalInformation as string;
-                                    if (!string.IsNullOrEmpty(isTypeOnly) &&
-                                        isTypeOnly == OpcUaTypeOnly)
-                                    {
-                                        sub.AdditionalInformation.RemoveAt(index);
-                                        keepGoing = true;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return destination;
-        }
-
-
         #endregion
     }
 }
