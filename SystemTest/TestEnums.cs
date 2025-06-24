@@ -338,7 +338,7 @@ namespace SystemTest
             {
                 AttributeType index = GetAttribute(enumStrings, "2");
                 Assert.AreEqual("Sign", index.Value);
-                Assert.AreEqual(1, index.Attribute.Count);
+                Assert.AreEqual(0, index.Attribute.Count);
             }
 
             {
@@ -404,6 +404,46 @@ namespace SystemTest
                 AttributeType localeAttribute = GetAttribute(descriptionAttribute, locale);
                 Assert.IsNotNull(localeAttribute.Value);
                 Assert.AreEqual(description, localeAttribute.Value);
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(Opc.Ua.DataTypes.NodeClass, "NodeId", DisplayName = "NodeClass NodeId")]
+        [DataRow(Opc.Ua.DataTypes.NegotiationStatus, "NodeId", DisplayName = "NegotiationStatus NodeId")]
+        [DataRow(Opc.Ua.DataTypes.MessageSecurityMode, "NodeId", DisplayName = "MessageSecurityMode NodeId")]
+        [DataRow(Opc.Ua.DataTypes.NodeClass, "StructureFieldDefinition", DisplayName = "NodeClass StructureFieldDefinition")]
+        [DataRow(Opc.Ua.DataTypes.NegotiationStatus, "StructureFieldDefinition", DisplayName = "NegotiationStatus StructureFieldDefinition")]
+        [DataRow(Opc.Ua.DataTypes.MessageSecurityMode, "StructureFieldDefinition", DisplayName = "MessageSecurityMode StructureFieldDefinition")]
+
+        public void TestUnwantedAttributes(uint nodeId, string unwantedAttribute)
+        {
+            AttributeFamilyType objectToTest = GetTestAttribute(nodeId.ToString());
+
+            AttributeType enumFieldDefinition = objectToTest.Attribute["EnumFieldDefinition"];
+            Assert.IsNotNull(enumFieldDefinition, "Unable to retrieve EnumFieldDefinition");
+
+            TestUnwantedAttribute(enumFieldDefinition, unwantedAttribute, "");
+
+            AttributeType enums = objectToTest.Attribute["EnumStrings"];
+            if ( enums == null )
+            {
+                enums = objectToTest.Attribute["EnumValues"];
+            }
+            Assert.IsNotNull(enums, "Unable to retrieve EnumStrings or EnumValues");
+
+            TestUnwantedAttribute(enums, unwantedAttribute, "");
+        }
+
+        // Recursively looks for unwanted attributes in the attribute tree
+        public void TestUnwantedAttribute(AttributeType attribute, string unwantedAttribute, string name)
+        {
+            string path = name + " " + attribute.Name;
+            AttributeType unwanted = attribute.Attribute[unwantedAttribute];
+            Assert.IsNull(unwanted, "Unexpected Attribute found:" + path);
+
+            foreach( AttributeType sub in attribute.Attribute)
+            {
+                TestUnwantedAttribute( sub, unwantedAttribute, path);
             }
         }
 

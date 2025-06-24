@@ -2823,6 +2823,21 @@ namespace MarkdownProcessor
             }
         }
 
+        private void RemoveNodeIdsFromDefinition(AttributeType attribute)
+        {
+            if (attribute != null)
+            {
+                foreach (AttributeType indexAttribute in attribute.Attribute)
+                {
+                    RemoveUnwantedNodeIdAttribute(indexAttribute);
+                    foreach (AttributeType fieldAttribute in indexAttribute.Attribute)
+                    {
+                        RemoveUnwantedNodeIdAttribute(fieldAttribute);
+                    }
+                }
+            }
+        }
+
         #endregion
 
 
@@ -3209,6 +3224,10 @@ namespace MarkdownProcessor
                         if (added != null)
                         {
                             added.AdditionalInformation.Append(OpcUaTypeOnly);
+                            foreach( AttributeType enumAttribute in added.Attribute)
+                            {
+                                RemoveUnwantedNodeIdAttribute(enumAttribute);
+                            }
                         }
                     }
                     else
@@ -3222,6 +3241,7 @@ namespace MarkdownProcessor
                             if (added != null)
                             {
                                 added.AdditionalInformation.Append(OpcUaTypeOnly);
+                                RemoveNodeIdsFromDefinition(added);
                             }
                         }
                     }
@@ -3249,27 +3269,34 @@ namespace MarkdownProcessor
                         AddModifyAttribute(fieldAttribute.Attribute,
                             "Name", "String", new Variant(fieldDefinition.Name));
 
+                        LocalizedText descriptionLocalizedText = new LocalizedText("");
+
                         if (fieldDefinition.Description != null && fieldDefinition.Description.Length > 0)
                         {
-                            LocalizedText localizedText = new LocalizedText(
+                            descriptionLocalizedText = new LocalizedText(
                                 fieldDefinition.Description[0].Locale, fieldDefinition.Description[0].Value);
-                            AddModifyAttribute(fieldAttribute.Attribute,
-                                "Description", "LocalizedText", new Variant(localizedText));
                         }
+
+                        AddModifyAttribute(fieldAttribute.Attribute, "Description", "LocalizedText",
+                            new Variant(descriptionLocalizedText));
+
+                        LocalizedText displayNameLocalizedText = new LocalizedText("");
 
                         if (fieldDefinition.DisplayName != null && fieldDefinition.DisplayName.Length > 0)
                         {
-                            LocalizedText localizedText = new LocalizedText(
+                            displayNameLocalizedText = new LocalizedText(
                                 fieldDefinition.DisplayName[0].Locale, fieldDefinition.DisplayName[0].Value);
-                            AddModifyAttribute(fieldAttribute.Attribute,
-                                "DisplayName", "LocalizedText", new Variant(localizedText));
                         }
+
+                        AddModifyAttribute(fieldAttribute.Attribute, "DisplayName", "LocalizedText",
+                            new Variant(displayNameLocalizedText));
 
                         AddModifyAttribute(fieldAttribute.Attribute,
                             "Value", "Int32", new Variant(fieldDefinition.Value));
 
                         enumFields.Attribute.Insert(fieldAttribute, false, true);
                     }
+                    RemoveNodeIdsFromDefinition(enumFields);
                     attribute.Attribute.Insert(enumFields, false, true);
                 }
             }
