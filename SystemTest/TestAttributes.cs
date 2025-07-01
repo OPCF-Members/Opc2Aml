@@ -43,6 +43,25 @@ namespace SystemTest
         [DataRow("IsAbstract", "2881", "false", 
             true, true, DisplayName = "AcknowledgeableConditionType should not be Abstract")]
 
+        [DataRow("MinimumSamplingInterval", "2253", "",
+            false, true, DisplayName = "Server should not have MinimumSamplingInterval")]
+        [DataRow("MinimumSamplingInterval", "2994", "1000",
+            true, true, DisplayName = "Auditing should have MinimumSamplingInterval")]
+
+        [DataRow("MinimumSamplingInterval", "6235", "",
+            false, false, DisplayName = "Negative should not have MinimumSamplingInterval")]
+        [DataRow("MinimumSamplingInterval", "6236", "",
+            false, false, DisplayName = "Zero should not have MinimumSamplingInterval")]
+        [DataRow("MinimumSamplingInterval", "6237", "1",
+            true, false, DisplayName = "Positive should have MinimumSamplingInterval")]
+
+        [DataRow("ValueRank", "62", "-2",
+            true, true, DisplayName = "BaseVariableType ValueRank -2")]
+        [DataRow("ValueRank", "58", "",
+            false, true, DisplayName = "BaseObjectType No ValueRank")]
+        [DataRow("ValueRank", "18773", "-1",
+            true, true, DisplayName = "CartesianCoordinates LengthUnit ValueRank -1")]
+
         public void TestAttribute(string attribute, string nodeId, 
             string expected, bool expectedToBeFound, bool foundationRoot = false)
         {
@@ -79,6 +98,7 @@ namespace SystemTest
             Assert.IsNotNull( nameAttribute );
             Assert.AreEqual( "xs:string", nameAttribute.AttributeDataType );
         }
+
 
         #endregion
 

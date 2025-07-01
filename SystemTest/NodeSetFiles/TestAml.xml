@@ -3250,11 +3250,44 @@
 		</Value>
 	</UAVariable>
 
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6235" BrowseName="1:NegativeMinimumSamplingInterval" AccessLevel="3" MinimumSamplingInterval="-1">
+		<DisplayName>NegativeMinimumSamplingInterval</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6236" BrowseName="1:ZeroMinimumSamplingInterval" AccessLevel="3" MinimumSamplingInterval="0">
+		<DisplayName>ZeroMinimumSamplingInterval</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>0</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6237" BrowseName="1:PositiveMinimumSamplingInterval" AccessLevel="3" MinimumSamplingInterval="1">
+		<DisplayName>PositiveMinimumSamplingInterval</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>1</uax:Int32>
+		</Value>
+	</UAVariable>
+
 	<!-- Next Numbers
     ObjectType 1009
     VariableType 2001
     DataType 3004
     Object 5025
-    Variable 6235
+    Variable 6238
     -->
 </UANodeSet>

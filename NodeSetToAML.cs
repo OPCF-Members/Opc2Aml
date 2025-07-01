@@ -41,6 +41,7 @@ using UANode = MarkdownProcessor.NodeSet.UANode;
 using UAObject = MarkdownProcessor.NodeSet.UAObject;
 using UAType = MarkdownProcessor.NodeSet.UAType;
 using UAVariable = MarkdownProcessor.NodeSet.UAVariable;
+using UAVariableType = MarkdownProcessor.NodeSet.UAVariableType;
 using DataTypeField = MarkdownProcessor.NodeSet.DataTypeField;
 using Aml.Engine.Adapter;
 using System.Xml.Linq;
@@ -604,6 +605,15 @@ namespace MarkdownProcessor
             {
                 AddModifyAttribute(seq, "IsAbstract", "Boolean", uaType.IsAbstract);
             }
+
+            UAVariableType uaVariableType = uanode as UAVariableType;
+            if (uaVariableType != null)
+            {
+                if (uaVariableType.ValueRank != -1)
+                {
+                    AddModifyAttribute(seq, "ValueRank", "Int32", uaVariableType.ValueRank);
+                }
+            }
         }
 
         private void BuildLocalizedTextAttribute( 
@@ -714,14 +724,12 @@ namespace MarkdownProcessor
             {
                 if (bListOf == false && val.TypeInfo != null)  // look for reasons not to add the attribute because missing == default value
                 {
-                    if (name == "ValueRank" && val == -2 )
-                        return null;
                     if (name == "IsSource" && val == false)
                         return null;
                     if (name == "Symmetric" && val == false)
                         return null;
                 }
-                    a = seq.Append(name);  // not found so create a new one
+                a = seq.Append(name);  // not found so create a new one
             }
 
             a.RecreateAttributeInstance(at);
@@ -3373,6 +3381,11 @@ namespace MarkdownProcessor
 
                 AddModifyAttribute( ie.Attribute, "ValueRank", "Int32", varnode.ValueRank );
                 SetArrayDimensions( ie, varnode.ArrayDimensions );
+
+                if ( varnode.MinimumSamplingInterval > 0 )
+                {
+                    AddModifyAttribute(ie.Attribute, "MinimumSamplingInterval", "Double", varnode.MinimumSamplingInterval);
+                }
             }
 
             if( toAdd.DecodedNodeId.Equals( Opc.Ua.ObjectIds.Server_ServerDiagnostics ) )
