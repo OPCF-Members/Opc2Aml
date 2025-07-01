@@ -55,6 +55,7 @@ using System.Reflection;
 using System.Xml;
 using Opc2Aml;
 using Newtonsoft.Json.Linq;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
 
 namespace MarkdownProcessor
@@ -2561,7 +2562,6 @@ namespace MarkdownProcessor
                             // AddModifyAttribute(rtn.Attribute, "ValueRank", "Int32", -2); // #9 remove unset attributes
                             // AddModifyAttribute(rtn.Attribute, "Value", "BaseDataType", Variant.Null); // #9 remove unset attributes
                             // AddModifyAttribute(rtn.Attribute, "AccessLevel", "AccessLevelType", Variant.Null); // #9 remove unset attributes
-                            // AddModifyAttribute(rtn.Attribute, "MinimumSamplingInterval", "Duration", Variant.Null); // #9 remove unset attributes
                             AddBaseNodeClassAttributes(rtn.Attribute, refnode);
                             break;
                         case NodeClass.Method:
@@ -2906,6 +2906,13 @@ namespace MarkdownProcessor
 
             if (OptionSetsPropertyId != null && m_modelManager.IsTypeOf(nodeId, NumberNodeId))
             {
+                bool addTypeOnly = false;
+                if (nodeId.Equals(Opc.Ua.DataTypeIds.AccessLevelType) ||
+                    nodeId.Equals(Opc.Ua.DataTypeIds.AccessLevelExType))
+                {
+                    addTypeOnly = true;
+                }
+
                 att.AttributeDataType = "";
                 var OptionSetsPropertyNode = FindNode<UANode>(OptionSetsPropertyId);
                 var OptionSets = OptionSetsPropertyNode as UAVariable;
@@ -2917,11 +2924,14 @@ namespace MarkdownProcessor
                         AttributeType a = new AttributeType( new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
                         a.Name = OptionSetValue.Text;
                         a.AttributeDataType = "xs:boolean";
+                        if ( addTypeOnly )
+                        {
+                            a.AdditionalInformation.Append("OpcUa:TypeOnly");
+                        }
                         att.Attribute.Insert( a, false );
                     }
                 }
             }
-            
 
             if (nodeId == NodeIdNodeId || nodeId == ExpandedNodeIdNodeId)
             {
@@ -3386,9 +3396,27 @@ namespace MarkdownProcessor
                 {
                     AddModifyAttribute(ie.Attribute, "MinimumSamplingInterval", "Double", varnode.MinimumSamplingInterval);
                 }
+
+                byte[] accessLevelBytes = BitConverter.GetBytes(varnode.AccessLevel);
+                if ( accessLevelBytes.Length == 4 )
+                {
+                    byte accessLevelByte = accessLevelBytes[0];
+                    accessLevelBytes[0] = 0;
+                    uint masked = BitConverter.ToUInt32(accessLevelBytes);
+
+                    if (accessLevelByte > 0)
+                    {
+                        AddModifyAttribute(ie.Attribute, "AccessLevel", "AccessLevelType", new Variant(accessLevelByte));
+                    }
+
+                    if ( masked > 0 )
+                    {
+                        AddModifyAttribute(ie.Attribute, "AccessLevelEx", "AccessLevelExType", new Variant(masked));
+                    }
+                }
             }
 
-            if( toAdd.DecodedNodeId.Equals( Opc.Ua.ObjectIds.Server_ServerDiagnostics ) )
+            if ( toAdd.DecodedNodeId.Equals( Opc.Ua.ObjectIds.Server_ServerDiagnostics ) )
             {
                 serverDiagnostics = true;
             }

@@ -3283,11 +3283,91 @@
 		</Value>
 	</UAVariable>
 
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6238" BrowseName="1:NoAccessLevelProvided" MinimumSamplingInterval="-1">
+		<DisplayName>NoAccessLevelProvided</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6239" BrowseName="1:NoAccessLevel" AccessLevel="0">
+		<DisplayName>ReadAccessLevel</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6240" BrowseName="1:ReadAccessLevel" AccessLevel="1">
+		<DisplayName>ReadAccessLevel</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6241" BrowseName="1:Multi" AccessLevel="85">
+		<DisplayName>Multi</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6242" BrowseName="1:MultiAlternate" AccessLevel="42">
+		<DisplayName>MultiAlternate</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6243" BrowseName="1:MultiEx" AccessLevel="1365">
+		<DisplayName>MultiEx</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6244" BrowseName="1:MultiAlternateEx" AccessLevel="554">
+		<DisplayName>MultiAlternateEx</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5013</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+
 	<!-- Next Numbers
     ObjectType 1009
     VariableType 2001
     DataType 3004
     Object 5025
-    Variable 6238
+    Variable 6245
     -->
 </UANodeSet>

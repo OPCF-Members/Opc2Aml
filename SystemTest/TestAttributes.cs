@@ -62,6 +62,37 @@ namespace SystemTest
         [DataRow("ValueRank", "18773", "-1",
             true, true, DisplayName = "CartesianCoordinates LengthUnit ValueRank -1")]
 
+        [DataRow("AccessLevel", "6238", "1",
+            true, false, DisplayName = "AccessLevel NoAccessLevelProvided")]
+        [DataRow("AccessLevel", "6239", "",
+            false, false, DisplayName = "AccessLevel NoAccessLevel")]
+        [DataRow("AccessLevel", "6240", "1",
+            true, false, DisplayName = "AccessLevel ReadAccessLevel")]
+        [DataRow("AccessLevel", "6241", "85",
+            true, false, DisplayName = "AccessLevel Multiple Access Levels")]
+        [DataRow("AccessLevel", "6242", "42",
+            true, false, DisplayName = "AccessLevel Multiple Access Levels Alternate")]
+        [DataRow("AccessLevel", "6243", "85",
+            true, false, DisplayName = "AccessLevel Multiple Access Levels Expanded")]
+        [DataRow("AccessLevel", "6244", "42",
+            true, false, DisplayName = "AccessLevel Multiple Access Levels Alternate Expanded")]
+
+        [DataRow("AccessLevelEx", "6238", "",
+            false, false, DisplayName = "AccessLevelEx NoAccessLevelProvided")]
+        [DataRow("AccessLevelEx", "6239", "",
+            false, false, DisplayName = "AccessLevelEx NoAccessLevel")]
+        [DataRow("AccessLevelEx", "6240", "",
+            false, false, DisplayName = "AccessLevelEx ReadAccessLevel")]
+        [DataRow("AccessLevelEx", "6241", "",
+            false, false, DisplayName = "AccessLevelEx Multiple Access Levels")]
+        [DataRow("AccessLevelEx", "6242", "",
+            false, false, DisplayName = "AccessLevelEx Multiple Access Levels Alternate")]
+        [DataRow("AccessLevelEx", "6243", "1280",
+            true, false, DisplayName = "AccessLevelEx Multiple Access Levels Expanded")]
+        [DataRow("AccessLevelEx", "6244", "512",
+            true, false, DisplayName = "AccessLevelEx Multiple Access Levels Alternate Expanded")]
+
+
         public void TestAttribute(string attribute, string nodeId, 
             string expected, bool expectedToBeFound, bool foundationRoot = false)
         {
