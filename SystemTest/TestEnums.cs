@@ -122,23 +122,22 @@ namespace SystemTest
 
         [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
 
-        [DataRow( Opc.Ua.DataTypes.NodeClass, new NodeClass(), DisplayName = "EnumValue Constraints - NodeClass" )]
-        [DataRow( Opc.Ua.DataTypes.MessageSecurityMode, new MessageSecurityMode(), DisplayName = "EnumString Constraints - MessageSecurityMode" )]
+        [DataRow( Opc.Ua.DataTypes.NodeClass, 3004u, new NodeClass(), DisplayName = "EnumValue Constraints - NodeClass" ) ]
+        [DataRow( Opc.Ua.DataTypes.MessageSecurityMode, 3005u, new MessageSecurityMode(), DisplayName = "EnumString Constraints - MessageSecurityMode" ) ]
 
-        public void TestConstraints( uint nodeId, object enumObject )
+        public void TestConstraints( uint baseNodeId, uint testNodeId, object enumObject )
         {
-            int[] enumValuesArray = (int[])Enum.GetValues( enumObject.GetType() );
-            string[] enumStringsArray = (string[])Enum.GetNames( enumObject.GetType() );
+            int[] enumValuesArray = ( int[] )Enum.GetValues( enumObject.GetType() );
+            string[] enumStringsArray = ( string[] )Enum.GetNames( enumObject.GetType() );
 
             List<int> enumValues = enumValuesArray.ToList<int>();
             List<string> values = enumStringsArray.ToList<string>();
 
-            Assert.AreEqual( enumValues.Count, values.Count );
+            Assert.AreEqual(enumValues.Count, values.Count);
 
-            AttributeFamilyType objectToTest = GetTestAttribute( nodeId.ToString() );
+            AttributeFamilyType objectToTest = GetTestAttribute( testNodeId.ToString(), foundation: false );
             Assert.IsNotNull( objectToTest );
             Assert.AreEqual( "xs:string", objectToTest.AttributeDataType );
-
 
             AttributeValueRequirementType enumStringsConstraint = null;
 
@@ -304,7 +303,7 @@ namespace SystemTest
             Assert.IsNotNull(mainAttribute, "Unable to find Initial Object");
 
             AttributeType enumStrings = GetAttribute(mainAttribute, "EnumStrings");
-            Assert.AreEqual(4, enumStrings.Attribute.Count);
+            Assert.AreEqual(5, enumStrings.Attribute.Count);
             Assert.IsNotNull(enumStrings.AdditionalInformation);
             Assert.AreEqual(1, enumStrings.AdditionalInformation.Count);
             Assert.AreEqual(TestHelper.TypeOnly, enumStrings.AdditionalInformation[0] as string);
@@ -348,7 +347,7 @@ namespace SystemTest
             Assert.IsNotNull(mainAttribute, "Unable to find Initial Object");
 
             AttributeType enumStrings = GetAttribute(mainAttribute, "EnumValues");
-            Assert.AreEqual(9, enumStrings.Attribute.Count);
+            Assert.AreEqual(10, enumStrings.Attribute.Count);
             Assert.IsNotNull(enumStrings.AdditionalInformation);
             Assert.AreEqual(1, enumStrings.AdditionalInformation.Count);
             Assert.AreEqual(TestHelper.TypeOnly, enumStrings.AdditionalInformation[0] as string);
@@ -396,9 +395,32 @@ namespace SystemTest
         }
 
         [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
-        [DataRow(Opc.Ua.DataTypes.NodeClass, "NodeId", DisplayName = "NodeClass NodeId")]
-        [DataRow(Opc.Ua.DataTypes.NegotiationStatus, "NodeId", DisplayName = "NegotiationStatus NodeId")]
-        [DataRow(Opc.Ua.DataTypes.MessageSecurityMode, "NodeId", DisplayName = "MessageSecurityMode NodeId")]
+        [DataRow(Opc.Ua.DataTypes.NodeClass, DisplayName = "NodeClass NodeId")]
+        [DataRow(Opc.Ua.DataTypes.NegotiationStatus, DisplayName = "NegotiationStatus NodeId")]
+        [DataRow(Opc.Ua.DataTypes.MessageSecurityMode, DisplayName = "MessageSecurityMode NodeId")]
+
+        public void TestEnumNodeId(uint nodeId)
+        {
+            AttributeFamilyType objectToTest = GetTestAttribute( nodeId.ToString() );
+
+            Assert.IsNotNull(objectToTest.Attribute["NodeId"]);
+            AttributeType enumFieldDefinition = objectToTest.Attribute["EnumFieldDefinition"];
+            Assert.IsNotNull(enumFieldDefinition, "Unable to retrieve EnumFieldDefinition");
+            // EnumFieldDefinition should not have nodeId, as the objectToTest should already have the same info
+            TestUnwantedAttribute(enumFieldDefinition, "NodeId", "");
+
+            AttributeType enums = objectToTest.Attribute["EnumStrings"];
+            if (enums == null)
+            {
+                enums = objectToTest.Attribute["EnumValues"];
+            }
+            Assert.IsNotNull(enums, "Unable to retrieve EnumStrings or EnumValues");
+            Assert.IsNotNull(enums.Attribute["NodeId"]);
+        }
+
+
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
         [DataRow(Opc.Ua.DataTypes.NodeClass, "StructureFieldDefinition", DisplayName = "NodeClass StructureFieldDefinition")]
         [DataRow(Opc.Ua.DataTypes.NegotiationStatus, "StructureFieldDefinition", DisplayName = "NegotiationStatus StructureFieldDefinition")]
         [DataRow(Opc.Ua.DataTypes.MessageSecurityMode, "StructureFieldDefinition", DisplayName = "MessageSecurityMode StructureFieldDefinition")]
@@ -603,10 +625,14 @@ namespace SystemTest
             Assert.IsNotNull(valueAsText, "Unable to Find ValueAsText Property");
         }
 
-        public AttributeFamilyType GetTestAttribute( string nodeId )
+        public AttributeFamilyType GetTestAttribute( string nodeId, bool foundation = true )
         {
             CAEXDocument document = GetDocument();
             string rootName = TestHelper.GetOpcRootName();
+            if (!foundation)
+            {
+                rootName = TestHelper.GetRootName();
+            }
             string desiredName = rootName + nodeId;
             Console.WriteLine( "Looking for " + rootName + nodeId );
             CAEXObject initialObject = document.FindByID( rootName + nodeId );
