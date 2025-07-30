@@ -43,6 +43,13 @@ namespace SystemTest
         [DataRow("IsAbstract", "2881", "false", 
             true, true, DisplayName = "AcknowledgeableConditionType should not be Abstract")]
 
+        [DataRow("ValueRank", "62", "-2",
+            true, true, DisplayName = "BaseVariableType ValueRank -2")]
+        [DataRow("ValueRank", "58", "",
+            false, true, DisplayName = "BaseObjectType No ValueRank")]
+        [DataRow("ValueRank", "18773", "-1",
+            true, true, DisplayName = "CartesianCoordinates LengthUnit ValueRank -1")]
+
         public void TestAttribute(string attribute, string nodeId, 
             string expected, bool expectedToBeFound, bool foundationRoot = false)
         {
