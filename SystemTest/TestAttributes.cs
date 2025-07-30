@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
@@ -47,6 +47,13 @@ namespace SystemTest
             false, true, DisplayName = "Server should not have MinimumSamplingInterval")]
         [DataRow("MinimumSamplingInterval", "2994", "1000",
             true, true, DisplayName = "Auditing should have MinimumSamplingInterval")]
+
+        [DataRow("ValueRank", "62", "-2",
+            true, true, DisplayName = "BaseVariableType ValueRank -2")]
+        [DataRow("ValueRank", "58", "",
+            false, true, DisplayName = "BaseObjectType No ValueRank")]
+        [DataRow("ValueRank", "18773", "-1",
+            true, true, DisplayName = "CartesianCoordinates LengthUnit ValueRank -1")]
 
         public void TestAttribute(string attribute, string nodeId, 
             string expected, bool expectedToBeFound, bool foundationRoot = false)
