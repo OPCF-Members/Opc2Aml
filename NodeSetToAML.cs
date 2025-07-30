@@ -3426,6 +3426,11 @@ namespace MarkdownProcessor
 
                 AddModifyAttribute( ie.Attribute, "ValueRank", "Int32", varnode.ValueRank );
                 SetArrayDimensions( ie, varnode.ArrayDimensions );
+
+                if (varnode.MinimumSamplingInterval > 0)
+                {
+                    AddModifyAttribute(ie.Attribute, "MinimumSamplingInterval", "Double", varnode.MinimumSamplingInterval);
+                }
             }
 
             if( toAdd.DecodedNodeId.Equals( Opc.Ua.ObjectIds.Server_ServerDiagnostics ) )

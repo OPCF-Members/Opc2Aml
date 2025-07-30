@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
@@ -42,6 +42,11 @@ namespace SystemTest
         [DataRow("IsAbstract", "2782", "true", true, true, DisplayName = "ConditionType should be Abstract")]
         [DataRow("IsAbstract", "2881", "false", 
             true, true, DisplayName = "AcknowledgeableConditionType should not be Abstract")]
+
+        [DataRow("MinimumSamplingInterval", "2253", "",
+            false, true, DisplayName = "Server should not have MinimumSamplingInterval")]
+        [DataRow("MinimumSamplingInterval", "2994", "1000",
+            true, true, DisplayName = "Auditing should have MinimumSamplingInterval")]
 
         [DataRow("ValueRank", "62", "-2",
             true, true, DisplayName = "BaseVariableType ValueRank -2")]
