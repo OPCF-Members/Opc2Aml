@@ -17,6 +17,7 @@ namespace SystemTest
         public const string ExtractPrefix = "Extract_";
         public const string Opc2AmlName = "Opc2AmlConsole";
         public const string Opc2Aml = Opc2AmlName + ".exe";
+        public const string TypeOnly = "OpcUa:TypeOnly";
 
         public const string TestAmlUri = "http://opcfoundation.org/UA/FX/AML/TESTING";
 

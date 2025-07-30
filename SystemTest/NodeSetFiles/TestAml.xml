@@ -45,7 +45,259 @@
 
     </Aliases>
 
-    <UADataType NodeId="ns=1;i=3003" BrowseName="1:LowLevelStructure">
+	<UADataType NodeId="ns=1;i=3004" BrowseName="TestNodeClass">
+		<DisplayName>Modified NodeClass</DisplayName>
+		<Category>Base Info Base Types</Category>
+		<Documentation>https://reference.opcfoundation.org/v105/Core/docs/Part5/12.2.5/#12.2.5.2</Documentation>
+		<References>
+			<Reference ReferenceType="HasProperty">ns=1;i=2004</Reference>
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=29</Reference>
+		</References>
+		<Definition Name="NodeClass">
+			<Field Name="Unspecified" Value="0">
+				<Description>No value is specified.</Description>
+			</Field>
+			<Field Name="Object" Value="1">
+				<Description>The Node is an Object.</Description>
+			</Field>
+			<Field Name="Variable" Value="2">
+				<Description>The Node is a Variable.</Description>
+			</Field>
+			<Field Name="Method" Value="4">
+				<Description>The Node is a Method.</Description>
+			</Field>
+			<Field Name="ObjectType" Value="8">
+				<Description>The Node is an ObjectType.</Description>
+			</Field>
+			<Field Name="VariableType" Value="16">
+				<Description>The Node is a VariableType.</Description>
+			</Field>
+			<Field Name="ReferenceType" Value="32">
+				<Description>The Node is a ReferenceType.</Description>
+			</Field>
+			<Field Name="DataType" Value="64">
+				<Description>The Node is a DataType.</Description>
+			</Field>
+			<Field Name="View" Value="128">
+				<Description>The Node is a View.</Description>
+			</Field>
+		</Definition>
+	</UADataType>
+	<UAVariable NodeId="ns=1;i=2004" BrowseName="EnumValues" ParentNodeId="ns=1;i=3004" DataType="i=7594" ValueRank="1" ArrayDimensions="9">
+		<DisplayName>EnumValues</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+			<Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=3004</Reference>
+		</References>
+		<Value>
+			<ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>0</Value>
+							<DisplayName>
+								<Locale>de</Locale>
+								<Text>Nicht spezifiziert</Text>
+							</DisplayName>
+							<Description>
+								<Locale>de</Locale>
+								<Text>Es ist kein Wert angegeben.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>1</Value>
+							<DisplayName>
+								<Locale>fr</Locale>
+								<Text>Objet</Text>
+							</DisplayName>
+							<Description>
+								<Locale>fr</Locale>
+								<Text>Le nœud est un objet.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>2</Value>
+							<DisplayName>
+								<Locale>en</Locale>
+								<Text>Variable</Text>
+							</DisplayName>
+							<Description>
+								<Locale>en</Locale>
+								<Text>The Node is a Variable.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>4</Value>
+							<DisplayName>
+								<Locale>de</Locale>
+								<Text>Verfahren</Text>
+							</DisplayName>
+							<Description>
+								<Locale>de</Locale>
+								<Text>Der Knoten ist eine Methode.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>8</Value>
+							<DisplayName>
+								<Locale>fr</Locale>
+								<Text>Type d'objet</Text>
+							</DisplayName>
+							<Description>
+								<Locale>fr</Locale>
+								<Text>Le nœud est un type d'objet.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>16</Value>
+							<DisplayName>
+								<Locale>en</Locale>
+								<Text>VariableType</Text>
+							</DisplayName>
+							<Description>
+								<Locale>en</Locale>
+								<Text>The Node is a VariableType.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>32</Value>
+							<DisplayName>
+								<Locale>de</Locale>
+								<Text>Referenztyp</Text>
+							</DisplayName>
+							<Description>
+								<Locale>de</Locale>
+								<Text>Der Knoten ist ein Referenztyp.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>64</Value>
+							<DisplayName>
+								<Text>DataType</Text>
+							</DisplayName>
+							<Description>
+								<Text>The Node is a DataType.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>128</Value>
+							<DisplayName>
+								<Text>View</Text>
+							</DisplayName>
+							<Description>
+								<Text>The Node is a View.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+			</ListOfExtensionObject>
+		</Value>
+	</UAVariable>
+
+	<UADataType NodeId="ns=1;i=3005" BrowseName="TestMessageSecurityMode">
+		<DisplayName Locale="en">Modified MessageSecurityMode</DisplayName>
+		<Category>Base Info ServerType</Category>
+		<Documentation>https://reference.opcfoundation.org/v105/Core/docs/Part5/12.3.10</Documentation>
+		<References>
+			<Reference ReferenceType="HasProperty">ns=1;i=2005</Reference>
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=29</Reference>
+		</References>
+		<Definition Name="MessageSecurityMode">
+			<Field Name="Invalid" Value="0" />
+			<Field Name="None" Value="1" />
+			<Field Name="Sign" Value="2" />
+			<Field Name="SignAndEncrypt" Value="3" />
+		</Definition>
+	</UADataType>
+	<UAVariable NodeId="ns=1;i=2005" BrowseName="EnumStrings" ParentNodeId="ns=1;i=3005" DataType="LocalizedText" ValueRank="1" ArrayDimensions="4">
+		<DisplayName>EnumStrings</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+			<Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=3005</Reference>
+		</References>
+		<Value>
+			<ListOfLocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+				<LocalizedText>
+					<Locale>de</Locale>
+					<Text>Ungültig</Text>
+				</LocalizedText>
+				<LocalizedText>
+					<Locale>fr</Locale>
+					<Text>Aucune</Text>
+				</LocalizedText>
+				<LocalizedText>
+					<Text>Sign</Text>
+				</LocalizedText>
+				<LocalizedText>
+					<Locale>en</Locale>
+					<Text>Sign And Encrypt</Text>
+				</LocalizedText>
+			</ListOfLocalizedText>
+		</Value>
+	</UAVariable>
+
+
+
+	<UADataType NodeId="ns=1;i=3003" BrowseName="1:LowLevelStructure">
         <DisplayName>LowLevelStructure</DisplayName>
         <References>
             <Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
@@ -3250,10 +3502,13 @@
 		</Value>
 	</UAVariable>
 
+	
+	
+	
 	<!-- Next Numbers
     ObjectType 1009
-    VariableType 2001
-    DataType 3004
+    VariableType 2006
+    DataType 3006
     Object 5025
     Variable 6235
     -->
