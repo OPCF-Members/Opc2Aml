@@ -1,18 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using Aml.Engine.AmlObjects;
 using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
-using Aml.Engine.Services;
 using System.Linq;
-using Microsoft.VisualBasic.FileIO;
-using System.Reflection.Metadata;
-using Aml.Engine.Adapter;
-using System.ComponentModel;
-using Newtonsoft.Json.Linq;
 using System;
 using Opc.Ua;
 
@@ -132,23 +122,22 @@ namespace SystemTest
 
         [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
 
-        [DataRow( Opc.Ua.DataTypes.NodeClass, new NodeClass(), DisplayName = "EnumValue Constraints - NodeClass" )]
-        [DataRow( Opc.Ua.DataTypes.MessageSecurityMode, new MessageSecurityMode(), DisplayName = "EnumString Constraints - MessageSecurityMode" )]
+        [DataRow( Opc.Ua.DataTypes.NodeClass, 3004u, new NodeClass(), DisplayName = "EnumValue Constraints - NodeClass" ) ]
+        [DataRow( Opc.Ua.DataTypes.MessageSecurityMode, 3005u, new MessageSecurityMode(), DisplayName = "EnumString Constraints - MessageSecurityMode" ) ]
 
-        public void TestConstraints( uint nodeId, object enumObject )
+        public void TestConstraints( uint baseNodeId, uint testNodeId, object enumObject )
         {
-            int[] enumValuesArray = (int[])Enum.GetValues( enumObject.GetType() );
-            string[] enumStringsArray = (string[])Enum.GetNames( enumObject.GetType() );
+            int[] enumValuesArray = ( int[] )Enum.GetValues( enumObject.GetType() );
+            string[] enumStringsArray = ( string[] )Enum.GetNames( enumObject.GetType() );
 
             List<int> enumValues = enumValuesArray.ToList<int>();
             List<string> values = enumStringsArray.ToList<string>();
 
-            Assert.AreEqual( enumValues.Count, values.Count );
+            Assert.AreEqual(enumValues.Count, values.Count);
 
-            AttributeFamilyType objectToTest = GetTestAttribute( nodeId.ToString() );
+            AttributeFamilyType objectToTest = GetTestAttribute( testNodeId.ToString(), foundation: false );
             Assert.IsNotNull( objectToTest );
             Assert.AreEqual( "xs:string", objectToTest.AttributeDataType );
-
 
             AttributeValueRequirementType enumStringsConstraint = null;
 
@@ -300,6 +289,171 @@ namespace SystemTest
                     Assert.IsNotNull(element.Value, "Second Element Attribute Value is null");
                     Assert.AreEqual("ObjectType", element.Value, "Unexpected Value for Second Element");
                 }
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestAttributeStringType()
+        {
+            // TestMessageSecurityMode
+            CAEXDocument doc = GetDocument();
+            string enumerationObjectId = TestHelper.BuildAmlId("", TestHelper.Uris.Test, "3005");
+            CAEXObject initialObject = doc.FindByID(enumerationObjectId);
+            AttributeFamilyType mainAttribute = initialObject as AttributeFamilyType;
+            Assert.IsNotNull(mainAttribute, "Unable to find Initial Object");
+
+            AttributeType enumStrings = GetAttribute(mainAttribute, "EnumStrings");
+            Assert.AreEqual(5, enumStrings.Attribute.Count);
+            Assert.IsNotNull(enumStrings.AdditionalInformation);
+            Assert.AreEqual(1, enumStrings.AdditionalInformation.Count);
+            Assert.AreEqual(TestHelper.TypeOnly, enumStrings.AdditionalInformation[0] as string);
+
+            {
+                AttributeType index = GetAttribute(enumStrings, "0");
+                Assert.AreEqual("Ungültig", index.Value);
+                AttributeType de = GetAttribute(index, "de");
+                Assert.AreEqual("Ungültig", de.Value);
+            }
+
+            {
+                AttributeType index = GetAttribute(enumStrings, "1");
+                Assert.AreEqual("Aucune", index.Value);
+                AttributeType fr = GetAttribute(index, "fr");
+                Assert.AreEqual("Aucune", fr.Value);
+            }
+
+            {
+                AttributeType index = GetAttribute(enumStrings, "2");
+                Assert.AreEqual("Sign", index.Value);
+                Assert.AreEqual(0, index.Attribute.Count);
+            }
+
+            {
+                AttributeType index = GetAttribute(enumStrings, "3");
+                Assert.AreEqual("Sign And Encrypt", index.Value);
+                AttributeType en = GetAttribute(index, "en");
+                Assert.AreEqual("Sign And Encrypt", en.Value);
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestAttributeValueType()
+        {
+            // TestNodeClass
+            CAEXDocument doc = GetDocument();
+            string enumerationObjectId = TestHelper.BuildAmlId("", TestHelper.Uris.Test, "3004");
+            CAEXObject initialObject = doc.FindByID(enumerationObjectId);
+            AttributeFamilyType mainAttribute = initialObject as AttributeFamilyType;
+            Assert.IsNotNull(mainAttribute, "Unable to find Initial Object");
+
+            AttributeType enumStrings = GetAttribute(mainAttribute, "EnumValues");
+            Assert.AreEqual(10, enumStrings.Attribute.Count);
+            Assert.IsNotNull(enumStrings.AdditionalInformation);
+            Assert.AreEqual(1, enumStrings.AdditionalInformation.Count);
+            Assert.AreEqual(TestHelper.TypeOnly, enumStrings.AdditionalInformation[0] as string);
+
+            TestEnumValue(enumStrings, "0", "0", "de", "Nicht spezifiziert", "Es ist kein Wert angegeben.");
+            TestEnumValue(enumStrings, "1", "1", "fr", "Objet", "Le nœud est un objet.");
+            TestEnumValue(enumStrings, "2", "2", "en", "Variable", "The Node is a Variable.");
+            TestEnumValue(enumStrings, "3", "4", "de", "Verfahren", "Der Knoten ist eine Methode.");
+            TestEnumValue(enumStrings, "4", "8", "fr", "Type d'objet", "Le nœud est un type d'objet.");
+            TestEnumValue(enumStrings, "5", "16", "en", "VariableType", "The Node is a VariableType.");
+            TestEnumValue(enumStrings, "6", "32", "de", "Referenztyp", "Der Knoten ist ein Referenztyp.");
+            TestEnumValue(enumStrings, "7", "64", string.Empty, "DataType", "The Node is a DataType.");
+            TestEnumValue(enumStrings, "8", "128", string.Empty, "View", "The Node is a View.");
+        }
+
+        public void TestEnumValue( AttributeType enumValues, 
+            string index, 
+            string value, 
+            string locale, 
+            string displayName,
+            string description )
+        {
+            AttributeType indexed = GetAttribute(enumValues, index);
+            AttributeType valueAttribute = GetAttribute(indexed, "Value");
+            Assert.IsNotNull(valueAttribute.Value);
+            Assert.AreEqual(value, valueAttribute.Value);
+            AttributeType nameAttribute = GetAttribute(indexed, "DisplayName");
+            Assert.IsNotNull(nameAttribute.Value);
+            Assert.AreEqual(displayName, nameAttribute.Value);
+            if ( !string.IsNullOrEmpty(locale))
+            {
+                AttributeType localeAttribute = GetAttribute(nameAttribute, locale);
+                Assert.IsNotNull(localeAttribute.Value);
+                Assert.AreEqual(displayName, localeAttribute.Value);
+            }
+            AttributeType descriptionAttribute = GetAttribute(indexed, "Description");
+            Assert.IsNotNull(descriptionAttribute.Value);
+            Assert.AreEqual(description, descriptionAttribute.Value);
+            if (!string.IsNullOrEmpty(locale))
+            {
+                AttributeType localeAttribute = GetAttribute(descriptionAttribute, locale);
+                Assert.IsNotNull(localeAttribute.Value);
+                Assert.AreEqual(description, localeAttribute.Value);
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(Opc.Ua.DataTypes.NodeClass, DisplayName = "NodeClass NodeId")]
+        [DataRow(Opc.Ua.DataTypes.NegotiationStatus, DisplayName = "NegotiationStatus NodeId")]
+        [DataRow(Opc.Ua.DataTypes.MessageSecurityMode, DisplayName = "MessageSecurityMode NodeId")]
+
+        public void TestEnumNodeId(uint nodeId)
+        {
+            AttributeFamilyType objectToTest = GetTestAttribute( nodeId.ToString() );
+
+            Assert.IsNotNull(objectToTest.Attribute["NodeId"]);
+            AttributeType enumFieldDefinition = objectToTest.Attribute["EnumFieldDefinition"];
+            Assert.IsNotNull(enumFieldDefinition, "Unable to retrieve EnumFieldDefinition");
+            // EnumFieldDefinition should not have nodeId, as the objectToTest should already have the same info
+            TestUnwantedAttribute(enumFieldDefinition, "NodeId", "");
+
+            AttributeType enums = objectToTest.Attribute["EnumStrings"];
+            if (enums == null)
+            {
+                enums = objectToTest.Attribute["EnumValues"];
+            }
+            Assert.IsNotNull(enums, "Unable to retrieve EnumStrings or EnumValues");
+            Assert.IsNotNull(enums.Attribute["NodeId"]);
+        }
+
+
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(Opc.Ua.DataTypes.NodeClass, "StructureFieldDefinition", DisplayName = "NodeClass StructureFieldDefinition")]
+        [DataRow(Opc.Ua.DataTypes.NegotiationStatus, "StructureFieldDefinition", DisplayName = "NegotiationStatus StructureFieldDefinition")]
+        [DataRow(Opc.Ua.DataTypes.MessageSecurityMode, "StructureFieldDefinition", DisplayName = "MessageSecurityMode StructureFieldDefinition")]
+
+        public void TestUnwantedAttributes(uint nodeId, string unwantedAttribute)
+        {
+            AttributeFamilyType objectToTest = GetTestAttribute(nodeId.ToString());
+
+            AttributeType enumFieldDefinition = objectToTest.Attribute["EnumFieldDefinition"];
+            Assert.IsNotNull(enumFieldDefinition, "Unable to retrieve EnumFieldDefinition");
+
+            TestUnwantedAttribute(enumFieldDefinition, unwantedAttribute, "");
+
+            AttributeType enums = objectToTest.Attribute["EnumStrings"];
+            if ( enums == null )
+            {
+                enums = objectToTest.Attribute["EnumValues"];
+            }
+            Assert.IsNotNull(enums, "Unable to retrieve EnumStrings or EnumValues");
+
+            TestUnwantedAttribute(enums, unwantedAttribute, "");
+        }
+
+        // Recursively looks for unwanted attributes in the attribute tree
+        public void TestUnwantedAttribute(AttributeType attribute, string unwantedAttribute, string name)
+        {
+            string path = name + " " + attribute.Name;
+            AttributeType unwanted = attribute.Attribute[unwantedAttribute];
+            Assert.IsNull(unwanted, "Unexpected Attribute found:" + path);
+
+            foreach( AttributeType sub in attribute.Attribute)
+            {
+                TestUnwantedAttribute( sub, unwantedAttribute, path);
             }
         }
 
@@ -471,10 +625,14 @@ namespace SystemTest
             Assert.IsNotNull(valueAsText, "Unable to Find ValueAsText Property");
         }
 
-        public AttributeFamilyType GetTestAttribute( string nodeId )
+        public AttributeFamilyType GetTestAttribute( string nodeId, bool foundation = true )
         {
             CAEXDocument document = GetDocument();
             string rootName = TestHelper.GetOpcRootName();
+            if (!foundation)
+            {
+                rootName = TestHelper.GetRootName();
+            }
             string desiredName = rootName + nodeId;
             Console.WriteLine( "Looking for " + rootName + nodeId );
             CAEXObject initialObject = document.FindByID( rootName + nodeId );
@@ -482,11 +640,11 @@ namespace SystemTest
             {
                 Console.WriteLine( "Cant find, use back for " + desiredName );
 
-                AttributeTypeLibType archie = document.CAEXFile.AttributeTypeLib[ "ATL_http://opcfoundation.org/UA/" ];
+                AttributeTypeLibType attributeType = document.CAEXFile.AttributeTypeLib[ "ATL_http://opcfoundation.org/UA/" ];
 
-                if( archie != null )
+                if( attributeType != null )
                 {
-                    foreach( AttributeFamilyType familyType in archie )
+                    foreach( AttributeFamilyType familyType in attributeType )
                     {
                         if( familyType.ID.Equals( desiredName, StringComparison.OrdinalIgnoreCase ) )
                         {
@@ -523,6 +681,24 @@ namespace SystemTest
             stringValues = enumStringsConstraint;
         }
 
+        public AttributeType GetAttribute( AttributeFamilyType attributeFamilyType, string attributeName)
+        {
+            Assert.IsNotNull(attributeFamilyType, "AttributeFamilyType is null");
+            return GetAttribute(attributeFamilyType.Attribute, attributeName);
+        }
+        public AttributeType GetAttribute(AttributeType attributeType, string attributeName)
+        {
+            Assert.IsNotNull(attributeType, "AttributeType is null");
+            return GetAttribute(attributeType.Attribute, attributeName);
+        }
+
+        public AttributeType GetAttribute( AttributeSequence attributes, string attributeName)
+        {
+            Assert.IsNotNull(attributes, "AttributeType is null");
+            AttributeType result = attributes[attributeName];
+            Assert.IsNotNull(result, "Unable to find Attribute " + attributeName);
+            return result;
+        }
 
         #endregion
     }

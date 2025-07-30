@@ -107,6 +107,7 @@ namespace MarkdownProcessor
         private readonly NodeId IntegerNodeId = Opc.Ua.DataTypeIds.Integer;
 
         private readonly System.Xml.Linq.XNamespace defaultNS = "http://www.dke.de/CAEX";
+        private const string OpcUaTypeOnly = "OpcUa:TypeOnly";
         private const string uaNamespaceURI = "http://opcfoundation.org/UA/";
         private const string OpcLibInfoNamespace = "http://opcfoundation.org/UA/FX/2021/08/OpcUaLibInfo.xsd";
         private UANode structureNode;
@@ -1685,7 +1686,7 @@ namespace MarkdownProcessor
             var at = AddModifyAttribute(seq, AttributeName, "Boolean", value);
             if (at != null && typeOnly)
             {
-                at.AdditionalInformation.Append("OpcUa:TypeOnly");
+                at.AdditionalInformation.Append(OpcUaTypeOnly);
             }
             return at;
         }
@@ -2714,7 +2715,7 @@ namespace MarkdownProcessor
             a.AttributeDataType = AttType;
             a.AttributeValue = value;
 
-            a.AdditionalInformation.Append("OpcUa:TypeOnly");
+            a.AdditionalInformation.Append(OpcUaTypeOnly);
         }
 
         private void ProcessReferenceType(ref InterfaceClassLibType icl, NodeId nodeId)
@@ -2779,7 +2780,7 @@ namespace MarkdownProcessor
                     AttributeType inverseNameAttribute = AddModifyAttribute(added.Attribute, 
                         "InverseName", "LocalizedText", refnode.InverseName[0].Value);
                     RemoveUnwantedNodeIdAttribute(inverseNameAttribute);
-                    inverseNameAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
+                    inverseNameAttribute.AdditionalInformation.Append(OpcUaTypeOnly);
                 }
 
                 // Need typeonly here
@@ -2805,7 +2806,7 @@ namespace MarkdownProcessor
                     AttributeType inverseNameAttribute = AddModifyAttribute(
                         inverseAdded.Attribute, "InverseName", "LocalizedText", refnode.DecodedBrowseName.Name);
                     RemoveUnwantedNodeIdAttribute(inverseNameAttribute);
-                    inverseNameAttribute.AdditionalInformation.Append("OpcUa:TypeOnly");
+                    inverseNameAttribute.AdditionalInformation.Append(OpcUaTypeOnly);
 
                     OverrideAttribute(inverseAdded, IsSource, "xs:boolean", false);
                     OverrideAttribute(inverseAdded, RefClassConnectsToPath, "xs:string", added.CAEXPath());
@@ -2813,7 +2814,7 @@ namespace MarkdownProcessor
             }
 
             AttributeType nodeIdAttribute = AddModifyAttribute(added.Attribute, "NodeId", "NodeId", new Variant( nodeId ) );
-            nodeIdAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+            nodeIdAttribute.AdditionalInformation.Append( OpcUaTypeOnly );
             MinimizeNodeId( nodeIdAttribute );
         }
 
@@ -2825,6 +2826,21 @@ namespace MarkdownProcessor
                 if (unwantedNodeIdAttribute != null)
                 {
                     attribute.Attribute.RemoveElement(unwantedNodeIdAttribute);
+                }
+            }
+        }
+
+        private void RemoveNodeIdsFromDefinition(AttributeType attribute)
+        {
+            if (attribute != null)
+            {
+                foreach (AttributeType indexAttribute in attribute.Attribute)
+                {
+                    RemoveUnwantedNodeIdAttribute(indexAttribute);
+                    foreach (AttributeType fieldAttribute in indexAttribute.Attribute)
+                    {
+                        RemoveUnwantedNodeIdAttribute(fieldAttribute);
+                    }
                 }
             }
         }
@@ -2854,48 +2870,32 @@ namespace MarkdownProcessor
 
         private void ProcessEnumerations(ref AttributeTypeType att, NodeId nodeId)
         {
-            NodeId EnumStringsPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumStrings");
-            if (EnumStringsPropertyId != null)
+            NodeId enumTypeNodeId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumStrings");
+            if (enumTypeNodeId == null)
             {
-                UADataType enumNode = FindNode<UADataType>( nodeId );
-
-                att.AttributeDataType = "xs:string";
-                UAVariable EnumStrings = FindNode<UAVariable>(EnumStringsPropertyId);
-
-                AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType( new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
-                UADataType MyNode = FindNode<UADataType>(nodeId);
-                stringValueRequirement.Name = MyNode.DecodedBrowseName.Name + " Constraint";
-                NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
-
-                Opc.Ua.LocalizedText[] EnumValues = EnumStrings.DecodedValue.Value as Opc.Ua.LocalizedText[];
-                foreach ( Opc.Ua.LocalizedText EnumValue in EnumValues )
-                {
-                    stringValueNominalType.RequiredValue.Append( EnumValue.Text );
-                }
-
-                att.Constraint.Insert( stringValueRequirement );
-                return;
+                enumTypeNodeId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumValues");
             }
 
-            NodeId EnumValuesPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "EnumValues");
-            if (EnumValuesPropertyId != null)
+            if (enumTypeNodeId != null)
             {
                 att.AttributeDataType = "xs:string";
-                UAVariable EnumValues = FindNode<UAVariable>(EnumValuesPropertyId);
-                AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType( new System.Xml.Linq.XElement( defaultNS + "Constraint" ) );
+
                 UADataType MyNode = FindNode<UADataType>(nodeId);
 
-                stringValueRequirement.Name = MyNode.DecodedBrowseName.Name + " Constraint";
-                NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
-
-                ExtensionObject[] EnumVals = EnumValues.DecodedValue.Value as ExtensionObject[];
-                foreach ( ExtensionObject EnumValue in EnumVals )
+                if (MyNode.Definition != null && MyNode.Definition.Field != null && MyNode.Definition.Field.Length > 0)
                 {
-                    EnumValueType ev = EnumValue.Body as EnumValueType;
-                    stringValueNominalType.RequiredValue.Append( ev.DisplayName.Text );
-                }
+                    AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType(new System.Xml.Linq.XElement(defaultNS + "Constraint"));
 
-                att.Constraint.Insert( stringValueRequirement );
+                    stringValueRequirement.Name = MyNode.DecodedBrowseName.Name + " Constraint";
+                    NominalScaledTypeType stringValueNominalType = stringValueRequirement.New_NominalType();
+
+                    foreach (DataTypeField field in MyNode.Definition.Field)
+                    {
+                        stringValueNominalType.RequiredValue.Append(field.Name);
+                    }
+
+                    att.Constraint.Insert(stringValueRequirement);
+                }
             }
         }
 
@@ -3112,7 +3112,7 @@ namespace MarkdownProcessor
 
             MinimizeNodeId( nodeIdAttribute );
 
-            nodeIdAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+            nodeIdAttribute.AdditionalInformation.Append( OpcUaTypeOnly );
         }
 
 
@@ -3150,7 +3150,7 @@ namespace MarkdownProcessor
 
                                     structureFieldAttribute.RecreateAttributeInstance( structureFieldDefinition as AttributeFamilyType );
                                     structureFieldAttribute.Name = "StructureFieldDefinition";
-                                    structureFieldAttribute.AdditionalInformation.Append( "OpcUa:TypeOnly" );
+                                    structureFieldAttribute.AdditionalInformation.Append( OpcUaTypeOnly );
 
 
                                     // Now fill the data
@@ -3195,15 +3195,51 @@ namespace MarkdownProcessor
         private void AddEnumerationFieldDefinition(AttributeFamilyType attribute, UANode uaNode)
         {
             UADataType enumNode = uaNode as UADataType;
-            if (enumNode != null && 
-                enumNode.Definition != null && 
+            if (enumNode != null &&
+                enumNode.Definition != null &&
                 enumNode.Definition.Field != null &&
-                enumNode.Definition.Field.Length > 0 )
+                enumNode.Definition.Field.Length > 0)
             {
                 string enumPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, Enumeration);
 
                 if (attribute.RefBaseClassPath.Equals(enumPath))
                 {
+                    NodeId enumStringsNodeId = m_modelManager.FindFirstTarget(uaNode.DecodedNodeId,
+                        HasPropertyNodeId, true, "EnumStrings");
+                    if (enumStringsNodeId != null)
+                    {
+                        UAVariable enumStrings = FindNode<UAVariable>(enumStringsNodeId);
+                        AttributeType added = AddModifyAttribute(attribute.Attribute, "EnumStrings", "LocalizedText",
+                            enumStrings.DecodedValue, bListOf: true);
+                        if (added != null)
+                        {
+                            added.AdditionalInformation.Append(OpcUaTypeOnly);
+                            RemoveNodeIdsFromDefinition(added);
+
+                            AttributeType nodeIdAttribute = AddModifyAttribute(added.Attribute,
+                                "NodeId", "NodeId", new Variant(enumStringsNodeId));
+                        }
+                    }
+                    else
+                    {
+                        NodeId EnumValuesPropertyId = m_modelManager.FindFirstTarget(uaNode.DecodedNodeId, HasPropertyNodeId, true, "EnumValues");
+                        if (EnumValuesPropertyId != null)
+                        {
+                            UAVariable enumValues = FindNode<UAVariable>(EnumValuesPropertyId);
+                            AttributeType added = AddModifyAttribute(attribute.Attribute, "EnumValues", "EnumValueType",
+                                enumValues.DecodedValue, bListOf: true);
+                            if (added != null)
+                            {
+                                RemoveNodeIdsFromDefinition(added);
+
+                                AttributeType nodeIdAttribute = AddModifyAttribute(added.Attribute,
+                                    "NodeId", "NodeId", new Variant(EnumValuesPropertyId));
+
+                                added.AdditionalInformation.Append(OpcUaTypeOnly);
+                            }
+                        }
+                    }
+
                     string path = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "ListOfEnumField");
                     AttributeFamilyType enumFieldDefinition = m_cAEXDocument.FindByPath(path) as AttributeFamilyType;
 
@@ -3212,14 +3248,14 @@ namespace MarkdownProcessor
 
                     enumFields.RecreateAttributeInstance(enumFieldDefinition as AttributeFamilyType);
                     enumFields.Name = "EnumFieldDefinition";
-                    enumFields.AdditionalInformation.Append("OpcUa:TypeOnly");
+                    enumFields.AdditionalInformation.Append(OpcUaTypeOnly);
 
                     string enumFieldPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "EnumField");
                     AttributeFamilyType enumFieldSource = m_cAEXDocument.FindByPath(enumFieldPath) as AttributeFamilyType;
 
                     foreach (DataTypeField fieldDefinition in enumNode.Definition.Field)
                     {
-                        AttributeType fieldAttribute = new AttributeType( new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                        AttributeType fieldAttribute = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
 
                         fieldAttribute.RecreateAttributeInstance(enumFieldSource);
                         fieldAttribute.Name = fieldDefinition.Name;
@@ -3227,27 +3263,37 @@ namespace MarkdownProcessor
                         AddModifyAttribute(fieldAttribute.Attribute,
                             "Name", "String", new Variant(fieldDefinition.Name));
 
+                        LocalizedText descriptionLocalizedText = new LocalizedText("");
+
                         if (fieldDefinition.Description != null && fieldDefinition.Description.Length > 0)
                         {
-                            LocalizedText localizedText = new LocalizedText(
+                            descriptionLocalizedText = new LocalizedText(
                                 fieldDefinition.Description[0].Locale, fieldDefinition.Description[0].Value);
-                            AddModifyAttribute(fieldAttribute.Attribute,
-                                "Description", "LocalizedText", new Variant(localizedText));
                         }
+
+                        AddModifyAttribute(fieldAttribute.Attribute, "Description", "LocalizedText",
+                            new Variant(descriptionLocalizedText));
+
+                        LocalizedText displayNameLocalizedText = new LocalizedText("");
 
                         if (fieldDefinition.DisplayName != null && fieldDefinition.DisplayName.Length > 0)
                         {
-                            LocalizedText localizedText = new LocalizedText(
+                            displayNameLocalizedText = new LocalizedText(
                                 fieldDefinition.DisplayName[0].Locale, fieldDefinition.DisplayName[0].Value);
-                            AddModifyAttribute(fieldAttribute.Attribute,
-                                "DisplayName", "LocalizedText", new Variant(localizedText));
                         }
+
+                        AddModifyAttribute(fieldAttribute.Attribute, "DisplayName", "LocalizedText",
+                            new Variant(displayNameLocalizedText));
 
                         AddModifyAttribute(fieldAttribute.Attribute,
                             "Value", "Int32", new Variant(fieldDefinition.Value));
 
+                        RemoveNodeIdsFromDefinition(fieldAttribute);
+
                         enumFields.Attribute.Insert(fieldAttribute, false, true);
                     }
+                    RemoveNodeIdsFromDefinition(enumFields);
+
                     attribute.Attribute.Insert(enumFields, false, true);
                 }
             }
@@ -3975,7 +4021,7 @@ namespace MarkdownProcessor
                         {
                             string isTypeOnly = additionalInformation as string;
                             if ( !string.IsNullOrEmpty( isTypeOnly ) && 
-                                isTypeOnly == "OpcUa:TypeOnly" )
+                                isTypeOnly == OpcUaTypeOnly )
                             {
                                 attributesToRemove.Add( attribute );
                                 break;
@@ -3987,7 +4033,6 @@ namespace MarkdownProcessor
 
             foreach( AttributeType attribute in attributesToRemove )
             {
-                Utils.LogDebug( "{0} Removing TypeOnly Attribute {1}", path, attribute.Name ); 
                 attributes.RemoveElement( attribute );
             }
 
@@ -3997,7 +4042,6 @@ namespace MarkdownProcessor
                 RemoveTypeOnlyAttributes( attribute.Attribute, subPath );
             }   
         }
-
 
         #endregion
     }
