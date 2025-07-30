@@ -43,6 +43,11 @@ namespace SystemTest
         [DataRow("IsAbstract", "2881", "false", 
             true, true, DisplayName = "AcknowledgeableConditionType should not be Abstract")]
 
+        [DataRow("MinimumSamplingInterval", "2253", "",
+            false, true, DisplayName = "Server should not have MinimumSamplingInterval")]
+        [DataRow("MinimumSamplingInterval", "2994", "1000",
+            true, true, DisplayName = "Auditing should have MinimumSamplingInterval")]
+
         public void TestAttribute(string attribute, string nodeId, 
             string expected, bool expectedToBeFound, bool foundationRoot = false)
         {
