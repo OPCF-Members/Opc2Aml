@@ -54,6 +54,7 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 using Opc2Aml;
+using Org.BouncyCastle.Asn1.X500;
 
 
 namespace MarkdownProcessor
@@ -351,17 +352,15 @@ namespace MarkdownProcessor
                 }
             }
 
-            Utils.LogInfo("Add NonHierarchical References");
-
-            AddNonHierarchicalReferences();
-
             Utils.LogInfo( "Creating Instances" );
 
             _runningInstances = true;
 
             CreateInstances(); //  add the instances for each model
 
-            Utils.LogInfo( "Creating Instances Complete" );
+            Utils.LogInfo("Add NonHierarchical References");
+
+            AddNonHierarchicalReferences();
 
             RemoveTypeOnly();
 
@@ -2724,7 +2723,7 @@ namespace MarkdownProcessor
                         else if (m_modelManager.IsTypeOf(reference.ReferenceTypeId,
                             Opc.Ua.ReferenceTypeIds.NonHierarchicalReferences) == true)
                         {
-                            _nonHierarchicalReferences.AddReference(nodeId, rtn, reference);
+                            _nonHierarchicalReferences.AddReference(reference, instance: _runningInstances);
                         }
                     }
                 }
@@ -2769,12 +2768,12 @@ namespace MarkdownProcessor
             foreach(NonHierarchicalReferenceHolder referenceHolder in _nonHierarchicalReferences.ReferenceList )
             {
                 UANode sourceNode = m_modelManager.FindNode<UANode>(referenceHolder.Reference.SourceId);
-                SystemUnitClassType sourceSystemUnitClass = FindNonHierarchicalReference(
+                SystemUnitClassType sourceSystemUnitClass = FindNonHierarchicalReference( referenceHolder,
                     sourceNode);
                 string sourcePath = GetCreatedPathName(sourceNode);
 
                 UANode targetNode = m_modelManager.FindNode<UANode>(referenceHolder.Reference.TargetId);
-                SystemUnitClassType targetSystemUnitClass = FindNonHierarchicalReference(
+                SystemUnitClassType targetSystemUnitClass = FindNonHierarchicalReference( referenceHolder,
                     targetNode);
                 string targetPath = GetCreatedPathName(targetNode);
 
@@ -2807,13 +2806,6 @@ namespace MarkdownProcessor
                     bool waitdd = true;
                 }
 
-                SystemUnitClassType destinationSystemUnitClass = FindNonHierarchicalReference(
-                    referenceHolder.Reference.TargetId) as SystemUnitClassType;
-
-                if (sourceSystemUnitClass == null || destinationSystemUnitClass == null)
-                {
-                    bool waits = true;
-                }
 
                 string refURI = m_modelManager.FindModelUri(referenceHolder.Reference.ReferenceTypeId);
                 UANode referenceTypeNode = FindNode<UANode>(referenceHolder.Reference.ReferenceTypeId);
@@ -2822,12 +2814,12 @@ namespace MarkdownProcessor
                     referenceTypeNode.DecodedBrowseName.Name,
                     sourceSystemUnitClass.Name,
                     sourceSystemUnitClass.ID,
-                    destinationSystemUnitClass.Name,
-                    destinationSystemUnitClass.ID);
+                    targetSystemUnitClass.Name,
+                    targetSystemUnitClass.ID);
 
 
                 SystemUnitFamilyType sourceFamily = sourceSystemUnitClass as SystemUnitFamilyType;
-                InternalElementType destinationType = destinationSystemUnitClass as InternalElementType;
+                InternalElementType destinationType = targetSystemUnitClass as InternalElementType;
 
                 ExternalInterfaceType sourceInterface = Archie_FindOrAddSourceInterface(ref sourceSystemUnitClass,
                     refURI, referenceTypeNode.DecodedBrowseName.Name, referenceHolder.Reference.SourceId);
@@ -2848,37 +2840,46 @@ namespace MarkdownProcessor
             }
         }
 
-        private SystemUnitClassType FindNonHierarchicalReference(UANode node)
+        private SystemUnitClassType FindNonHierarchicalReference(NonHierarchicalReferenceHolder reference, UANode node)
         {
             SystemUnitClassType type = null;
 
-
-            string createdPathName = GetCreatedPathName(node);
-            string[] paths = createdPathName.Split('_');
-
-            if (paths.Length > 0)
+            if (reference.Instance)
             {
-                string uri = m_modelManager.FindModelUri(node.DecodedNodeId);
-                string firstPath = BuildLibraryReference(SUCPrefix, uri, paths[0]);
-                SystemUnitClassType initialDestination = m_cAEXDocument.FindByPath(firstPath) as SystemUnitClassType;
+                // The node should have exactly what I want.
+                string amlNode = AmlIDFromNodeId(node.DecodedNodeId);
+                CAEXObject cAEXObject = m_cAEXDocument.FindByID(amlNode, resolveAlias: false, elementType: typeof(InternalElementType));
+                type = cAEXObject as SystemUnitClassType;
+            }
+            else
+            {
+                string createdPathName = GetCreatedPathName(node);
+                string[] paths = createdPathName.Split('_');
 
-                if (initialDestination != null)
+                if (paths.Length > 0)
                 {
-                    SystemUnitClassType working = initialDestination;
-                    for (int index = 1; index < paths.Length; index++)
-                    {
-                        SystemUnitClassType potential = working.InternalElement[paths[index]] as SystemUnitClassType;
-                        if (potential != null)
-                        {
-                            working = potential as SystemUnitClassType;
-                        }
-                        else
-                        {
-                            bool unexpected = true;
-                        }
-                    }
+                    string uri = m_modelManager.FindModelUri(node.DecodedNodeId);
+                    string firstPath = BuildLibraryReference(SUCPrefix, uri, paths[0]);
+                    SystemUnitClassType initialDestination = m_cAEXDocument.FindByPath(firstPath) as SystemUnitClassType;
 
-                    type = working;
+                    if (initialDestination != null)
+                    {
+                        SystemUnitClassType working = initialDestination;
+                        for (int index = 1; index < paths.Length; index++)
+                        {
+                            SystemUnitClassType potential = working.InternalElement[paths[index]] as SystemUnitClassType;
+                            if (potential != null)
+                            {
+                                working = potential as SystemUnitClassType;
+                            }
+                            else
+                            {
+                                bool unexpected = true;
+                            }
+                        }
+
+                        type = working;
+                    }
                 }
             }
             if (type == null)
@@ -3726,27 +3727,7 @@ namespace MarkdownProcessor
                         }
                         else if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, Opc.Ua.ReferenceTypeIds.NonHierarchicalReferences) == true)
                         {
-                            if (!_nonHierarchicalReferences.BlackList.Contains(reference.ReferenceTypeId.ToString()))
-                            {
-                                UANode sourceNode = m_modelManager.FindNode<UANode>(reference.SourceId);
-                                string id = AmlIDFromNodeId(sourceNode.DecodedNodeId);
-                                CAEXObject sourceObject = m_cAEXDocument.FindByID(id);
-                                SystemUnitClassType sourceSystemUnitClass = sourceObject as SystemUnitClassType;
-
-                                //SystemUnitClassType sourceSystemUnitClass = FindNonHierarchicalReference(
-                                //    sourceNode);
-                                string sourcePath = GetCreatedPathName(sourceNode);
-
-                                UANode targetNode = m_modelManager.FindNode<UANode>(reference.TargetId);
-                                SystemUnitClassType targetSystemUnitClass = FindNonHierarchicalReference(
-                                    targetNode);
-                                string targetIdString = AmlIDFromNodeId(targetNode.DecodedNodeId);
-                                CAEXObject targetObject = m_cAEXDocument.FindByID(targetIdString);
-                                SystemUnitClassType targetAgain = targetObject as SystemUnitClassType;
-                                string targetPath = GetCreatedPathName(targetNode);
-
-                                bool wait = true;
-                            }
+                            _nonHierarchicalReferences.AddReference(reference, instance: _runningInstances);
                         }
                     }
                 }

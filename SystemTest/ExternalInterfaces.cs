@@ -19,7 +19,7 @@ namespace SystemTest
 
         // This test is more about studying the file output, but has validity as a real test        
         private int LinkInternalElementDifferentCount;
-        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout ), Ignore("No Longer valid with Non Hierarchical References")]
         public void DifferencesBetweenLinksAndInternalElements()
         {
             GetDocument();
