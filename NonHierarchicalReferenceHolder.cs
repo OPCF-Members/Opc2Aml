@@ -29,12 +29,15 @@ namespace Opc2Aml
             BlackList.Add(Opc.Ua.ReferenceTypeIds.HasTypeDefinition.ToString());
             BlackList.Add(Opc.Ua.ReferenceTypeIds.HasModellingRule.ToString());
 
-            BlackList.Add(Opc.Ua.ReferenceTypeIds.HasEffect.ToString());
-            BlackList.Add(Opc.Ua.ReferenceTypeIds.AlwaysGeneratesEvent.ToString());
-            //BlackList.Add(Opc.Ua.ReferenceTypeIds.HasTrueSubState.ToString());
-            BlackList.Add(Opc.Ua.ReferenceTypeIds.HasCondition.ToString());
-            BlackList.Add(Opc.Ua.ReferenceTypeIds.GeneratesEvent.ToString());
+            // All subsequent blacklist items have the following errors and description
+            // InternalLink has reference to an object out of AllowedScope
+            // The referenced CAEX-Element via RefPartnerSideB is defined outside the class or
+            // library bounds of this object, which is not allowed
 
+            BlackList.Add(Opc.Ua.ReferenceTypeIds.HasCondition.ToString());
+            BlackList.Add(Opc.Ua.ReferenceTypeIds.HasEffect.ToString());
+            BlackList.Add(Opc.Ua.ReferenceTypeIds.GeneratesEvent.ToString());
+            BlackList.Add(Opc.Ua.ReferenceTypeIds.AlwaysGeneratesEvent.ToString());
         }
 
         public List<NonHierarchicalReferenceHolder> ReferenceList { get { return References; } }
