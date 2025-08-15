@@ -17,9 +17,6 @@ namespace Opc2Aml
 
         public HashSet<string> BlackList = new HashSet<string>();
 
-        //NodeId HasTypeDefinition = Opc.Ua.ReferenceTypeIds.HasTypeDefinition;
-        //NodeId HasModellingRule = Opc.Ua.ReferenceTypeIds.HasModellingRule;
-
         public NonHierarchicalReferences( ModelManager modelManager )
         {
             References = new List<NonHierarchicalReferenceHolder>();
