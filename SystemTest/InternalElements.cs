@@ -300,6 +300,52 @@ namespace SystemTest
             }
         }
 
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestInstanceRoleRequirements()
+        {
+            var document = GetDocument();
+
+            foreach (InstanceHierarchyType instanceHierarchy in document.CAEXFile.InstanceHierarchy)
+            {
+                foreach (InternalElementType internalElement in instanceHierarchy.InternalElement)
+                {
+                    CheckRoleRequirementsRecursive(internalElement);
+                }
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestRoleRequirements()
+        {
+            var document = GetDocument();
+
+            foreach (SystemUnitClassLibType libType in document.CAEXFile.SystemUnitClassLib)
+            {
+                foreach (SystemUnitClassType systemUnitClass in libType)
+                {
+                    CheckRoleRequirementsRecursive(systemUnitClass);
+                }
+            }
+        }
+
+        private void CheckRoleRequirementsRecursive(SystemUnitClassType entity)
+        {
+            var seen = new HashSet<string>();
+
+            foreach (IObjectWithRoleReference roleReference in entity.RoleReferences)
+            {
+                // Use RefBaseRoleClassPath as the unique key for duplication
+                string key = roleReference.RoleReference ?? string.Empty;
+                Assert.IsFalse(seen.Contains(key), $"Duplicate RoleRequirements '{key}' found in '{entity.Name}'");
+                seen.Add(key);
+            }
+
+            foreach (InternalElementType internalElement in entity.InternalElement)
+            {
+                CheckRoleRequirementsRecursive(internalElement);
+            }
+        }
+
 
         #endregion
 
