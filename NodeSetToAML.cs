@@ -2818,16 +2818,22 @@ namespace MarkdownProcessor
             MinimizeNodeId( nodeIdAttribute );
         }
 
-        private void RemoveUnwantedNodeIdAttribute( AttributeType attribute )
+
+        private void RemoveUnwantedAttribute(AttributeType attributeType, string attributeName)
         {
-            if (attribute != null)
+            if (attributeType != null)
             {
-                AttributeType unwantedNodeIdAttribute = attribute.Attribute["NodeId"];
-                if (unwantedNodeIdAttribute != null)
+                AttributeType unwantedAttribute = attributeType.Attribute[attributeName];
+                if (unwantedAttribute != null)
                 {
-                    attribute.Attribute.RemoveElement(unwantedNodeIdAttribute);
+                    attributeType.Attribute.RemoveElement(unwantedAttribute);
                 }
             }
+        }
+
+        private void RemoveUnwantedNodeIdAttribute(AttributeType attribute)
+        {
+            RemoveUnwantedAttribute(attribute, "NodeId");
         }
 
         private void RemoveNodeIdsFromDefinition(AttributeType attribute)
@@ -3162,6 +3168,11 @@ namespace MarkdownProcessor
                                         "IsOptional", "Boolean", new Variant( field.IsOptional) );
                                     
                                     SetArrayDimensions( structureFieldAttribute.Attribute, field.ArrayDimensions );
+                                    RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], "StructureFieldDefinition");  
+                                    if ( string.IsNullOrEmpty(field.ArrayDimensions))
+                                    {
+                                        RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], "UInt32");
+                                    }
 
                                     AddModifyAttribute( structureFieldAttribute.Attribute,
                                         "AllowSubtypes", "Boolean", new Variant( field.AllowSubTypes ) );
@@ -3176,12 +3187,19 @@ namespace MarkdownProcessor
                                             "Description", "LocalizedText", new Variant( localizedText ) );
                                     }
 
+                                    RemoveUnwantedAttribute(structureFieldAttribute.Attribute["Description"], 
+                                        "StructureFieldDefinition");
+
                                     // Remove the NodeId from the structure Field
                                     AttributeType nodeIdAttribute = structureFieldAttribute.Attribute[ "DataType" ];
                                     if( nodeIdAttribute != null )
                                     {
                                         structureFieldAttribute.Attribute.RemoveElement( nodeIdAttribute );
                                     }
+
+                                    RemoveUnwantedNodeIdAttribute(structureFieldAttribute);
+                                    RemoveNodeIdsFromDefinition(structureFieldAttribute);
+
 
                                     fieldDefinitionAttribute.Attribute.Insert( structureFieldAttribute );
                                 }
