@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aml.Engine" Version="4.4.0" />
-    <PackageReference Include="Aml.Engine.Services" Version="4.2.2" />
+    <PackageReference Include="Aml.Engine" Version="4.4.3" />
+    <PackageReference Include="Aml.Engine.Services" Version="4.2.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.7.3" />
     <PackageReference Include="MSTest.TestFramework" Version="3.7.3" />
