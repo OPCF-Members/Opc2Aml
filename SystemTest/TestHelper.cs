@@ -79,7 +79,7 @@ namespace SystemTest
             {
                 foreach( FileInfo fileInfo in RetrieveFiles() )
                 {
-                    if( fileInfo.Name.Equals( filename ) )
+                    if( fileInfo.Name.Equals( filename, StringComparison.OrdinalIgnoreCase ) )
                     {
                         AutomationMLContainer container = new AutomationMLContainer( fileInfo.FullName,
                             System.IO.FileMode.Open, FileAccess.Read );

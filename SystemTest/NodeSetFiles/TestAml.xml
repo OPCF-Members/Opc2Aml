@@ -40,6 +40,7 @@
 		<Alias Alias="SessionDiagnosticsDataType">i=865</Alias>
         <Alias Alias="SessionSecurityDiagnosticsDataType">i=868</Alias>
         <Alias Alias="SubscriptionDiagnosticsDataType">i=874</Alias>
+		<Alias Alias="TransmitQosDataType">i=23604</Alias>
 		<Alias Alias="NegotiationStatus">i=24216</Alias>
 		<Alias Alias="LowLevelStructure">ns=1;i=3003</Alias>
 
@@ -308,6 +309,8 @@
         </Definition>
     </UADataType>
 
+	
+	
     <UAVariableType ValueRank="-2" NodeId="ns=1;i=2003" BrowseName="1:ComplexVariableType">
         <DisplayName>ComplexVariableType</DisplayName>
         <References>
@@ -318,8 +321,30 @@
         </References>
     </UAVariableType>
 
+	<UADataType NodeId="ns=1;i=3006" BrowseName="1:PublisherQosDataType">
+		<DisplayName>PublisherQosDataType</DisplayName>
+		<Category>UAFX AutomationComponent Base</Category>
+		<Category>UAFX FunctionalEntity Base</Category>
+		<Documentation>https://reference.opcfoundation.org/UAFX/Part81/v100/docs/10.36</Documentation>
+		<References>
+			<!--<Reference ReferenceType="HasEncoding" BrowseName="Default Binary">ns=1;i=5024</Reference>
+			<Reference ReferenceType="HasEncoding" BrowseName="Default JSON">ns=1;i=5026</Reference>
+			<Reference ReferenceType="HasEncoding" BrowseName="Default XML">ns=1;i=5025</Reference>-->
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
+		</References>
+		<Definition Name="1:PublisherQosDataType">
+			<Field Name="QosCategory" DataType="String" IsOptional="true" MaxStringLength="123">
+				<Description Locale="en">Quality of Service Category</Description>
+			</Field>
+			<Field Name="DatagramQos" DataType="TransmitQosDataType" ValueRank="2" ArrayDimensions="2,3" AllowSubTypes="true">
+				<Description>Transmit Quality of Service</Description>
+			</Field>
+			<Field Name="NoDescription" DataType="String" IsOptional="false" MaxStringLength="321"/>
+		</Definition>
+	</UADataType>
 
-    <UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING" NodeId="ns=1;i=5000" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING" ParentNodeId="i=11715">
+
+	<UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING" NodeId="ns=1;i=5000" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING" ParentNodeId="i=11715">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING</DisplayName>
         <References>
             <Reference ReferenceType="HasComponent" IsForward="false">i=11715</Reference>
@@ -3538,7 +3563,7 @@
 	<!-- Next Numbers
     ObjectType 1009
     VariableType 2006
-    DataType 3006
+    DataType 3007
     Object 5025
     Variable 6238
     -->
