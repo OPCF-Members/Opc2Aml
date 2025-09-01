@@ -60,7 +60,6 @@ namespace SystemTest
         [DataRow("DatagramQos", "Name", "DatagramQos")]
         [DataRow("DatagramQos", "Description", "Transmit Quality of Service")]
         [DataRow("DatagramQos", "ValueRank", "2")]
-        [DataRow("DatagramQos", "MaxStringLength", "0")]
         [DataRow("DatagramQos", "IsOptional", "false")]
 
         [DataRow("NoDescription", "Name", "NoDescription")]

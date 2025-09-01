@@ -3174,13 +3174,25 @@ namespace MarkdownProcessor
                                         RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], "UInt32");
                                     }
 
-                                    AddModifyAttribute( structureFieldAttribute.Attribute,
-                                        "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
+                                    // Max String Length is only for strings and bytestrings
+                                    // This seems to be a point for discussion.
+                                    // Do we put max string length in if it zero?
+                                    if ( field.MaxStringLength > 0 && 
+                                        m_modelManager.IsTypeOf( field.DecodedDataType, Opc.Ua.DataTypeIds.String ) ||
+                                        m_modelManager.IsTypeOf( field.DecodedDataType, Opc.Ua.DataTypeIds.ByteString ) )
+                                    {
+                                        AddModifyAttribute( structureFieldAttribute.Attribute,
+                                            "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
+                                    }
+                                    else if ( structureFieldAttribute.Attribute[ "MaxStringLength" ] != null )
+                                    {
+                                        RemoveUnwantedAttribute( structureFieldAttribute, "MaxStringLength" );
+                                    }
 
-                                    if( field.Description != null  && field.Description.Length > 0 )
+                                    if ( field.Description != null && field.Description.Length > 0 )
                                     {
                                         LocalizedText localizedText = new LocalizedText(
-                                            field.Description[0].Locale, field.Description[ 0 ].Value );
+                                            field.Description[0].Locale, field.Description[0].Value );
                                         AddModifyAttribute( structureFieldAttribute.Attribute,
                                             "Description", "LocalizedText", new Variant( localizedText ) );
                                     }
