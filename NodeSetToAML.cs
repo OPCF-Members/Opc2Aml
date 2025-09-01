@@ -3162,17 +3162,33 @@ namespace MarkdownProcessor
                                     // Now fill the data
                                     AddModifyAttribute( structureFieldAttribute.Attribute, 
                                         "Name", "String", new Variant( field.Name ) );
-                                    AddModifyAttribute( structureFieldAttribute.Attribute,
-                                        "ValueRank", "Int32", new Variant( field.ValueRank ) );
+
+                                    if ( field.ValueRank == ValueRanks.Scalar || 
+                                        field.ValueRank >= ValueRanks.OneDimension )
+                                    {
+                                        AddModifyAttribute(structureFieldAttribute.Attribute,
+                                            "ValueRank", "Int32", new Variant(field.ValueRank));
+                                    }
+                                    else
+                                    {
+                                        RemoveUnwantedAttribute( structureFieldAttribute, "ValueRank" );
+                                    }
+
                                     AddModifyAttribute( structureFieldAttribute.Attribute,
                                         "IsOptional", "Boolean", new Variant( field.IsOptional) );
                                     
-                                    SetArrayDimensions( structureFieldAttribute.Attribute, field.ArrayDimensions );
-                                    RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], "StructureFieldDefinition");  
-                                    if ( string.IsNullOrEmpty(field.ArrayDimensions))
+                                    if ( field.ValueRank >= ValueRanks.OneDimension &&
+                                        !string.IsNullOrEmpty( field.ArrayDimensions ) )
                                     {
-                                        RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], "UInt32");
+                                        SetArrayDimensions(structureFieldAttribute.Attribute, field.ArrayDimensions);
+                                        RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], 
+                                            "StructureFieldDefinition");
                                     }
+                                    else
+                                    {
+                                        RemoveUnwantedAttribute(structureFieldAttribute, "ArrayDimensions");
+                                    }
+
 
                                     // Max String Length is only for strings and bytestrings
                                     // This seems to be a point for discussion.

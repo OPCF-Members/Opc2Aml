@@ -53,7 +53,6 @@ namespace SystemTest
         [DataRow("QosCategory","Name", "QosCategory")]
         [DataRow("QosCategory", "Description", "Quality of Service Category")]
         [DataRow("QosCategory", "ValueRank", "-1")]
-        [DataRow("QosCategory", "ArrayDimensions", null)]
         [DataRow("QosCategory", "MaxStringLength", "123")]
         [DataRow("QosCategory", "IsOptional", "true")]
 
@@ -65,7 +64,6 @@ namespace SystemTest
         [DataRow("NoDescription", "Name", "NoDescription")]
         [DataRow("NoDescription", "Description", null)]
         [DataRow("NoDescription", "ValueRank", "-1")]
-        [DataRow("NoDescription", "ArrayDimensions", null)]
         [DataRow("NoDescription", "MaxStringLength", "321")]
         [DataRow("NoDescription", "IsOptional", "false")]
 
