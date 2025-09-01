@@ -3175,8 +3175,6 @@ namespace MarkdownProcessor
                                     }
 
                                     AddModifyAttribute( structureFieldAttribute.Attribute,
-                                        "AllowSubtypes", "Boolean", new Variant( field.AllowSubTypes ) );
-                                    AddModifyAttribute( structureFieldAttribute.Attribute,
                                         "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
 
                                     if( field.Description != null  && field.Description.Length > 0 )

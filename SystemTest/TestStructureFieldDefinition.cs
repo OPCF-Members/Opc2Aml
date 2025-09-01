@@ -56,14 +56,12 @@ namespace SystemTest
         [DataRow("QosCategory", "ArrayDimensions", null)]
         [DataRow("QosCategory", "MaxStringLength", "123")]
         [DataRow("QosCategory", "IsOptional", "true")]
-        [DataRow("QosCategory", "AllowSubtypes", "false")]
 
         [DataRow("DatagramQos", "Name", "DatagramQos")]
         [DataRow("DatagramQos", "Description", "Transmit Quality of Service")]
         [DataRow("DatagramQos", "ValueRank", "2")]
         [DataRow("DatagramQos", "MaxStringLength", "0")]
         [DataRow("DatagramQos", "IsOptional", "false")]
-        [DataRow("DatagramQos", "AllowSubtypes", "true")]
 
         [DataRow("NoDescription", "Name", "NoDescription")]
         [DataRow("NoDescription", "Description", null)]
@@ -71,7 +69,6 @@ namespace SystemTest
         [DataRow("NoDescription", "ArrayDimensions", null)]
         [DataRow("NoDescription", "MaxStringLength", "321")]
         [DataRow("NoDescription", "IsOptional", "false")]
-        [DataRow("NoDescription", "AllowSubtypes", "false")]
 
         public void TestAttributeValues(string variableName, 
             string attributeName, 
