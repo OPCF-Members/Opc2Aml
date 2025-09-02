@@ -3205,16 +3205,31 @@ namespace MarkdownProcessor
                                         RemoveUnwantedAttribute( structureFieldAttribute, "MaxStringLength" );
                                     }
 
-                                    if ( field.Description != null && field.Description.Length > 0 )
+                                    if (field.Description != null && field.Description.Length > 0)
                                     {
+                                        List<Variant> localizedTextList = new List<Variant>(field.Description.Length);
+                                        foreach(NodeSet.LocalizedText description in field.Description)
+                                        {
+                                            localizedTextList.Add(
+                                                new Variant(
+                                                    new LocalizedText(description.Locale, description.Value)));
+                                        }
+                                        Variant localizedTextArray = new Variant(localizedTextList);
+
                                         LocalizedText localizedText = new LocalizedText(
-                                            field.Description[0].Locale, field.Description[0].Value );
-                                        AddModifyAttribute( structureFieldAttribute.Attribute,
-                                            "Description", "LocalizedText", new Variant( localizedText ) );
+                                            field.Description[0].Locale, field.Description[0].Value);
+                                        AddModifyAttribute(structureFieldAttribute.Attribute,
+                                            "Description", "LocalizedText", localizedTextArray,
+                                            bListOf: true);
+                                        RemoveUnwantedAttribute(structureFieldAttribute.Attribute["Description"],
+                                            "StructureFieldDefinition");
+                                    }
+                                    else if (structureFieldAttribute.Attribute["Description"] != null)
+                                    {
+                                        RemoveUnwantedAttribute(structureFieldAttribute, "Description");
                                     }
 
-                                    RemoveUnwantedAttribute(structureFieldAttribute.Attribute["Description"], 
-                                        "StructureFieldDefinition");
+
 
                                     // Remove the NodeId from the structure Field
                                     AttributeType nodeIdAttribute = structureFieldAttribute.Attribute[ "DataType" ];

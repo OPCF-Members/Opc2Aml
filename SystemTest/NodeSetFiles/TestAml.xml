@@ -335,6 +335,8 @@
 		<Definition Name="1:PublisherQosDataType">
 			<Field Name="QosCategory" DataType="String" IsOptional="true" MaxStringLength="123">
 				<Description Locale="en">Quality of Service Category</Description>
+				<Description Locale="fr">Catégorie de qualité de service</Description>
+				<Description>Kategorie „Dienstqualität“</Description>
 			</Field>
 			<Field Name="DatagramQos" DataType="TransmitQosDataType" ValueRank="2" ArrayDimensions="2,3" AllowSubTypes="true">
 				<Description>Transmit Quality of Service</Description>
@@ -343,6 +345,26 @@
 		</Definition>
 	</UADataType>
 
+	<UADataType NodeId="ns=1;i=3007" BrowseName="3DCartesianCoordinates" SymbolicName="ThreeDCartesianCoordinates">
+		<DisplayName>3DCartesianCoordinates</DisplayName>
+		<Category>Base Info Spatial Data</Category>
+		<Documentation>https://reference.opcfoundation.org/v105/Core/docs/Part5/12.26</Documentation>
+		<References>
+			<Reference ReferenceType="HasSubtype" IsForward="false">i=18809</Reference>
+		</References>
+		<Definition Name="3DCartesianCoordinates" SymbolicName="ThreeDCartesianCoordinates">
+			<Field Name="X" DataType="i=11" >
+				<Description>No Locale</Description>
+			</Field>
+			<Field Name="Y" DataType="i=11" >
+				<Description Locale="en">With Locale</Description>
+			</Field>
+			<Field Name="Z" DataType="i=11" >
+				<Description>Multiple Descriptions</Description>
+				<Description Locale="en">Multiple Descriptions with Locale</Description>
+			</Field>
+		</Definition>
+	</UADataType>
 
 	<UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING" NodeId="ns=1;i=5000" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING" ParentNodeId="i=11715">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING</DisplayName>
@@ -3563,7 +3585,7 @@
 	<!-- Next Numbers
     ObjectType 1009
     VariableType 2006
-    DataType 3007
+    DataType 3008
     Object 5025
     Variable 6238
     -->
