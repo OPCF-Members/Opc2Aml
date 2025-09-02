@@ -341,7 +341,7 @@
 			<Field Name="DatagramQos" DataType="TransmitQosDataType" ValueRank="2" ArrayDimensions="2,3" AllowSubTypes="true">
 				<Description>Transmit Quality of Service</Description>
 			</Field>
-			<Field Name="NoDescription" DataType="String" IsOptional="false" MaxStringLength="321"/>
+			<Field Name="NoDescription" DataType="String" IsOptional="false" ValueRank="-2" MaxStringLength="321"/>
 		</Definition>
 	</UADataType>
 

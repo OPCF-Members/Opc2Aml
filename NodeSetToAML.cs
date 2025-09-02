@@ -3174,9 +3174,16 @@ namespace MarkdownProcessor
                                         RemoveUnwantedAttribute( structureFieldAttribute, "ValueRank" );
                                     }
 
-                                    AddModifyAttribute( structureFieldAttribute.Attribute,
-                                        "IsOptional", "Boolean", new Variant( field.IsOptional) );
-                                    
+                                    if ( field.IsOptional )
+                                    {
+                                        AddModifyAttribute(structureFieldAttribute.Attribute,
+                                            "IsOptional", "Boolean", new Variant(true));
+                                    }
+                                    else
+                                    {
+                                        RemoveUnwantedAttribute(structureFieldAttribute, "IsOptional");
+                                    }
+
                                     if ( field.ValueRank >= ValueRanks.OneDimension &&
                                         !string.IsNullOrEmpty( field.ArrayDimensions ) )
                                     {

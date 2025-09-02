@@ -64,14 +64,14 @@ namespace SystemTest
         [DataRow("DatagramQos", "ArrayDimensions", "2", "0", "")]
         [DataRow("DatagramQos", "ArrayDimensions", "3", "1", "")]
         [DataRow("DatagramQos", "ValueRank", "2", "", "")]
-        [DataRow("DatagramQos", "IsOptional", "false", "", "")]
+        [DataRow("DatagramQos", "IsOptional", null, "", "")]
 
         [DataRow("NoDescription", "Name", "NoDescription", "", "")]
         [DataRow("NoDescription", "Description", null, "", "")]
-        [DataRow("NoDescription", "ValueRank", "-1", "", "")]
+        [DataRow("NoDescription", "ValueRank", null, "", "")]
         [DataRow("NoDescription", "ArrayDimensions", null, "", "")]
         [DataRow("NoDescription", "MaxStringLength", "321", "", "")]
-        [DataRow("NoDescription", "IsOptional", "false", "", "")]
+        [DataRow("NoDescription", "IsOptional", null, "", "")]
 
         public void TestAttributeValues(string variableName, 
             string attributeName, 
