@@ -342,6 +342,7 @@
 				<Description>Transmit Quality of Service</Description>
 			</Field>
 			<Field Name="NoDescription" DataType="String" IsOptional="false" ValueRank="-2" MaxStringLength="321"/>
+			<Field Name="PracticallyEmpty" DataType="i=12" ValueRank="-2"/>
 		</Definition>
 	</UADataType>
 

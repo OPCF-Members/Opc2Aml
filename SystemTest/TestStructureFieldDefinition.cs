@@ -1,10 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
-using System.Linq;
 using System;
-using Opc.Ua;
 
 namespace SystemTest
 {
@@ -26,7 +23,7 @@ namespace SystemTest
 
             foreach( AttributeType attribute in objectToTest.Attribute )
             {
-                if ( attribute.Name != "NodeId")
+                if ( attribute.Name != "NodeId" && attribute.Name != "PracticallyEmpty" )
                 {
                     AttributeType structureAttribute = GetAttribute(attribute, "StructureFieldDefinition");
                     foreach(AttributeType definitionAttribute in structureAttribute.Attribute)
@@ -50,7 +47,7 @@ namespace SystemTest
         }
 
         [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
-        [DataRow("QosCategory","Name", "QosCategory", "", "")]
+        [DataRow("QosCategory","Name", null, "", "")]
         [DataRow("QosCategory", "Description", "Quality of Service Category", "0", "en")]
         [DataRow("QosCategory", "Description", "Catégorie de qualité de service", "1", "fr")]
         [DataRow("QosCategory", "Description", "Kategorie „Dienstqualität“", "2", "")]
@@ -59,14 +56,14 @@ namespace SystemTest
         [DataRow("QosCategory", "MaxStringLength", "123", "", "")]
         [DataRow("QosCategory", "IsOptional", "true", "", "")]
 
-        [DataRow("DatagramQos", "Name", "DatagramQos", "", "")]
+        [DataRow("DatagramQos", "Name", null, "", "")]
         [DataRow("DatagramQos", "Description", "Transmit Quality of Service", "0", "")]
         [DataRow("DatagramQos", "ArrayDimensions", "2", "0", "")]
         [DataRow("DatagramQos", "ArrayDimensions", "3", "1", "")]
         [DataRow("DatagramQos", "ValueRank", "2", "", "")]
         [DataRow("DatagramQos", "IsOptional", null, "", "")]
 
-        [DataRow("NoDescription", "Name", "NoDescription", "", "")]
+        [DataRow("NoDescription", "Name", null, "", "")]
         [DataRow("NoDescription", "Description", null, "", "")]
         [DataRow("NoDescription", "ValueRank", null, "", "")]
         [DataRow("NoDescription", "ArrayDimensions", null, "", "")]
@@ -78,15 +75,6 @@ namespace SystemTest
             string expectedValue,
             string arrayIndex,
             string localeId)
-        {
-            AttributeValuesEx(variableName, attributeName, expectedValue, arrayIndex, localeId);
-        }
-
-        public void AttributeValuesEx(string variableName,
-            string attributeName,
-            string expectedValue,
-            string arrayIndex = "",
-            string localeId = "")
         {
             AttributeFamilyType objectToTest = GetTestAttribute(TestHelper.Uris.Test,
                 PublisherQosDataType);
@@ -121,9 +109,20 @@ namespace SystemTest
             }
         }
 
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestUnwantedStructureAttribute()
+        {
+            AttributeFamilyType objectToTest = GetTestAttribute(TestHelper.Uris.Test, PublisherQosDataType);
+            AttributeType emptyAttribute = GetAttribute(objectToTest.Attribute, "PracticallyEmpty");
+            Assert.IsNull(emptyAttribute.Attribute["StructureFieldDefinition"],
+                "Unexpected StructureFieldDefinition found in PracticallyEmpty");
+        }
+
+
         #endregion
 
-                #region Helpers
+        #region Helpers
 
         private CAEXDocument GetDocument()
         {

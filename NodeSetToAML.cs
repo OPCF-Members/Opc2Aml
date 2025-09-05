@@ -3160,8 +3160,7 @@ namespace MarkdownProcessor
 
 
                                     // Now fill the data
-                                    AddModifyAttribute( structureFieldAttribute.Attribute, 
-                                        "Name", "String", new Variant( field.Name ) );
+                                    RemoveUnwantedAttribute(structureFieldAttribute, "Name");
 
                                     if ( field.ValueRank == ValueRanks.Scalar || 
                                         field.ValueRank >= ValueRanks.OneDimension )
@@ -3248,8 +3247,10 @@ namespace MarkdownProcessor
                                     RemoveUnwantedNodeIdAttribute(structureFieldAttribute);
                                     RemoveNodeIdsFromDefinition(structureFieldAttribute);
 
-
-                                    fieldDefinitionAttribute.Attribute.Insert( structureFieldAttribute );
+                                    if (structureFieldAttribute.Attribute.Count > 0)
+                                    {
+                                        fieldDefinitionAttribute.Attribute.Insert(structureFieldAttribute);
+                                    }
                                 }
                             }
                         }
