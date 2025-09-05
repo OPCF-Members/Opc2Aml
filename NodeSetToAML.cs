@@ -3160,35 +3160,82 @@ namespace MarkdownProcessor
 
 
                                     // Now fill the data
-                                    AddModifyAttribute( structureFieldAttribute.Attribute, 
-                                        "Name", "String", new Variant( field.Name ) );
-                                    AddModifyAttribute( structureFieldAttribute.Attribute,
-                                        "ValueRank", "Int32", new Variant( field.ValueRank ) );
-                                    AddModifyAttribute( structureFieldAttribute.Attribute,
-                                        "IsOptional", "Boolean", new Variant( field.IsOptional) );
-                                    
-                                    SetArrayDimensions( structureFieldAttribute.Attribute, field.ArrayDimensions );
-                                    RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], "StructureFieldDefinition");  
-                                    if ( string.IsNullOrEmpty(field.ArrayDimensions))
+                                    RemoveUnwantedAttribute(structureFieldAttribute, "Name");
+
+                                    if ( field.ValueRank == ValueRanks.Scalar || 
+                                        field.ValueRank >= ValueRanks.OneDimension )
                                     {
-                                        RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], "UInt32");
+                                        AddModifyAttribute(structureFieldAttribute.Attribute,
+                                            "ValueRank", "Int32", new Variant(field.ValueRank));
+                                    }
+                                    else
+                                    {
+                                        RemoveUnwantedAttribute( structureFieldAttribute, "ValueRank" );
                                     }
 
-                                    AddModifyAttribute( structureFieldAttribute.Attribute,
-                                        "AllowSubtypes", "Boolean", new Variant( field.AllowSubTypes ) );
-                                    AddModifyAttribute( structureFieldAttribute.Attribute,
-                                        "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
-
-                                    if( field.Description != null  && field.Description.Length > 0 )
+                                    if ( field.IsOptional )
                                     {
-                                        LocalizedText localizedText = new LocalizedText(
-                                            field.Description[0].Locale, field.Description[ 0 ].Value );
+                                        AddModifyAttribute(structureFieldAttribute.Attribute,
+                                            "IsOptional", "Boolean", new Variant(true));
+                                    }
+                                    else
+                                    {
+                                        RemoveUnwantedAttribute(structureFieldAttribute, "IsOptional");
+                                    }
+
+                                    if ( field.ValueRank >= ValueRanks.OneDimension &&
+                                        !string.IsNullOrEmpty( field.ArrayDimensions ) )
+                                    {
+                                        SetArrayDimensions(structureFieldAttribute.Attribute, field.ArrayDimensions);
+                                        RemoveUnwantedAttribute(structureFieldAttribute.Attribute["ArrayDimensions"], 
+                                            "StructureFieldDefinition");
+                                    }
+                                    else
+                                    {
+                                        RemoveUnwantedAttribute(structureFieldAttribute, "ArrayDimensions");
+                                    }
+
+
+                                    // Max String Length is only for strings and bytestrings
+                                    // This seems to be a point for discussion.
+                                    // Do we put max string length in if it zero?
+                                    if ( field.MaxStringLength > 0 && 
+                                        m_modelManager.IsTypeOf( field.DecodedDataType, Opc.Ua.DataTypeIds.String ) ||
+                                        m_modelManager.IsTypeOf( field.DecodedDataType, Opc.Ua.DataTypeIds.ByteString ) )
+                                    {
                                         AddModifyAttribute( structureFieldAttribute.Attribute,
-                                            "Description", "LocalizedText", new Variant( localizedText ) );
+                                            "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
+                                    }
+                                    else if ( structureFieldAttribute.Attribute[ "MaxStringLength" ] != null )
+                                    {
+                                        RemoveUnwantedAttribute( structureFieldAttribute, "MaxStringLength" );
                                     }
 
-                                    RemoveUnwantedAttribute(structureFieldAttribute.Attribute["Description"], 
-                                        "StructureFieldDefinition");
+                                    if (field.Description != null && field.Description.Length > 0)
+                                    {
+                                        List<Variant> localizedTextList = new List<Variant>(field.Description.Length);
+                                        foreach(NodeSet.LocalizedText description in field.Description)
+                                        {
+                                            localizedTextList.Add(
+                                                new Variant(
+                                                    new LocalizedText(description.Locale, description.Value)));
+                                        }
+                                        Variant localizedTextArray = new Variant(localizedTextList);
+
+                                        LocalizedText localizedText = new LocalizedText(
+                                            field.Description[0].Locale, field.Description[0].Value);
+                                        AddModifyAttribute(structureFieldAttribute.Attribute,
+                                            "Description", "LocalizedText", localizedTextArray,
+                                            bListOf: true);
+                                        RemoveUnwantedAttribute(structureFieldAttribute.Attribute["Description"],
+                                            "StructureFieldDefinition");
+                                    }
+                                    else if (structureFieldAttribute.Attribute["Description"] != null)
+                                    {
+                                        RemoveUnwantedAttribute(structureFieldAttribute, "Description");
+                                    }
+
+
 
                                     // Remove the NodeId from the structure Field
                                     AttributeType nodeIdAttribute = structureFieldAttribute.Attribute[ "DataType" ];
@@ -3200,8 +3247,10 @@ namespace MarkdownProcessor
                                     RemoveUnwantedNodeIdAttribute(structureFieldAttribute);
                                     RemoveNodeIdsFromDefinition(structureFieldAttribute);
 
-
-                                    fieldDefinitionAttribute.Attribute.Insert( structureFieldAttribute );
+                                    if (structureFieldAttribute.Attribute.Count > 0)
+                                    {
+                                        fieldDefinitionAttribute.Attribute.Insert(structureFieldAttribute);
+                                    }
                                 }
                             }
                         }

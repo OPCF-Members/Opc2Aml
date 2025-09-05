@@ -1,10 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
-using System.Linq;
 using System;
-using Opc.Ua;
 
 namespace SystemTest
 {
@@ -26,7 +23,7 @@ namespace SystemTest
 
             foreach( AttributeType attribute in objectToTest.Attribute )
             {
-                if ( attribute.Name != "NodeId")
+                if ( attribute.Name != "NodeId" && attribute.Name != "PracticallyEmpty" )
                 {
                     AttributeType structureAttribute = GetAttribute(attribute, "StructureFieldDefinition");
                     foreach(AttributeType definitionAttribute in structureAttribute.Attribute)
@@ -50,81 +47,82 @@ namespace SystemTest
         }
 
         [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
-        [DataRow("QosCategory","Name", "QosCategory")]
-        [DataRow("QosCategory", "Description", "Quality of Service Category")]
-        [DataRow("QosCategory", "ValueRank", "-1")]
-        [DataRow("QosCategory", "ArrayDimensions", null)]
-        [DataRow("QosCategory", "MaxStringLength", "123")]
-        [DataRow("QosCategory", "IsOptional", "true")]
-        [DataRow("QosCategory", "AllowSubtypes", "false")]
+        [DataRow("QosCategory","Name", null, "", "")]
+        [DataRow("QosCategory", "Description", "Quality of Service Category", "0", "en")]
+        [DataRow("QosCategory", "Description", "Catégorie de qualité de service", "1", "fr")]
+        [DataRow("QosCategory", "Description", "Kategorie „Dienstqualität“", "2", "")]
+        [DataRow("QosCategory", "ValueRank", "-1", "", "")]
+        [DataRow("QosCategory", "ArrayDimensions", null, "", "")]
+        [DataRow("QosCategory", "MaxStringLength", "123", "", "")]
+        [DataRow("QosCategory", "IsOptional", "true", "", "")]
 
-        [DataRow("DatagramQos", "Name", "DatagramQos")]
-        [DataRow("DatagramQos", "Description", "Transmit Quality of Service")]
-        [DataRow("DatagramQos", "ValueRank", "2")]
-        [DataRow("DatagramQos", "MaxStringLength", "0")]
-        [DataRow("DatagramQos", "IsOptional", "false")]
-        [DataRow("DatagramQos", "AllowSubtypes", "true")]
+        [DataRow("DatagramQos", "Name", null, "", "")]
+        [DataRow("DatagramQos", "Description", "Transmit Quality of Service", "0", "")]
+        [DataRow("DatagramQos", "ArrayDimensions", "2", "0", "")]
+        [DataRow("DatagramQos", "ArrayDimensions", "3", "1", "")]
+        [DataRow("DatagramQos", "ValueRank", "2", "", "")]
+        [DataRow("DatagramQos", "IsOptional", null, "", "")]
 
-        [DataRow("NoDescription", "Name", "NoDescription")]
-        [DataRow("NoDescription", "Description", null)]
-        [DataRow("NoDescription", "ValueRank", "-1")]
-        [DataRow("NoDescription", "ArrayDimensions", null)]
-        [DataRow("NoDescription", "MaxStringLength", "321")]
-        [DataRow("NoDescription", "IsOptional", "false")]
-        [DataRow("NoDescription", "AllowSubtypes", "false")]
+        [DataRow("NoDescription", "Name", null, "", "")]
+        [DataRow("NoDescription", "Description", null, "", "")]
+        [DataRow("NoDescription", "ValueRank", null, "", "")]
+        [DataRow("NoDescription", "ArrayDimensions", null, "", "")]
+        [DataRow("NoDescription", "MaxStringLength", "321", "", "")]
+        [DataRow("NoDescription", "IsOptional", null, "", "")]
 
         public void TestAttributeValues(string variableName, 
             string attributeName, 
-            string expectedValue)
-        {
-            AttributeValues(variableName, attributeName, expectedValue);
-        }
-
-        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
-        public void TestDescriptionLocale()
-        {
-            AttributeValues("QosCategory", "Description", "Quality of Service Category", "en");
-        }
-
-        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
-        public void TestArrayDimensions()
-        {
-            AttributeType structured = GetStructured(TestHelper.Uris.Test, 
-                PublisherQosDataType, "DatagramQos");
-            AttributeType attribute = GetAttribute(structured, "ArrayDimensions");
-            AttributeType first = GetAttribute(attribute, "0");
-            Assert.AreEqual("2", first.Value, "Unexpected value for ArrayDimensions[0].");
-            AttributeType second = GetAttribute(attribute, "1");
-            Assert.AreEqual("3", second.Value, "Unexpected value for ArrayDimensions[1].");
-        }
-
-        public void AttributeValues(string variableName,
-            string attributeName,
             string expectedValue,
-            string localeId = "")
+            string arrayIndex,
+            string localeId)
         {
             AttributeFamilyType objectToTest = GetTestAttribute(TestHelper.Uris.Test,
                 PublisherQosDataType);
 
             AttributeType variableAttribute = GetAttribute(objectToTest.Attribute, variableName);
             AttributeType structured = GetAttribute(variableAttribute, "StructureFieldDefinition");
-            AttributeType attribute = GetAttribute(structured.Attribute, attributeName);
-            Assert.AreEqual(expectedValue, attribute.Value,
-                $"Unexpected value for {variableName}.{attributeName} in {structured.Name}.");  
 
-            if (!string.IsNullOrEmpty(localeId))
+            if (string.IsNullOrEmpty(expectedValue))
             {
-                AttributeType locale = GetAttribute(attribute.Attribute, localeId);
-                Assert.AreEqual(expectedValue, locale.Value,
-                    $"Unexpected locale value for {variableName}.{attributeName} in {structured.Name}.");
+                // attributeName should not exist
+                Assert.IsNull(structured.Attribute[attributeName],
+                    $"Attribute {attributeName} exists in {variableName} when it should not.");
+            }
+            else
+            {
+                AttributeType attribute = GetAttribute(structured.Attribute, attributeName);
+
+                if (!string.IsNullOrEmpty(arrayIndex))
+                {
+                    attribute = GetAttribute(attribute, arrayIndex);
+                }
+
+                Assert.AreEqual(expectedValue, attribute.Value,
+                    $"Unexpected value for {variableName}.{attributeName} in {structured.Name}.");
+
+                if (!string.IsNullOrEmpty(localeId))
+                {
+                    AttributeType locale = GetAttribute(attribute.Attribute, localeId);
+                    Assert.AreEqual(expectedValue, locale.Value,
+                        $"Unexpected locale value for {variableName}.{attributeName} in {structured.Name}.");
+                }
             }
         }
 
 
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestUnwantedStructureAttribute()
+        {
+            AttributeFamilyType objectToTest = GetTestAttribute(TestHelper.Uris.Test, PublisherQosDataType);
+            AttributeType emptyAttribute = GetAttribute(objectToTest.Attribute, "PracticallyEmpty");
+            Assert.IsNull(emptyAttribute.Attribute["StructureFieldDefinition"],
+                "Unexpected StructureFieldDefinition found in PracticallyEmpty");
+        }
+
 
         #endregion
 
-                #region Helpers
+        #region Helpers
 
         private CAEXDocument GetDocument()
         {
