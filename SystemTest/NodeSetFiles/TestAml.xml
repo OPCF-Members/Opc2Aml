@@ -367,6 +367,83 @@
 		</Definition>
 	</UADataType>
 
+	<UADataType NodeId="ns=1;i=3008" BrowseName="Test_Duplex">
+		<DisplayName>Duplex</DisplayName>
+		<Category>BNM Ethernet Base Info</Category>
+		<Documentation>https://reference.opcfoundation.org/v105/Core/docs/Part22/5.3.1/#5.3.1.1</Documentation>
+		<References>
+			<Reference ReferenceType="HasProperty" BrowseName="EnumValues">ns=1;i=6238</Reference>
+			<Reference ReferenceType="HasSubtype" IsForward="false" BrowseName="Enumeration">i=29</Reference>
+		</References>
+		<Definition Name="Duplex">
+			<Field Name="Full" Value="0">
+				<Description Locale="en">Full duplex.</Description>
+			</Field>
+			<Field Name="Half" Value="1">
+				<Description>Half duplex.</Description>
+			</Field>
+			<Field Name="Unknown" Value="2">
+			</Field>
+		</Definition>
+	</UADataType>
+	<UAVariable NodeId="ns=1;i=6238" BrowseName="EnumValues" ParentNodeId="i=24210" DataType="i=7594" ValueRank="1" ArrayDimensions="3">
+		<DisplayName>EnumValues</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition" BrowseName="PropertyType">i=68</Reference>
+			<Reference ReferenceType="HasProperty" IsForward="false" BrowseName="Duplex">i=24210</Reference>
+		</References>
+		<Value>
+			<ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>0</Value>
+							<DisplayName>
+    							<Locale>de</Locale>
+								<Text>Voll</Text>
+							</DisplayName>
+							<Description>
+								<Locale>de</Locale>
+								<Text>Vollduplex</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>1</Value>
+							<DisplayName>
+								<Text>Half</Text>
+							</DisplayName>
+							<Description>
+								<Text>Half duplex.</Text>
+							</Description>
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+				<ExtensionObject>
+					<TypeId>
+						<Identifier>i=7616</Identifier>
+					</TypeId>
+					<Body>
+						<EnumValueType>
+							<Value>2</Value>
+							<!-- It's not valid that an enumvaluetype doesn't have a name, this is just for testing purposes-->
+						</EnumValueType>
+					</Body>
+				</ExtensionObject>
+			</ListOfExtensionObject>
+		</Value>
+	</UAVariable>
+
+
 	<UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING" NodeId="ns=1;i=5000" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING" ParentNodeId="i=11715">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING</DisplayName>
         <References>
@@ -3586,8 +3663,8 @@
 	<!-- Next Numbers
     ObjectType 1009
     VariableType 2006
-    DataType 3008
+    DataType 3009
     Object 5025
-    Variable 6238
+    Variable 6239
     -->
 </UANodeSet>
