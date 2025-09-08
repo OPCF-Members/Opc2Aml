@@ -367,6 +367,43 @@
 		</Definition>
 	</UADataType>
 
+
+	<UADataType NodeId="ns=1;i=3009" BrowseName="Test_AlarmMask">
+		<DisplayName>AlarmMask</DisplayName>
+		<Category>A &amp; C Summary</Category>
+		<Documentation>https://reference.opcfoundation.org/v105/Core/docs/Part9/8.3</Documentation>
+		<References>
+			<Reference ReferenceType="HasProperty" BrowseName="OptionSetValues">ns=1;i=6239</Reference>
+			<Reference ReferenceType="HasSubtype" IsForward="false" BrowseName="UInt16">i=5</Reference>
+		</References>
+		<Definition Name="AlarmMask" IsOptionSet="true">
+			<Field Name="Active" Value="0" />
+			<Field Name="Unacknowledged" Value="1" />
+			<Field Name="Unconfirmed" Value="2" />
+		</Definition>
+	</UADataType>
+	<UAVariable NodeId="ns=1;i=6239" BrowseName="OptionSetValues" ParentNodeId="i=32251" DataType="LocalizedText" ValueRank="1" ArrayDimensions="3">
+		<DisplayName>OptionSetValues</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition" BrowseName="PropertyType">i=68</Reference>
+			<Reference ReferenceType="HasProperty" IsForward="false" BrowseName="AlarmMask">i=32251</Reference>
+		</References>
+		<Value>
+			<ListOfLocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+				<LocalizedText>
+					<Text>Active</Text>
+				</LocalizedText>
+				<LocalizedText>
+					<Text>Unacknowledged</Text>
+				</LocalizedText>
+				<LocalizedText>
+					<Text>Unconfirmed</Text>
+				</LocalizedText>
+			</ListOfLocalizedText>
+		</Value>
+	</UAVariable>
+
+
 	<UAObject SymbolicName="http___opcfoundation_org_UA_FX_AML_TESTING" NodeId="ns=1;i=5000" BrowseName="1:http://opcfoundation.org/UA/FX/AML/TESTING" ParentNodeId="i=11715">
         <DisplayName>http://opcfoundation.org/UA/FX/AML/TESTING</DisplayName>
         <References>
@@ -3586,8 +3623,8 @@
 	<!-- Next Numbers
     ObjectType 1009
     VariableType 2006
-    DataType 3008
+    DataType 3010
     Object 5025
-    Variable 6238
+    Variable 6240
     -->
 </UANodeSet>

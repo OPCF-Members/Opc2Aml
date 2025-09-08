@@ -3113,6 +3113,8 @@ namespace MarkdownProcessor
 
             AddEnumerationFieldDefinition( attribute, uaNode );
 
+            AddOptionSetFieldDefintion( attribute, uaNode );
+
             AttributeType nodeIdAttribute = AddModifyAttribute( attribute.Attribute,"NodeId", "NodeId", 
                 new Variant( uaNode.DecodedNodeId ) );
 
@@ -3365,6 +3367,28 @@ namespace MarkdownProcessor
                 }
             }
         }
+
+        private void AddOptionSetFieldDefintion( AttributeFamilyType attribute, UANode uaNode )
+        {
+            UADataType optionSetNode = uaNode as UADataType;
+            if (optionSetNode != null &&
+                optionSetNode.Definition != null &&
+                optionSetNode.Definition.IsOptionSet == true)
+            {
+                if ( optionSetNode.Definition.Field != null &&
+                    optionSetNode.Definition.Field.Length > 0 )
+                {
+                    // Create an OptionSetFieldDefinition Attribute
+                    // Create the attributes and add
+
+                }
+                else
+                {
+                    bool unexpected = true;
+                }
+            }
+        }
+
 
         private AttributeFamilyType ProcessDataType(NodeSet.UANode node)
         {
