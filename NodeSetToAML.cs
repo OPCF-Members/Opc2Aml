@@ -3200,8 +3200,8 @@ namespace MarkdownProcessor
                                     // This seems to be a point for discussion.
                                     // Do we put max string length in if it zero?
                                     if ( field.MaxStringLength > 0 && 
-                                        m_modelManager.IsTypeOf( field.DecodedDataType, Opc.Ua.DataTypeIds.String ) ||
-                                        m_modelManager.IsTypeOf( field.DecodedDataType, Opc.Ua.DataTypeIds.ByteString ) )
+                                        ( m_modelManager.IsTypeOf( field.DecodedDataType, Opc.Ua.DataTypeIds.String ) ||
+                                          m_modelManager.IsTypeOf( field.DecodedDataType, Opc.Ua.DataTypeIds.ByteString ) ) )
                                     {
                                         AddModifyAttribute( structureFieldAttribute.Attribute,
                                             "MaxStringLength", "UInt32", new Variant( field.MaxStringLength ) );
