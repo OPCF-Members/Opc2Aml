@@ -3378,9 +3378,37 @@ namespace MarkdownProcessor
                 if ( optionSetNode.Definition.Field != null &&
                     optionSetNode.Definition.Field.Length > 0 )
                 {
-                    // Create an OptionSetFieldDefinition Attribute
-                    // Create the attributes and add
+                    string path = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "ListOfOptionSet");
+                    AttributeFamilyType optionSetFieldDefinition = m_cAEXDocument.FindByPath(path) as AttributeFamilyType;
 
+                    AttributeType optionSetFields = new AttributeType(
+                        new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+
+                    optionSetFields.RecreateAttributeInstance(optionSetFieldDefinition as AttributeFamilyType);
+                    optionSetFields.Name = "OptionSetFieldDefinition";
+                    optionSetFields.AdditionalInformation.Append(OpcUaTypeOnly);
+
+                    string optionSetPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "OptionSet");
+                    AttributeFamilyType optionSetSource = m_cAEXDocument.FindByPath(optionSetPath) as AttributeFamilyType;
+
+                    foreach (DataTypeField fieldDefinition in optionSetNode.Definition.Field)
+                    {
+                        AttributeType fieldAttribute = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+
+                        fieldAttribute.RecreateAttributeInstance(optionSetSource);
+                        fieldAttribute.Name = fieldDefinition.Name;
+
+                        AttributeType valueAttribute = AddModifyAttribute(fieldAttribute.Attribute,
+                            "Value", "Int32", new Variant(fieldDefinition.Value));
+
+                        RemoveUnwantedAttribute(valueAttribute, "NodeId");
+                        RemoveUnwantedAttribute(fieldAttribute, "ValidBits");
+                        RemoveUnwantedAttribute(fieldAttribute, "NodeId");
+
+                        optionSetFields.Attribute.Insert(fieldAttribute, false, true);
+                    }
+
+                    attribute.Attribute.Insert(optionSetFields, false, true);
                 }
                 else
                 {
