@@ -3113,6 +3113,8 @@ namespace MarkdownProcessor
 
             AddEnumerationFieldDefinition( attribute, uaNode );
 
+            AddOptionSetFieldDefintion( attribute, uaNode );
+
             AttributeType nodeIdAttribute = AddModifyAttribute( attribute.Attribute,"NodeId", "NodeId", 
                 new Variant( uaNode.DecodedNodeId ) );
 
@@ -3211,31 +3213,15 @@ namespace MarkdownProcessor
                                         RemoveUnwantedAttribute( structureFieldAttribute, "MaxStringLength" );
                                     }
 
-                                    if (field.Description != null && field.Description.Length > 0)
+                                    AttributeType descriptionCreated = AddLocalizedTextArrayAttribute(
+                                        structureFieldAttribute,
+                                        "Description",
+                                        field.Description);
+
+                                    if (descriptionCreated != null)
                                     {
-                                        List<Variant> localizedTextList = new List<Variant>(field.Description.Length);
-                                        foreach(NodeSet.LocalizedText description in field.Description)
-                                        {
-                                            localizedTextList.Add(
-                                                new Variant(
-                                                    new LocalizedText(description.Locale, description.Value)));
-                                        }
-                                        Variant localizedTextArray = new Variant(localizedTextList);
-
-                                        LocalizedText localizedText = new LocalizedText(
-                                            field.Description[0].Locale, field.Description[0].Value);
-                                        AddModifyAttribute(structureFieldAttribute.Attribute,
-                                            "Description", "LocalizedText", localizedTextArray,
-                                            bListOf: true);
-                                        RemoveUnwantedAttribute(structureFieldAttribute.Attribute["Description"],
-                                            "StructureFieldDefinition");
+                                        RemoveUnwantedAttribute(descriptionCreated,"StructureFieldDefinition");
                                     }
-                                    else if (structureFieldAttribute.Attribute["Description"] != null)
-                                    {
-                                        RemoveUnwantedAttribute(structureFieldAttribute, "Description");
-                                    }
-
-
 
                                     // Remove the NodeId from the structure Field
                                     AttributeType nodeIdAttribute = structureFieldAttribute.Attribute[ "DataType" ];
@@ -3297,7 +3283,26 @@ namespace MarkdownProcessor
                                 enumValues.DecodedValue, bListOf: true);
                             if (added != null)
                             {
+                                // Remove empty values
                                 RemoveNodeIdsFromDefinition(added);
+
+                                foreach( AttributeType arrayElement in added.Attribute )
+                                {
+                                    List<string> toBeRemoved = new List<string>();
+                                    
+                                    foreach ( AttributeType parameter in arrayElement.Attribute )
+                                    {
+                                        if ( string.IsNullOrEmpty( parameter.Value ) )
+                                        {
+                                            toBeRemoved.Add(parameter.Name);
+                                        }
+                                    }
+
+                                    foreach (string removeAttribute in toBeRemoved)
+                                    {
+                                        RemoveUnwantedAttribute(arrayElement, removeAttribute);
+                                    }
+                                }
 
                                 AttributeType nodeIdAttribute = AddModifyAttribute(added.Attribute,
                                     "NodeId", "NodeId", new Variant(EnumValuesPropertyId));
@@ -3327,30 +3332,14 @@ namespace MarkdownProcessor
                         fieldAttribute.RecreateAttributeInstance(enumFieldSource);
                         fieldAttribute.Name = fieldDefinition.Name;
 
-                        AddModifyAttribute(fieldAttribute.Attribute,
-                            "Name", "String", new Variant(fieldDefinition.Name));
+                        // Remove the Name
+                        RemoveUnwantedAttribute(fieldAttribute, "Name");
 
-                        LocalizedText descriptionLocalizedText = new LocalizedText("");
+                        // Description is an array of LocalizedText
 
-                        if (fieldDefinition.Description != null && fieldDefinition.Description.Length > 0)
-                        {
-                            descriptionLocalizedText = new LocalizedText(
-                                fieldDefinition.Description[0].Locale, fieldDefinition.Description[0].Value);
-                        }
+                        AddLocalizedTextArrayAttribute(fieldAttribute, "Description", fieldDefinition.Description);
 
-                        AddModifyAttribute(fieldAttribute.Attribute, "Description", "LocalizedText",
-                            new Variant(descriptionLocalizedText));
-
-                        LocalizedText displayNameLocalizedText = new LocalizedText("");
-
-                        if (fieldDefinition.DisplayName != null && fieldDefinition.DisplayName.Length > 0)
-                        {
-                            displayNameLocalizedText = new LocalizedText(
-                                fieldDefinition.DisplayName[0].Locale, fieldDefinition.DisplayName[0].Value);
-                        }
-
-                        AddModifyAttribute(fieldAttribute.Attribute, "DisplayName", "LocalizedText",
-                            new Variant(displayNameLocalizedText));
+                        AddLocalizedTextArrayAttribute( fieldAttribute, "DisplayName", fieldDefinition.DisplayName);
 
                         AddModifyAttribute(fieldAttribute.Attribute,
                             "Value", "Int32", new Variant(fieldDefinition.Value));
@@ -3365,6 +3354,56 @@ namespace MarkdownProcessor
                 }
             }
         }
+
+        private void AddOptionSetFieldDefintion( AttributeFamilyType attribute, UANode uaNode )
+        {
+            UADataType optionSetNode = uaNode as UADataType;
+            if (optionSetNode != null &&
+                optionSetNode.Definition != null &&
+                optionSetNode.Definition.IsOptionSet == true)
+            {
+                if ( optionSetNode.Definition.Field != null &&
+                    optionSetNode.Definition.Field.Length > 0 )
+                {
+                    string path = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "ListOfOptionSet");
+                    AttributeFamilyType optionSetFieldDefinition = m_cAEXDocument.FindByPath(path) as AttributeFamilyType;
+
+                    AttributeType optionSetFields = new AttributeType(
+                        new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+
+                    optionSetFields.RecreateAttributeInstance(optionSetFieldDefinition as AttributeFamilyType);
+                    optionSetFields.Name = "OptionSetFieldDefinition";
+                    optionSetFields.AdditionalInformation.Append(OpcUaTypeOnly);
+
+                    string optionSetPath = BuildLibraryReference(ATLPrefix, Opc.Ua.Namespaces.OpcUa, "OptionSet");
+                    AttributeFamilyType optionSetSource = m_cAEXDocument.FindByPath(optionSetPath) as AttributeFamilyType;
+
+                    foreach (DataTypeField fieldDefinition in optionSetNode.Definition.Field)
+                    {
+                        AttributeType fieldAttribute = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+
+                        fieldAttribute.RecreateAttributeInstance(optionSetSource);
+                        fieldAttribute.Name = fieldDefinition.Name;
+
+                        AttributeType valueAttribute = AddModifyAttribute(fieldAttribute.Attribute,
+                            "Value", "Int32", new Variant(fieldDefinition.Value));
+
+                        RemoveUnwantedAttribute(valueAttribute, "NodeId");
+                        RemoveUnwantedAttribute(fieldAttribute, "ValidBits");
+                        RemoveUnwantedAttribute(fieldAttribute, "NodeId");
+
+                        optionSetFields.Attribute.Insert(fieldAttribute, false, true);
+                    }
+
+                    attribute.Attribute.Insert(optionSetFields, false, true);
+                }
+                else
+                {
+                    bool unexpected = true;
+                }
+            }
+        }
+
 
         private AttributeFamilyType ProcessDataType(NodeSet.UANode node)
         {
@@ -3400,6 +3439,49 @@ namespace MarkdownProcessor
 
             return added;
         }
+        
+        private AttributeType AddLocalizedTextArrayAttribute( AttributeType attribute, 
+            string name, NodeSet.LocalizedText[] texts)
+        {
+            AttributeType created = null;
+
+            // Currently for Field Definitions
+            Variant localizedTextArray = LocalizedTextArrayAsVariant(texts);
+            if (localizedTextArray.TypeInfo != null &&
+                localizedTextArray.TypeInfo.BuiltInType != null &&
+                localizedTextArray.TypeInfo.BuiltInType == BuiltInType.Variant)
+            {
+                created = AddModifyAttribute(attribute.Attribute, name, "LocalizedText", 
+                    localizedTextArray, bListOf: true);
+            }
+            else
+            {
+                RemoveUnwantedAttribute(attribute, name);
+            }
+
+            return created;
+        }
+
+        private Variant LocalizedTextArrayAsVariant(NodeSet.LocalizedText[] array )
+        {
+            Variant localizedTextArray = new Variant();
+
+            if (array != null && array.Length >= 0)
+            {
+                List<Variant> localizedTextList = new List<Variant>(array.Length);
+                foreach (NodeSet.LocalizedText text in array)
+                {
+                    localizedTextList.Add(
+                        new Variant(
+                            new LocalizedText(text.Locale, text.Value)));
+                }
+
+                localizedTextArray = new Variant(localizedTextList);
+            }
+
+            return localizedTextArray;
+        }
+
         #endregion
 
         #region INSTANCE

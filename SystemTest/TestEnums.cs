@@ -178,10 +178,6 @@ namespace SystemTest
 
             foreach (AttributeType fieldDefinition in enumFieldDefinition.Attribute)
             {
-                AttributeType nameAttribute = fieldDefinition.Attribute["Name"];
-                Assert.IsNotNull(nameAttribute, "Field Definition Name is null");
-                Assert.IsNotNull(nameAttribute.Value, "Field Definition Name Value is null");
-                Assert.AreEqual(fieldDefinition.Name, nameAttribute.Value, "Field Definition Name does not match Attribute Name");
                 AttributeType valueAttribute = fieldDefinition.Attribute["Value"];
                 Assert.IsNotNull(valueAttribute, "Field Definition Value is null");
                 Assert.IsNotNull(valueAttribute.Value, "Field Definition Value-Value is null");
@@ -456,6 +452,24 @@ namespace SystemTest
                 TestUnwantedAttribute( sub, unwantedAttribute, path);
             }
         }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestForRemovedAttributes()
+        {
+            AttributeFamilyType objectToTest = GetTestAttribute("3008", foundation: false);
+
+            AttributeType enumFieldDefinition = GetAttribute(objectToTest, "EnumFieldDefinition");
+            AttributeType unknownElement = GetAttribute(enumFieldDefinition, "Unknown");
+            Assert.IsNull(unknownElement.Attribute["DisplayName"]);
+            Assert.IsNull(unknownElement.Attribute["Description"]);
+
+            AttributeType enumValues = GetAttribute(objectToTest, "EnumValues");
+            AttributeType lastArrayElement = GetAttribute(enumValues, "2");
+            Assert.IsNull(lastArrayElement.Attribute["DisplayName"]);
+            Assert.IsNull(lastArrayElement.Attribute["Description"]);
+        }
+
+
 
         #endregion
 
