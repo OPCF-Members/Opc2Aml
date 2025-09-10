@@ -47,37 +47,52 @@ namespace SystemTest
         }
 
         [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
-        [DataRow("QosCategory","Name", null, "", "")]
-        [DataRow("QosCategory", "Description", "Quality of Service Category", "0", "en")]
-        [DataRow("QosCategory", "Description", "Catégorie de qualité de service", "1", "fr")]
-        [DataRow("QosCategory", "Description", "Kategorie „Dienstqualität“", "2", "")]
-        [DataRow("QosCategory", "ValueRank", "-1", "", "")]
-        [DataRow("QosCategory", "ArrayDimensions", null, "", "")]
-        [DataRow("QosCategory", "MaxStringLength", "123", "", "")]
-        [DataRow("QosCategory", "IsOptional", "true", "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory","Name", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "Description", "Quality of Service Category", "0", "en")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "Description", "Catégorie de qualité de service", "1", "fr")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "Description", "Kategorie „Dienstqualität“", "2", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "ValueRank", "-1", "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "ArrayDimensions", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "MaxStringLength", "123", "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "IsOptional", "true", "", "")]
 
-        [DataRow("DatagramQos", "Name", null, "", "")]
-        [DataRow("DatagramQos", "Description", "Transmit Quality of Service", "0", "")]
-        [DataRow("DatagramQos", "ArrayDimensions", "2", "0", "")]
-        [DataRow("DatagramQos", "ArrayDimensions", "3", "1", "")]
-        [DataRow("DatagramQos", "ValueRank", "2", "", "")]
-        [DataRow("DatagramQos", "IsOptional", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "Name", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "Description", "Transmit Quality of Service", "0", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "ArrayDimensions", "2", "0", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "ArrayDimensions", "3", "1", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "ValueRank", "2", "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "IsOptional", null, "", "")]
 
-        [DataRow("NoDescription", "Name", null, "", "")]
-        [DataRow("NoDescription", "Description", null, "", "")]
-        [DataRow("NoDescription", "ValueRank", null, "", "")]
-        [DataRow("NoDescription", "ArrayDimensions", null, "", "")]
-        [DataRow("NoDescription", "MaxStringLength", "321", "", "")]
-        [DataRow("NoDescription", "IsOptional", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "NoDescription", "Name", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "NoDescription", "Description", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "NoDescription", "ValueRank", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "NoDescription", "ArrayDimensions", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "NoDescription", "MaxStringLength", "321", "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "NoDescription", "IsOptional", null, "", "")]
 
-        public void TestAttributeValues(string variableName, 
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "Value", "Name", null, "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "Value", "Description", null, "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "Value", "ValueRank", "-1", "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "Value", "ArrayDimensions", null, "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "Value", "MaxStringLength", null, "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "Value", "IsOptional", null, "", "")]
+
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "ValidBits", "Name", null, "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "ValidBits", "Description", null, "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "ValidBits", "ValueRank", "-1", "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "ValidBits", "ArrayDimensions", null, "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "ValidBits", "MaxStringLength", null, "", "")]
+        [DataRow(TestHelper.Uris.Root, Opc.Ua.DataTypes.OptionSet, "ValidBits", "IsOptional", null, "", "")]
+
+        public void TestAttributeValues(TestHelper.Uris uriId,
+            uint nodeId,
+            string variableName, 
             string attributeName, 
             string expectedValue,
             string arrayIndex,
             string localeId)
         {
-            AttributeFamilyType objectToTest = GetTestAttribute(TestHelper.Uris.Test,
-                PublisherQosDataType);
+            AttributeFamilyType objectToTest = GetTestAttribute(uriId, nodeId);
 
             AttributeType variableAttribute = GetAttribute(objectToTest.Attribute, variableName);
             AttributeType structured = GetAttribute(variableAttribute, "StructureFieldDefinition");
