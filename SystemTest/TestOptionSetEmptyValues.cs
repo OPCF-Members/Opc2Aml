@@ -101,6 +101,10 @@ namespace SystemTest
 
 
             AttributeType fieldDefinition = GetAttribute( theObject.Attribute, "OptionSetFieldDefinition");
+            Assert.IsNotNull(fieldDefinition.AdditionalInformation);
+            Assert.AreEqual(1, fieldDefinition.AdditionalInformation.Count);
+            Assert.AreEqual("OpcUa:TypeOnly", fieldDefinition.AdditionalInformation[0]);
+
             AttributeType attribute = GetAttribute(fieldDefinition, attributeName);
 
             Assert.IsNull(attribute.Attribute["NodeId"]);

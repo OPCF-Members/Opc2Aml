@@ -368,7 +368,7 @@
 	</UADataType>
 
 
-	<UADataType NodeId="ns=1;i=3009" BrowseName="Test_AlarmMask">
+	<UADataType NodeId="ns=1;i=3009" BrowseName="TestAlarmMask">
 		<DisplayName>AlarmMask</DisplayName>
 		<Category>A &amp; C Summary</Category>
 		<Documentation>https://reference.opcfoundation.org/v105/Core/docs/Part9/8.3</Documentation>
