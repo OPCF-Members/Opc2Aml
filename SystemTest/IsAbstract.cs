@@ -18,7 +18,8 @@ namespace SystemTest
         // Test reads the nodeset file, finds everything that should be abstract,
         // Then walks the Amlx, and verifies both that the attribute is properly set, and properly not set
         const string NodeSetFile = "Modified.Opc.Ua.NodeSet2.xml";
-        
+        const string NodeSetFileContainer = NodeSetFile + ".amlx";
+
         CAEXDocument m_document = null;
 
         Dictionary<int, string> AbstractNodeIds = new Dictionary<int, string>();
@@ -149,6 +150,20 @@ namespace SystemTest
             Assert.AreEqual( 0, shouldNotBeAbstractCount, "There were " + shouldNotBeAbstractCount.ToString() +
                 " shouldNotBeAbstract errors - check ShouldNotBeAbstract.txt" );
         }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow (6182u, DisplayName = "StringNodeId has ExpandedNodeId Value")]
+        public void TestSpecificIsAbstract( uint nodeId )
+        {
+            CAEXDocument document = TestHelper.GetReadOnlyDocument("TestAml.xml.amlx");
+            string amlNodeId = TestHelper.BuildAmlId("", TestHelper.Uris.Test, nodeId.ToString());
+
+            CAEXObject initialObject = document.FindByID( amlNodeId );
+            SystemUnitClassType initialInternalElement = initialObject as SystemUnitClassType;
+            Assert.IsNotNull(initialInternalElement, "Unable to find Initial Object");
+            Assert.IsNull(initialInternalElement.Attribute["IsAbstract"], "Instances should not have IsAbstract");
+        }
+
 
         public void WriteTestFile( DirectoryInfo outputDirectory, string fileName, List<string> output)
         {
@@ -336,14 +351,12 @@ namespace SystemTest
             return numeric;
         }
 
-        private CAEXDocument GetDocument()
+        private CAEXDocument GetDocument( string fileName = NodeSetFileContainer )
         {
-            if( m_document == null )
-            {
-                m_document = TestHelper.GetReadOnlyDocument( NodeSetFile + ".amlx" );
-            }
-            Assert.IsNotNull( m_document, "Unable to retrieve Document" );
-            return m_document;
+            CAEXDocument document = TestHelper.GetReadOnlyDocument( NodeSetFileContainer );
+            
+            Assert.IsNotNull( document, "Unable to retrieve Document " + fileName );
+            return document;
         }
 
     }

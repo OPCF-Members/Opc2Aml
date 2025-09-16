@@ -2823,13 +2823,22 @@ namespace MarkdownProcessor
         {
             if (attributeType != null)
             {
-                AttributeType unwantedAttribute = attributeType.Attribute[attributeName];
+                RemoveUnwantedAttribute(attributeType.Attribute, attributeName);
+            }
+        }
+
+        private void RemoveUnwantedAttribute(AttributeSequence attributes, string attributeName)
+        {
+            if (attributes != null)
+            {
+                AttributeType unwantedAttribute = attributes[attributeName];
                 if (unwantedAttribute != null)
                 {
-                    attributeType.Attribute.RemoveElement(unwantedAttribute);
+                    attributes.RemoveElement(unwantedAttribute);
                 }
             }
         }
+
 
         private void RemoveUnwantedNodeIdAttribute(AttributeType attribute)
         {
@@ -3551,6 +3560,8 @@ namespace MarkdownProcessor
             ie.ID = amlId;
             ie.Name = toAdd.DecodedBrowseName.Name;
             AddBaseNodeClassAttributes(ie.Attribute, toAdd);
+
+            RemoveUnwantedAttribute(ie.Attribute, "IsAbstract");
 
             // set the values to match the values in the nodeset
             if (toAdd.NodeClass == NodeClass.Variable)
