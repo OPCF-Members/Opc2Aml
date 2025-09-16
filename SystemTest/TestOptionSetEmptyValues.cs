@@ -2,6 +2,8 @@
 using Aml.Engine.CAEX.Extensions;
 using Aml.Engine.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Opc.Ua;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,8 +12,6 @@ namespace SystemTest
     [TestClass]
     public class TestOptionSetEmptyValues
     {
-        CAEXDocument m_document = null;
-
         #region Tests
 
         [ TestMethod]
@@ -86,19 +86,46 @@ namespace SystemTest
             TestOptionSet( value );
         }
 
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow("Active", "0")]
+        [DataRow("Unacknowledged", "1")]
+        [DataRow("Unconfirmed", "2")]
+        public void TestFieldDefinitions(string attributeName, string attributeValue)
+        {
+            CAEXDocument document = GetDocument("TestAml.xml.amlx");
+            string amlId = TestHelper.BuildAmlId("", TestHelper.Uris.Test, "3009");
+            CAEXObject initialObject = document.FindByID(amlId);
+            Assert.IsNotNull(initialObject, "Unable to find Initial Object");
+            AttributeFamilyType theObject = initialObject as AttributeFamilyType;
+            Assert.IsNotNull(theObject, "Unable to Cast Initial Object");
+
+
+            AttributeType fieldDefinition = GetAttribute( theObject.Attribute, "OptionSetFieldDefinition");
+            Assert.IsNotNull(fieldDefinition.AdditionalInformation);
+            Assert.AreEqual(1, fieldDefinition.AdditionalInformation.Count);
+            Assert.AreEqual("OpcUa:TypeOnly", fieldDefinition.AdditionalInformation[0]);
+
+            AttributeType attribute = GetAttribute(fieldDefinition, attributeName);
+
+            Assert.IsNull(attribute.Attribute["NodeId"]);
+            AttributeType valueAttribute = GetAttribute(attribute, "Value");
+            Assert.AreEqual( valueAttribute.Value, attributeValue);
+
+            Assert.IsNull(valueAttribute.Attribute[ "NodeId" ] );
+            Assert.IsNull(valueAttribute.Attribute[ "ValidBits" ]);
+        }
+
+
 
         #endregion
 
         #region Helpers
 
-        private CAEXDocument GetDocument()
+        private CAEXDocument GetDocument(string fileName = "AmlFxTest.xml.amlx")
         {
-            if( m_document == null )
-            {
-                m_document = TestHelper.GetReadOnlyDocument( "AmlFxTest.xml.amlx" );
-            }
-            Assert.IsNotNull( m_document, "Unable to retrieve Document" );
-            return m_document;
+            CAEXDocument document = TestHelper.GetReadOnlyDocument( fileName );
+            Assert.IsNotNull(document, "Unable to retrieve Document" );
+            return document;
         }
 
         public void TestOptionSet( AttributeTypeType attributeFamilyType )
@@ -137,6 +164,21 @@ namespace SystemTest
             Assert.IsNotNull( fxAcAttributes );
             return fxAcAttributes;
         }
+
+        public AttributeType GetAttribute(AttributeType attributeType, string attributeName)
+        {
+            Assert.IsNotNull(attributeType, "AttributeType is null");
+            return GetAttribute(attributeType.Attribute, attributeName);
+        }
+
+        public AttributeType GetAttribute(AttributeSequence attributes, string attributeName)
+        {
+            Assert.IsNotNull(attributes, "AttributeType is null");
+            AttributeType result = attributes[attributeName];
+            Assert.IsNotNull(result, "Unable to find Attribute " + attributeName);
+            return result;
+        }
+
 
         #endregion
 
