@@ -152,18 +152,81 @@ namespace SystemTest
         }
 
         [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
-        [DataRow (6182u, DisplayName = "StringNodeId has ExpandedNodeId Value")]
-        public void TestSpecificIsAbstract( uint nodeId )
+        [DataRow (TestHelper.Uris.Test, 6182u, DisplayName = "StringNodeId has ExpandedNodeId Value")]
+        [DataRow(TestHelper.Uris.Root, 2994u, DisplayName = "Auditing has Boolean Value")]
+        public void TestInstanceIsAbstract(TestHelper.Uris uri, uint nodeId )
         {
-            CAEXDocument document = TestHelper.GetReadOnlyDocument("TestAml.xml.amlx");
-            string amlNodeId = TestHelper.BuildAmlId("", TestHelper.Uris.Test, nodeId.ToString());
-
-            CAEXObject initialObject = document.FindByID( amlNodeId );
-            SystemUnitClassType initialInternalElement = initialObject as SystemUnitClassType;
-            Assert.IsNotNull(initialInternalElement, "Unable to find Initial Object");
-            Assert.IsNull(initialInternalElement.Attribute["IsAbstract"], "Instances should not have IsAbstract");
+            SystemUnitClassType element = GetObject(uri, nodeId) as SystemUnitClassType;
+            Assert.IsNull(element.Attribute["IsAbstract"], "Instances should not have IsAbstract");
         }
 
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(TestHelper.Uris.Root, 62u, false, DisplayName = "BaseVariableType")]
+        [DataRow(TestHelper.Uris.Root, 58u, true, DisplayName = "BaseObjectType")]
+        public void TestSystemUnitClassIsAbstract(TestHelper.Uris uri, uint nodeId, bool isNull)
+        {
+            SystemUnitClassType element = GetObject(uri, nodeId) as SystemUnitClassType;
+            AttributeType isAbstract = element.Attribute["IsAbstract"];
+            if (isNull)
+            {
+                Assert.IsNull(isAbstract);
+            }
+            else
+            {
+                Assert.IsNotNull(isAbstract);
+                Assert.IsNotNull(isAbstract.Value);
+                Assert.AreEqual("true", isAbstract.Value);
+                Assert.AreEqual(0, isAbstract.Attribute.Count);
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(TestHelper.Uris.Root, 24u, false, DisplayName = "BaseDataType")]
+        [DataRow(TestHelper.Uris.Root, 1u, true, DisplayName = "Boolean")]
+        public void TestAttributeIsAbstract(TestHelper.Uris uri, uint nodeId, bool isNull)
+        {
+            AttributeFamilyType element = GetObject(uri, nodeId) as AttributeFamilyType;
+            AttributeType isAbstract = element.Attribute["IsAbstract"];
+            if (isNull)
+            {
+                Assert.IsNull(isAbstract);
+            }
+            else
+            {
+                Assert.IsNotNull(isAbstract);
+                Assert.IsNotNull(isAbstract.Value);
+                Assert.AreEqual("true", isAbstract.Value);
+                Assert.AreEqual(0, isAbstract.Attribute.Count);
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(false, DisplayName = "Aggregates")]
+        [DataRow(true, DisplayName = "Inverse")]
+        public void TestInterfaceIsAbstract(bool isNull)
+        {
+            InterfaceFamilyType element = GetObject(TestHelper.Uris.Root, 44, "f") as InterfaceFamilyType;
+            AttributeSequence attributes = element.Attribute;
+            if ( isNull )
+            {
+                InterfaceFamilyType inverse = element.InterfaceClass["AggregatedBy"];
+                Assert.IsNotNull(inverse);
+                attributes = inverse.Attribute;
+            }
+
+            AttributeType isAbstract = attributes["IsAbstract"];
+            if (isNull)
+            {
+                Assert.IsNull(isAbstract);
+            }
+            else
+            {
+                Assert.IsNotNull(isAbstract);
+                Assert.IsNotNull(isAbstract.Value);
+                Assert.AreEqual("true", isAbstract.Value);
+                Assert.AreEqual(0, isAbstract.Attribute.Count);
+            }
+        }
 
         public void WriteTestFile( DirectoryInfo outputDirectory, string fileName, List<string> output)
         {
@@ -349,6 +412,19 @@ namespace SystemTest
             }
 
             return numeric;
+        }
+
+        public CAEXObject GetObject( TestHelper.Uris uri, uint nodeId, string prefix = "" )
+        {
+            CAEXDocument document = TestHelper.GetReadOnlyDocument("TestAml.xml.amlx");
+            string amlNodeId = TestHelper.BuildAmlId(prefix, uri, nodeId.ToString());
+
+            CAEXObject initialObject = document.FindByID(amlNodeId);
+
+            Assert.IsNotNull(initialObject, "Unable to find Initial Object");
+
+            return initialObject;
+
         }
 
         private CAEXDocument GetDocument( string fileName = NodeSetFileContainer )
