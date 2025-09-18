@@ -718,9 +718,9 @@ namespace MarkdownProcessor
                 ListOfPrefix = ListOf;
             string path = BuildLibraryReference(ATLPrefix, sURI, ListOfPrefix + sUADataType);
             var ob = m_cAEXDocument.FindByPath(path);
-            var at = ob as AttributeFamilyType;
-            AttributeType a = seq[name];  //find the existing attribute with the name
-            if (a == null)
+            var sourceAttribute = ob as AttributeFamilyType;
+            AttributeType desiredAttribute = seq[name];  //find the existing attribute with the name
+            if (desiredAttribute == null)
             {
                 if (bListOf == false && val.TypeInfo != null)  // look for reasons not to add the attribute because missing == default value
                 {
@@ -729,10 +729,10 @@ namespace MarkdownProcessor
                     if (name == "Symmetric" && val == false)
                         return null;
                 }
-                    a = seq.Append(name);  // not found so create a new one
+                desiredAttribute = seq.Append(name);  // not found so create a new one
             }
 
-            a.RecreateAttributeInstance(at);
+            RecreateAttributeInstance(sourceAttribute, desiredAttribute);
 
             if (val.TypeInfo != null)
             {
@@ -760,7 +760,7 @@ namespace MarkdownProcessor
                                 if( refDataType == "LocalizedText" && referenceName == "EnumStrings" )
                                 {
                                     addElements = false;
-                                    AttributeTypeType attributeType = a as AttributeTypeType;
+                                    AttributeTypeType attributeType = desiredAttribute as AttributeTypeType;
                                     if( attributeType != null )
                                     {
                                         AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType(
@@ -790,7 +790,7 @@ namespace MarkdownProcessor
 
                                 if ( refDataType == "EnumValueType" && referenceName == "EnumValues" )
                                 {
-                                    AttributeTypeType attributeType = a as AttributeTypeType;
+                                    AttributeTypeType attributeType = desiredAttribute as AttributeTypeType;
                                     if( attributeType != null )
                                     {
                                         AttributeValueRequirementType stringValueRequirement = new AttributeValueRequirementType(
@@ -841,7 +841,7 @@ namespace MarkdownProcessor
 
                                             bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
 
-                                            AddModifyAttribute(a.Attribute, index.ToString(), typeId, elementVariant, elementListOf);
+                                            AddModifyAttribute(desiredAttribute.Attribute, index.ToString(), typeId, elementVariant, elementListOf);
                                         }
                                     }
                                 }
@@ -859,7 +859,7 @@ namespace MarkdownProcessor
                             {
                                 Variant elementVariant = new Variant( valueAsList[ index ] );
                                 bool elementListOf = elementVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
-                                AddModifyAttribute( a.Attribute, index.ToString(), refDataType, 
+                                AddModifyAttribute( desiredAttribute.Attribute, index.ToString(), refDataType, 
                                     elementVariant, elementListOf, sURI );
                             }
                         }
@@ -890,7 +890,7 @@ namespace MarkdownProcessor
                         case BuiltInType.UInteger:
                         case BuiltInType.Enumeration:
                             {
-                                a.AttributeValue = val;
+                                desiredAttribute.AttributeValue = val;
                                 break;
                             }
 
@@ -900,7 +900,7 @@ namespace MarkdownProcessor
                                 if ( bytes != null )
                                 {
                                     string encoded = Convert.ToBase64String( bytes, 0, bytes.Length );
-                                    a.AttributeValue = new Variant( encoded.ToString() );
+                                    desiredAttribute.AttributeValue = new Variant( encoded.ToString() );
                                 }
 
                                 break;
@@ -923,8 +923,8 @@ namespace MarkdownProcessor
 
                                 if ( nodeId != null )
                                 {
-                                    a.AttributeValue = nodeId;
-                                    AttributeType rootNodeId = a.Attribute[ "RootNodeId" ];
+                                    desiredAttribute.AttributeValue = nodeId;
+                                    AttributeType rootNodeId = desiredAttribute.Attribute[ "RootNodeId" ];
                                     if ( rootNodeId != null )
                                     {
                                         AttributeType namespaceUri = rootNodeId.Attribute[ "NamespaceUri" ];
@@ -970,10 +970,10 @@ namespace MarkdownProcessor
                                                 }
                                         }
                                     }
-                                    a.DefaultValue = null;
-                                    a.Value = null;
+                                    desiredAttribute.DefaultValue = null;
+                                    desiredAttribute.Value = null;
 
-                                    MinimizeNodeId( a );
+                                    MinimizeNodeId( desiredAttribute );
                                 }
 
                                 if ( expandedNodeId != null )
@@ -983,7 +983,7 @@ namespace MarkdownProcessor
                                         if( expandedNodeId.ServerIndex < m_modelManager.ModelNamespaceIndexes.Count )
                                         {
                                             string serverUri = m_modelManager.ModelNamespaceIndexes[ (int)expandedNodeId.ServerIndex ].NamespaceUri;
-                                            AttributeType serverInstanceUri = a.Attribute[ "ServerInstanceUri" ];
+                                            AttributeType serverInstanceUri = desiredAttribute.Attribute[ "ServerInstanceUri" ];
                                             if ( serverInstanceUri != null )
                                             {
                                                 serverInstanceUri.Value = serverUri;
@@ -998,24 +998,24 @@ namespace MarkdownProcessor
                         case BuiltInType.StatusCode:
                             {
                                 StatusCode statusCode = (StatusCode)val.Value;
-                                a.AttributeValue = statusCode.Code;
+                                desiredAttribute.AttributeValue = statusCode.Code;
 
                                 break;
                             }
 
                         case BuiltInType.QualifiedName:
                             {
-                                a.AttributeValue = val;
+                                desiredAttribute.AttributeValue = val;
 
                                 QualifiedName qualifiedName = val.Value as QualifiedName;
                                 if( qualifiedName != null )
                                 {
-                                    AttributeType uri = a.Attribute[ "NamespaceUri" ];
+                                    AttributeType uri = desiredAttribute.Attribute[ "NamespaceUri" ];
                                     uri.Value = m_modelManager.ModelNamespaceIndexes[ qualifiedName.NamespaceIndex ].NamespaceUri;
-                                    AttributeType nameAttribute = a.Attribute[ "Name" ];
+                                    AttributeType nameAttribute = desiredAttribute.Attribute[ "Name" ];
                                     nameAttribute.Value = qualifiedName.Name;
-                                    a.DefaultValue = null;
-                                    a.Value = null;
+                                    desiredAttribute.DefaultValue = null;
+                                    desiredAttribute.Value = null;
                                 }
 
                                 break;
@@ -1026,14 +1026,14 @@ namespace MarkdownProcessor
                                 Opc.Ua.LocalizedText localizedText = (Opc.Ua.LocalizedText)val.Value;
                                 if( localizedText != null && localizedText.Text != null )
                                 {
-                                    a.AttributeValue = localizedText.Text;
+                                    desiredAttribute.AttributeValue = localizedText.Text;
                                     if ( !string.IsNullOrEmpty( localizedText.Locale ) )
                                     {
                                         CAEXObject findObject = m_cAEXDocument.FindByPath(
                                             "AutomationMLBaseAttributeTypeLib/LocalizedAttribute" );
                                         AttributeFamilyType localizedAttributeFamilyType = 
                                             findObject as AttributeFamilyType;
-                                        AttributeType textAttribute = a.Attribute.Append( localizedText.Locale );
+                                        AttributeType textAttribute = desiredAttribute.Attribute.Append( localizedText.Locale );
                                         textAttribute.RecreateAttributeInstance( localizedAttributeFamilyType );
                                         textAttribute.Value = localizedText.Text;
                                     }
@@ -1047,7 +1047,7 @@ namespace MarkdownProcessor
                                 ExtensionObject extensionObject = val.Value as ExtensionObject;
                                 if ( extensionObject != null && extensionObject.Body != null )
                                 {
-                                    AddModifyExtensionObject( a, extensionObject );
+                                    AddModifyExtensionObject( desiredAttribute, extensionObject );
                                 }
 
                                 break;
@@ -1063,21 +1063,21 @@ namespace MarkdownProcessor
 
                                     bool actualListOf = actualValue.TypeInfo.ValueRank >= ValueRanks.OneDimension;
 
-                                    AddModifyAttribute( a.Attribute, "Value", dataTypeNodeId, actualValue, actualListOf );
-                                    AddModifyAttribute( a.Attribute, "StatusCode", "StatusCode",
+                                    AddModifyAttribute( desiredAttribute.Attribute, "Value", dataTypeNodeId, actualValue, actualListOf );
+                                    AddModifyAttribute( desiredAttribute.Attribute, "StatusCode", "StatusCode",
                                         dataValue.StatusCode );
-                                    AddModifyAttribute( a.Attribute, "SourceTimestamp", "DateTime",
+                                    AddModifyAttribute( desiredAttribute.Attribute, "SourceTimestamp", "DateTime",
                                         dataValue.SourceTimestamp );
                                     if( dataValue.SourcePicoseconds > 0 )
                                     {
-                                        AddModifyAttribute( a.Attribute, "SourcePicoseconds", "UInt16",
+                                        AddModifyAttribute( desiredAttribute.Attribute, "SourcePicoseconds", "UInt16",
                                             dataValue.SourcePicoseconds );
                                     }
-                                    AddModifyAttribute( a.Attribute, "ServerTimestamp", "DateTime",
+                                    AddModifyAttribute( desiredAttribute.Attribute, "ServerTimestamp", "DateTime",
                                         dataValue.ServerTimestamp );
                                     if ( dataValue.ServerPicoseconds > 0 )
                                     {
-                                        AddModifyAttribute( a.Attribute, "ServerPicoseconds", "UInt16",
+                                        AddModifyAttribute( desiredAttribute.Attribute, "ServerPicoseconds", "UInt16",
                                             dataValue.ServerPicoseconds );
                                     }
                                 }
@@ -1091,14 +1091,14 @@ namespace MarkdownProcessor
 
                                 bool internalListOf = internalVariant.TypeInfo.ValueRank >= ValueRanks.OneDimension;
 
-                                AddModifyAttribute( a.Attribute, "Value", dataTypeNodeId, internalVariant, internalListOf );
+                                AddModifyAttribute( desiredAttribute.Attribute, "Value", dataTypeNodeId, internalVariant, internalListOf );
 
                                 break;
                             }
 
                         case BuiltInType.DiagnosticInfo:
                             {
-                                AddModifyAttributeObject( a, val.Value );
+                                AddModifyAttributeObject( desiredAttribute, val.Value );
                                 break;
                             }
 
@@ -1113,12 +1113,12 @@ namespace MarkdownProcessor
                         // this is specifically the variant case
                         NodeId dataTypeFromBase = new NodeId( (uint)val.TypeInfo.BuiltInType );
                         string variantDataType = GetAttributeDataType( dataTypeFromBase );
-                        a.AttributeDataType = variantDataType;
+                        desiredAttribute.AttributeDataType = variantDataType;
                     }
                 }
             }
 
-            return a;
+            return desiredAttribute;
         }
 
         private bool MinimizeNodeId( AttributeType nodeIdAttribute )
@@ -2756,12 +2756,7 @@ namespace MarkdownProcessor
                 }
             }
 
-            // Only sets it if it is true -
-            // It doesn't matter if 'References' is set x times,
-            // it would take more time to look it up each time
-            RemoveUnwantedNodeIdAttribute(
-                OverrideBooleanAttribute(
-                    added.Attribute, "IsAbstract", refnode.IsAbstract, typeOnly: true));
+            AddIsAbstractAttribute(added.Attribute, refnode.IsAbstract);
 
             // override any attribute values
             if (BaseNodeId != null)
@@ -2819,6 +2814,36 @@ namespace MarkdownProcessor
         }
 
 
+        /// <summary>
+        /// Recreate the attribute instance to remove any inherited attributes that are not part of the base type.
+        /// These are automatically added by the Aml Engine.  This causes a huge problem with IsAbstract and NodeId
+        /// </summary>
+        /// <param name="sourceAttribute"></param>
+        /// <param name="newAttribute"></param>
+        /// <returns></returns>
+        private AttributeType RecreateAttributeInstance( 
+            AttributeFamilyType sourceAttribute, AttributeType newAttribute )
+        {
+            newAttribute.RecreateAttributeInstance(sourceAttribute);
+
+            List<AttributeType> inheritedAttributes = new List<AttributeType>();
+
+            foreach(AttributeType attribute in newAttribute.Attribute)
+            {
+                if (sourceAttribute.Attribute[attribute.Name] == null)
+                {
+                    inheritedAttributes.Add(attribute);
+                }
+            }
+
+            foreach(AttributeType attribute in inheritedAttributes)
+            {
+                newAttribute.Attribute.RemoveElement(attribute);
+            }
+
+            return newAttribute;
+        }
+
         private void RemoveUnwantedAttribute(AttributeType attributeType, string attributeName)
         {
             if (attributeType != null)
@@ -2835,6 +2860,27 @@ namespace MarkdownProcessor
                 if (unwantedAttribute != null)
                 {
                     attributes.RemoveElement(unwantedAttribute);
+                }
+            }
+        }
+
+        private void AddIsAbstractAttribute( AttributeSequence sequence
+            , bool isAbstract )
+        {
+            if (sequence != null )
+            {
+                AttributeType isAbstractAttribute = sequence["IsAbstract"];
+                if ( isAbstractAttribute != null && !isAbstract )
+                {
+                    sequence.RemoveElement(isAbstractAttribute);
+                }
+
+                if ( isAbstract )
+                {
+                    isAbstractAttribute = OverrideBooleanAttribute(sequence, "IsAbstract", true, typeOnly: true);
+                    // Now, because of the way the library recreates attributes, it will come back with nodeid
+                    // due to adding inherited Attributes.
+                    RemoveUnwantedAttribute(isAbstractAttribute.Attribute, "NodeId");
                 }
             }
         }
@@ -3129,13 +3175,21 @@ namespace MarkdownProcessor
 
             MinimizeNodeId( nodeIdAttribute );
 
+            UADataType dataType = uaNode as UADataType;
+            if (dataType != null && dataType.IsAbstract)
+            {
+                AttributeType isAbstractAttribute = AddModifyAttribute(
+                    attribute.Attribute, "IsAbstract", "Boolean", true);
+                isAbstractAttribute.AdditionalInformation.Append(OpcUaTypeOnly);
+            }
+
             nodeIdAttribute.AdditionalInformation.Append( OpcUaTypeOnly );
         }
 
 
         private void AddStructureFieldDefinition( AttributeFamilyType attribute, UANode uaNode )
         {
-            if( m_modelManager.IsTypeOf( uaNode.DecodedNodeId, structureNode.DecodedNodeId ) )
+            if ( m_modelManager.IsTypeOf( uaNode.DecodedNodeId, structureNode.DecodedNodeId ) )
             {
                 attribute.AttributeDataType = "";
                 NodeSet.UADataType uaDataType = uaNode as NodeSet.UADataType;
@@ -3165,7 +3219,7 @@ namespace MarkdownProcessor
                                     structureFieldAttribute = new AttributeType(
                                         new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
 
-                                    structureFieldAttribute.RecreateAttributeInstance( structureFieldDefinition as AttributeFamilyType );
+                                    RecreateAttributeInstance( structureFieldDefinition , structureFieldAttribute);
                                     structureFieldAttribute.Name = "StructureFieldDefinition";
                                     structureFieldAttribute.AdditionalInformation.Append( OpcUaTypeOnly );
 
@@ -3427,6 +3481,7 @@ namespace MarkdownProcessor
             var att = added as AttributeTypeType;
             added.Name = node.DecodedBrowseName.Name;
             added.ID = AmlIDFromNodeId(node.DecodedNodeId);
+
             m_atl_temp.AttributeType.Insert(added);
 
             added.AttributeDataType = GetAttributeDataType(node.DecodedNodeId);
