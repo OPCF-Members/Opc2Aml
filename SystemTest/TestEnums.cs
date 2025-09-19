@@ -178,6 +178,7 @@ namespace SystemTest
 
             foreach (AttributeType fieldDefinition in enumFieldDefinition.Attribute)
             {
+                Assert.IsNull(fieldDefinition.Attribute["IsAbstract"]);
                 AttributeType valueAttribute = fieldDefinition.Attribute["Value"];
                 Assert.IsNotNull(valueAttribute, "Field Definition Value is null");
                 Assert.IsNotNull(valueAttribute.Value, "Field Definition Value-Value is null");

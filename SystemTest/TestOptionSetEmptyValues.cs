@@ -108,6 +108,7 @@ namespace SystemTest
             AttributeType attribute = GetAttribute(fieldDefinition, attributeName);
 
             Assert.IsNull(attribute.Attribute["NodeId"]);
+            Assert.IsNull(attribute.Attribute["IsAbstract"]);
             AttributeType valueAttribute = GetAttribute(attribute, "Value");
             Assert.AreEqual( valueAttribute.Value, attributeValue);
 
