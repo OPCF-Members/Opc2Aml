@@ -18,7 +18,8 @@ namespace SystemTest
         // Test reads the nodeset file, finds everything that should be abstract,
         // Then walks the Amlx, and verifies both that the attribute is properly set, and properly not set
         const string NodeSetFile = "Modified.Opc.Ua.NodeSet2.xml";
-        
+        const string NodeSetFileContainer = NodeSetFile + ".amlx";
+
         CAEXDocument m_document = null;
 
         Dictionary<int, string> AbstractNodeIds = new Dictionary<int, string>();
@@ -148,6 +149,83 @@ namespace SystemTest
                 " bad Id errors - check StillBadIds.txt" );
             Assert.AreEqual( 0, shouldNotBeAbstractCount, "There were " + shouldNotBeAbstractCount.ToString() +
                 " shouldNotBeAbstract errors - check ShouldNotBeAbstract.txt" );
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow (TestHelper.Uris.Test, 6182u, DisplayName = "StringNodeId has ExpandedNodeId Value")]
+        [DataRow(TestHelper.Uris.Root, 2994u, DisplayName = "Auditing has Boolean Value")]
+        public void TestInstanceIsAbstract(TestHelper.Uris uri, uint nodeId )
+        {
+            SystemUnitClassType element = GetObject(uri, nodeId) as SystemUnitClassType;
+            Assert.IsNull(element.Attribute["IsAbstract"], "Instances should not have IsAbstract");
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(TestHelper.Uris.Root, 62u, false, DisplayName = "BaseVariableType")]
+        [DataRow(TestHelper.Uris.Root, 58u, true, DisplayName = "BaseObjectType")]
+        public void TestSystemUnitClassIsAbstract(TestHelper.Uris uri, uint nodeId, bool isNull)
+        {
+            SystemUnitClassType element = GetObject(uri, nodeId) as SystemUnitClassType;
+            AttributeType isAbstract = element.Attribute["IsAbstract"];
+            if (isNull)
+            {
+                Assert.IsNull(isAbstract);
+            }
+            else
+            {
+                Assert.IsNotNull(isAbstract);
+                Assert.IsNotNull(isAbstract.Value);
+                Assert.AreEqual("true", isAbstract.Value);
+                Assert.AreEqual(0, isAbstract.Attribute.Count);
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(TestHelper.Uris.Root, 24u, false, DisplayName = "BaseDataType")]
+        [DataRow(TestHelper.Uris.Root, 1u, true, DisplayName = "Boolean")]
+        public void TestAttributeIsAbstract(TestHelper.Uris uri, uint nodeId, bool isNull)
+        {
+            AttributeFamilyType element = GetObject(uri, nodeId) as AttributeFamilyType;
+            AttributeType isAbstract = element.Attribute["IsAbstract"];
+            if (isNull)
+            {
+                Assert.IsNull(isAbstract);
+            }
+            else
+            {
+                Assert.IsNotNull(isAbstract);
+                Assert.IsNotNull(isAbstract.Value);
+                Assert.AreEqual("true", isAbstract.Value);
+                Assert.AreEqual(0, isAbstract.Attribute.Count);
+            }
+        }
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(false, DisplayName = "Aggregates")]
+        [DataRow(true, DisplayName = "Inverse")]
+        public void TestInterfaceIsAbstract(bool isNull)
+        {
+            InterfaceFamilyType element = GetObject(TestHelper.Uris.Root, 44, "f") as InterfaceFamilyType;
+            AttributeSequence attributes = element.Attribute;
+            if ( isNull )
+            {
+                InterfaceFamilyType inverse = element.InterfaceClass["AggregatedBy"];
+                Assert.IsNotNull(inverse);
+                attributes = inverse.Attribute;
+            }
+
+            AttributeType isAbstract = attributes["IsAbstract"];
+            if (isNull)
+            {
+                Assert.IsNull(isAbstract);
+            }
+            else
+            {
+                Assert.IsNotNull(isAbstract);
+                Assert.IsNotNull(isAbstract.Value);
+                Assert.AreEqual("true", isAbstract.Value);
+                Assert.AreEqual(0, isAbstract.Attribute.Count);
+            }
         }
 
         public void WriteTestFile( DirectoryInfo outputDirectory, string fileName, List<string> output)
@@ -336,14 +414,25 @@ namespace SystemTest
             return numeric;
         }
 
-        private CAEXDocument GetDocument()
+        public CAEXObject GetObject( TestHelper.Uris uri, uint nodeId, string prefix = "" )
         {
-            if( m_document == null )
-            {
-                m_document = TestHelper.GetReadOnlyDocument( NodeSetFile + ".amlx" );
-            }
-            Assert.IsNotNull( m_document, "Unable to retrieve Document" );
-            return m_document;
+            CAEXDocument document = TestHelper.GetReadOnlyDocument("TestAml.xml.amlx");
+            string amlNodeId = TestHelper.BuildAmlId(prefix, uri, nodeId.ToString());
+
+            CAEXObject initialObject = document.FindByID(amlNodeId);
+
+            Assert.IsNotNull(initialObject, "Unable to find Initial Object");
+
+            return initialObject;
+
+        }
+
+        private CAEXDocument GetDocument( string fileName = NodeSetFileContainer )
+        {
+            CAEXDocument document = TestHelper.GetReadOnlyDocument( NodeSetFileContainer );
+            
+            Assert.IsNotNull( document, "Unable to retrieve Document " + fileName );
+            return document;
         }
 
     }

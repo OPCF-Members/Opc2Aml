@@ -305,7 +305,7 @@
         </References>
         <Definition Name="1:LowLevelStructure">
             <Field DataType="String" Name="Name"/>
-            <Field DataType="Double" Name="Value"/>
+            <Field DataType="Double" Name="Value" MaxStringLength="123"/>
         </Definition>
     </UADataType>
 
