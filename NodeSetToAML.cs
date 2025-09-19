@@ -3168,7 +3168,7 @@ namespace MarkdownProcessor
 
             AddEnumerationFieldDefinition( attribute, uaNode );
 
-            AddOptionSetFieldDefintion( attribute, uaNode );
+            AddOptionSetFieldDefinition( attribute, uaNode );
 
             AttributeType nodeIdAttribute = AddModifyAttribute( attribute.Attribute,"NodeId", "NodeId", 
                 new Variant( uaNode.DecodedNodeId ) );
@@ -3392,7 +3392,7 @@ namespace MarkdownProcessor
                     {
                         AttributeType fieldAttribute = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
 
-                        fieldAttribute.RecreateAttributeInstance(enumFieldSource);
+                        RecreateAttributeInstance(enumFieldSource, fieldAttribute);
                         fieldAttribute.Name = fieldDefinition.Name;
 
                         // Remove the Name
@@ -3418,7 +3418,7 @@ namespace MarkdownProcessor
             }
         }
 
-        private void AddOptionSetFieldDefintion( AttributeFamilyType attribute, UANode uaNode )
+        private void AddOptionSetFieldDefinition( AttributeFamilyType attribute, UANode uaNode )
         {
             UADataType optionSetNode = uaNode as UADataType;
             if (optionSetNode != null &&
@@ -3434,7 +3434,7 @@ namespace MarkdownProcessor
                     AttributeType optionSetFields = new AttributeType(
                         new System.Xml.Linq.XElement(defaultNS + "Attribute"));
 
-                    optionSetFields.RecreateAttributeInstance(optionSetFieldDefinition as AttributeFamilyType);
+                    optionSetFields.RecreateAttributeInstance(optionSetFieldDefinition);
                     optionSetFields.Name = "OptionSetFieldDefinition";
                     optionSetFields.AdditionalInformation.Append(OpcUaTypeOnly);
 
@@ -3452,6 +3452,7 @@ namespace MarkdownProcessor
                             "Value", "Int32", new Variant(fieldDefinition.Value));
 
                         RemoveUnwantedAttribute(valueAttribute, "NodeId");
+                        RemoveUnwantedAttribute(fieldAttribute, "IsAbstract");
                         RemoveUnwantedAttribute(fieldAttribute, "ValidBits");
                         RemoveUnwantedAttribute(fieldAttribute, "NodeId");
 
