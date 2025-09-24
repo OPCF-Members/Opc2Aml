@@ -1776,7 +1776,11 @@ namespace MarkdownProcessor
             }
         }
 
-        ExternalInterfaceType NonHierarchical_FindOrAddSourceInterface(ref SystemUnitClassType suc, string uri, string name, NodeId nodeId)
+        ExternalInterfaceType FindOrAddSourceInterface(ref SystemUnitClassType suc, 
+            string uri, 
+            string name, 
+            NodeId nodeId,
+            bool addAttribute = false)
         {
             string RefBaseClassPath = BuildLibraryReference(ICLPrefix, uri, name);
             var splitname = name.Split('/');
@@ -1817,12 +1821,19 @@ namespace MarkdownProcessor
             rtn.ID = AmlIDFromNodeId(nodeId, leafname);
             rtn.RefBaseClassPath = RefBaseClassPath;
             CopyAttributes(ref rtn);
-            AddModifyAttribute(rtn.Attribute, NonHierarchicalReferenceAttribute,
-                "String", new Variant(), bListOf: true);
+            if (addAttribute)
+            {
+                AddModifyAttribute(rtn.Attribute, NonHierarchicalReferenceAttribute,
+                    "String", new Variant(), bListOf: true);
+            }
             return rtn;
         }
 
-        ExternalInterfaceType NonHierarchical_FindOrAddInterface(ref SystemUnitClassType suc, string uri, string name, NodeId nodeId = null)
+        ExternalInterfaceType FindOrAddInterface(ref SystemUnitClassType suc, 
+            string uri, 
+            string name, 
+            NodeId nodeId = null,
+            bool addAttribute = false)
         {
             var splitname = name.Split('/');
             var leafname = splitname[splitname.Length - 1];
@@ -1843,82 +1854,13 @@ namespace MarkdownProcessor
                 rtn.ID = AmlIDFromNodeId(nodeId, leafname);
             }
             CopyAttributes(ref rtn);
-            AddModifyAttribute(rtn.Attribute, NonHierarchicalReferenceAttribute,
-                "String", new Variant(), bListOf: true);
+            if (addAttribute)
+            {
+                AddModifyAttribute(rtn.Attribute, NonHierarchicalReferenceAttribute,
+                    "String", new Variant(), bListOf: true);
+            }
             return rtn;
         }
-
-
-
-
-        ExternalInterfaceType FindOrAddSourceInterface(ref SystemUnitFamilyType suc, 
-            string uri, 
-            string name, 
-            NodeId nodeId )
-        {
-            string RefBaseClassPath = BuildLibraryReference(ICLPrefix, uri, name);
-            var splitname = name.Split('/');
-            var leafname = splitname[splitname.Length - 1];
-            SystemUnitFamilyType test = suc;
-            bool bFoundInParent = false;
-            bool bFirst = true;
-            while (test != null && bFoundInParent == false)
-            {
-                foreach (var iface in test.ExternalInterface)
-                {
-                    if (iface.RefBaseClassPath == RefBaseClassPath)
-                    {
-                        if (bFirst)
-                            return iface;
-                        bFoundInParent = true;
-                        break;
-                    }
-                }
-                bFirst = false;
-                test = test.BaseClass;
-            }
-            if (bFoundInParent == true)  // make a unique name by appending the SUC name
-                leafname += ":" + suc.Name;
-            var rtn = suc.ExternalInterface.Append(leafname);
-            rtn.ID = AmlIDFromNodeId(nodeId, leafname);
-            rtn.RefBaseClassPath = RefBaseClassPath;
-            CopyAttributes(ref rtn);
-
-            return rtn;
-        }
-
-
-
-        ExternalInterfaceType FindOrAddInterface(ref InternalElementType suc, 
-            string uri, 
-            string name, 
-            NodeId nodeId = null)
-        {
-            var splitname = name.Split('/');
-            var leafname = splitname[splitname.Length - 1];
-            if( leafname[0] == '[')
-                leafname = leafname.Substring(1);  //remove the leading [
-            InternalElementType test = suc;
-
-            foreach (var iface in test.ExternalInterface)
-            {
-                if (iface.Name == leafname)
-                    return iface;
-            }
-
-            var rtn = suc.ExternalInterface.Append(leafname);
-            rtn.RefBaseClassPath = BuildLibraryReference(ICLPrefix, uri, name);
-            if (nodeId != null)
-            {
-                rtn.ID = AmlIDFromNodeId(nodeId, leafname);
-            }
-
-            CopyAttributes(ref rtn);
-
-            return rtn;
-        }
-
-
 
         private string AmlIDFromNodeId(NodeId nodeId, string prefix = null)
         {
@@ -2681,7 +2623,9 @@ namespace MarkdownProcessor
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
                             var ReferenceTypeNode = FindNode<UANode>(reference.ReferenceTypeId);
-                            var sourceInterface = FindOrAddSourceInterface(ref rtn, refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId);
+                            SystemUnitClassType rtnSystemUnitClassType = rtn as SystemUnitClassType;
+                            var sourceInterface = FindOrAddSourceInterface(ref rtnSystemUnitClassType, 
+                                refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId);
                             var targetNode = FindNode<UANode>(reference.TargetId);
                             //                           if (targetNode.NodeClass != NodeClass.Method) //  methods are now processed
                             {
@@ -2718,10 +2662,11 @@ namespace MarkdownProcessor
                                 }
                                 else if (targetNode.NodeClass == NodeClass.Method)
                                     ie.RefBaseSystemUnitPath = BuildLibraryReference(SUCPrefix, MetaModelName, MethodNodeClass);
-                                var ie_suc = ie as SystemUnitClassType;
+                                SystemUnitClassType ie_suc = ie as SystemUnitClassType;
 
-
-                                var destInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, reference.TargetId);
+                                var destInterface = FindOrAddInterface(ref ie_suc, refURI, 
+                                    ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, 
+                                    reference.TargetId);
 
                                 var internalLink = rtn.New_InternalLink(targetNode.DecodedBrowseName.Name);
                                 internalLink.RefPartnerSideA = sourceInterface.ID;
@@ -2815,10 +2760,11 @@ namespace MarkdownProcessor
                     targetSystemUnitClass.Name,
                     targetSystemUnitClass.ID);
 
-                ExternalInterfaceType sourceInterface = NonHierarchical_FindOrAddSourceInterface(ref sourceSystemUnitClass,
+                ExternalInterfaceType sourceInterface = FindOrAddSourceInterface(ref sourceSystemUnitClass,
                     refURI, 
                     referenceTypeNode.DecodedBrowseName.Name, 
-                    referenceHolder.Reference.SourceId);
+                    referenceHolder.Reference.SourceId,
+                    addAttribute: true);
 
                 // Rebuild the source name
                 string preId = referenceTypeNode.DecodedBrowseName.Name + ";" +
@@ -2827,10 +2773,11 @@ namespace MarkdownProcessor
                 string newId = WebUtility.UrlEncode(preId);
                 sourceInterface.ID = newId;
 
-                ExternalInterfaceType destInterface = NonHierarchical_FindOrAddInterface(ref targetSystemUnitClass,
+                ExternalInterfaceType destInterface = FindOrAddInterface(ref targetSystemUnitClass,
                     refURI, 
                     referenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value,
-                    referenceHolder.Reference.TargetId);
+                    referenceHolder.Reference.TargetId,
+                    addAttribute: true);
 
                 AddNonHierarchicalReference(sourceInterface.Attribute, targetSystemUnitClass.ID);
                 AddNonHierarchicalReference(destInterface.Attribute, sourceSystemUnitClass.ID);
@@ -3870,7 +3817,9 @@ namespace MarkdownProcessor
                         {
                             string refURI = m_modelManager.FindModelUri(reference.ReferenceTypeId);
                             var ReferenceTypeNode = FindNode<UANode>(reference.ReferenceTypeId);
-                            var sourceInterface = FindOrAddInterface(ref ie, refURI, ReferenceTypeNode.DecodedBrowseName.Name, nodeId);
+                            SystemUnitClassType ie_systemUnitClassType = ie as SystemUnitClassType;
+                            var sourceInterface = FindOrAddInterface(ref ie_systemUnitClassType, refURI, 
+                                ReferenceTypeNode.DecodedBrowseName.Name, nodeId);
                             var targetNode = FindNode<UANode>(reference.TargetId);
                            
                             if (reference.TargetId != TypesFolderNodeId)
@@ -3879,7 +3828,12 @@ namespace MarkdownProcessor
                                 var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode, 
                                     serverDiagnostics);
                                 foundInternalElements.Add(childIE.Name);
-                                var destInterface = FindOrAddInterface(ref childIE, refURI, ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, targetNode.DecodedNodeId);
+
+                                SystemUnitClassType childSystemUnitClass = childIE as SystemUnitClassType;
+                                var destInterface = FindOrAddInterface(ref childSystemUnitClass, refURI, 
+                                    ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, 
+                                    targetNode.DecodedNodeId);
+
                                 FindOrAddInternalLink(ref ie, sourceInterface.ID, destInterface.ID, targetNode.DecodedBrowseName.Name);
                             }
                         }
