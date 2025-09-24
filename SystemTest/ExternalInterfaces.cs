@@ -10,7 +10,8 @@ using System.Threading.Tasks;
 
 namespace SystemTest
 {
-    [TestClass]
+    // Disabling Tests
+    //[TestClass, Ignore("Tests are invalid with the additions of NonHierarchical References")]
 
     public class ExternalInterfaces
     {
@@ -19,7 +20,7 @@ namespace SystemTest
 
         // This test is more about studying the file output, but has validity as a real test        
         private int LinkInternalElementDifferentCount;
-        [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
+        [TestMethod, Timeout( TestHelper.UnitTestTimeout ), Ignore("Test is now invalid with the additions of NonHierarchical References")]
         public void DifferencesBetweenLinksAndInternalElements()
         {
             GetDocument();

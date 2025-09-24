@@ -2326,9 +2326,7 @@
 		<References>
 			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
 			<Reference ReferenceType="HasTypeDefinition">i=8995</Reference>
-			<Reference ReferenceType="HasTrueSubState">i=9160</Reference>
-			<Reference ReferenceType="HasTrueSubState">i=9169</Reference>
-			<Reference ReferenceType="HasTrueSubState">i=9178</Reference>
+			<Reference ReferenceType="HasTrueSubState">ns=1;i=6165</Reference>
 		</References>
 	</UAVariable>
 	<UAVariable DataType="NodeId" NodeId="ns=1;i=6163" BrowseName="InputNode" ParentNodeId="ns=1;i=5018">
@@ -2350,10 +2348,7 @@
 		<References>
 			<Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
 			<Reference ReferenceType="HasTypeDefinition">i=8995</Reference>
-			<Reference ReferenceType="HasTrueSubState">i=10020</Reference>
-			<Reference ReferenceType="HasTrueSubState">i=10029</Reference>
-			<Reference ReferenceType="HasTrueSubState">i=10038</Reference>
-			<Reference ReferenceType="HasTrueSubState">i=10047</Reference>
+			<Reference ReferenceType="HasTrueSubState" IsForward="false">ns=1;i=6162</Reference>
 		</References>
 	</UAVariable>
 	<UAVariable DataType="i=296" ValueRank="1" NodeId="ns=1;i=6166" BrowseName="InputArguments" ParentNodeId="ns=1;i=7024">
