@@ -2782,13 +2782,21 @@ namespace MarkdownProcessor
                 AddNonHierarchicalReference(sourceInterface.Attribute, targetSystemUnitClass.ID);
                 AddNonHierarchicalReference(destInterface.Attribute, sourceSystemUnitClass.ID);
 
-                if (!referenceHolder.Limited)
-                {
-                    InternalLinkType internalLink = sourceSystemUnitClass.New_InternalLink(
-                        referenceTypeNode.DecodedBrowseName.Name);
-                    internalLink.RefPartnerSideA = sourceInterface.ID;
-                    internalLink.RefPartnerSideB = destInterface.ID;
-                }
+                
+                // Archie October 2025
+                // InternalLink Problems are the reason for the non-aml way to solve for
+                // non-hierarchical references.  Some InternalLinks work fine, most do not.
+                // This code allowed for the creation of the InternalLink for those scenarios that did work
+                // The working group has decided to not use InternalLinks for non-hierarchical references
+                // to have a consistent mechanism.
+                //if (!referenceHolder.Limited)
+                //{
+                //    InternalLinkType internalLink = sourceSystemUnitClass.New_InternalLink(
+                //        referenceTypeNode.DecodedBrowseName.Name);
+                //    internalLink.RefPartnerSideA = sourceInterface.ID;
+                //    internalLink.RefPartnerSideB = destInterface.ID;
+                //}
+                
             }
         }
 
