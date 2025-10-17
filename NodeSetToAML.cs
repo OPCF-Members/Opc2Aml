@@ -69,7 +69,7 @@ namespace MarkdownProcessor
         private const string UaBaseRole = "UaBaseRole";
         private const string MethodNodeClass = "UaMethodNodeClass";
         private const string RefClassConnectsToPath = "RefClassConnectsToPath";
-        private const string NonHierarchicalReferenceAttribute = "RefSystemUnitPath";
+        private const string NonHierarchicalReferenceAttribute = "ReferenceIds";
         private const string IsSource = "IsSource";
         private const string ForwardPrefix = "f";
         private const string ReversePrefix = "r";

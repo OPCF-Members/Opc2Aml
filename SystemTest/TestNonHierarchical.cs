@@ -11,7 +11,7 @@ namespace SystemTest
     public class TestNonHierarchical
     {
         CAEXDocument m_document = null;
-        private const string AttributeName = "RefSystemUnitPath";
+        private const string AttributeName = "ReferenceIds";
 
         #region Tests
 
