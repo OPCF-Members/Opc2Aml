@@ -51,7 +51,7 @@ namespace SystemTest
         [DataRow(false, "3", FxAcUri, DisplayName = "FxAssetType")]
         [DataRow(false, "175", DiUri, DisplayName = "Manufacturer")]
         [DataRow(true, "5008", TestAmlUri, DisplayName = "Asset Instance")]
-        [DataRow(true, "6008", DiUri, DisplayName = "Manufacturer Instance")]
+        [DataRow(true, "6084", DiUri, DisplayName = "Manufacturer Instance")]
         public void TestBrowseNames(bool instance, string nodeIdentifier, string expectedUri)
         {
             SystemUnitClassType objectToTest = GetTestObject(instance, nodeIdentifier);
