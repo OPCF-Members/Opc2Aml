@@ -188,6 +188,14 @@ namespace Opc2Aml
 #endif    
         }
 
+        // Changes will need to be made for reverse.  The constructor of this object
+        // loads all nodesets, which will not be necessary for reverse.
+        public void Reverse()
+        {
+            AmlToNodeSet converter = new AmlToNodeSet();
+            converter.Run( converter.HardCodeFileName );
+        }
+
         private Configuration _configuration = null;
     }
 }

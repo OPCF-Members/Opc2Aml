@@ -43,12 +43,15 @@ namespace MarkdownProcessor
 {
     public class ModelManager
     {
-        public ModelInfo DefaultModel { get; private set; }
-        public NamespaceTable NamespaceUris { get; private set; }
-        public StringTable ServerUris { get; private set; }
-        public Dictionary<NodeId, UANode> Nodes { get; private set; }
-        public Dictionary<string, ModelInfo> Models { get; private set; }
-        public List<ModelInfo> ModelNamespaceIndexes { get; private set; }
+        // Not sure how to get around changing private setters for the case of a reverse generation
+        // as this file is not supposed to be modified directly.
+        // Might need a reflection derived class
+        public ModelInfo DefaultModel { get; set; }
+        public NamespaceTable NamespaceUris { get; set; }
+        public StringTable ServerUris { get; set; }
+        public Dictionary<NodeId, UANode> Nodes { get; set; }
+        public Dictionary<string, ModelInfo> Models { get; set; }
+        public List<ModelInfo> ModelNamespaceIndexes { get; set; }
 
         public event EventHandler<ModelRequiredEventArgs> ModelRequired;
 
