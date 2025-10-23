@@ -3334,6 +3334,7 @@ namespace MarkdownProcessor
                 AttributeType isAbstractAttribute = AddModifyAttribute(
                     attribute.Attribute, "IsAbstract", "Boolean", true);
                 isAbstractAttribute.AdditionalInformation.Append(OpcUaTypeOnly);
+                RemoveUnwantedAttribute(isAbstractAttribute, "NodeId");
             }
 
             nodeIdAttribute.AdditionalInformation.Append( OpcUaTypeOnly );

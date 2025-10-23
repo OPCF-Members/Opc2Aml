@@ -228,6 +228,33 @@ namespace SystemTest
             }
         }
 
+
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        public void TestNodeIdInIsAbstract()
+        {
+            CAEXDocument document = GetDocument("AmlFxTest.xml.amlx");
+            int counter = 0;
+            foreach( AttributeTypeLibType libType in document.AttributeTypeLib )
+            {
+                foreach (AttributeFamilyType familyType in libType)
+                {
+                    AttributeType isAbstract = familyType.Attribute["IsAbstract"];
+                    if ( isAbstract != null )
+                    {
+                        AttributeType nodeId = isAbstract.Attribute["NodeId"];
+                        if (nodeId != null)
+                        {
+                            Console.WriteLine(familyType.Name + " has NodeId in IsAbstract");
+                            counter++;
+                            // Error
+                        }
+                    }
+                }
+            }
+            Assert.AreEqual(0, counter, "There were " + counter.ToString() +
+                " IsAbstract attributes with NodeId sub-attributes");
+        }
+
         public void WriteTestFile( DirectoryInfo outputDirectory, string fileName, List<string> output)
         {
             if( output.Count == 0 )
