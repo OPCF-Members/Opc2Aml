@@ -1561,7 +1561,21 @@ namespace MarkdownProcessor
 
             if ( returnAttributeType == null )
             {
-                returnAttributeType = AddModifyAttribute( seq, name, sUADataType, val, bListOf, sURI );
+                NodeId optionSetsPropertyId = m_modelManager.FindFirstTarget(
+                    dataTypeNode.DecodedNodeId, HasPropertyNodeId, true, "OptionSetValues");
+
+                if (optionSetsPropertyId != null && m_modelManager.IsTypeOf(
+                    dataTypeNode.DecodedNodeId, NumberNodeId))
+                {
+                    // This could still be null.  There are many error conditions here.
+                    // BitFieldMaskDataType does not have a definition of the optionset values.
+                    returnAttributeType = AddModifyAttributeOptionSet(seq, name, dataTypeNode, sURI, val );
+                }
+            }
+
+            if (returnAttributeType == null)
+            {
+                returnAttributeType = AddModifyAttribute(seq, name, sUADataType, val, bListOf, sURI);
             }
 
             return returnAttributeType;
@@ -1669,6 +1683,46 @@ namespace MarkdownProcessor
                                     elementVariant );
                             }
                         }
+                    }
+                }
+            }
+
+            return attributeType;
+        }
+
+        private AttributeType AddModifyAttributeOptionSet(AttributeSequence seq,
+            string name,
+            UANode dataType,
+            string uri,
+            Variant val)
+        {
+            AttributeType attributeType = null;
+
+            UADataType dataTypeNode = dataType as UADataType;
+            if (dataTypeNode != null )
+            {
+                // Cheating here.
+                if (UInt64.TryParse(val.ToString(), out UInt64 ulVal))
+                {
+                    attributeType = AddModifyAttribute(seq, 
+                        name, dataTypeNode.DecodedBrowseName.Name, 
+                        new Variant(), bListOf: false, uri);
+
+                    for (int index = 0; index < dataTypeNode.Definition.Field.Length; index++)
+                    {
+                        DataTypeField field = dataTypeNode.Definition.Field[index];
+                        AttributeType fieldAttribute = attributeType.Attribute[field.Name];
+                        UInt64 bitLocation = 1UL << field.Value;
+                        UInt64 bitMask = ulVal & bitLocation;
+                        bool bitValue = false;
+                        
+                        if (bitMask > 0)
+                        {
+                            bitValue = true;
+                        }
+
+                        AddModifyAttribute(attributeType.Attribute,
+                            field.Name, "Boolean", new Variant(bitValue));
                     }
                 }
             }
@@ -3801,9 +3855,30 @@ namespace MarkdownProcessor
                 {
                     AddModifyAttribute(ie.Attribute, "MinimumSamplingInterval", "Double", varnode.MinimumSamplingInterval);
                 }
+
+                byte[] accessLevelBytes = BitConverter.GetBytes(varnode.AccessLevel);
+                if (accessLevelBytes.Length == 4)
+                {
+                    byte accessLevelByte = accessLevelBytes[0];
+                    uint complete = BitConverter.ToUInt32(accessLevelBytes);
+                    accessLevelBytes[0] = 0;
+                    uint masked = BitConverter.ToUInt32(accessLevelBytes);
+
+                    if (accessLevelByte > 0)
+                    {
+                        AddModifyAttribute(ie.Attribute, "AccessLevel",
+                            Opc.Ua.DataTypeIds.AccessLevelType, new Variant(accessLevelByte));
+                    }
+
+                    if (masked > 0)
+                    {
+                        AddModifyAttribute(ie.Attribute, "AccessLevelEx", Opc.Ua.DataTypeIds.AccessLevelExType,
+                            new Variant(complete));
+                    }
+                }
             }
 
-            if( toAdd.DecodedNodeId.Equals( Opc.Ua.ObjectIds.Server_ServerDiagnostics ) )
+            if ( toAdd.DecodedNodeId.Equals( Opc.Ua.ObjectIds.Server_ServerDiagnostics ) )
             {
                 serverDiagnostics = true;
             }

@@ -75,7 +75,27 @@ namespace SystemTest
             Assert.IsNull(valueAttribute.Attribute[ "ValidBits" ]);
         }
 
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow(6240, "CurrentRead", true)]
+        [DataRow(6240, "CurrentWrite", false)]
+        public void TestValues(int nodeId, string optionSetName, bool expected )
+        {
+            CAEXDocument document = GetDocument("TestAml.xml.amlx");
+            string amlId = TestHelper.BuildAmlId("", TestHelper.Uris.Test, nodeId.ToString());
+            CAEXObject initialObject = document.FindByID(amlId);
+            Assert.IsNotNull(initialObject, "Unable to find Initial Object");
+            SystemUnitClassType theObject = initialObject as SystemUnitClassType;
+            Assert.IsNotNull(theObject, "Unable to Cast Initial Object");
 
+            AttributeType valueAttribute = theObject.Attribute[ "Value" ];
+            Assert.IsNotNull(valueAttribute, "Unable to find Value Attribute");
+            //Assert.AreEqual("", valueAttribute.Value);
+            //Assert.IsNull(valueAttribute.Value);
+            AttributeType optionSetAttribute = valueAttribute.Attribute[optionSetName];
+            Assert.IsNotNull(optionSetAttribute, "Unable to find Value Attribute");
+            Assert.IsNotNull(optionSetAttribute.Value, "Option Set Value is null");
+            Assert.AreEqual(expected.ToString().ToLower(), optionSetAttribute.Value.ToLower(), "Option Set Value is incorrect");    
+        }
 
         #endregion
 

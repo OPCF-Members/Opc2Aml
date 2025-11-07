@@ -40,6 +40,7 @@
 		<Alias Alias="SessionDiagnosticsDataType">i=865</Alias>
         <Alias Alias="SessionSecurityDiagnosticsDataType">i=868</Alias>
         <Alias Alias="SubscriptionDiagnosticsDataType">i=874</Alias>
+		<Alias Alias="AccessLevelType">i=15031</Alias>
 		<Alias Alias="TransmitQosDataType">i=23604</Alias>
 		<Alias Alias="NegotiationStatus">i=24216</Alias>
 		<Alias Alias="LowLevelStructure">ns=1;i=3003</Alias>
@@ -843,7 +844,15 @@
             <Reference ReferenceType="HasModellingRule">i=80</Reference>
         </References>
     </UAVariable>
-    <UAObject NodeId="ns=1;i=5001" BrowseName="1:EnumTesting" ParentNodeId="i=85">
+	<UAObject NodeId="ns=1;i=5025" BrowseName="1:OptionSetTesting" ParentNodeId="i=85">
+		<DisplayName>OptionSet Testing</DisplayName>
+		<Description>A Folder to store instances specifically for testing purposes</Description>
+		<References>
+			<Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+			<Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+		</References>
+	</UAObject>
+	<UAObject NodeId="ns=1;i=5001" BrowseName="1:EnumTesting" ParentNodeId="i=85">
         <DisplayName>Enumeration Testing</DisplayName>
 		<Description>A Folder to store instances specifically for testing purposes</Description>
         <References>
@@ -3692,11 +3701,76 @@
 		</Value>
 	</UAVariable>
 
+	<UAVariable DataType="AccessLevelType" NodeId="ns=1;i=6240" BrowseName="1:AccessLevelInstance" AccessLevel="3">
+		<DisplayName>AccessLevelInstance</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5025</Reference>
+		</References>
+		<Value>
+			<uax:Byte>85</uax:Byte>
+		</Value>
+	</UAVariable>
+	<UAVariable DataType="AccessLevelType" NodeId="ns=1;i=6241" BrowseName="1:AlternateAccessLevelInstance" AccessLevel="3">
+		<DisplayName>AlternateAccessLevelInstance</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5025</Reference>
+		</References>
+		<Value>
+			<uax:Byte>42</uax:Byte>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6242" BrowseName="1:Multi" AccessLevel="85">
+		<DisplayName>Multi</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5025</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6243" BrowseName="1:MultiAlternate" AccessLevel="42">
+		<DisplayName>MultiAlternate</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5025</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6244" BrowseName="1:MultiEx" AccessLevel="1365">
+		<DisplayName>MultiEx</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5025</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+
+	<UAVariable DataType="Int32" NodeId="ns=1;i=6245" BrowseName="1:MultiAlternateEx" AccessLevel="554">
+		<DisplayName>MultiAlternateEx</DisplayName>
+		<References>
+			<Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+			<Reference ReferenceType="Organizes" IsForward="false">ns=1;i=5025</Reference>
+		</References>
+		<Value>
+			<uax:Int32>-1</uax:Int32>
+		</Value>
+	</UAVariable>
+	
 	<!-- Next Numbers
     ObjectType 1009
     VariableType 2006
     DataType 3010
-    Object 5025
-    Variable 6240
+    Object 5026
+    Variable 6246
     -->
 </UANodeSet>
