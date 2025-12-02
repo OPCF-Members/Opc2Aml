@@ -75,6 +75,7 @@ namespace MarkdownProcessor
         private const string ReversePrefix = "r";
         private const string RoleClassPrefix = "rc";
         private const string Enumeration = "Enumeration";
+        private const string KeepExternalInterfaceAttribute = "KeepExternalInterface";
         private ModelManager m_modelManager;
         private CAEXDocument m_cAEXDocument;
         private AttributeTypeLibType m_atl_temp;
@@ -147,6 +148,8 @@ namespace MarkdownProcessor
 
         private bool _runningInstances = false;
         private NonHierarchicalReferences _nonHierarchicalReferences = null;
+
+        Dictionary<NodeId, List<ReferenceInfo>> m_multipleReferences = new Dictionary<NodeId, List<ReferenceInfo>>();
 
         public NodeSetToAML(ModelManager modelManager)
         {
@@ -2133,8 +2136,12 @@ namespace MarkdownProcessor
 
                         if (!found)
                         {
-                            checkIt.ExternalInterface.RemoveElement(externalInterface);
-                            deleted = true;
+                            AttributeType theAttribute = externalInterface.Attribute[KeepExternalInterfaceAttribute];
+                            if ( theAttribute == null )
+                            {
+                                checkIt.ExternalInterface.RemoveElement(externalInterface);
+                                deleted = true;
+                            }
                         }
                     }
                 }
@@ -2333,31 +2340,37 @@ namespace MarkdownProcessor
             Dictionary<string, string> oldIdToNewName = new Dictionary<string, string>();
             Dictionary<string,string>oldToNewName = new Dictionary<string, string>();
             Dictionary<string, ExternalInterfaceType> newTypes = new Dictionary<string, ExternalInterfaceType>();
+            List<ExternalInterfaceType> reInsert = new List<ExternalInterfaceType>();
 
             foreach ( ExternalInterfaceType externalInterface in systemUnitClass.ExternalInterface )
             {
                 AttributeType sourceType = externalInterface.Attribute["IsSource"];
-                if ( sourceType != null )
+                if ( sourceType != null && sourceType.Value != null && sourceType.Value.Equals("true"))
                 {
-                    if(sourceType.Value.Equals("true"))
+                    string[] splitName = externalInterface.Name.Split(":");
+                    if (splitName.Length > 0)
                     {
-                        string[] splitName = externalInterface.Name.Split(":");
-                        if ( splitName.Length > 0 )
+                        string newName = splitName[0];
+                        if (!oldToNewName.ContainsKey(externalInterface.Name))
                         {
-                            string newName = splitName[0];
-                            if (!oldToNewName.ContainsKey(externalInterface.Name) )
+                            oldIdToNewName.Add(externalInterface.ID, newName);
+                            oldToNewName.Add(externalInterface.Name, newName);
+                            if (!newTypes.ContainsKey(newName))
                             {
-                                oldIdToNewName.Add(externalInterface.ID, newName);
-                                oldToNewName.Add(externalInterface.Name, newName);
-                                if (!newTypes.ContainsKey(newName))
-                                {
-                                    ExternalInterfaceType replace = (ExternalInterfaceType)externalInterface.Copy(deepCopy: true);
-                                    replace.Name = newName;
-                                    replace.ID = WebUtility.UrlEncode(newName + named);
-                                    newTypes.Add(newName, replace);
-                                }
+                                ExternalInterfaceType replace = (ExternalInterfaceType)externalInterface.Copy(deepCopy: true);
+                                replace.Name = newName;
+                                replace.ID = WebUtility.UrlEncode(newName + named);
+                                newTypes.Add(newName, replace);
                             }
                         }
+                    }
+                }
+                else 
+                {
+                    AttributeType keepAttribute = externalInterface.Attribute[KeepExternalInterfaceAttribute];
+                    if (keepAttribute != null)
+                    {
+                        reInsert.Add(externalInterface);
                     }
                 }
             }
@@ -2380,6 +2393,10 @@ namespace MarkdownProcessor
             foreach( ExternalInterfaceType externalInterface in newTypes.Values )
             {
                 systemUnitClass.ExternalInterface.Insert( externalInterface, asFirst: false, asIs: true );
+            }
+            foreach (ExternalInterfaceType externalInterface in reInsert)
+            {
+                systemUnitClass.ExternalInterface.Insert(externalInterface, asFirst: false, asIs: true);
             }
         }
 
@@ -3708,12 +3725,62 @@ namespace MarkdownProcessor
         private void CreateInstances()
         {
             // add an InstanceHierarchy to the ROOT CAEXFile element
-            var myIH = m_cAEXDocument.CAEXFile.New_InstanceHierarchy("OPC UA Instance Hierarchy");
+            InstanceHierarchyType myIH = m_cAEXDocument.CAEXFile.New_InstanceHierarchy("OPC UA Instance Hierarchy");
             AddLibraryHeaderInfo(myIH);
 
-            var RootNode = FindNode<UANode>(RootNodeId);
-            RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode, false);
+            UANode RootNode = FindNode<UANode>(RootNodeId);
 
+            Dictionary<NodeId, List<ReferenceInfo>> instanceReferences = 
+                new Dictionary<NodeId, List<ReferenceInfo>>();
+
+            DateTime start = DateTime.UtcNow;
+            BuildInstanceReferences(instanceReferences, RootNode);
+            MinimizeInstanceReferences(instanceReferences);
+            DateTime mid = DateTime.UtcNow;
+            RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode, false);
+            DateTime end = DateTime.UtcNow;
+
+            Utils.LogError("Time to build instance references: {0} ms", (mid - start).TotalMilliseconds);
+            Utils.LogError("Time to build instances: {0} ms", (end - mid).TotalMilliseconds);
+        }
+
+        private void BuildInstanceReferences(Dictionary<NodeId, List<ReferenceInfo>> instanceReferences, 
+            UANode toAdd )
+        {
+            List<ReferenceInfo> references = m_modelManager.FindReferences(toAdd.DecodedNodeId);
+
+            foreach (ReferenceInfo reference in references)
+            {
+                if (reference.IsForward == true)
+                {
+                    if (m_modelManager.IsTypeOf(reference.ReferenceTypeId, HierarchicalNodeId) == true)
+                    {
+                        UANode targetNode = FindNode<UANode>(reference.TargetId);
+                        if (reference.TargetId != TypesFolderNodeId)
+                        {
+                            if (!instanceReferences.ContainsKey(reference.TargetId))
+                            {
+                                instanceReferences[reference.TargetId] = new List<ReferenceInfo>();
+                            }
+
+                            instanceReferences[reference.TargetId].Add(reference);
+
+                            BuildInstanceReferences(instanceReferences, targetNode);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void MinimizeInstanceReferences(Dictionary<NodeId, List<ReferenceInfo>> instanceReferences )
+        {
+            foreach (KeyValuePair<NodeId, List<ReferenceInfo>> pair in instanceReferences)
+            {
+                if (pair.Value.Count > 1)
+                {
+                    m_multipleReferences.Add(pair.Key, pair.Value);
+                }
+            }
         }
 
         InternalElementType RecursiveAddModifyInstance<T>(ref T parent, UANode toAdd, bool serverDiagnostics) where T : IInternalElementContainer
@@ -3726,7 +3793,7 @@ namespace MarkdownProcessor
             Utils.LogTrace( "Add Instance {0} [{1}] Start", prefix, decodedNodeId );
 
             //first see if node already exists
-            var ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
+            InternalElementType ie = parent.InternalElement[toAdd.DecodedBrowseName.Name];
             if (ie == null)
             {
                 SystemUnitFamilyType suc;
@@ -3761,7 +3828,31 @@ namespace MarkdownProcessor
                 ie = CreateClassInstanceWithIDReplacement(prefix + "_", suc);
                 
                 parent.Insert(ie);
+            }
+            else
+            {
+                if (m_multipleReferences.TryGetValue(toAdd.DecodedNodeId, out List<ReferenceInfo> ignoreReferences))
+                {
+                    if (ie.ID != amlId)
+                    {
+                        // This call takes a long time, and this snippet increases time by a factor of 12.
+                        // Issue 143: 2 instances of same node created
+                        // https://github.com/OPCF-Members/Opc2Aml/issues/143
+                        InternalElementType findById = (InternalElementType)m_cAEXDocument.FindByID(amlId);
 
+                        if (findById != null)
+                        {
+                            parent.InternalElement.RemoveElement(ie);
+                            ie = findById;
+                        }
+                        else
+                        {
+                            Utils.LogError("Unable to find " + toAdd.DecodedBrowseName.Name + " with ID " + amlId +
+                                " although multiple references exist.");
+                        }
+
+                    }
+                }
             }
             Debug.Assert(ie != null);
 
@@ -3833,7 +3924,6 @@ namespace MarkdownProcessor
                            
                             if (reference.TargetId != TypesFolderNodeId)
                             {
-
                                 var childIE = RecursiveAddModifyInstance<InternalElementType>(ref ie, targetNode, 
                                     serverDiagnostics);
                                 foundInternalElements.Add(childIE.Name);
@@ -3842,6 +3932,21 @@ namespace MarkdownProcessor
                                 var destInterface = FindOrAddInterface(ref childSystemUnitClass, refURI, 
                                     ReferenceTypeNode.DecodedBrowseName.Name + "]/[" + sourceInterface.Attribute["InverseName"].Value, 
                                     targetNode.DecodedNodeId);
+
+                                if ( m_multipleReferences.TryGetValue(targetNode.DecodedNodeId, 
+                                    out List<ReferenceInfo> multipleReferences))
+                                {
+                                    foreach (ReferenceInfo saveReference in multipleReferences)
+                                    {
+                                        if ( saveReference.Equals(reference))
+                                        {
+                                            OverrideBooleanAttribute(destInterface.Attribute,
+                                                KeepExternalInterfaceAttribute, 
+                                                value: true, typeOnly: true);
+                                            break;
+                                        }
+                                    }
+                                }
 
                                 FindOrAddInternalLink(ref ie, sourceInterface.ID, destInterface.ID, targetNode.DecodedBrowseName.Name);
                             }
