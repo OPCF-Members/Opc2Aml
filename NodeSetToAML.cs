@@ -150,6 +150,7 @@ namespace MarkdownProcessor
         private NonHierarchicalReferences _nonHierarchicalReferences = null;
 
         Dictionary<NodeId, List<ReferenceInfo>> m_multipleReferences = new Dictionary<NodeId, List<ReferenceInfo>>();
+        Dictionary<NodeId, InternalElementType> m_instances = new Dictionary<NodeId, InternalElementType>();
 
         public NodeSetToAML(ModelManager modelManager)
         {
@@ -3812,11 +3813,10 @@ namespace MarkdownProcessor
                 }
                 Debug.Assert(suc != null);
 
-                // check if instance already exists before adding a new one  #11
                 ie = (InternalElementType)m_cAEXDocument.FindByID(amlId);
-                if( ie != null )
+                if (ie != null)
                 {
-                    Utils.LogTrace( "Add Instance {0} [{1}] Already Added", prefix, decodedNodeId );
+                    Utils.LogTrace("Add Instance {0} [{1}] Already Added", prefix, decodedNodeId);
                     return ie;
                 }
 
@@ -3828,29 +3828,15 @@ namespace MarkdownProcessor
                 ie = CreateClassInstanceWithIDReplacement(prefix + "_", suc);
                 
                 parent.Insert(ie);
+                m_instances.Add( toAdd.DecodedNodeId, ie);
             }
             else
             {
-                if (m_multipleReferences.TryGetValue(toAdd.DecodedNodeId, out List<ReferenceInfo> ignoreReferences))
+                if (ie.ID != amlId)
                 {
-                    if (ie.ID != amlId)
+                    if (m_instances.TryGetValue(toAdd.DecodedNodeId, out InternalElementType existingIE))
                     {
-                        // This call takes a long time, and this snippet increases time by a factor of 12.
-                        // Issue 143: 2 instances of same node created
-                        // https://github.com/OPCF-Members/Opc2Aml/issues/143
-                        InternalElementType findById = (InternalElementType)m_cAEXDocument.FindByID(amlId);
-
-                        if (findById != null)
-                        {
-                            parent.InternalElement.RemoveElement(ie);
-                            ie = findById;
-                        }
-                        else
-                        {
-                            Utils.LogError("Unable to find " + toAdd.DecodedBrowseName.Name + " with ID " + amlId +
-                                " although multiple references exist.");
-                        }
-
+                        ie = existingIE;
                     }
                 }
             }
