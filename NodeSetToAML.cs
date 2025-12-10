@@ -3734,15 +3734,12 @@ namespace MarkdownProcessor
             Dictionary<NodeId, List<ReferenceInfo>> instanceReferences = 
                 new Dictionary<NodeId, List<ReferenceInfo>>();
 
-            DateTime start = DateTime.UtcNow;
+            // Issue 143.  Need to go through and find multiple Target NodeIds, and respect 
+            // those in the instance creation routine
             BuildInstanceReferences(instanceReferences, RootNode);
             MinimizeInstanceReferences(instanceReferences);
-            DateTime mid = DateTime.UtcNow;
-            RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode, false);
-            DateTime end = DateTime.UtcNow;
 
-            Utils.LogError("Time to build instance references: {0} ms", (mid - start).TotalMilliseconds);
-            Utils.LogError("Time to build instances: {0} ms", (end - mid).TotalMilliseconds);
+            RecursiveAddModifyInstance<InstanceHierarchyType>(ref myIH, RootNode, false);
         }
 
         private void BuildInstanceReferences(Dictionary<NodeId, List<ReferenceInfo>> instanceReferences, 
@@ -3813,11 +3810,10 @@ namespace MarkdownProcessor
                 }
                 Debug.Assert(suc != null);
 
-                ie = (InternalElementType)m_cAEXDocument.FindByID(amlId);
-                if (ie != null)
+                InternalElementType existingInternalElement = FindInstanceInternalElement(toAdd);
+                if (existingInternalElement != null)
                 {
-                    Utils.LogTrace("Add Instance {0} [{1}] Already Added", prefix, decodedNodeId);
-                    return ie;
+                    return existingInternalElement;
                 }
 
                 if ( prefix.StartsWith("http://"))
@@ -3834,9 +3830,11 @@ namespace MarkdownProcessor
             {
                 if (ie.ID != amlId)
                 {
-                    if (m_instances.TryGetValue(toAdd.DecodedNodeId, out InternalElementType existingIE))
+                    InternalElementType existingInternalElement = FindInstanceInternalElement(toAdd);
+                    if (existingInternalElement != null)
                     {
-                        ie = existingIE;
+                        parent.InternalElement.RemoveElement(ie);   
+                        ie = existingInternalElement;
                     }
                 }
             }
@@ -4003,6 +4001,29 @@ namespace MarkdownProcessor
             Utils.LogTrace( "Add Instance {0} [{1}] Complete", prefix, decodedNodeId );
 
             return ie;
+        }
+
+        InternalElementType FindInstanceInternalElement(UANode node)
+        {
+            InternalElementType internalElement = null;
+
+            /*
+             * Previously, this was accomplished by using the document.FindById method.
+             * However due to Issue 143 - a duplication issue, this added a substantial performance hit
+             * Adding a LookupService actual increments the performance hit to an unusable level.
+             * Adding a ServiceLocater.QueryService and using ILookupUpTable to load the table does 
+             * improve the performance to an acceptable level, but it is optimized for ReadOnly document
+             * access.  This converter needs Read/Write access, which makes using the ILookUpTable not feasible.
+             * A local dictionary is used instead.
+             */
+
+            if (m_instances.TryGetValue(node.DecodedNodeId, out internalElement))
+            {
+                Utils.LogTrace("Add Instance {0} [{1}] Previously Added", 
+                    node.DecodedBrowseName.Name, node.DecodedNodeId);
+            }
+
+            return internalElement;
         }
 
         // add an internal link if it does not already exist
