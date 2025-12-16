@@ -1,16 +1,12 @@
 ﻿using Aml.Engine.CAEX;
 using Aml.Engine.CAEX.Extensions;
-using Aml.Engine.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Opc.Ua;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SystemTest
 {
     [TestClass]
-    public class TestOptionSetEmptyValues
+    public class TestOptionSet
     {
         #region Tests
 
@@ -19,7 +15,7 @@ namespace SystemTest
         {
             AttributeTypeLibType attributeLibrary = GetFxAcAttributes();
             AttributeFamilyType attributeFamilyType = attributeLibrary[ "OperationalHealthOptionSet" ];
-            TestOptionSet( attributeFamilyType );
+            TestOptionSetCount( attributeFamilyType );
         }
 
         [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
@@ -29,7 +25,7 @@ namespace SystemTest
             AttributeFamilyType attributeFamilyType = attributeLibrary[ "AggregatedHealthDataType" ];
             Assert.IsNotNull( attributeFamilyType );
             AttributeType attributeType = attributeFamilyType.Attribute[ "AggregatedOperationalHealth" ];
-            TestOptionSet( attributeType );
+            TestOptionSetCount( attributeType );
         }
 
         [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
@@ -42,7 +38,7 @@ namespace SystemTest
             Assert.IsNotNull( internalElementType );
             AttributeType value = internalElementType.Attribute[ "Value" ];
             Assert.IsNotNull( value );
-            TestOptionSet( value );
+            TestOptionSetCount( value );
         }
 
         [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
@@ -75,6 +71,36 @@ namespace SystemTest
             Assert.IsNull(valueAttribute.Attribute[ "ValidBits" ]);
         }
 
+        [TestMethod, Timeout(TestHelper.UnitTestTimeout)]
+        [DataRow("0", "fr", "Activer")]
+        [DataRow("1", "de", "Nicht bestätigt")]
+        [DataRow("2", "en", "Unconfirmed")]
+        public void TestFieldValues(string index, string localeId, string value)
+        {
+            CAEXDocument document = GetDocument("TestAml.xml.amlx");
+            string amlId = TestHelper.BuildAmlId("", TestHelper.Uris.Test, "3009");
+            CAEXObject initialObject = document.FindByID(amlId);
+            Assert.IsNotNull(initialObject, "Unable to find Initial Object");
+            AttributeFamilyType theObject = initialObject as AttributeFamilyType;
+            Assert.IsNotNull(theObject, "Unable to Cast Initial Object");
+
+
+            AttributeType values = GetAttribute(theObject.Attribute, "OptionSetValues");
+            Assert.IsNotNull(values.AdditionalInformation);
+            Assert.AreEqual(1, values.AdditionalInformation.Count);
+            Assert.AreEqual("OpcUa:TypeOnly", values.AdditionalInformation[0]);
+
+            AttributeType nodeIdAttribute = GetAttribute(values, "NodeId");
+            AttributeType rootNodeIdAttribute = GetAttribute(nodeIdAttribute, "RootNodeId");
+            AttributeType numericId = GetAttribute(rootNodeIdAttribute, "NumericId");
+            Assert.AreEqual(numericId.Value, "6239");
+
+
+            AttributeType indexAttribute = GetAttribute(values, index);
+            AttributeType localeAttribute = GetAttribute(indexAttribute, localeId);
+            Assert.AreEqual(localeAttribute.Value, value);
+        }
+
 
 
         #endregion
@@ -88,7 +114,7 @@ namespace SystemTest
             return document;
         }
 
-        public void TestOptionSet( AttributeTypeType attributeFamilyType )
+        public void TestOptionSetCount( AttributeTypeType attributeFamilyType )
         {
             Assert.IsNotNull( attributeFamilyType );
             Assert.IsTrue( attributeFamilyType.Attribute.Count >= 4 );

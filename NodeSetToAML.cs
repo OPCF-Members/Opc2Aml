@@ -3115,36 +3115,37 @@ namespace MarkdownProcessor
 
         private void ProcessOptionSets(ref AttributeTypeType att, NodeId nodeId)
         {
-            NodeId OptionSetsPropertyId = m_modelManager.FindFirstTarget(nodeId, HasPropertyNodeId, true, "OptionSetValues");
-
-            if (OptionSetsPropertyId != null && m_modelManager.IsTypeOf(nodeId, NumberNodeId))
+            // This should not be done via the Localized text.  Should be from Field Definitions.
+            UADataType dataType = m_modelManager.FindNode<UADataType>(nodeId);
+            if ( dataType != null )
             {
-                att.AttributeDataType = "";
-                var OptionSetsPropertyNode = FindNode<UANode>(OptionSetsPropertyId);
-                var OptionSets = OptionSetsPropertyNode as UAVariable;
-                Opc.Ua.LocalizedText[] OptionSetValues = OptionSets.DecodedValue.Value as Opc.Ua.LocalizedText[];
-                foreach (var OptionSetValue in OptionSetValues)
+                if (dataType != null &&
+                    dataType.Definition != null &&
+                    dataType.Definition.IsOptionSet == true)
                 {
-                    if( OptionSetValue.Text != null && OptionSetValue.Text.Length > 0 )
+                    if (dataType.Definition.Field != null)
                     {
-                        AttributeType a = new AttributeType( new System.Xml.Linq.XElement( defaultNS + "Attribute" ) );
-                        a.Name = OptionSetValue.Text;
-                        a.AttributeDataType = "xs:boolean";
-                        att.Attribute.Insert( a, false );
+                        foreach(DataTypeField field in dataType.Definition.Field)
+                        {
+                            if ( !string.IsNullOrEmpty( field.Name ))
+                            {
+                                AttributeType a = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
+                                a.Name = field.Name;
+                                a.AttributeDataType = "xs:boolean";
+                                att.Attribute.Insert(a, false);
+                            }
+                        }
                     }
                 }
             }
-            
 
             if (nodeId == NodeIdNodeId || nodeId == ExpandedNodeIdNodeId)
             {
-
                 // add NodeId
-                
                 var added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
                 added2.Name = "ServerInstanceUri";
                 added2.AttributeDataType = "xs:anyURI";
-                att.Attribute.Insert( added2, false);
+                att.Attribute.Insert(added2, false);
 
                 added2 = new AttributeType(new System.Xml.Linq.XElement(defaultNS + "Attribute"));
                 added2.Name = "Alias";
@@ -3614,6 +3615,23 @@ namespace MarkdownProcessor
                     }
 
                     attribute.Attribute.Insert(optionSetFields, false, true);
+
+                    NodeId optionSetsPropertyId = m_modelManager.FindFirstTarget(
+                        optionSetNode.DecodedNodeId, HasPropertyNodeId, true, "OptionSetValues");
+
+                    if (optionSetsPropertyId != null && m_modelManager.IsTypeOf(optionSetNode.DecodedNodeId, NumberNodeId))
+                    {
+                        UANode optionSetsPropertyNode = FindNode<UANode>(optionSetsPropertyId);
+                        UAVariable optionSets = optionSetsPropertyNode as UAVariable;
+
+                        Opc.Ua.LocalizedText[] optionSetValues = optionSets.DecodedValue.Value as Opc.Ua.LocalizedText[];
+                        AttributeType optionSetValuesAttribute = AddModifyAttribute(attribute.Attribute, "OptionSetValues",
+                            Opc.Ua.DataTypes.LocalizedText, new Variant(optionSetValues), bListOf: true);
+                        optionSetValuesAttribute.AdditionalInformation.Append(OpcUaTypeOnly);
+                        RemoveNodeIdsFromDefinition(optionSetValuesAttribute);
+                        AddModifyAttribute(optionSetValuesAttribute.Attribute, "NodeId", "NodeId",
+                            new Variant(optionSetsPropertyId));
+                    }
                 }
                 else
                 {
