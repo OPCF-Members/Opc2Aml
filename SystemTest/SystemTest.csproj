@@ -48,6 +48,15 @@
     <None Update="NodeSetFiles\Modified.Opc.Ua.NodeSet2.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="NodeSetFiles\Opc.Ua.Fx.IOPModel.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NodeSetFiles\Opc.Ua.Fx.Show.BottleMachine.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NodeSetFiles\Opc.Ua.Fx.Show.Controller.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="NodeSetFiles\TestAml.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

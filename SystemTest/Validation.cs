@@ -15,6 +15,9 @@ namespace SystemTest
         [TestMethod, Timeout( TestHelper.UnitTestTimeout )]
         [DataRow("TestAml.xml.amlx")]
         [DataRow("AmlFxTest.xml.amlx")]
+        [DataRow("Opc.Ua.Fx.IOPModel.xml.amlx")]
+        [DataRow("Opc.Ua.Fx.Show.BottleMachine.xml.amlx")]
+        [DataRow("Opc.Ua.Fx.Show.Controller.xml.amlx")]
         public void ValidationTest( string fileName )
         {
             var lookupService = LookupService.Register();

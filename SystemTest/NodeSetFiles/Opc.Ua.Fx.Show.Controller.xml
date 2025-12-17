@@ -1,0 +1,1202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:s3="http://opcfoundation.org/UA/FX/Data/Types.xsd" xmlns:s4="http://opcfoundation.org/UA/DI/Types.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ua="http://unifiedautomation.com/Configuration/NodeSet.xsd" xmlns:s5="http://opcfoundation.org/FxShow/BottleMachine/Types.xsd" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:s1="http://opcfoundation.org/FxShow/Controller/Types.xsd" xmlns:s2="http://opcfoundation.org/UA/FX/AC/Types.xsd">
+    <NamespaceUris>
+        <Uri>http://opcfoundation.org/FxShow/Controller/</Uri>
+        <Uri>http://opcfoundation.org/UA/FX/AC/</Uri>
+        <Uri>http://opcfoundation.org/UA/FX/Data/</Uri>
+        <Uri>http://opcfoundation.org/UA/DI/</Uri>
+        <Uri>http://opcfoundation.org/FxShow/BottleMachine/</Uri>
+    </NamespaceUris>
+    <Models>
+        <Model Version="1.0.0" PublicationDate="2021-09-14T07:21:35Z" ModelUri="http://opcfoundation.org/FxShow/Controller/">
+            <RequiredModel Version="1.05.05" PublicationDate="2025-06-30T00:00:00Z" ModelUri="http://opcfoundation.org/UA/"/>
+            <RequiredModel Version="1.04.0" PublicationDate="2022-11-03T00:00:00Z" ModelUri="http://opcfoundation.org/UA/DI/"/>
+            <RequiredModel Version="1.00.03" PublicationDate="2025-07-17T12:00:00Z" ModelUri="http://opcfoundation.org/UA/FX/Data/"/>
+            <RequiredModel Version="1.00.03" PublicationDate="2025-07-17T12:00:00Z" ModelUri="http://opcfoundation.org/UA/FX/AC/"/>
+            <RequiredModel Version="2.0.0" PublicationDate="2021-08-02T14:09:22Z" ModelUri="http://opcfoundation.org/FxShow/BottleMachine/"/>
+        </Model>
+    </Models>
+    <Aliases>
+        <Alias Alias="Boolean">i=1</Alias>
+        <Alias Alias="String">i=12</Alias>
+        <Alias Alias="DateTime">i=13</Alias>
+        <Alias Alias="Organizes">i=35</Alias>
+        <Alias Alias="HasTypeDefinition">i=40</Alias>
+        <Alias Alias="HasProperty">i=46</Alias>
+        <Alias Alias="HasComponent">i=47</Alias>
+        <Alias Alias="IdType">i=256</Alias>
+        <Alias Alias="NumericRange">i=291</Alias>
+        <Alias Alias="Argument">i=296</Alias>
+        <Alias Alias="AggregatedHealthDataType">ns=2;i=3003</Alias>
+        <Alias Alias="DeviceHealthOptionSet">ns=2;i=3005</Alias>
+        <Alias Alias="IntervalRange">ns=2;i=3008</Alias>
+        <Alias Alias="OperationalHealthOptionSet">ns=2;i=3010</Alias>
+        <Alias Alias="PublisherQosDataType">ns=2;i=3011</Alias>
+        <Alias Alias="SubscriberQosDataType">ns=2;i=3012</Alias>
+    </Aliases>
+    <Extensions>
+        <Extension>
+            <ua:ModelInfo Version="1.8.1" Hash="eBske1b2bV/IYdJ5wsBiaA==" Tool="UaModeler"/>
+        </Extension>
+    </Extensions>
+    <UAObject NodeId="ns=1;i=5018" BrowseName="1:BottleController">
+        <DisplayName>BottleController</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=2</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6020</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5011</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=7001</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5001</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5012</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=7002</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5013</Reference>
+            <Reference ReferenceType="Organizes" IsForward="false">ns=3;i=71</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6020" ParentNodeId="ns=1;i=5018" DataType="AggregatedHealthDataType" BrowseName="2:AggregatedHealth">
+        <DisplayName>AggregatedHealth</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=2001</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6021</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6022</Reference>
+        </References>
+        <Value>
+            <uax:ExtensionObject>
+                <uax:TypeId>
+                    <uax:Identifier>ns=2;i=5005</uax:Identifier>
+                </uax:TypeId>
+                <uax:Body>
+                    <AggregatedHealthDataType xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
+                        <AggregatedDeviceHealth>0</AggregatedDeviceHealth>
+                        <AggregatedOperationalHealth>0</AggregatedOperationalHealth>
+                    </AggregatedHealthDataType>
+                </uax:Body>
+            </uax:ExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6021" ParentNodeId="ns=1;i=6020" DataType="DeviceHealthOptionSet" BrowseName="2:AggregatedDeviceHealth">
+        <DisplayName>AggregatedDeviceHealth</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=6020</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6022" ParentNodeId="ns=1;i=6020" DataType="OperationalHealthOptionSet" BrowseName="2:AggregatedOperationalHealth">
+        <DisplayName>AggregatedOperationalHealth</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=6020</Reference>
+        </References>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5011" ParentNodeId="ns=1;i=5018" BrowseName="2:Assets">
+        <DisplayName>Assets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5008</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5008" BrowseName="1:FxDemoServer">
+        <DisplayName>FxDemoServer</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=3</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6017</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6018</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6019</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5011</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6017" ParentNodeId="ns=1;i=5008" DataType="String" BrowseName="4:Manufacturer">
+        <DisplayName>Manufacturer</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5008</Reference>
+        </References>
+        <Value>
+            <uax:String>Schneider Electric</uax:String>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6018" ParentNodeId="ns=1;i=5008" DataType="String" BrowseName="4:ProductInstanceUri">
+        <DisplayName>ProductInstanceUri</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5008</Reference>
+        </References>
+        <Value>
+            <uax:String>urn:schneider:industrial automation:demoserver:fxdemo</uax:String>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6019" ParentNodeId="ns=1;i=5008" DataType="String" BrowseName="4:SoftwareRevision">
+        <DisplayName>SoftwareRevision</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5008</Reference>
+        </References>
+        <Value>
+            <uax:String>0.1.0</uax:String>
+        </Value>
+    </UAVariable>
+    <UAMethod NodeId="ns=1;i=7001" ParentNodeId="ns=1;i=5018" MethodDeclarationId="ns=2;i=293" BrowseName="2:CloseConnections">
+        <DisplayName>CloseConnections</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6003</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6004</Reference>
+        </References>
+    </UAMethod>
+    <UAVariable NodeId="ns=1;i=6003" ArrayDimensions="2" ParentNodeId="ns=1;i=7001" DataType="Argument" ValueRank="1" BrowseName="InputArguments">
+        <DisplayName>InputArguments</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7001</Reference>
+        </References>
+        <Value>
+            <uax:ListOfExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>ConnectionEndpoints</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>i=17</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>Remove</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>i=1</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>-1</uax:ValueRank>
+                            <uax:ArrayDimensions/>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+            </uax:ListOfExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6004" ArrayDimensions="1" ParentNodeId="ns=1;i=7001" DataType="Argument" ValueRank="1" BrowseName="OutputArguments">
+        <DisplayName>OutputArguments</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7001</Reference>
+        </References>
+        <Value>
+            <uax:ListOfExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>Results</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>i=19</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+            </uax:ListOfExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5001" ParentNodeId="ns=1;i=5018" BrowseName="2:ComponentCapabilities">
+        <DisplayName>ComponentCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1001</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5012" ParentNodeId="ns=1;i=5018" BrowseName="2:Descriptors">
+        <DisplayName>Descriptors</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
+        </References>
+    </UAObject>
+    <UAMethod NodeId="ns=1;i=7002" ParentNodeId="ns=1;i=5018" MethodDeclarationId="ns=2;i=292" BrowseName="2:EstablishConnections">
+        <DisplayName>EstablishConnections</DisplayName>
+        <References>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6001</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6002</Reference>
+        </References>
+    </UAMethod>
+    <UAVariable NodeId="ns=1;i=6001" ArrayDimensions="5" ParentNodeId="ns=1;i=7002" DataType="Argument" ValueRank="1" BrowseName="InputArguments">
+        <DisplayName>InputArguments</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7002</Reference>
+        </References>
+        <Value>
+            <uax:ListOfExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>CommandMask</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=1024</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>-1</uax:ValueRank>
+                            <uax:ArrayDimensions/>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>AssetVerifications</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=1048</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>ConnectionEndpointConfigurations</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=1044</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>ReserveCommunicationIds</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=3017</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>CommunicationConfigurations</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=1046</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+            </uax:ListOfExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6002" ArrayDimensions="4" ParentNodeId="ns=1;i=7002" DataType="Argument" ValueRank="1" BrowseName="OutputArguments">
+        <DisplayName>OutputArguments</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=7002</Reference>
+        </References>
+        <Value>
+            <uax:ListOfExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>AssetVerificationResults</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=1038</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>ConnectionEndpointConfigurationResults</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=3008</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>ReserveCommunicationIdsResults</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=3019</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>i=297</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <uax:Argument>
+                            <uax:Name>CommunicationConfigurationResults</uax:Name>
+                            <uax:DataType>
+                                <uax:Identifier>ns=3;i=1033</uax:Identifier>
+                            </uax:DataType>
+                            <uax:ValueRank>1</uax:ValueRank>
+                            <uax:ArrayDimensions>
+                                <uax:UInt32>0</uax:UInt32>
+                            </uax:ArrayDimensions>
+                            <uax:Description/>
+                        </uax:Argument>
+                    </uax:Body>
+                </uax:ExtensionObject>
+            </uax:ListOfExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5013" ParentNodeId="ns=1;i=5018" BrowseName="2:FunctionalEntities">
+        <DisplayName>FunctionalEntities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5477</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5019</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5002</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5018</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5477" BrowseName="1:BottleMachine">
+        <DisplayName>BottleMachine</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=4</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5013</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5015</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5016</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5017</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5025</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5026</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5015" ParentNodeId="ns=1;i=5477" BrowseName="2:ConnectionEndpoints">
+        <DisplayName>ConnectionEndpoints</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=20</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5477</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5016" ParentNodeId="ns=1;i=5477" BrowseName="2:InputData">
+        <DisplayName>InputData</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1000</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6022</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6024</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6026</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6028</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6008</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6055</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6030</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6040</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5009</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6014</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5477</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5009" ParentNodeId="ns=1;i=5016" BrowseName="2:SubscriberCapabilities">
+        <DisplayName>SubscriberCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1004</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6027</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6028</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6029</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6030</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6031</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5016</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6027" ParentNodeId="ns=1;i=5009" DataType="Boolean" BrowseName="2:PreconfiguredDataSetOnly">
+        <DisplayName>PreconfiguredDataSetOnly</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>true</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6028" ArrayDimensions="0" ParentNodeId="ns=1;i=5009" DataType="String" ValueRank="1" BrowseName="2:PreconfiguredSubscribedDataSets">
+        <DisplayName>PreconfiguredSubscribedDataSets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+        </References>
+        <Value>
+            <uax:ListOfString>
+                <uax:String>FxShowDataSetReader</uax:String>
+            </uax:ListOfString>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6029" ArrayDimensions="0" ParentNodeId="ns=1;i=5009" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedMessageReceiveTimeouts">
+        <DisplayName>SupportedMessageReceiveTimeouts</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6030" ArrayDimensions="0" ParentNodeId="ns=1;i=5009" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedPublishingIntervals">
+        <DisplayName>SupportedPublishingIntervals</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6031" ArrayDimensions="0" ParentNodeId="ns=1;i=5009" DataType="SubscriberQosDataType" ValueRank="1" BrowseName="2:SupportedQos">
+        <DisplayName>SupportedQos</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5009</Reference>
+        </References>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5017" ParentNodeId="ns=1;i=5477" BrowseName="2:OutputData">
+        <DisplayName>OutputData</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1019</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6004</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6033</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6032</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6005</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6042</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6048</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6006</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6034</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5014</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6046</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5477</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5014" ParentNodeId="ns=1;i=5017" BrowseName="2:PublisherCapabilities">
+        <DisplayName>PublisherCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1003</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6032</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6033</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6034</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6035</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5017</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6032" ParentNodeId="ns=1;i=5014" DataType="Boolean" BrowseName="2:PreconfiguredDataSetOnly">
+        <DisplayName>PreconfiguredDataSetOnly</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5014</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>true</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6033" ArrayDimensions="0" ParentNodeId="ns=1;i=5014" DataType="String" ValueRank="1" BrowseName="2:PreconfiguredPublishedDataSets">
+        <DisplayName>PreconfiguredPublishedDataSets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5014</Reference>
+        </References>
+        <Value>
+            <uax:ListOfString>
+                <uax:String>FxShowPublishedDataSet</uax:String>
+            </uax:ListOfString>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6034" ArrayDimensions="0" ParentNodeId="ns=1;i=5014" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedPublishingIntervals">
+        <DisplayName>SupportedPublishingIntervals</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5014</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6035" ArrayDimensions="0" ParentNodeId="ns=1;i=5014" DataType="PublisherQosDataType" ValueRank="1" BrowseName="2:SupportedQos">
+        <DisplayName>SupportedQos</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5014</Reference>
+        </References>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5025" ParentNodeId="ns=1;i=5477" BrowseName="2:PublisherCapabilities">
+        <DisplayName>PublisherCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1003</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6036</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6037</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6038</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6039</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5477</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6036" ParentNodeId="ns=1;i=5025" DataType="Boolean" BrowseName="2:PreconfiguredDataSetOnly">
+        <DisplayName>PreconfiguredDataSetOnly</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5025</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6037" ArrayDimensions="0" ParentNodeId="ns=1;i=5025" DataType="String" ValueRank="1" BrowseName="2:PreconfiguredPublishedDataSets">
+        <DisplayName>PreconfiguredPublishedDataSets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5025</Reference>
+        </References>
+        <Value>
+            <uax:ListOfString>
+                <uax:String>FxShowPublishedDataSet</uax:String>
+            </uax:ListOfString>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6038" ArrayDimensions="1" ParentNodeId="ns=1;i=5025" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedPublishingIntervals">
+        <DisplayName>SupportedPublishingIntervals</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5025</Reference>
+        </References>
+        <Value>
+            <uax:ListOfExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>ns=2;i=5020</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <IntervalRange xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
+                            <Min>10</Min>
+                            <Max>100</Max>
+                            <Increment>10</Increment>
+                            <Multiplier>1</Multiplier>
+                            <Unit>Millisecond_2</Unit>
+                        </IntervalRange>
+                    </uax:Body>
+                </uax:ExtensionObject>
+            </uax:ListOfExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6039" ArrayDimensions="1" ParentNodeId="ns=1;i=5025" DataType="PublisherQosDataType" ValueRank="1" BrowseName="2:SupportedQos">
+        <DisplayName>SupportedQos</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5025</Reference>
+        </References>
+        <Value>
+            <uax:ListOfExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>ns=2;i=5025</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <PublisherQosDataType xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
+                            <QosCategory>opc.qos.cat://priority</QosCategory>
+                            <DatagramQos>
+                                <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <TypeId>
+                                        <Identifier>i=23925</Identifier>
+                                    </TypeId>
+                                    <Body>
+                                        <TransmitQosPriorityDataType>
+                                            <PriorityLabel>opc.qos.lbl://green</PriorityLabel>
+                                        </TransmitQosPriorityDataType>
+                                    </Body>
+                                </ExtensionObject>
+                                <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <TypeId>
+                                        <Identifier>i=23925</Identifier>
+                                    </TypeId>
+                                    <Body>
+                                        <TransmitQosPriorityDataType>
+                                            <PriorityLabel>opc.qos.lbl://best effort</PriorityLabel>
+                                        </TransmitQosPriorityDataType>
+                                    </Body>
+                                </ExtensionObject>
+                            </DatagramQos>
+                        </PublisherQosDataType>
+                    </uax:Body>
+                </uax:ExtensionObject>
+            </uax:ListOfExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5026" ParentNodeId="ns=1;i=5477" BrowseName="2:SubscriberCapabilities">
+        <DisplayName>SubscriberCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1004</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6040</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6041</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6042</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6043</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6044</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5477</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6040" ParentNodeId="ns=1;i=5026" DataType="Boolean" BrowseName="2:PreconfiguredDataSetOnly">
+        <DisplayName>PreconfiguredDataSetOnly</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5026</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>true</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6041" ArrayDimensions="0" ParentNodeId="ns=1;i=5026" DataType="String" ValueRank="1" BrowseName="2:PreconfiguredSubscribedDataSets">
+        <DisplayName>PreconfiguredSubscribedDataSets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5026</Reference>
+        </References>
+        <Value>
+            <uax:ListOfString>
+                <uax:String>FxShowDataSetReader</uax:String>
+            </uax:ListOfString>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6042" ArrayDimensions="0" ParentNodeId="ns=1;i=5026" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedMessageReceiveTimeouts">
+        <DisplayName>SupportedMessageReceiveTimeouts</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5026</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6043" ArrayDimensions="1" ParentNodeId="ns=1;i=5026" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedPublishingIntervals">
+        <DisplayName>SupportedPublishingIntervals</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5026</Reference>
+        </References>
+        <Value>
+            <uax:ListOfExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>ns=2;i=5020</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <IntervalRange xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
+                            <Min>10</Min>
+                            <Max>100</Max>
+                            <Increment>10</Increment>
+                            <Multiplier>1</Multiplier>
+                            <Unit>Millisecond_2</Unit>
+                        </IntervalRange>
+                    </uax:Body>
+                </uax:ExtensionObject>
+            </uax:ListOfExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6044" ParentNodeId="ns=1;i=5026" DataType="SubscriberQosDataType" ValueRank="1" BrowseName="2:SupportedQos">
+        <DisplayName>SupportedQos</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5026</Reference>
+        </References>
+        <Value>
+            <uax:ListOfExtensionObject>
+                <uax:ExtensionObject>
+                    <uax:TypeId>
+                        <uax:Identifier>ns=2;i=5028</uax:Identifier>
+                    </uax:TypeId>
+                    <uax:Body>
+                        <SubscriberQosDataType xmlns="http://opcfoundation.org/UA/FX/AC/Types.xsd">
+                            <QosCategory>opc.qos.cat://priority</QosCategory>
+                            <DatagramQos>
+                                <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <TypeId>
+                                        <Identifier>i=23929</Identifier>
+                                    </TypeId>
+                                    <Body>
+                                        <ReceiveQosPriorityDataType>
+                                            <PriorityLabel>opc.qos.lbl://green</PriorityLabel>
+                                        </ReceiveQosPriorityDataType>
+                                    </Body>
+                                </ExtensionObject>
+                                <ExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+                                    <TypeId>
+                                        <Identifier>i=23929</Identifier>
+                                    </TypeId>
+                                    <Body>
+                                        <ReceiveQosPriorityDataType>
+                                            <PriorityLabel>opc.qos.lbl://best effort</PriorityLabel>
+                                        </ReceiveQosPriorityDataType>
+                                    </Body>
+                                </ExtensionObject>
+                            </DatagramQos>
+                        </SubscriberQosDataType>
+                    </uax:Body>
+                </uax:ExtensionObject>
+            </uax:ListOfExtensionObject>
+        </Value>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5019" BrowseName="1:MassTest">
+        <DisplayName>MassTest</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=4</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5013</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5020</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5021</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5022</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5023</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5024</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5020" ParentNodeId="ns=1;i=5019" BrowseName="2:ConnectionEndpoints">
+        <DisplayName>ConnectionEndpoints</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=20</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5019</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5021" ParentNodeId="ns=1;i=5019" BrowseName="2:InputData">
+        <DisplayName>InputData</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1000</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5019</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6139</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6179</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6180</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6181</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6182</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6102</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6155</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6156</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6157</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6158</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6149</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6171</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6172</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6173</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6174</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6122</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6159</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6160</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6161</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6162</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5022" ParentNodeId="ns=1;i=5019" BrowseName="2:OutputData">
+        <DisplayName>OutputData</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1019</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5019</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6144</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6183</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6184</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6185</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6186</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6134</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6163</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6164</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6165</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6166</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6154</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6175</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6176</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6177</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6178</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6078</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6167</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6168</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6169</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6170</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5023" ParentNodeId="ns=1;i=5019" BrowseName="2:PublisherCapabilities">
+        <DisplayName>PublisherCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1003</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5019</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6052</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6053</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6054</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6055</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6052" ParentNodeId="ns=1;i=5023" DataType="Boolean" BrowseName="2:PreconfiguredDataSetOnly">
+        <DisplayName>PreconfiguredDataSetOnly</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5023</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6053" ArrayDimensions="0" ParentNodeId="ns=1;i=5023" DataType="String" ValueRank="1" BrowseName="2:PreconfiguredPublishedDataSets">
+        <DisplayName>PreconfiguredPublishedDataSets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5023</Reference>
+        </References>
+        <Value>
+            <uax:ListOfString>
+                <uax:String>MassTestPDS</uax:String>
+            </uax:ListOfString>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6054" ArrayDimensions="0" ParentNodeId="ns=1;i=5023" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedPublishingIntervals">
+        <DisplayName>SupportedPublishingIntervals</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5023</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6055" ArrayDimensions="0" ParentNodeId="ns=1;i=5023" DataType="PublisherQosDataType" ValueRank="1" BrowseName="2:SupportedQos">
+        <DisplayName>SupportedQos</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5023</Reference>
+        </References>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5024" ParentNodeId="ns=1;i=5019" BrowseName="2:SubscriberCapabilities">
+        <DisplayName>SubscriberCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1004</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5019</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6056</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6057</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6058</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6059</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6060</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6056" ParentNodeId="ns=1;i=5024" DataType="Boolean" BrowseName="2:PreconfiguredDataSetOnly">
+        <DisplayName>PreconfiguredDataSetOnly</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6057" ArrayDimensions="0" ParentNodeId="ns=1;i=5024" DataType="String" ValueRank="1" BrowseName="2:PreconfiguredSubscribedDataSets">
+        <DisplayName>PreconfiguredSubscribedDataSets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+        <Value>
+            <uax:ListOfString>
+                <uax:String>MassTestSDS</uax:String>
+            </uax:ListOfString>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6058" ArrayDimensions="0" ParentNodeId="ns=1;i=5024" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedMessageReceiveTimeouts">
+        <DisplayName>SupportedMessageReceiveTimeouts</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6059" ArrayDimensions="0" ParentNodeId="ns=1;i=5024" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedPublishingIntervals">
+        <DisplayName>SupportedPublishingIntervals</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6060" ArrayDimensions="0" ParentNodeId="ns=1;i=5024" DataType="SubscriberQosDataType" ValueRank="1" BrowseName="2:SupportedQos">
+        <DisplayName>SupportedQos</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5024</Reference>
+        </References>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5002" BrowseName="1:NumericValues">
+        <DisplayName>NumericValues</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=4</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5003</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5005</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5006</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5007</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=5010</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5013</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5003" ParentNodeId="ns=1;i=5002" BrowseName="2:ConnectionEndpoints">
+        <DisplayName>ConnectionEndpoints</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=20</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5002</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5005" ParentNodeId="ns=1;i=5002" BrowseName="2:InputData">
+        <DisplayName>InputData</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1000</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5002</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6067</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6069</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6056</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6035</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6057</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6059</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6058</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6060</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5006" ParentNodeId="ns=1;i=5002" BrowseName="2:OutputData">
+        <DisplayName>OutputData</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1019</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5002</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6068</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6070</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6062</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6061</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6063</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6064</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6065</Reference>
+            <Reference ReferenceType="Organizes">ns=5;i=6066</Reference>
+        </References>
+    </UAObject>
+    <UAObject NodeId="ns=1;i=5007" ParentNodeId="ns=1;i=5002" BrowseName="2:PublisherCapabilities">
+        <DisplayName>PublisherCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1003</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5002</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6005</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6006</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6007</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6011</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6005" ParentNodeId="ns=1;i=5007" DataType="Boolean" BrowseName="2:PreconfiguredDataSetOnly">
+        <DisplayName>PreconfiguredDataSetOnly</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5007</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6006" ArrayDimensions="0" ParentNodeId="ns=1;i=5007" DataType="String" ValueRank="1" BrowseName="2:PreconfiguredPublishedDataSets">
+        <DisplayName>PreconfiguredPublishedDataSets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5007</Reference>
+        </References>
+        <Value>
+            <uax:ListOfString>
+                <uax:String>NumericValuesPDS</uax:String>
+            </uax:ListOfString>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6007" ArrayDimensions="0" ParentNodeId="ns=1;i=5007" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedPublishingIntervals">
+        <DisplayName>SupportedPublishingIntervals</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5007</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6011" ArrayDimensions="0" ParentNodeId="ns=1;i=5007" DataType="PublisherQosDataType" ValueRank="1" BrowseName="2:SupportedQos">
+        <DisplayName>SupportedQos</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5007</Reference>
+        </References>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5010" ParentNodeId="ns=1;i=5002" BrowseName="2:SubscriberCapabilities">
+        <DisplayName>SubscriberCapabilities</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">ns=2;i=1004</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5002</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6012</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6023</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6024</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6025</Reference>
+            <Reference ReferenceType="HasComponent">ns=1;i=6026</Reference>
+        </References>
+    </UAObject>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6012" ParentNodeId="ns=1;i=5010" DataType="Boolean" BrowseName="2:PreconfiguredDataSetOnly">
+        <DisplayName>PreconfiguredDataSetOnly</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5010</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6023" ArrayDimensions="0" ParentNodeId="ns=1;i=5010" DataType="String" ValueRank="1" BrowseName="2:PreconfiguredSubscribedDataSets">
+        <DisplayName>PreconfiguredSubscribedDataSets</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5010</Reference>
+        </References>
+        <Value>
+            <uax:ListOfString>
+                <uax:String>NumericValuesSDS</uax:String>
+            </uax:ListOfString>
+        </Value>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6024" ArrayDimensions="0" ParentNodeId="ns=1;i=5010" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedMessageReceiveTimeouts">
+        <DisplayName>SupportedMessageReceiveTimeouts</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5010</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6025" ArrayDimensions="0" ParentNodeId="ns=1;i=5010" DataType="IntervalRange" ValueRank="1" BrowseName="2:SupportedPublishingIntervals">
+        <DisplayName>SupportedPublishingIntervals</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5010</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable AccessLevel="3" NodeId="ns=1;i=6026" ArrayDimensions="0" ParentNodeId="ns=1;i=5010" DataType="SubscriberQosDataType" ValueRank="1" BrowseName="2:SupportedQos">
+        <DisplayName>SupportedQos</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=5010</Reference>
+        </References>
+    </UAVariable>
+    <UAObject NodeId="ns=1;i=5004" BrowseName="1:http://opcfoundation.org/FxShow/Controller/" SymbolicName="http___opcfoundation_org_FxShow_Controller_">
+        <DisplayName>http://opcfoundation.org/FxShow/Controller/</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6008</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6009</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6010</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6013</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6014</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6015</Reference>
+            <Reference ReferenceType="HasProperty">ns=1;i=6016</Reference>
+            <Reference ReferenceType="HasComponent" IsForward="false">i=11715</Reference>
+        </References>
+    </UAObject>
+    <UAVariable NodeId="ns=1;i=6008" ParentNodeId="ns=1;i=5004" DataType="Boolean" BrowseName="IsNamespaceSubset">
+        <DisplayName>IsNamespaceSubset</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+        <Value>
+            <uax:Boolean>false</uax:Boolean>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6009" ParentNodeId="ns=1;i=5004" DataType="DateTime" BrowseName="NamespacePublicationDate">
+        <DisplayName>NamespacePublicationDate</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+        <Value>
+            <uax:DateTime>2021-09-14T07:21:35Z</uax:DateTime>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6010" ParentNodeId="ns=1;i=5004" DataType="String" BrowseName="NamespaceUri">
+        <DisplayName>NamespaceUri</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+        <Value>
+            <uax:String>http://opcfoundation.org/FxShow/Controller/</uax:String>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6013" ParentNodeId="ns=1;i=5004" DataType="String" BrowseName="NamespaceVersion">
+        <DisplayName>NamespaceVersion</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+        <Value>
+            <uax:String>1.0.0</uax:String>
+        </Value>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6014" ArrayDimensions="0" ParentNodeId="ns=1;i=5004" DataType="IdType" ValueRank="1" BrowseName="StaticNodeIdTypes">
+        <DisplayName>StaticNodeIdTypes</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6015" ArrayDimensions="0" ParentNodeId="ns=1;i=5004" DataType="NumericRange" ValueRank="1" BrowseName="StaticNumericNodeIdRange">
+        <DisplayName>StaticNumericNodeIdRange</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+    </UAVariable>
+    <UAVariable NodeId="ns=1;i=6016" ParentNodeId="ns=1;i=5004" DataType="String" BrowseName="StaticStringNodeIdPattern">
+        <DisplayName>StaticStringNodeIdPattern</DisplayName>
+        <References>
+            <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+            <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=5004</Reference>
+        </References>
+    </UAVariable>
+</UANodeSet>
