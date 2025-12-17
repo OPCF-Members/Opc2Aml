@@ -468,12 +468,15 @@
 		<Value>
 			<ListOfLocalizedText xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
 				<LocalizedText>
-					<Text>Active</Text>
+					<Locale>fr</Locale>
+					<Text>Activer</Text>
 				</LocalizedText>
 				<LocalizedText>
-					<Text>Unacknowledged</Text>
+					<Locale>de</Locale>
+					<Text>Nicht bestätigt</Text>
 				</LocalizedText>
 				<LocalizedText>
+					<Locale>en</Locale>
 					<Text>Unconfirmed</Text>
 				</LocalizedText>
 			</ListOfLocalizedText>
