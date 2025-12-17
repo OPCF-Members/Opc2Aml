@@ -55,6 +55,7 @@ namespace SystemTest
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "ArrayDimensions", null, "", "")]
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "MaxStringLength", "123", "", "")]
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "IsOptional", "true", "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "QosCategory", "AllowSubTypes", null, "", "")]
 
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "Name", null, "", "")]
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "Description", "Transmit Quality of Service", "0", "")]
@@ -62,6 +63,7 @@ namespace SystemTest
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "ArrayDimensions", "3", "1", "")]
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "ValueRank", "2", "", "")]
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "IsOptional", null, "", "")]
+        [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "DatagramQos", "AllowSubTypes", "true", "", "")]
 
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "NoDescription", "Name", null, "", "")]
         [DataRow(TestHelper.Uris.Test, PublisherQosDataType, "NoDescription", "Description", null, "", "")]

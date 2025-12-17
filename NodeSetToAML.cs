@@ -3440,6 +3440,12 @@ namespace MarkdownProcessor
                                         RemoveUnwantedAttribute(descriptionCreated,"StructureFieldDefinition");
                                     }
 
+                                    if ( field.AllowSubTypes)
+                                    {
+                                        AddModifyAttribute(structureFieldAttribute.Attribute,
+                                            "AllowSubTypes", "Boolean", new Variant(true));
+                                    }
+
                                     // Remove the NodeId from the structure Field
                                     AttributeType nodeIdAttribute = structureFieldAttribute.Attribute[ "DataType" ];
                                     if( nodeIdAttribute != null )
