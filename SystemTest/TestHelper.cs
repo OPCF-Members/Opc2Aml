@@ -29,7 +29,10 @@ namespace SystemTest
             Ac,
             Test,
             AmlFxTest,
-            InstanceLevel
+            InstanceLevel,
+            IOPModel,
+            ShowBottleMachine,
+            ShowController
         }
 
         public static readonly Dictionary<Uris, string> UriMap = new Dictionary<Uris, string>()
@@ -41,6 +44,9 @@ namespace SystemTest
             { Uris.Test, TestHelper.TestAmlUri },
             { Uris.AmlFxTest, "http://opcfoundation.org/UA/FX/AML/TESTING/AmlFxTest/" },
             { Uris.InstanceLevel, "http://opcfoundation.org/UA/FX/AML/TESTING/InstanceLevel/" },
+            { Uris.IOPModel, "http://opcfoundation.org/UA/FX/IOPModel/" },
+            { Uris.ShowBottleMachine, "http://opcfoundation.org/FxShow/BottleMachine/" },
+            { Uris.ShowController, "http://opcfoundation.org/FxShow/Controller/" },
         };
 
         public const int UnitTestTimeout = 480000;
