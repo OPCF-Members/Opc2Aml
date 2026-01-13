@@ -67,6 +67,12 @@ namespace SystemTest
             TestHelper.Uris.AmlFxTest, 5008u,
             DisplayName = "Instance Hosts")]
 
+        [DataRow("", TestHelper.Uris.Root, 14156u,
+            "HasCondition",
+            TestHelper.Uris.Root, Opc.Ua.ObjectTypes.CertificateExpirationAlarmType,
+            DisplayName = "DefaultApplication Group to Audit Event Issue 139")]
+
+
         public void TestReference(string prefix, TestHelper.Uris testUri, uint testNodeId, string referenceName,
             TestHelper.Uris targetUri, uint targetNodeId)
         {
