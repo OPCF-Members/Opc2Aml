@@ -133,6 +133,12 @@ namespace MarkdownProcessor
                     {
                         foreach (var jj in ii.RequiredModel)
                         {
+                            if (nodeset.Models.FirstOrDefault(m => m.ModelUri == jj.ModelUri) != null)
+                            {
+                                // RequiredModel is defined in the current document. Will be created later.
+                                continue;
+                            }
+
                             if (jj.ModelUri == Opc.Ua.Namespaces.OpcUa)
                             {
                                 hasCoreModel = true;
