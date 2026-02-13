@@ -832,6 +832,12 @@ namespace MarkdownProcessor
                                         {
                                             Variant elementVariant = new Variant(valueAsList[index]);
                                             ExtensionObject extensionObject = elementVariant.Value as ExtensionObject;
+
+                                            if (extensionObject.Encoding == ExtensionObjectEncoding.None)
+                                            {
+                                                continue;
+                                            }
+
                                             NodeId typeId = ExpandedNodeId.ToNodeId(extensionObject.TypeId, m_modelManager.NamespaceUris);
 
                                             Type extentionObjectType = extensionObject.Body.GetType();
