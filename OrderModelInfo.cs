@@ -67,7 +67,7 @@ namespace Opc2Aml
         public void AddCompiled( string uri, HashSet<string> set,
             Dictionary<string, ModelInfo> source )
         {
-            if( source.TryGetValue( uri, out ModelInfo modelInfo ) )
+            if( source.TryGetValue( uri, out ModelInfo modelInfo ) && !set.Contains(uri))
             {
                 if ( modelInfo.NodeSet != null && 
                     modelInfo.NodeSet.Models != null )

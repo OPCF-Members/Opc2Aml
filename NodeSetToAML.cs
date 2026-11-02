@@ -741,7 +741,10 @@ namespace MarkdownProcessor
                 desiredAttribute = seq.Append(name);  // not found so create a new one
             }
 
-            RecreateAttributeInstance(sourceAttribute, desiredAttribute);
+            if (sourceAttribute != null)
+            {
+                RecreateAttributeInstance(sourceAttribute, desiredAttribute);
+            }
 
             if (val.TypeInfo != null)
             {
@@ -832,6 +835,12 @@ namespace MarkdownProcessor
                                         {
                                             Variant elementVariant = new Variant(valueAsList[index]);
                                             ExtensionObject extensionObject = elementVariant.Value as ExtensionObject;
+
+                                            if (extensionObject.Encoding == ExtensionObjectEncoding.None)
+                                            {
+                                                continue;
+                                            }
+
                                             NodeId typeId = ExpandedNodeId.ToNodeId(extensionObject.TypeId, m_modelManager.NamespaceUris);
 
                                             Type extentionObjectType = extensionObject.Body.GetType();
@@ -2734,6 +2743,10 @@ namespace MarkdownProcessor
                 UANode targetNode = m_modelManager.FindNode<UANode>(referenceHolder.Reference.TargetId);
                 SystemUnitClassType targetSystemUnitClass = FindNonHierarchicalReference(referenceHolder,
                     targetNode);
+                if (targetSystemUnitClass == null)
+                {
+                    continue;
+                }
                 string targetPath = GetCreatedPathName(targetNode);
 
                 string refURI = m_modelManager.FindModelUri(referenceHolder.Reference.ReferenceTypeId);
@@ -2743,8 +2756,8 @@ namespace MarkdownProcessor
                     referenceTypeNode.DecodedBrowseName.Name,
                     sourceSystemUnitClass.Name,
                     sourceSystemUnitClass.ID,
-                    targetSystemUnitClass.Name,
-                    targetSystemUnitClass.ID);
+                    targetSystemUnitClass?.Name,
+                    targetSystemUnitClass?.ID);
 
                 ExternalInterfaceType sourceInterface = FindOrAddSourceInterface(ref sourceSystemUnitClass,
                     refURI, 
